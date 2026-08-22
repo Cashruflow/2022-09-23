@@ -87,11 +87,16 @@
         display:flex;align-items:center;justify-content:center;}
   .more svg{width:17px;height:17px;}
 
-  /* ===== аккордеон (вариант B) ===== */
-  .row.lv1{padding-left:calc(var(--ui-page-pad-m) + 20px);}
-  .row.lv2{padding-left:calc(var(--ui-page-pad-m) + 40px);}
-  .row.open .chev{transform:rotate(0deg);color:#00a0ff;}
-  .guide{position:absolute;top:0;bottom:0;width:1px;background:#1c1c1c;}
+  /* ===== аккордеон: шеврон слева, шаг уровня 18px, направляющая линия ===== */
+  .row{position:relative;}
+  .row.lv1{padding-left:calc(var(--ui-page-pad-m) + 18px);}
+  .row.lv2{padding-left:calc(var(--ui-page-pad-m) + 36px);}
+  .tog{width:17px;height:17px;color:#3f3f3f;transform:rotate(-90deg);
+       transition:transform .18s, color .18s;}
+  .row.open > .tog{transform:rotate(0deg);color:var(--ui-brand);}
+  .row.lf .tog{visibility:hidden;}
+  .gd{position:absolute;top:0;bottom:0;width:1px;background:#1c1c1c;}
+  .row.last .gd.deep{bottom:auto;height:30px;}
 
   /* ===== шторка действий ===== */
   .dim{position:absolute;inset:0;background:rgba(0,0,0,.55);}
@@ -123,7 +128,7 @@
   <div class="brg" aria-label="Меню">☰</div>
   <div class="top">
     <div class="hdr">
-      <h1>Структура проекта<span class="count">(784)</span></h1>
+      <h1>Структура проекта</h1>
       <div class="back">← AI-платформа <span class="v">v1.99.0</span></div>
     </div>
     <div class="srch">
@@ -131,37 +136,56 @@
       <input type="text"  placeholder="Фильтр: mjs, dnevnik, web…">
       
     </div>
-    <div class="found"><span class="crumbs"><b>/home/cashruflow</b></span><a>Свернуть всё</a></div>
+    <div class="found"><span class="crumbs"><span class="up">web</span><span class="sep">/</span><b>public</b></span><a>Свернуть всё</a></div>
   </div>
   <div class="list">
     <div class="row">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
       <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
       <span class="body">
         
-        <span class="nm dir">mcp-server</span>
-        <span class="cm">ядро: MCP API (3000), SSE-коннектор (3002), бот дневника</span>
+        <span class="nm dir">scripts</span>
+        <span class="cm">утилиты и cron</span>
       </span>
-      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      
     </div>
     <div class="row open">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
       <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
       <span class="body">
         
         <span class="nm dir">web</span>
         <span class="cm">веб-панель (3001, за nginx :80)</span>
       </span>
-      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      
     </div>
     <div class="row lv1 open">
+      <span class="gd deep" style="left:calc(var(--ui-page-pad-m) + 8px);"></span>
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
       <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
       <span class="body">
         
         <span class="nm dir">public</span>
         <span class="cm">все страницы платформы: CRM, финансы, медкарта, кабинеты</span>
       </span>
-      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      
     </div>
     <div class="row lv2">
+      <span class="gd" style="left:calc(var(--ui-page-pad-m) + 8px);"></span><span class="gd deep" style="left:calc(var(--ui-page-pad-m) + 26px);"></span>
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      <span class="body">
+        
+        <span class="nm dir">assets</span>
+        <span class="cm">иконки и логотипы (icons.svg, logo.svg)</span>
+      </span>
+      
+    </div>
+    <div class="row lv2 lf">
+      <span class="gd" style="left:calc(var(--ui-page-pad-m) + 8px);"></span><span class="gd deep" style="left:calc(var(--ui-page-pad-m) + 26px);"></span>
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
       <span class="htm ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
       <span class="body">
         
@@ -170,7 +194,9 @@
       </span>
       <span class="more"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></span>
     </div>
-    <div class="row lv2">
+    <div class="row lv2 lf sel">
+      <span class="gd" style="left:calc(var(--ui-page-pad-m) + 8px);"></span><span class="gd deep" style="left:calc(var(--ui-page-pad-m) + 26px);"></span>
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
       <span class="htm ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
       <span class="body">
         
@@ -179,42 +205,19 @@
       </span>
       <span class="more"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></span>
     </div>
-    <div class="row lv2">
-      <span class="js ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
-      <span class="body">
-        
-        <span class="nm js">sidebar.js</span>
-        <span class="cm">общий сайдбар навигации всех страниц</span>
-      </span>
-      <span class="more"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></span>
+  </div>
+  <div class="dim"></div>
+  <div class="sheet">
+    <div class="grab"></div>
+    <div class="sh-hd">
+      <span class="nm htm">structure.html</span>
+      <span class="pth">/home/cashruflow/web/public/structure.html</span>
     </div>
-    <div class="row lv1">
-      <span class="js ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
-      <span class="body">
-        
-        <span class="nm js">server.js</span>
-        <span class="cm">Express: все API платформы — задачи, CRM, финансы, медкарта</span>
-      </span>
-      <span class="more"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></span>
-    </div>
-    <div class="row lv1">
-      <span class="js ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
-      <span class="body">
-        
-        <span class="nm js">tasks.js</span>
-        <span class="cm">API бэклога задач (data/tasks.db)</span>
-      </span>
-      <span class="more"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></span>
-    </div>
-    <div class="row">
-      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
-      <span class="body">
-        
-        <span class="nm dir">gpt</span>
-        <span class="cm">GPT-ядро: точка входа, реестр агентов, клиент OpenAI</span>
-      </span>
-      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-    </div>
+    <div class="sh-note">живое дерево проекта с // комментариями</div>
+    <div class="act"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg><span>Скопировать путь</span></div>
+    <div class="act"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg><span>Скопировать публичную ссылку
+      <span class="sub">ai.cashruflow.ru/structure.html</span></span></div>
+    <div class="act"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"/></svg><span>Открыть страницу</span></div>
   </div>
 </div>
 </x-dc>

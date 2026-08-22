@@ -87,11 +87,16 @@
         display:flex;align-items:center;justify-content:center;}
   .more svg{width:17px;height:17px;}
 
-  /* ===== аккордеон (вариант B) ===== */
-  .row.lv1{padding-left:calc(var(--ui-page-pad-m) + 20px);}
-  .row.lv2{padding-left:calc(var(--ui-page-pad-m) + 40px);}
-  .row.open .chev{transform:rotate(0deg);color:#00a0ff;}
-  .guide{position:absolute;top:0;bottom:0;width:1px;background:#1c1c1c;}
+  /* ===== аккордеон: шеврон слева, шаг уровня 18px, направляющая линия ===== */
+  .row{position:relative;}
+  .row.lv1{padding-left:calc(var(--ui-page-pad-m) + 18px);}
+  .row.lv2{padding-left:calc(var(--ui-page-pad-m) + 36px);}
+  .tog{width:17px;height:17px;color:#3f3f3f;transform:rotate(-90deg);
+       transition:transform .18s, color .18s;}
+  .row.open > .tog{transform:rotate(0deg);color:var(--ui-brand);}
+  .row.lf .tog{visibility:hidden;}
+  .gd{position:absolute;top:0;bottom:0;width:1px;background:#1c1c1c;}
+  .row.last .gd.deep{bottom:auto;height:30px;}
 
   /* ===== шторка действий ===== */
   .dim{position:absolute;inset:0;background:rgba(0,0,0,.55);}

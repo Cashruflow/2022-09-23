@@ -84,11 +84,16 @@ const CSS = `
         display:flex;align-items:center;justify-content:center;}
   .more svg{width:17px;height:17px;}
 
-  /* ===== аккордеон (вариант B) ===== */
-  .row.lv1{padding-left:calc(var(--ui-page-pad-m) + 20px);}
-  .row.lv2{padding-left:calc(var(--ui-page-pad-m) + 40px);}
-  .row.open .chev{transform:rotate(0deg);color:#00a0ff;}
-  .guide{position:absolute;top:0;bottom:0;width:1px;background:#1c1c1c;}
+  /* ===== аккордеон: шеврон слева, шаг уровня 18px, направляющая линия ===== */
+  .row{position:relative;}
+  .row.lv1{padding-left:calc(var(--ui-page-pad-m) + 18px);}
+  .row.lv2{padding-left:calc(var(--ui-page-pad-m) + 36px);}
+  .tog{width:17px;height:17px;color:#3f3f3f;transform:rotate(-90deg);
+       transition:transform .18s, color .18s;}
+  .row.open > .tog{transform:rotate(0deg);color:var(--ui-brand);}
+  .row.lf .tog{visibility:hidden;}
+  .gd{position:absolute;top:0;bottom:0;width:1px;background:#1c1c1c;}
+  .row.last .gd.deep{bottom:auto;height:30px;}
 
   /* ===== шторка действий ===== */
   .dim{position:absolute;inset:0;background:rgba(0,0,0,.55);}
@@ -141,9 +146,9 @@ function kind(name) {
 
 const burger = '<div class="brg" aria-label="Меню">☰</div>';
 
-function head(count, extra = '') {
+function head(extra = '') {
   return `<div class="hdr">
-      <h1>Структура проекта<span class="count">(${count})</span></h1>
+      <h1>Структура проекта</h1>
       <div class="back">← AI-платформа <span class="v">v1.99.0</span></div>
     </div>${extra}`;
 }
@@ -157,18 +162,28 @@ function field({ value = '', ph = 'Фильтр: mjs, dnevnik, web…', clear = 
 }
 
 /* строка списка: папка — с шевроном, файл — с «⋮» */
-function row(name, comment, { level = 0, open = false, sel = false, flatPath = '' } = {}) {
+function row(name, comment, { level = 0, open = false, sel = false, last = false, flatPath = '', hit = '' } = {}) {
   const k = kind(name);
   const isDir = k === 'dir';
-  const lv = level ? ` lv${level}` : '';
-  return `<div class="row${lv}${sel ? ' sel' : ''}${open ? ' open' : ''}">
+  const cls = ['row', level ? `lv${level}` : '', isDir ? '' : 'lf',
+               open ? 'open' : '', sel ? 'sel' : '', last ? 'last' : ''].filter(Boolean).join(' ');
+  // направляющие: линия под шевроном родителя, шаг 18px от бокового отступа
+  const guides = [];
+  for (let i = 1; i <= level; i++) {
+    guides.push(`<span class="gd${i === level ? ' deep' : ''}" `
+      + `style="left:calc(var(--ui-page-pad-m) + ${(i - 1) * 18 + 8}px);"></span>`);
+  }
+  const mark = (s) => hit ? s.split(hit).join(`<span class="hit">${hit}</span>`) : s;
+  return `<div class="${cls}">
+      ${guides.join('')}
+      ${svg('chev', 'tog')}
       <span class="${k} ic">${svg(isDir ? 'folder' : 'file')}</span>
       <span class="body">
-        ${flatPath ? `<span class="pth">${flatPath}</span>` : ''}
-        <span class="nm ${k}">${name}</span>
+        ${flatPath ? `<span class="pth">${mark(flatPath)}</span>` : ''}
+        <span class="nm ${k}">${mark(name)}</span>
         ${comment ? `<span class="cm">${comment}</span>` : ''}
       </span>
-      ${isDir ? svg('chev', 'chev') : `<span class="more">${svg('dots')}</span>`}
+      ${isDir ? '' : `<span class="more">${svg('dots')}</span>`}
     </div>`;
 }
 
@@ -194,7 +209,7 @@ ${body}
 const out = (file, body) => { writeFileSync(file, dc(body)); console.log('  ' + file); };
 
 /* =========================================================
-   ЭКРАН 0 — как открывается сейчас (десктопная вёрстка на 390px)
+   СТРАНИЦА «ЧЕРНОВИКИ» — как раздел открывается сейчас на 390px
    ========================================================= */
 const nowLines = [
   ['~', 0, ''],
@@ -253,98 +268,111 @@ out('Now.dc.html', `
 </div>`);
 
 /* =========================================================
-   ВАРИАНТ A — проваливание по папкам
+   ПАНЕЛЬ НАД СПИСКОМ — путь текущей ветки + «свернуть всё»
+   ========================================================= */
+const bar = (left, right) =>
+  `<div class="found"><span class="crumbs">${left}</span>${right}</div>`;
+
+/* =========================================================
+   ЭКРАН 1 — корень, всё свёрнуто
    ========================================================= */
 out('Main.dc.html', `
 <div class="scr">
   ${burger}
   <div class="top">
-    ${head('784')}
+    ${head()}
     ${field()}
-    <div class="crumbs"><span class="dir">${svg('net')}</span><b>/home/cashruflow</b></div>
+    ${bar('<b>/home/cashruflow</b>', '<a>Свернуть всё</a>')}
   </div>
   <div class="list">
-    <div class="grp">Папки</div>
-    ${row('mcp-server', 'ядро: MCP API (3000), SSE-коннектор (3002), бот дневника')}
-    ${row('web', 'веб-панель (3001, за nginx :80)')}
-    ${row('gpt', 'GPT-ядро: точка входа, реестр агентов, клиент OpenAI')}
-    ${row('notediscovery', 'дневник и база знаний (8000)')}
-    ${row('docs', 'документация: VERSION, ARCHITECTURE, ADR')}
+    ${row('agents', 'AI-агенты: diary_agent, gpt_diary_agent')}
+    ${row('backups', 'бэкапы перед правками — дата в имени файла')}
     ${row('data', 'SQLite: tasks.db (бэклог + промты), med.sqlite (медкарта)')}
     ${row('design', 'макеты из Claude Design — переносятся навыком design-transfer')}
+    ${row('docs', 'документация: VERSION, ARCHITECTURE, ADR')}
+    ${row('gpt', 'GPT-ядро: точка входа, реестр агентов, клиент OpenAI')}
+    ${row('mcp-server', 'ядро: MCP API (3000), SSE-коннектор (3002), бот дневника')}
+    ${row('notediscovery', 'дневник и база знаний (8000)')}
     ${row('scripts', 'утилиты и cron')}
-    ${row('backups', 'бэкапы перед правками — дата в имени файла')}
+    ${row('web', 'веб-панель (3001, за nginx :80)')}
   </div>
 </div>`);
 
-out('AFolder.dc.html', `
+/* =========================================================
+   ЭКРАН 2 — ветка web → public раскрыта
+   ========================================================= */
+out('Open.dc.html', `
 <div class="scr">
   ${burger}
   <div class="top">
-    ${head('22')}
+    ${head()}
     ${field()}
-    <div class="crumbs">
-      <span class="up">${svg('folder')}</span>
-      <span class="up">web</span><span class="sep">/</span><b>public</b>
-    </div>
+    ${bar('<span class="up">web</span><span class="sep">/</span><b>public</b>',
+          '<a>Свернуть всё</a>')}
   </div>
   <div class="list">
-    <div class="grp">Папки</div>
-    ${row('assets', 'иконки и логотипы (icons.svg, logo.svg)')}
-    ${row('img', 'картинки: логотипы сервисов')}
-    <div class="grp">Файлы</div>
-    ${row('index.html', 'главная: дашборд, плашки, карточки инструментов')}
-    ${row('structure.html', 'живое дерево проекта с // комментариями')}
-    ${row('tasks.html', 'бэклог задач: таблица, таймеры, виджет «в работе», спринты')}
-    ${row('set.html', 'настройки /set: тема, геометрия карточек (--ui-токены)')}
-    ${row('sidebar.js', 'общий сайдбар навигации всех страниц')}
-    ${row('ui.css', 'общая тема портала: CSS-переменные (--ui-brand, --ui-ico)')}
-  </div>
-  <div class="toast">Скопировано: /home/cashruflow/web/public/set.html</div>
-</div>`);
-
-out('ASearch.dc.html', `
-<div class="scr">
-  ${burger}
-  <div class="top">
-    ${head('784')}
-    ${field({ value: 'mcp', clear: true })}
-    <div class="found"><span>Найдено: <em>7</em></span><a>Сбросить</a></div>
-  </div>
-  <div class="list">
-    ${row('mcp-server', 'ядро: MCP API (3000), SSE-коннектор (3002), бот дневника',
-      { flatPath: '~/' }).replace('>mcp-server<', '><span class="hit">mcp</span>-server<')}
-    ${row('mcp_sse.mjs', 'SSE-коннектор для Claude (list_tasks, create_task, wordstat)',
-      { flatPath: '~/mcp-server/' }).replace('>mcp_sse.mjs<', '><span class="hit">mcp</span>_sse.mjs<')}
-    ${row('mcp_gpt_sse.mjs', 'SSE-коннектор для GPT (аналог mcp_sse)',
-      { flatPath: '~/mcp-server/' }).replace('>mcp_gpt_sse.mjs<', '><span class="hit">mcp</span>_gpt_sse.mjs<')}
-    ${row('mcp_server.mjs', 'StreamableHTTP MCP для ChatGPT (от GPT, на верификации)',
-      { flatPath: '~/mcp-server/' }).replace('>mcp_server.mjs<', '><span class="hit">mcp</span>_server.mjs<')}
-    ${row('create_gpt_mcp.py', 'разовый скрипт создания GPT MCP',
-      { flatPath: '~/mcp-server/' }).replace('_mcp.py<', '_<span class="hit">mcp</span>.py<')}
-    ${row('mcp', 'старый бэкап MCP-ядра',
-      { flatPath: '~/' }).replace('>mcp<', '><span class="hit">mcp</span><')}
+    ${row('scripts', 'утилиты и cron')}
+    ${row('web', 'веб-панель (3001, за nginx :80)', { open: true })}
+    ${row('public', 'все страницы платформы: CRM, финансы, медкарта, кабинеты',
+          { level: 1, open: true })}
+    ${row('assets', 'иконки и логотипы (icons.svg, logo.svg)', { level: 2 })}
+    ${row('index.html', 'главная: дашборд, плашки, карточки инструментов', { level: 2 })}
+    ${row('sidebar.js', 'общий сайдбар навигации всех страниц', { level: 2 })}
+    ${row('structure.html', 'живое дерево проекта с // комментариями', { level: 2 })}
+    ${row('ui.css', 'общая тема портала: CSS-переменные (--ui-brand, --ui-ico)',
+          { level: 2, last: true })}
+    ${row('server.js', 'Express: все API платформы — задачи, CRM, финансы, медкарта',
+          { level: 1 })}
+    ${row('tasks.js', 'API бэклога задач (data/tasks.db)', { level: 1, last: true })}
   </div>
 </div>`);
 
-out('ASheet.dc.html', `
+/* =========================================================
+   ЭКРАН 3 — поиск: тот же фильтр, плоский список найденных путей
+   ========================================================= */
+out('Search.dc.html', `
 <div class="scr">
   ${burger}
   <div class="top">
-    ${head('22')}
+    ${head()}
+    ${field({ value: 'agent', clear: true })}
+    <div class="found"><span>Найдено: <em>6</em></span><a>Сбросить</a></div>
+  </div>
+  <div class="list">
+    ${row('agents', 'AI-агенты: diary_agent, gpt_diary_agent',
+          { flatPath: '~/', hit: 'agent' })}
+    ${row('gpt_diary_agent', 'GPT-агент дневника (agent.mjs + README)',
+          { flatPath: '~/agents/', hit: 'agent' })}
+    ${row('agent.mjs', '', { flatPath: '~/agents/gpt_diary_agent/', hit: 'agent' })}
+    ${row('README.md', '', { flatPath: '~/agents/gpt_diary_agent/', hit: 'agent' })}
+    ${row('agents', 'AI-агенты: diary_agent (сводки дневника через Claude → TG)',
+          { flatPath: '~/mcp-server/', hit: 'agent' })}
+    ${row('diary_agent.mjs', 'сводки дневника: Claude API → Telegram, cron',
+          { flatPath: '~/mcp-server/agents/', hit: 'agent' })}
+  </div>
+</div>`);
+
+/* =========================================================
+   ЭКРАН 4 — шторка действий с файлом
+   ========================================================= */
+out('Sheet.dc.html', `
+<div class="scr">
+  ${burger}
+  <div class="top">
+    ${head()}
     ${field()}
-    <div class="crumbs">
-      <span class="up">${svg('folder')}</span>
-      <span class="up">web</span><span class="sep">/</span><b>public</b>
-    </div>
+    ${bar('<span class="up">web</span><span class="sep">/</span><b>public</b>',
+          '<a>Свернуть всё</a>')}
   </div>
   <div class="list">
-    <div class="grp">Папки</div>
-    ${row('assets', 'иконки и логотипы (icons.svg, logo.svg)')}
-    ${row('img', 'картинки: логотипы сервисов')}
-    <div class="grp">Файлы</div>
-    ${row('index.html', 'главная: дашборд, плашки, карточки инструментов')}
-    ${row('structure.html', 'живое дерево проекта с // комментариями', { sel: true })}
+    ${row('scripts', 'утилиты и cron')}
+    ${row('web', 'веб-панель (3001, за nginx :80)', { open: true })}
+    ${row('public', 'все страницы платформы: CRM, финансы, медкарта, кабинеты',
+          { level: 1, open: true })}
+    ${row('assets', 'иконки и логотипы (icons.svg, logo.svg)', { level: 2 })}
+    ${row('index.html', 'главная: дашборд, плашки, карточки инструментов', { level: 2 })}
+    ${row('structure.html', 'живое дерево проекта с // комментариями',
+          { level: 2, sel: true })}
   </div>
   <div class="dim"></div>
   <div class="sheet">
@@ -358,51 +386,6 @@ out('ASheet.dc.html', `
     <div class="act">${svg('globe')}<span>Скопировать публичную ссылку
       <span class="sub">ai.cashruflow.ru/structure.html</span></span></div>
     <div class="act">${svg('open')}<span>Открыть страницу</span></div>
-  </div>
-</div>`);
-
-/* =========================================================
-   ВАРИАНТ B — аккордеон
-   ========================================================= */
-out('BTree.dc.html', `
-<div class="scr">
-  ${burger}
-  <div class="top">
-    ${head('784')}
-    ${field()}
-    <div class="found"><span class="crumbs"><b>/home/cashruflow</b></span><a>Свернуть всё</a></div>
-  </div>
-  <div class="list">
-    ${row('mcp-server', 'ядро: MCP API (3000), SSE-коннектор (3002), бот дневника')}
-    ${row('web', 'веб-панель (3001, за nginx :80)')}
-    ${row('gpt', 'GPT-ядро: точка входа, реестр агентов, клиент OpenAI')}
-    ${row('notediscovery', 'дневник и база знаний (8000)')}
-    ${row('docs', 'документация: VERSION, ARCHITECTURE, ADR')}
-    ${row('data', 'SQLite: tasks.db (бэклог + промты), med.sqlite (медкарта)')}
-    ${row('design', 'макеты из Claude Design — переносятся навыком design-transfer')}
-    ${row('scripts', 'утилиты и cron')}
-    ${row('backups', 'бэкапы перед правками — дата в имени файла')}
-  </div>
-</div>`);
-
-out('BOpen.dc.html', `
-<div class="scr">
-  ${burger}
-  <div class="top">
-    ${head('784')}
-    ${field()}
-    <div class="found"><span class="crumbs"><b>/home/cashruflow</b></span><a>Свернуть всё</a></div>
-  </div>
-  <div class="list">
-    ${row('mcp-server', 'ядро: MCP API (3000), SSE-коннектор (3002), бот дневника')}
-    ${row('web', 'веб-панель (3001, за nginx :80)', { open: true })}
-    ${row('public', 'все страницы платформы: CRM, финансы, медкарта, кабинеты', { level: 1, open: true })}
-    ${row('index.html', 'главная: дашборд, плашки, карточки инструментов', { level: 2 })}
-    ${row('structure.html', 'живое дерево проекта с // комментариями', { level: 2 })}
-    ${row('sidebar.js', 'общий сайдбар навигации всех страниц', { level: 2 })}
-    ${row('server.js', 'Express: все API платформы — задачи, CRM, финансы, медкарта', { level: 1 })}
-    ${row('tasks.js', 'API бэклога задач (data/tasks.db)', { level: 1 })}
-    ${row('gpt', 'GPT-ядро: точка входа, реестр агентов, клиент OpenAI')}
   </div>
 </div>`);
 
