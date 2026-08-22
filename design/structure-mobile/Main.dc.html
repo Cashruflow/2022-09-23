@@ -1,0 +1,223 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+  /* ===== токены /set (THEME_DEFAULTS → /theme.css) ===== */
+  :root{
+    --ui-brand:#00a0ff; --ui-danger:#f87171;
+    --ui-radius:8px; --ui-card-radius:12px;
+    --ui-page-pad-m:14px; --ui-field-h:44px; --ui-sheet-radius:22px;
+    --ui-inp-bg:#1a1a1a; --ui-inp-border:#333333; --ui-inp-ph:#666666;
+    --ui-inp-radius:8px; --ui-ico:#e8e8e8; --ui-ico-stroke:2;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#0f0f0f;color:#fff;
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+       -webkit-font-smoothing:antialiased;}
+  a{color:var(--ui-brand);text-decoration:none;}
+  a:hover{color:#1aacff;}
+  svg{width:18px;height:18px;flex:0 0 auto;fill:none;stroke:currentColor;
+      stroke-width:var(--ui-ico-stroke,2);stroke-linecap:round;stroke-linejoin:round;}
+
+  .scr{position:relative;width:390px;height:844px;overflow:hidden;
+       display:flex;flex-direction:column;background:#0f0f0f;}
+
+  /* кнопка меню — sidebar.js: fixed top:12 right:12, 42x42, radius 10 */
+  .brg{position:absolute;top:12px;right:12px;z-index:6;width:42px;height:42px;
+       border-radius:10px;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;
+       display:flex;align-items:center;justify-content:center;font-size:19px;}
+
+  /* ===== закреплённая шапка: заголовок + поиск + путь ===== */
+  .top{flex:0 0 auto;background:#0f0f0f;border-bottom:1px solid #1c1c1c;
+       padding:14px var(--ui-page-pad-m) 8px;display:flex;flex-direction:column;gap:10px;}
+  .hdr{display:flex;flex-direction:column;gap:3px;}
+  h1{font-size:17px;font-weight:600;padding-right:54px;letter-spacing:-.01em;}
+  h1 .count{font-size:13px;color:#666;font-weight:400;margin-left:6px;}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#666;}
+  .back .v{color:#444;}
+
+  .srch{position:relative;display:flex;align-items:center;}
+  .srch .mag{position:absolute;left:12px;color:#5c5c5c;width:17px;height:17px;}
+  .srch input{width:100%;height:var(--ui-field-h,44px);padding:0 44px;
+              background:var(--ui-inp-bg,#1a1a1a);border:1px solid var(--ui-inp-border,#333);
+              border-radius:var(--ui-inp-radius,8px);color:#fff;font-family:inherit;
+              font-size:16px;outline:none;}
+  .srch input::placeholder{color:var(--ui-inp-ph,#666);}
+  .srch input.on{border-color:#00a0ff55;}
+  .clr{position:absolute;right:1px;width:42px;height:42px;color:#7a7a7a;
+       display:flex;align-items:center;justify-content:center;}
+  .clr svg{width:16px;height:16px;}
+
+  .crumbs{display:flex;align-items:center;gap:7px;min-height:34px;
+          font-family:var(--mono);font-size:12.5px;color:#666;overflow:hidden;}
+  .crumbs .sep{color:#333;}
+  .crumbs .up{color:#6ab0f5;}
+  .crumbs b{color:#e8e8e8;font-weight:600;}
+  .found{display:flex;align-items:center;justify-content:space-between;min-height:34px;
+         font-size:12.5px;color:#666;}
+  .found em{font-style:normal;color:#e8e8e8;}
+  .found a{font-size:12.5px;color:#6ab0f5;}
+
+  /* ===== список ===== */
+  .list{flex:1 1 auto;overflow:hidden;}
+  .grp{padding:15px var(--ui-page-pad-m) 6px;font-size:10px;letter-spacing:.08em;
+       text-transform:uppercase;color:#555;}
+  .row{display:flex;align-items:center;gap:12px;min-height:60px;
+       padding:10px var(--ui-page-pad-m);border-bottom:1px solid #171717;color:inherit;}
+  .row.sel{background:#141414;}
+  .row .body{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px;}
+  .nm{font-family:var(--mono);font-size:14.5px;line-height:1.25;word-break:break-all;}
+  .cm{font-size:12px;line-height:1.35;color:#6a6a6a;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pth{font-family:var(--mono);font-size:11.5px;color:#4e4e4e;
+       overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .hit{color:var(--ui-brand);background:rgba(0,160,255,.14);border-radius:3px;padding:0 1px;}
+  .dir{color:#6ab0f5;} .js{color:#4ade80;} .htm{color:#fb923c;}
+  .md{color:#c084fc;} .file{color:#8a8a8a;}
+  .ic{opacity:.85;}
+  .chev{color:#3f3f3f;width:17px;height:17px;transform:rotate(-90deg);}
+  .more{width:44px;height:44px;margin-right:-12px;color:#5a5a5a;
+        display:flex;align-items:center;justify-content:center;}
+  .more svg{width:17px;height:17px;}
+
+  /* ===== аккордеон (вариант B) ===== */
+  .row.lv1{padding-left:calc(var(--ui-page-pad-m) + 20px);}
+  .row.lv2{padding-left:calc(var(--ui-page-pad-m) + 40px);}
+  .row.open .chev{transform:rotate(0deg);color:#00a0ff;}
+  .guide{position:absolute;top:0;bottom:0;width:1px;background:#1c1c1c;}
+
+  /* ===== шторка действий ===== */
+  .dim{position:absolute;inset:0;background:rgba(0,0,0,.55);}
+  .sheet{position:absolute;left:0;right:0;bottom:0;background:#0a0a0a;
+         border-top:1px solid #1a1a1a;
+         border-radius:var(--ui-sheet-radius,22px) var(--ui-sheet-radius,22px) 0 0;
+         box-shadow:0 -10px 30px rgba(0,0,0,.6);padding:8px 0 26px;}
+  .grab{width:38px;height:4px;border-radius:2px;background:#2c2c2c;margin:4px auto 14px;}
+  .sh-hd{padding:0 18px 12px;border-bottom:1px solid #161616;display:flex;
+         flex-direction:column;gap:5px;}
+  .sh-hd .nm{font-size:16px;}
+  .sh-note{margin:12px 18px 6px;padding:10px 12px;background:#101010;
+           border:1px solid #1e1e1e;border-radius:var(--ui-card-radius,12px);
+           font-size:12.5px;line-height:1.45;color:#8a8a8a;}
+  .act{display:flex;align-items:center;gap:13px;min-height:54px;padding:7px 18px;
+       color:#e8e8e8;font-size:15px;}
+  .act svg{width:19px;height:19px;color:#8a8a8a;}
+  .act .sub{display:block;margin-top:2px;font-family:var(--mono);font-size:11.5px;color:#5a5a5a;}
+
+  /* уведомление о копировании — как в structure.html (toast) */
+  .toast{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);
+         background:#1a1a1a;border:1px solid #333;color:#fff;padding:9px 14px;
+         border-radius:8px;font-size:13px;max-width:90%;white-space:nowrap;
+         overflow:hidden;text-overflow:ellipsis;}
+</style>
+</helmet>
+
+<div class="scr">
+  <div class="brg" aria-label="Меню">☰</div>
+  <div class="top">
+    <div class="hdr">
+      <h1>Структура проекта<span class="count">(784)</span></h1>
+      <div class="back">← AI-платформа <span class="v">v1.99.0</span></div>
+    </div>
+    <div class="srch">
+      <svg class="mag" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+      <input type="text"  placeholder="Фильтр: mjs, dnevnik, web…">
+      
+    </div>
+    <div class="crumbs"><span class="dir"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg></span><b>/home/cashruflow</b></div>
+  </div>
+  <div class="list">
+    <div class="grp">Папки</div>
+    <div class="row">
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      <span class="body">
+        
+        <span class="nm dir">mcp-server</span>
+        <span class="cm">ядро: MCP API (3000), SSE-коннектор (3002), бот дневника</span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </div>
+    <div class="row">
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      <span class="body">
+        
+        <span class="nm dir">web</span>
+        <span class="cm">веб-панель (3001, за nginx :80)</span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </div>
+    <div class="row">
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      <span class="body">
+        
+        <span class="nm dir">gpt</span>
+        <span class="cm">GPT-ядро: точка входа, реестр агентов, клиент OpenAI</span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </div>
+    <div class="row">
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      <span class="body">
+        
+        <span class="nm dir">notediscovery</span>
+        <span class="cm">дневник и база знаний (8000)</span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </div>
+    <div class="row">
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      <span class="body">
+        
+        <span class="nm dir">docs</span>
+        <span class="cm">документация: VERSION, ARCHITECTURE, ADR</span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </div>
+    <div class="row">
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      <span class="body">
+        
+        <span class="nm dir">data</span>
+        <span class="cm">SQLite: tasks.db (бэклог + промты), med.sqlite (медкарта)</span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </div>
+    <div class="row">
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      <span class="body">
+        
+        <span class="nm dir">design</span>
+        <span class="cm">макеты из Claude Design — переносятся навыком design-transfer</span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </div>
+    <div class="row">
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      <span class="body">
+        
+        <span class="nm dir">scripts</span>
+        <span class="cm">утилиты и cron</span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </div>
+    <div class="row">
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      <span class="body">
+        
+        <span class="nm dir">backups</span>
+        <span class="cm">бэкапы перед правками — дата в имени файла</span>
+      </span>
+      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
