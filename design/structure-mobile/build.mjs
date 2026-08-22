@@ -197,15 +197,37 @@ const out = (file, body) => { writeFileSync(file, dc(body)); console.log('  ' + 
    ЭКРАН 0 — как открывается сейчас (десктопная вёрстка на 390px)
    ========================================================= */
 const nowLines = [
-  ['~', 0, 'dir', ''],
-  ['mcp-server', 1, 'dir', 'ядро: MCP API (3000), SSE-коннектор (3002), бот дневника'],
-  ['integrations', 2, 'dir', 'интеграции: wordstat, yandexgpt, webmaster, seo_auto'],
-  ['mcp_sse.mjs', 2, 'js', 'SSE-коннектор для Claude (list_tasks, create_task, wordstat)'],
-  ['server.mjs', 2, 'js', 'MCP API — эндпоинты /tools/*'],
-  ['web', 1, 'dir', 'веб-панель (3001, за nginx :80)'],
-  ['public', 2, 'dir', 'все страницы платформы: CRM, финансы, медкарта, кабинеты'],
-  ['server.js', 2, 'js', 'Express: все API платформы — задачи, CRM, финансы, медкарта'],
-  ['tasks.js', 2, 'js', 'API бэклога задач (data/tasks.db)'],
+  ['~', 0, ''],
+  ['add_adr_013.py', 0, 'разовый скрипт: ADR-013'],
+  ['add_changelog_v162.py', 0, 'разовый скрипт: CHANGELOG v1.6.2'],
+  ['add_token_stats.py', 0, 'разовый скрипт: статистика токенов'],
+  ['agents', 0, 'AI-агенты: diary_agent, gpt_diary_agent'],
+  ['gpt_diary_agent', 1, 'GPT-агент дневника (agent.mjs + README)'],
+  ['analytics', 0, 'аналитика (план: diary analytics)'],
+  ['apps', 0, 'пустая папка (резерв)'],
+  ['backups', 0, 'бэкапы перед правками — дата в имени файла'],
+  ['config', 0, 'пустая папка (резерв)'],
+  ['data', 0, 'SQLite: tasks.db (бэклог + промты), med.sqlite (медкарта)'],
+  ['fields_crm.csv', 1, 'исходник полей CRM из Google Sheets'],
+  ['med-uploads', 1, 'загруженные файлы анализов'],
+  ['med.sqlite', 1, 'SQLite: медкарта'],
+  ['projects.csv', 1, 'исходник проектов из Google Sheets'],
+  ['projects_crm.csv', 1, 'исходник CRM-порталов из Google Sheets'],
+  ['tasks.db', 1, 'SQLite: бэклог задач + промты'],
+  ['tenants', 1, 'БД других пользователей мед-модуля (irina.db)'],
+  ['database', 0, 'пустая папка (резерв)'],
+  ['design', 0, 'макеты из Claude Design — переносятся навыком design-transfer'],
+  ['docs', 0, 'документация: VERSION, ARCHITECTURE, ADR'],
+  ['ADR', 1, 'architecture decision records — история решений'],
+  ['ARCHITECTURE.md', 1, 'как устроена система: модули, связи, потоки данных'],
+  ['CHANGELOG.md', 1, 'что изменилось: история по версиям'],
+  ['DESIGN-TOKENS.md', 1, 'дизайн-токены платформы — цвета проекта главнее макета'],
+  ['PHILOSOPHY.md', 1, 'принципы разработки + правило версионирования'],
+  ['ROADMAP.md', 1, 'что дальше: план, идеи, приоритеты'],
+  ['VERSION.md', 1, 'состояние сейчас: версия, модули, статус'],
+  ['adr', 1, 'дубль папки ADR со строчными буквами (ADR-025 контакты)'],
+  ['structure-comments.json', 1, 'подписи для дерева /structure — этот файл'],
+  ['fix_diary_usage.py', 0, 'разовый фикс: usage дневника'],
 ];
 out('Now.dc.html', `
 <div class="scr">
@@ -223,8 +245,8 @@ out('Now.dc.html', `
                   padding:9px 12px;color:#fff;margin-bottom:16px;font-size:13px;outline:none;
                   font-family:inherit;">
     <div style="font-family:var(--mono);font-size:13px;line-height:1.7;color:#aaa;
-                white-space:pre;">${nowLines.map(([n, d, k, c]) =>
-      '  '.repeat(d) + `<span class="${k}">${n}</span>` +
+                white-space:pre;">${nowLines.map(([n, d, c]) =>
+      '  '.repeat(d) + `<span class="${kind(n)}">${n}</span>` +
       `<span style="color:#4a4a4a;"> ⧉</span>` +
       (c ? `<span style="color:#555;">  // ${c}</span>` : '')).join('\n')}</div>
   </div>

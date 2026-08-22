@@ -135,14 +135,36 @@
                   font-family:inherit;">
     <div style="font-family:var(--mono);font-size:13px;line-height:1.7;color:#aaa;
                 white-space:pre;"><span class="dir">~</span><span style="color:#4a4a4a;"> ⧉</span>
-  <span class="dir">mcp-server</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // ядро: MCP API (3000), SSE-коннектор (3002), бот дневника</span>
-    <span class="dir">integrations</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // интеграции: wordstat, yandexgpt, webmaster, seo_auto</span>
-    <span class="js">mcp_sse.mjs</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // SSE-коннектор для Claude (list_tasks, create_task, wordstat)</span>
-    <span class="js">server.mjs</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // MCP API — эндпоинты /tools/*</span>
-  <span class="dir">web</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // веб-панель (3001, за nginx :80)</span>
-    <span class="dir">public</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // все страницы платформы: CRM, финансы, медкарта, кабинеты</span>
-    <span class="js">server.js</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // Express: все API платформы — задачи, CRM, финансы, медкарта</span>
-    <span class="js">tasks.js</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // API бэклога задач (data/tasks.db)</span></div>
+<span class="file">add_adr_013.py</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // разовый скрипт: ADR-013</span>
+<span class="file">add_changelog_v162.py</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // разовый скрипт: CHANGELOG v1.6.2</span>
+<span class="file">add_token_stats.py</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // разовый скрипт: статистика токенов</span>
+<span class="dir">agents</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // AI-агенты: diary_agent, gpt_diary_agent</span>
+  <span class="dir">gpt_diary_agent</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // GPT-агент дневника (agent.mjs + README)</span>
+<span class="dir">analytics</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // аналитика (план: diary analytics)</span>
+<span class="dir">apps</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // пустая папка (резерв)</span>
+<span class="dir">backups</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // бэкапы перед правками — дата в имени файла</span>
+<span class="dir">config</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // пустая папка (резерв)</span>
+<span class="dir">data</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // SQLite: tasks.db (бэклог + промты), med.sqlite (медкарта)</span>
+  <span class="file">fields_crm.csv</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // исходник полей CRM из Google Sheets</span>
+  <span class="dir">med-uploads</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // загруженные файлы анализов</span>
+  <span class="file">med.sqlite</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // SQLite: медкарта</span>
+  <span class="file">projects.csv</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // исходник проектов из Google Sheets</span>
+  <span class="file">projects_crm.csv</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // исходник CRM-порталов из Google Sheets</span>
+  <span class="file">tasks.db</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // SQLite: бэклог задач + промты</span>
+  <span class="dir">tenants</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // БД других пользователей мед-модуля (irina.db)</span>
+<span class="dir">database</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // пустая папка (резерв)</span>
+<span class="dir">design</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // макеты из Claude Design — переносятся навыком design-transfer</span>
+<span class="dir">docs</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // документация: VERSION, ARCHITECTURE, ADR</span>
+  <span class="dir">ADR</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // architecture decision records — история решений</span>
+  <span class="md">ARCHITECTURE.md</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // как устроена система: модули, связи, потоки данных</span>
+  <span class="md">CHANGELOG.md</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // что изменилось: история по версиям</span>
+  <span class="md">DESIGN-TOKENS.md</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // дизайн-токены платформы — цвета проекта главнее макета</span>
+  <span class="md">PHILOSOPHY.md</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // принципы разработки + правило версионирования</span>
+  <span class="md">ROADMAP.md</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // что дальше: план, идеи, приоритеты</span>
+  <span class="md">VERSION.md</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // состояние сейчас: версия, модули, статус</span>
+  <span class="dir">adr</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // дубль папки ADR со строчными буквами (ADR-025 контакты)</span>
+  <span class="file">structure-comments.json</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // подписи для дерева /structure — этот файл</span>
+<span class="file">fix_diary_usage.py</span><span style="color:#4a4a4a;"> ⧉</span><span style="color:#555;">  // разовый фикс: usage дневника</span></div>
   </div>
 </div>
 </x-dc>
