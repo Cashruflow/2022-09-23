@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body{margin:0;background:#0a0a0a;color:#e8e8e8;
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;}
+    a{color:#00a0ff;text-decoration:none;} a:hover{color:#31b6ff;}
+    .page{padding:20px;}
+    .cap{font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:#6f6f78;margin-bottom:6px;}
+    h1{font-size:24px;font-weight:800;letter-spacing:-.02em;margin:0 0 18px;}
+    .sec{background:#141414;border:1px solid #262626;border-radius:14px;padding:16px 18px;margin-bottom:12px;}
+    .sec__h{display:flex;align-items:baseline;gap:9px;margin-bottom:10px;flex-wrap:wrap;}
+    .sec__h h2{font-size:15px;font-weight:700;margin:0;color:#e8e8e8;}
+    .sec__h code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:#00a0ff;}
+    ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;}
+    li{display:flex;gap:9px;align-items:flex-start;font-size:13px;line-height:1.5;color:#8b8b8b;}
+    li > svg{flex:0 0 auto;width:14px;height:14px;margin-top:3px;color:#4ade80;fill:none;stroke:currentColor;
+      stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+    li b{color:#e8e8e8;font-weight:600;}
+    li code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:#00a0ff;}
+    .tag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:20px;}
+    .tag.ui{background:rgba(0,160,255,.12);border:1px solid rgba(0,160,255,.35);color:#00a0ff;}
+    .tag.srv{background:rgba(250,204,21,.1);border:1px solid rgba(250,204,21,.32);color:#facc15;}
+    .tag.plt{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.32);color:#4ade80;}
+    .foot{font-size:12px;color:#666;line-height:1.55;margin-top:4px;}
+  </style>
+</helmet>
+<div class="page">
+  <div class="cap">Что и где менять</div>
+  <h1>Разбор по файлам</h1>
+
+  <div class="sec">
+    <div class="sec__h"><h2>Карточка привычки</h2><span class="tag ui">Вёрстка</span>
+      <code>medcard_habits.js · missionCard()</code><code>ui.css · .hab-card</code></div>
+    <ul>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Блок <b>«Сегодня»</b> числами: сделано / из плана / <b>осталось</b>. Данные уже приходят — <code>met.today_fact</code>, <code>met.today_plan</code>.</span></li>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Полоса дня с засечкой <b>минимума</b> (<code>met.min_amount</code>) — сейчас минимум не показан нигде, хотя именно он уводит миссию в «Под угрозой».</span></li>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Темп печатать как <b>«137 раз в день при плане 120 · +14%»</b> из <code>actual_daily_rate</code> / <code>planned_daily_rate</code>, а не голое <code>+14</code>. Подпись — окно усреднения (7 дней при сроке ≤30, иначе 30 — <code>habit_engine.js:90</code>).</span></li>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Строка <b>последней записи</b> с «Исправить» и остатком окна правки.</span></li>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Кольцо «сегодня» с датой в центре <b>убрать</b>: оно занимает 84px и не отвечает ни на один вопрос, на который отвечают числа выше. Кольцо цели остаётся.</span></li>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Карточка становится выше — в сетке <code>minmax(440px,1fr)</code> при ≥900px это не ломает раскладку, на мобиле колонка одна.</span></li>
+    </ul>
+  </div>
+
+  <div class="sec">
+    <div class="sec__h"><h2>Модалка статистики</h2><span class="tag ui">Вёрстка</span>
+      <code>medcard_habits.js · habitOpenCard()</code></div>
+    <ul>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Собрать на <b>общем компоненте «Сводка»</b> — <code>.stats-hero / .stats-tile / .stats-list</code> из ui.css. Он уже стоит в «Дневнике» и «Жизни», своего CSS раздел заводить не должен.</span></li>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Вывести то, что <code>computeMetrics()</code> и так считает и отдаёт: <code>total_volume</code>, <code>remaining</code>, <code>today_fact/plan</code>, <code>pace_ratio</code>, <code>rhythm</code>, <code>forecast_date</code>.</span></li>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Чекпойнты — <b>процент и количество</b>: «50% · 1 800 раз».</span></li>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Последние 4–5 записей <b>раскрыты сразу</b>, полная история — кнопкой.</span></li>
+    </ul>
+  </div>
+
+  <div class="sec">
+    <div class="sec__h"><h2>Тост платформы</h2><span class="tag plt">Общее</span><code>toast.js · ui.css · .plt-toast</code></div>
+    <ul>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span><code>pltToast(text, {action:{label,onClick}})</code> — кнопка внутри плашки. Пауза по наведению уже есть, места хватает.</span></li>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Это <b>не про привычки</b>: «Отменить» сразу после действия нужен в CRM, задачах и дневнике — одна правка на все ~35 страниц, которые уже подключают toast.js.</span></li>
+    </ul>
+  </div>
+
+  <div class="sec">
+    <div class="sec__h"><h2>Сервер</h2><span class="tag srv">Логика</span><code>habits.js:663</code></div>
+    <ul>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Окно правки для записей <b>текущего дня</b> — до конца дня вместо 30 минут (<code>RESULT_EDIT_WINDOW_MS</code>). Ошибку замечают, когда открывают карточку, а не через 5 минут после ввода.</span></li>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Для прошлых дней — <b>корректирующая запись</b> со знаком минус вместо отказа. История честная, сумма чинится, аудит цел.</span></li>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Оба изменения — <b>решение Константина</b>, не вёрстка: тут только предложение.</span></li>
+    </ul>
+  </div>
+
+  <div class="sec">
+    <div class="sec__h"><h2>Соседние страницы и /set</h2><span class="tag plt">Общее</span></div>
+    <ul>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>«исправить» сейчас — <b>крашеный <code>span</code></b> с <code>onclick</code>. Канон платформы — <code>.tbtn</code> / <code>.ibtn</code> (ADR-069): их вид и зона тапа приезжают из <code>/set → «Кнопки»</code>.</span></li>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Компонент «Сводка» держит <b>литеральные цвета</b> (сознательно — он всегда тёмный). Значит акцент аккаунта из <code>/set → «Акцент»</code> в статистику не доходит: либо завести для hero/плиток свои <code>--ui-*</code>, либо записать это правилом в ui.css, чтобы не «чинили» повторно.</span></li>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Блок «Сегодня» и строка «последняя запись» — <b>кандидаты в общие компоненты</b>, как уже сделали <code>place-field.js</code> и <code>.stats-*</code>: то же самое просится во вкладку «Жизнь» и в «Дневник».</span></li>
+      <li><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Все числа — <code>font-variant-numeric: tabular-nums</code> (в файле уже есть <code>MONO</code>): при обновлении цифры перестают дёргаться.</span></li>
+    </ul>
+  </div>
+
+  <div class="foot">Значения в макетах — реальные для миссии «Отжимания»: 3 600 раз за 30 дней, план 120/день, минимум 60,
+  набрано 2 640, темп 137/день за последние 7 дней. Числа сходятся между всеми артбордами.</div>
+</div>
+</x-dc>
+</body>
+</html>
