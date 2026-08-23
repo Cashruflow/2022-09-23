@@ -148,106 +148,12 @@
       <button class="add"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
     </div>
 
-      <div class="hab-card">
-        <button class="chev" title="Свернуть"><svg viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></svg></button>
-        <div class="hab-card__top">
-          <div class="hab-card__head">
-            <div class="hab-card__ico"><svg viewBox="0 0 24 24"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg></div>
-            <div class="hab-card__body">
-              <div class="hab-card__title">Отжимания</div>
-              <div class="hab-card__sub">2 640 из 3 600 раз</div>
-            </div>
-          </div>
-          <div class="hab-ring">
-            <svg viewBox="0 0 104 104"><circle class="track" cx="52" cy="52" r="48"/><circle class="val" cx="52" cy="52" r="48" stroke-dasharray="301.6" stroke-dashoffset="81.4"/></svg>
-            <div class="hab-ring__txt"><span class="hab-ring__pct">73%</span><span class="hab-ring__cap">цель</span></div>
-          </div>
-        </div>
-
-        <div class="today">
-          <div class="today__head">
-            <span>Сегодня · вс, 23 авг</span>
-            <span class="v">сделано <b>40</b> из 120</span>
-          </div>
-          <div class="today__hero">осталось <b>80</b> раз</div>
-          <div class="bar"><span class="fill" style="width:33.3%;"></span><span class="min" style="left:50%;"></span></div>
-          <div class="legend"><span class="l-now">40</span><span class="l-min">минимум 60</span><span class="l-plan">план 120</span></div>
-        </div>
-
-        <div class="tiles">
-          <div class="tile wide">
-            <div class="tl">Темп</div>
-            <div class="tv">137 <span class="u">раз в день при плане 120</span> <span class="d">+14%</span></div>
-            <div class="ts">среднее за последние 7 дней</div>
-          </div>
-          <div class="tile">
-            <div class="tl">Ритм</div>
-            <div class="tv">86% <span class="u">19 из 22</span></div>
-            <div class="ts">дней с минимумом</div>
-          </div>
-          <div class="tile">
-            <div class="tl">Прогноз</div>
-            <div class="tv">30 авг</div>
-            <div class="ts">цель — ровно в срок</div>
-          </div>
-        </div>
-
-        <div class="week">
-          <div class="hab-day"><span class="hab-day__lbl">Пн</span><span class="hab-day__mark is-full"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span></div>
-          <div class="hab-day"><span class="hab-day__lbl">Вт</span><span class="hab-day__mark is-full"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span></div>
-          <div class="hab-day"><span class="hab-day__lbl">Ср</span><span class="hab-day__mark is-full"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span></div>
-          <div class="hab-day"><span class="hab-day__lbl">Чт</span><span class="hab-day__mark is-partial"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span></div>
-          <div class="hab-day"><span class="hab-day__lbl">Пт</span><span class="hab-day__mark is-full"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span></div>
-          <div class="hab-day"><span class="hab-day__lbl">Сб</span><span class="hab-day__mark is-full"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span></div>
-          <div class="hab-day is-today"><span class="hab-day__lbl">Вс</span><span class="hab-day__mark is-partial"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span></div>
-        </div>
-
-        <div class="last">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          <span class="txt">Последняя <b>+20 раз</b> · 14:32</span>
-          <button class="fix">Исправить</button>
-          <span class="win">27 мин</span>
-        </div>
-
-        <div class="hab-card__actions">
-          <button class="hab-abtn"><svg viewBox="0 0 24 24"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg></button>
-          <button class="hab-abtn is-danger"><svg viewBox="0 0 24 24"><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M8 20v2h8v-2"/><path d="m12.5 17-.5-1-.5 1h1z"/><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20"/></svg></button>
-          <button class="hab-btn-result"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg><span>Результат</span></button>
-        </div>
-      </div>
-      <div class="hab-card is-short">
-        <button class="chev" title="Развернуть"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
-        <div class="short-row">
-          <div class="hab-card__ico"><svg viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg></div>
-          <div class="hab-card__body">
-            <div class="hab-card__title">Вода</div>
-            <div class="short-sub">осталось <b>0,9</b> из 2,5 л</div>
-          </div>
-          <button class="quick"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
-        </div>
-        <div class="bar short"><span class="fill" style="width:64%;background:#00a0ff;"></span><span class="min" style="left:60%;"></span></div>
-      </div>
-      <div class="hab-card is-short">
-        <button class="chev" title="Развернуть"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
-        <div class="short-row">
-          <div class="hab-card__ico"><svg viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg></div>
-          <div class="hab-card__body">
-            <div class="hab-card__title">Чтение</div>
-            <div class="short-sub"><span class="ok">готово</span> · 30 из 30 стр</div>
-          </div>
-          <button class="quick"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
-        </div>
-        <div class="bar short"><span class="fill" style="width:100%;background:#4ade80;"></span><span class="min" style="left:50%;"></span></div>
-      </div>
-
+@@CARDS@@
   </div>
 </div>
 
 <div class="notes">
-    <div class="note-row"><span class="n">1</span><span><b>Шеврон — в правом верхнем углу карточки</b>, зона тапа 44px. Развёрнута — «крышей» вверх, свёрнута — вниз.</span></div>
-    <div class="note-row"><span class="n">2</span><span><b>Свёрнутый вид — только текущий день:</b> сколько осталось, полоса «сделано / минимум / план» и кнопка записи. Цель, темп, ритм, неделя и история — за шевроном.</span></div>
-    <div class="note-row"><span class="n">3</span><span>Записать результат можно <b>не разворачивая</b> — «+» рядом с шевроном, те же 44px.</span></div>
-    <div class="note-row"><span class="n">4</span><span>Состояние каждой карточки <b>запоминается</b> — localStorage по id миссии, как уже сделано с офлайн-очередью трекера.</span></div>
+@@NOTES@@
 </div>
 </x-dc>
 </body>
