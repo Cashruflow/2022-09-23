@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    /* Та же карточка, тот же CSS — экран 360px (Android, iPhone SE/8 = 375px).
+       Ничего не подкручено: сетка "1fr auto" не может сжать ряд дней (min-content 182+30=212)
+       и кольцо (96), поэтому содержимое вылезает за правый край карточки. */
+    body{margin:0;background:#0a0a0a;color:#e8e8e8;
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;}
+    a{color:#00a0ff;text-decoration:none;} a:hover{color:#31b6ff;}
+    .phone{position:relative;width:360px;min-height:470px;overflow:hidden;background:#0a0a0a;}
+    .wrap{padding:18px 20px;}
+    .lbl{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#6f6f78;font-weight:700;margin-bottom:12px;}
+    .hab-card{background:#141414;border:1px solid #262626;border-radius:14px;padding:16px;}
+    .hab-card__top{display:grid;min-width:0;grid-template-columns:1fr auto;column-gap:10px;row-gap:12px;
+      grid-template-areas:"head ringtoday" "metrics ringtoday" "week ringgoal";align-items:center;}
+    .hab-card__head{grid-area:head;display:flex;align-items:center;gap:12px;min-width:0;align-self:start;}
+    .hab-card__ico{flex-shrink:0;width:46px;height:46px;border-radius:50%;background:#00a0ff;display:flex;align-items:center;justify-content:center;}
+    .hab-card__ico svg{width:21px;height:21px;color:#fff;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .hab-card__title{font-size:17px;font-weight:700;color:#e8e8e8;line-height:1.25;}
+    .hab-card__sub{font-size:12.5px;color:#8b8b8b;margin-top:3px;}
+    .hab-card__metrics{grid-area:metrics;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:#8b8b8b;
+      font-variant-numeric:tabular-nums;align-self:center;}
+    .hab-card__metrics b{font-weight:700;color:#ddd;}
+    .hab-card__metrics b.is-ok{color:#4ade80;}
+    .hab-ring{position:relative;flex-shrink:0;justify-self:center;}
+    .hab-ring svg{width:100%;height:100%;transform:rotate(-90deg);}
+    .hab-ring circle{fill:none;}
+    .hab-ring circle.track{stroke:#262626;stroke-width:7;}
+    .hab-ring circle.val{stroke:#00a0ff;stroke-width:7;stroke-linecap:round;}
+    .hab-ring__txt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+    .hab-ring__pct{font-weight:700;color:#e8e8e8;line-height:1.1;}
+    .hab-ring--goal{grid-area:ringtoday;align-self:end;width:96px;height:96px;}
+    .hab-ring--goal .hab-ring__pct{font-size:22px;}
+    .hab-ring--today{grid-area:ringgoal;align-self:start;width:70px;height:70px;}
+    .hab-ring--today .hab-ring__pct{font-size:14px;}
+    .hab-card__week{grid-area:week;display:flex;min-width:0;align-self:center;}
+    .hab-week-days{display:flex;gap:5px;min-width:0;}
+    .hab-day{display:flex;flex-direction:column;align-items:center;gap:7px;}
+    .hab-day__lbl{font-size:10px;color:#666;}
+    .hab-day__mark{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid #333;}
+    .hab-day__mark svg{width:13px;height:13px;color:#fff;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+    .hab-day__mark.is-full{background:#00a0ff;border-color:#00a0ff;}
+    .hab-day__mark.is-partial{background:#facc15;border-color:#facc15;}
+    .hab-day__mark.is-partial svg{color:#3a2e00;}
+    .edge{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed rgba(248,113,113,.75);z-index:5;}
+    .note{margin-top:14px;font-size:12px;line-height:1.5;color:#f87171;
+      background:rgba(20,10,10,.9);border:1px solid rgba(248,113,113,.4);border-radius:8px;padding:9px 11px;}
+    .note b{color:#fff;}
+    .note span{color:#8b8b8b;}
+  </style>
+</helmet>
+<div class="phone">
+  <div class="edge" style="right:20px;"></div>
+  <div class="wrap">
+    <div class="lbl">Тот же CSS на экране 360px</div>
+    <div class="hab-card">
+      <div class="hab-card__top">
+        <div class="hab-card__head">
+          <div class="hab-card__ico"><svg viewBox="0 0 24 24"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg></div>
+          <div class="hab-card__body">
+            <div class="hab-card__title">Отжимания</div>
+            <div class="hab-card__sub">раз · план 120 раз</div>
+          </div>
+        </div>
+        <div class="hab-card__metrics">
+          <span>Ритм <b class="is-ok">86%</b></span>
+          <span>Темп <b class="is-ok">+14</b></span>
+          <span>Прогноз <b>30 авг</b></span>
+        </div>
+        <div class="hab-ring hab-ring--today">
+          <svg viewBox="0 0 80 80"><circle class="track" cx="40" cy="40" r="36"/><circle class="val" cx="40" cy="40" r="36" stroke-dasharray="226.2" stroke-dashoffset="150.8"/></svg>
+          <div class="hab-ring__txt"><span class="hab-ring__pct">23.08</span></div>
+        </div>
+        <div class="hab-card__week">
+          <div class="hab-week-days">
+            <div class="hab-day"><span class="hab-day__lbl">Пн</span><span class="hab-day__mark is-full"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span></div>
+            <div class="hab-day"><span class="hab-day__lbl">Вт</span><span class="hab-day__mark is-full"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span></div>
+            <div class="hab-day"><span class="hab-day__lbl">Ср</span><span class="hab-day__mark is-full"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span></div>
+            <div class="hab-day"><span class="hab-day__lbl">Чт</span><span class="hab-day__mark is-partial"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span></div>
+            <div class="hab-day"><span class="hab-day__lbl">Пт</span><span class="hab-day__mark is-full"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span></div>
+            <div class="hab-day"><span class="hab-day__lbl">Сб</span><span class="hab-day__mark is-full"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span></div>
+            <div class="hab-day"><span class="hab-day__lbl">Вс</span><span class="hab-day__mark is-partial"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span></div>
+          </div>
+        </div>
+        <div class="hab-ring hab-ring--goal">
+          <svg viewBox="0 0 104 104"><circle class="track" cx="52" cy="52" r="48"/><circle class="val" cx="52" cy="52" r="48" stroke-dasharray="301.6" stroke-dashoffset="81.4"/></svg>
+          <div class="hab-ring__txt"><span class="hab-ring__pct">73%</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <b>Кольца уезжают за карточку.</b> Внутри карточки 286px, а сетке нужно 318:
+      ряд дней 212 (7×26 + 6×5) + зазор 10 + кольцо 96. Ни то, ни другое не сжимается — <code>min-width:0</code> на треке не помогает, у <code>.hab-day</code> min-content = 26px.
+      <span>Пунктир справа — правый край экрана.</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -8,122 +8,145 @@
 <x-dc>
 <helmet>
   <style>
-    /* Тост — точный .plt-toast из ui.css (#14351f / #1e5230 / #4ade80, radius 10, 13px).
-       Кнопка внутри тоста — то, чего в toast.js сейчас нет: предложение (opts.action). */
+    /* Тост — .plt-toast из ui.css как есть (#14351f/#1e5230/#4ade80, radius 10, 13px),
+       стопка #plt-toast-stack: fixed, bottom 24, width 75vw — на 390px это ровно 292px.
+       Нижняя шторка — тот же радиус, что у мобильного меню: --ui-sheet-radius, 22px. */
     body{margin:0;background:#0a0a0a;color:#e8e8e8;
       font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;}
     a{color:#00a0ff;text-decoration:none;} a:hover{color:#31b6ff;}
-    .page{padding:20px;}
-    .cap{font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:#6f6f78;
-      display:flex;align-items:center;gap:9px;margin-bottom:16px;}
-    .blk{margin-bottom:22px;}
-    .blk__h{font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:12px;}
-    .blk--before .blk__h{color:#f87171;}
-    .blk--after .blk__h{color:#4ade80;}
-    .steps{display:flex;flex-direction:column;gap:8px;}
-    .step{display:flex;align-items:flex-start;gap:10px;background:#141414;border:1px solid #262626;
-      border-radius:8px;padding:10px 12px;font-size:13px;color:#8b8b8b;line-height:1.45;}
-    .step .n{flex:0 0 auto;width:18px;height:18px;border-radius:50%;background:#1f1f1f;border:1px solid #333;
-      color:#8b8b8b;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+    .col{width:390px;padding:0 0 24px;background:#0a0a0a;}
+    .cap{padding:16px 16px 10px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;}
+    .cap.b{color:#f87171;} .cap.a{color:#4ade80;}
+    .screen{position:relative;width:390px;height:430px;overflow:hidden;background:#0a0a0a;border-top:1px solid #1a1a1a;border-bottom:1px solid #1a1a1a;}
+    .screen.tall{height:520px;}
+    .dim{filter:saturate(.5);opacity:.5;}
+    .card{margin:16px 20px;background:#141414;border:1px solid #262626;border-radius:14px;padding:16px;}
+    .card .t{font-size:17px;font-weight:700;}
+    .card .s{font-size:12.5px;color:#8b8b8b;margin-top:3px;font-variant-numeric:tabular-nums;}
+    .card .big{margin-top:10px;font-size:14px;color:#8b8b8b;display:flex;align-items:baseline;gap:7px;}
+    .card .big b{font-size:30px;font-weight:800;color:#f87171;line-height:1;font-variant-numeric:tabular-nums;}
+    /* стопка тостов: 75vw = 292px на экране 390 */
+    .toaststack{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);width:292px;display:flex;flex-direction:column-reverse;gap:10px;}
+    .plt-toast{position:relative;display:flex;align-items:flex-start;gap:8px;background:#14351f;border:1px solid #1e5230;
+      color:#4ade80;padding:10px 16px 12px;border-radius:10px;font-size:13px;line-height:1.4;
+      box-shadow:0 8px 30px rgba(0,0,0,.4);overflow:hidden;}
+    .plt-toast .txt{flex:1 1 auto;}
+    .plt-toast .bar{position:absolute;left:0;bottom:0;height:2px;width:58%;background:currentColor;opacity:.55;}
+    .plt-toast .act{flex:0 0 auto;align-self:center;background:transparent;border:1px solid #1e5230;color:#4ade80;
+      border-radius:8px;min-height:36px;padding:0 12px;font-size:12px;font-weight:600;font-family:inherit;}
+    .toaststack.wide{width:366px;}
+    .steps{padding:0 16px;display:flex;flex-direction:column;gap:8px;}
+    .step{display:flex;align-items:flex-start;gap:10px;background:#141414;border:1px solid #262626;border-radius:8px;
+      padding:10px 12px;font-size:12.5px;color:#8b8b8b;line-height:1.45;}
+    .step .n{flex:0 0 auto;width:18px;height:18px;border-radius:50%;background:#1f1f1f;border:1px solid #333;color:#8b8b8b;
+      font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px;}
     .step b{color:#e8e8e8;font-weight:600;}
     .step.is-dead{border-color:#3a1010;background:#150c0c;color:#f87171;}
     .step.is-dead .n{background:#3a1010;border-color:#7a2e2e;color:#f87171;}
     .step.is-good{border-color:#1e5230;background:#0e1a12;color:#9fe0b6;}
     .step.is-good .n{background:#14351f;border-color:#1e5230;color:#4ade80;}
-    .plt-toast{position:relative;display:flex;align-items:flex-start;gap:8px;
-      background:#14351f;border:1px solid #1e5230;color:#4ade80;padding:10px 16px 12px;border-radius:10px;
-      font-size:13px;line-height:1.4;box-shadow:0 8px 30px rgba(0,0,0,.4);overflow:hidden;margin:10px 0;}
-    .plt-toast .txt{flex:1 1 auto;}
-    .plt-toast .bar{position:absolute;left:0;bottom:0;height:2px;width:62%;background:currentColor;opacity:.55;}
-    .plt-toast .act{flex:0 0 auto;background:transparent;border:1px solid #1e5230;color:#4ade80;
-      border-radius:8px;padding:4px 11px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:-2px;}
-    .plt-toast .act:hover{background:#0e2716;}
-    .last{display:flex;align-items:center;gap:9px;background:#191919;border:1px solid #262626;border-radius:8px;
-      padding:8px 10px;font-size:12.5px;color:#8b8b8b;margin:10px 0;font-variant-numeric:tabular-nums;}
-    .last > svg{width:14px;height:14px;flex:0 0 auto;color:#666;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-    .last .txt{flex:1 1 auto;}
-    .last .txt b{color:#e8e8e8;font-weight:700;}
-    .last .fix{background:transparent;border:1px solid #333;color:#ccc;border-radius:8px;padding:6px 12px;
-      font-size:12px;cursor:pointer;font-family:inherit;}
-    .last .win{font-size:11px;color:#666;}
-    .sheet{background:#1c1c1e;border-radius:16px;padding:20px;max-width:400px;box-sizing:border-box;margin:10px 0;}
-    .sheet h4{margin:0 0 4px;font-size:16px;font-weight:700;}
-    .sheet .hint{font-size:12.5px;color:#666;margin-bottom:14px;}
-    .sheet .lbl{font-size:12px;color:#8b8b8b;margin-bottom:6px;}
-    .inp{display:flex;align-items:center;gap:10px;height:44px;padding:0 11px;background:#1a1a1a;
-      border:1px solid #00a0ff;border-radius:8px;box-shadow:0 0 0 3px rgba(0,160,255,.18);}
-    .inp .val{font-size:14px;font-weight:500;color:#fff;font-variant-numeric:tabular-nums;}
+    /* нижняя шторка правки */
+    .sheet{position:absolute;left:0;right:0;bottom:0;background:#1c1c1e;border-radius:22px 22px 0 0;
+      padding:8px 20px calc(20px + 8px);box-shadow:0 -10px 30px rgba(0,0,0,.6);}
+    .grab{width:38px;height:4px;border-radius:2px;background:#2c2c2c;margin:4px auto 12px;}
+    .sheet h4{margin:0 0 4px;font-size:17px;font-weight:700;}
+    .sheet .hint{font-size:12.5px;color:#666;margin-bottom:14px;font-variant-numeric:tabular-nums;}
+    .lbl{font-size:12px;color:#8b8b8b;margin-bottom:6px;}
+    .inp{display:flex;align-items:center;gap:10px;height:44px;padding:0 11px;background:#1a1a1a;border:1px solid #00a0ff;
+      border-radius:8px;box-shadow:0 0 0 3px rgba(0,160,255,.18);}
+    /* ui.css: на ≤768px все поля 16px — иначе Safari зумит страницу (ADR-081) */
+    .inp .val{font-size:16px;font-weight:500;color:#fff;font-variant-numeric:tabular-nums;}
     .inp .suf{margin-left:auto;font-size:12.5px;color:#8b8b8b;}
-    .was{font-size:11.5px;color:#666;margin-top:6px;}
-    .sheet .row{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:16px;}
-    .btn{background:#00a0ff;border:1px solid #00a0ff;color:#fff;border-radius:8px;padding:10px 18px;
-      font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;}
-    .tbtn{background:transparent;border:1px solid #333;color:#ccc;border-radius:8px;padding:10px 18px;
-      font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;}
-    .btn-danger{background:#3a1010;border:1px solid #7a2e2e;color:#f87171;border-radius:8px;padding:10px 14px;
-      font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;}
-    .note{font-size:12.5px;color:#8b8b8b;line-height:1.5;background:#141414;border:1px solid #262626;border-radius:8px;padding:12px 14px;margin-top:12px;}
+    .keys{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;}
+    .keys button{min-height:44px;background:#191919;border:1px solid #262626;border-radius:8px;color:#ccc;
+      font-size:13px;font-family:inherit;font-variant-numeric:tabular-nums;}
+    .was{font-size:11.5px;color:#666;margin-top:8px;}
+    .rowb{display:flex;gap:8px;margin-top:14px;}
+    .btn{flex:1;background:#00a0ff;border:1px solid #00a0ff;color:#fff;border-radius:12px;min-height:46px;
+      font-size:15px;font-weight:600;font-family:inherit;}
+    .btn-danger{flex:0 0 auto;background:#3a1010;border:1px solid #7a2e2e;color:#f87171;border-radius:12px;
+      min-height:46px;padding:0 16px;font-size:14px;font-family:inherit;}
+    .note{margin:14px 16px 0;font-size:12.5px;color:#8b8b8b;line-height:1.5;background:#141414;border:1px solid #262626;
+      border-radius:8px;padding:12px 14px;}
     .note b{color:#e8e8e8;font-weight:600;}
     .note code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:#00a0ff;}
+    .pin{position:absolute;z-index:700;font-size:11px;line-height:1.35;background:rgba(20,10,10,.94);
+      border:1px solid rgba(248,113,113,.45);color:#f87171;border-radius:8px;padding:6px 9px;max-width:180px;}
+    .pin b{color:#fff;font-weight:700;}
   </style>
 </helmet>
-<div class="page">
-  <div class="cap"><span>Ошибся при вводе: набрал 200 вместо 20</span></div>
-
-  <div class="blk blk--before">
-    <div class="blk__h">До — пять шагов и таймер</div>
-    <div class="plt-toast">
-      <span class="ic">✓</span>
-      <span class="txt">Записано: +200 в 14:32, топ 12% самых ранних сегодня из 34</span>
-      <i class="bar"></i>
+<div class="col">
+  <div class="cap b">До · ошибся: 200 вместо 20</div>
+  <div class="screen">
+    <div class="card dim">
+      <div class="t">Отжимания</div>
+      <div class="s">раз · план 120 раз</div>
+      <div class="big">сегодня <b>240</b> из 120</div>
     </div>
-    <div class="steps">
-      <div class="step"><span class="n">1</span><span>Тост сообщает о записи, но <b>сделать с ней ничего нельзя</b> — через 5 секунд он уходит.</span></div>
-      <div class="step"><span class="n">2</span><span>Открыть карточку → <b>глазик</b> «Статистика».</span></div>
-      <div class="step"><span class="n">3</span><span>Пролистать до строки <b>«История (30)»</b> и раскрыть её — по умолчанию свёрнута.</span></div>
-      <div class="step"><span class="n">4</span><span>Найти нужную запись и нажать <b>«исправить»</b> — ссылка появляется только у записей моложе 30 минут.</span></div>
-      <div class="step is-dead"><span class="n">5</span><span>Опоздал на 30 минут — <b>всё</b>: «Исправить можно только в течение 30 минут после ввода» (habits.js). Кривая сумма остаётся в цели, темпе и прогнозе навсегда.</span></div>
+    <div class="toaststack">
+      <div class="plt-toast">
+        <span class="ic">✓</span>
+        <span class="txt">Записано: +200 в 14:32, топ 12% самых ранних сегодня из 34</span>
+        <i class="bar"></i>
+      </div>
+    </div>
+    <div class="pin" style="top:150px;left:16px;">
+      <b>Плашка 292px</b> (75vw) — треть экрана пустует по бокам, а действия в ней нет вообще.
+    </div>
+    <div class="pin" style="top:250px;right:14px;">
+      <b>5 секунд</b> — и единственный след о записи исчез.
     </div>
   </div>
 
-  <div class="blk blk--after">
-    <div class="blk__h">После — один тап</div>
-    <div class="plt-toast">
-      <span class="ic">✓</span>
-      <span class="txt">Записано: +200 раз в 14:32. Сегодня 240 из 120 — план перевыполнен.</span>
-      <button class="act">Исправить</button>
-      <i class="bar"></i>
+  <div class="cap b" style="padding-top:14px;">Дальше — путь до кнопки «исправить»</div>
+  <div class="steps">
+    <div class="step"><span class="n">1</span><span>Тап по <b>глазику</b> на карточке — зона 30px.</span></div>
+    <div class="step"><span class="n">2</span><span>Пролистать модалку: чекпойнты, календарь, график.</span></div>
+    <div class="step"><span class="n">3</span><span>Раскрыть <b>«История (30)»</b> — по умолчанию свёрнута.</span></div>
+    <div class="step"><span class="n">4</span><span>Проскроллить окно 220px <i>внутри</i> модалки и попасть в текст <b>12px</b>.</span></div>
+    <div class="step is-dead"><span class="n">5</span><span>Если прошло 30 минут — <b>отказ</b>: «Исправить можно только в течение 30 минут после ввода». Кривые 200 остаются в цели, темпе и прогнозе.</span></div>
+  </div>
+
+  <div class="cap a" style="padding-top:20px;">После · тап по кнопке в плашке</div>
+  <div class="screen tall">
+    <div class="card dim">
+      <div class="t">Отжимания</div>
+      <div class="s">2 640 из 3 600 раз · до 30 авг</div>
+      <div class="big">сегодня <b style="color:#facc15;">240</b> из 120</div>
     </div>
-    <div class="last">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      <span class="txt">Последняя запись <b>+200 раз</b> · 14:32</span>
-      <button class="fix">Исправить</button>
-      <span class="win">27 мин</span>
+    <div class="toaststack wide" style="bottom:auto;top:150px;">
+      <div class="plt-toast">
+        <span class="ic">✓</span>
+        <span class="txt">Записано: +200 раз в 14:32. Сегодня 240 из 120.</span>
+        <button class="act">Исправить</button>
+        <i class="bar"></i>
+      </div>
     </div>
     <div class="sheet">
+      <div class="grab"></div>
       <h4>Исправить запись</h4>
       <div class="hint">14:32, сегодня · окно правки ещё 27 мин</div>
       <div class="lbl">Результат (раз)</div>
       <div class="inp"><span class="val">20</span><span class="suf">раз</span></div>
+      <div class="keys"><button>20</button><button>40</button><button>60</button><button>120</button></div>
       <div class="was">было 200 · день станет 60 из 120, останется 60</div>
-      <div class="row">
-        <button class="btn-danger">Удалить запись</button>
-        <span style="display:flex;gap:8px;"><button class="tbtn">Отмена</button><button class="btn">Сохранить</button></span>
+      <div class="rowb">
+        <button class="btn-danger">Удалить</button>
+        <button class="btn">Сохранить</button>
       </div>
     </div>
-    <div class="steps">
-      <div class="step is-good"><span class="n">1</span><span>Кнопка в тосте и строка последней записи на карточке — <b>правка сразу после ввода</b>, без поиска.</span></div>
-      <div class="step is-good"><span class="n">2</span><span>Остаток окна виден числом, а <b>не выясняется методом «ссылки нет»</b>.</span></div>
-      <div class="step is-good"><span class="n">3</span><span>Сразу видно, <b>во что превратится день</b> после правки: «станет 60 из 120».</span></div>
-    </div>
-    <div class="note">
-      <b>Предложение к серверу, отдельно от вёрстки:</b> поднять окно правки для записей <b>текущего дня</b> до конца дня
-      (<code>habits.js:663</code>, <code>RESULT_EDIT_WINDOW_MS</code>) — вводят обычно вечером, а замечают ошибку, когда смотрят карточку.
-      Прошлые дни оставить как есть, но вместо тупика давать <b>корректирующую запись</b> со знаком минус — история остаётся честной, сумма чинится.
-      <br><br>
-      <b>Кнопка в тосте — общая для платформы:</b> <code>pltToast(text, {action:{label,onClick}})</code> в <code>toast.js</code>.
-      «Отменить»/«Исправить» сразу после действия нужны и в CRM, и в дневнике, и в задачах — не только здесь.
-    </div>
+  </div>
+
+  <div class="note">
+    <b>Что здесь мобильного, кроме кнопки.</b> Плашка на телефоне сейчас 75vw = 292px: на узком экране это
+    <code>calc(100vw - 24px)</code>, иначе текст в три строки, а кнопке места нет. Правка — общая, в <code>#plt-toast-stack</code>.
+    <br><br>
+    Форма правки — <b>нижняя шторка</b> с радиусом <code>--ui-sheet-radius</code>, как мобильное меню в <code>sidebar.js</code>:
+    поля и кнопки оказываются под большим пальцем, а не по центру экрана. Поле — 16px, иначе Safari зумит страницу (ADR-081, правило уже в ui.css).
+    Быстрые кнопки «20 / 40 / 60 / 120» — из плана и минимума миссии: чаще всего правят именно на них, а клавиатура на телефоне закрывает пол-экрана.
+    <br><br>
+    <b>К серверу, отдельно:</b> окно правки для записей текущего дня — до конца дня (<code>habits.js:663</code>),
+    для прошлых — корректирующая запись со знаком минус вместо тупика.
   </div>
 </div>
 </x-dc>
