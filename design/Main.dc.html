@@ -1,0 +1,396 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; background: #0f0f0f; color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+    a { color: #00a0ff; text-decoration: none; }
+    a:hover { color: #4dbcff; }
+    .ico { width: 20px; height: 20px; stroke: #e8e8e8; stroke-width: 1.5; fill: none;
+      stroke-linecap: round; stroke-linejoin: round; opacity: .55; }
+    .ico-s { width: 14px; height: 14px; stroke: currentColor; stroke-width: 1.6; fill: none;
+      stroke-linecap: round; stroke-linejoin: round; }
+    .sb-l { display: flex; align-items: center; gap: 11px; padding: 8px 20px; font-size: 14px; color: #aaa; border-left: 3px solid transparent; }
+    .sb-l.on { color: #00a0ff; border-left-color: #00a0ff; background: #00a0ff11; font-weight: 600; }
+    .sb-g { padding: 14px 20px 6px; font-size: 10px; letter-spacing: .08em; color: #555; text-transform: uppercase; }
+    .tab { background: #161616; border: 1px solid #262626; border-radius: 10px; padding: 7px 14px; font-size: 13px; color: #aaa; }
+    .tab.on { background: #00a0ff; border-color: #00a0ff; color: #04121e; font-weight: 600; }
+    .tile { background: #141414; border: 1px solid #232323; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+    .tile-lab { font-size: 11px; color: #6a6a6a; display: flex; align-items: center; gap: 6px; }
+    .tile-num { font-size: 22px; font-weight: 600; letter-spacing: -.01em; line-height: 1; }
+    .tile-sub { font-size: 11px; color: #6a6a6a; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 7px; }
+    .card { background: #141414; border: 1px solid #232323; border-radius: 14px; padding: 18px 20px; display: flex; gap: 14px; align-items: flex-start; }
+    .glyph { width: 40px; height: 40px; flex: 0 0 40px; border-radius: 11px; background: #191919; border: 1px solid #262626; display: flex; align-items: center; justify-content: center; position: relative; }
+    .glyph .dot { position: absolute; right: -3px; top: -3px; border: 2px solid #141414; width: 10px; height: 10px; flex: 0 0 10px; }
+    .name { font-size: 15px; font-weight: 600; }
+    .badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+    .desc { font-size: 13px; color: #9a9a9a; line-height: 1.5; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; background: #191919; border: 1px solid #262626; border-radius: 16px; padding: 4px 10px; font-size: 11px; color: #8a8a8a; white-space: nowrap; }
+    .m-lab { font-size: 11px; color: #6a6a6a; margin-bottom: 4px; }
+    .m-val { font-size: 14px; font-weight: 600; color: #e8e8e8; }
+    .m-val small { font-size: 11px; font-weight: 400; color: #6a6a6a; }
+    .btn { display: inline-flex; align-items: center; gap: 7px; background: #00a0ff; color: #04121e; border: none; border-radius: 10px; padding: 0 14px; height: 34px; font-size: 13px; font-weight: 600; }
+    .gbtn { display: inline-flex; align-items: center; gap: 7px; background: transparent; color: #9a9a9a; border: 1px solid #262626; border-radius: 10px; padding: 0 12px; height: 34px; font-size: 13px; }
+    .hint { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: #6a6a6a; height: 34px; }
+    .spark { display: flex; align-items: flex-end; gap: 3px; height: 22px; }
+    .spark i { display: block; width: 6px; border-radius: 2px; background: #00a0ff; }
+    .act { display: flex; align-items: baseline; gap: 10px; padding: 9px 0; border-bottom: 1px solid #1c1c1c; }
+  </style>
+</helmet>
+
+<div style="display: flex; min-height: 1560px; background: #0f0f0f">
+
+  <div style="width: 230px; flex: 0 0 230px; background: #0a0a0a; border-right: 1px solid #1a1a1a; padding: 16px 0">
+    <div style="padding: 6px 20px 18px; font-size: 16px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px">
+      Digital CashFlow <span style="font-size: 11px; color: #555; font-weight: 400">v1.84</span>
+      <span style="width: 8px; height: 8px; border-radius: 50%; background: #e05252; box-shadow: 0 0 6px #e0525288"></span>
+    </div>
+    <div class="sb-g">Работа</div>
+    <div class="sb-l">Уведомления</div>
+    <div class="sb-l">Неделя</div>
+    <div class="sb-l">Бэклог</div>
+    <div class="sb-l">Проекты</div>
+    <div class="sb-g">Личное</div>
+    <div class="sb-l">Дневник</div>
+    <div class="sb-l">Ai-трекер привычек</div>
+    <div class="sb-l">KPI</div>
+    <div class="sb-l on">Ai-агенты</div>
+    <div class="sb-g">Интеграции</div>
+    <div class="sb-l">MCP-серверы</div>
+    <div class="sb-l">Вебхуки</div>
+    <div class="sb-l">AI-навыки</div>
+  </div>
+
+  <div style="flex: 1; min-width: 0">
+    <div style="padding: 16px 24px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; gap: 12px">
+      <div style="font-size: 18px; font-weight: 600">Ai-агенты <span style="color: #666; font-weight: 400">(6)</span></div>
+      <div style="display: flex; gap: 4px">
+        <div class="tab on">Агенты</div>
+        <div class="tab">Чаты</div>
+      </div>
+    </div>
+
+    <div style="padding: 22px 24px 32px; max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px">
+
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px">
+        <div class="tile">
+          <div class="tile-lab"><span class="dot" style="background: #6ee7b7"></span>Работают</div>
+          <div class="tile-num">4</div>
+          <div class="tile-sub">из 6 агентов реестра</div>
+        </div>
+        <div class="tile" style="border-color: #f8717155; background: linear-gradient(180deg, rgba(248,113,113,.14), rgba(248,113,113,0) 70%), #141414">
+          <div class="tile-lab" style="color: #f87171"><span class="dot" style="background: #f87171"></span>Требует внимания</div>
+          <div class="tile-num" style="color: #f87171">1</div>
+          <div class="tile-sub">Диагностика каналов — обрыв</div>
+        </div>
+        <div class="tile">
+          <div class="tile-lab"><span class="dot" style="background: #555"></span>В разработке</div>
+          <div class="tile-num" style="color: #9a9a9a">1</div>
+          <div class="tile-sub">Агент-контролёр, задача #249</div>
+        </div>
+        <div class="tile">
+          <div class="tile-lab">Расход сегодня</div>
+          <div class="tile-num">14,4&nbsp;₽</div>
+          <div class="tile-sub">3 прогона · 60&nbsp;240 токенов · за 7 дней 95,5&nbsp;₽</div>
+        </div>
+      </div>
+
+      <div style="background: linear-gradient(180deg, rgba(248,113,113,.14), rgba(248,113,113,0) 60%), #141414; border: 1px solid #f8717155; border-radius: 14px; padding: 18px 20px; display: flex; gap: 14px; align-items: flex-start">
+        <div class="glyph" style="background: #2a1010; border-color: #f8717144">
+          <svg class="ico" viewBox="0 0 20 20" style="stroke: #f87171; opacity: 1"><path d="M10 2.6 2.4 16.4h15.2z"/><path d="M10 7.6v4"/><path d="M10 13.9h.01"/></svg>
+        </div>
+        <div style="flex: 1; min-width: 0">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap">
+            <div class="name">Диагностика каналов — обрыв канала</div>
+            <span class="badge" style="background: #3a0d0d; color: #f87171">ошибка</span>
+            <span style="font-size: 12px; color: #6a6a6a">28.08, 12:00 · длится 47 минут</span>
+          </div>
+          <div style="font-size: 13px; color: #e0d0d0; line-height: 1.55; margin-bottom: 4px">
+            <b style="font-weight: 600">ai-gw → Anthropic: 403 Request not allowed.</b> Telegram-прокси в порядке.
+          </div>
+          <div style="font-size: 12px; color: #8b8b8b; line-height: 1.55">
+            По симптому: забанен IP самого VPS на границе Anthropic — не платформа и не ключ.
+            Затронуты агенты «Дневник», «KPI», «Проверка сайтов».
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap">
+            <div class="btn" style="background: #f87171; color: #2a0c0c">
+              <svg class="ico-s" viewBox="0 0 18 18"><path d="M15.5 3v4h-4"/><path d="M15.1 7A6.2 6.2 0 1 0 15.4 11"/></svg>
+              Перепроверить
+            </div>
+            <div class="gbtn" style="border-color: #f8717144; color: #f0b8b8">
+              <svg class="ico-s" viewBox="0 0 18 18"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h7A2.5 2.5 0 0 1 15 5.5v4A2.5 2.5 0 0 1 12.5 12H7l-4 3z"/></svg>
+              Спросить агента
+            </div>
+            <div class="gbtn" style="border-color: #f8717144; color: #f0b8b8">
+              <svg class="ico-s" viewBox="0 0 18 18"><path d="M10 3h5v5"/><path d="M15 3 8 10"/><path d="M13 11v3.5A1.5 1.5 0 0 1 11.5 16h-8A1.5 1.5 0 0 1 2 14.5v-8A1.5 1.5 0 0 1 3.5 5H7"/></svg>
+              Журнал загрузок
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start">
+
+        <div style="display: flex; flex-direction: column; gap: 12px">
+
+          <div class="card">
+            <div class="glyph">
+              <svg class="ico" viewBox="0 0 20 20"><path d="M4 4a1 1 0 0 1 1-1h9a2 2 0 0 1 2 2v12H6a2 2 0 0 0-2 2z"/><path d="M4 17a2 2 0 0 1 2-2h10"/><path d="M7 7h6"/><path d="M7 10h4"/></svg>
+              <span class="dot" style="background: #6ee7b7"></span>
+            </div>
+            <div style="flex: 1; min-width: 0">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap">
+                <div class="name">Дневник</div>
+                <span class="badge" style="background: #0b3a24; color: #6ee7b7">работает</span>
+                <span class="chip" style="margin-left: auto">
+                  <svg class="ico-s" viewBox="0 0 18 18" style="width: 12px; height: 12px"><circle cx="9" cy="9" r="6.5"/><path d="M9 5.2V9l2.6 1.6"/></svg>
+                  ежедневно 04:00 · вс 09:00
+                </span>
+              </div>
+              <div class="desc" style="margin-bottom: 14px">Читает записи дневника, делает сводку через Claude, шлёт в Telegram. Ручной запуск пишет отчёт в чат агента, а не в TG.</div>
+              <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 12px 0; border-top: 1px solid #1e1e1e; border-bottom: 1px solid #1e1e1e; margin-bottom: 14px">
+                <div><div class="m-lab">Сегодня</div><div class="m-val">9,8&nbsp;₽ <small>· 2 прогона</small></div></div>
+                <div><div class="m-lab">За 7 дней</div><div class="m-val">52,3&nbsp;₽ <small>· 11 прогонов</small></div></div>
+                <div><div class="m-lab">Последний прогон</div><div class="m-val">сегодня, 04:02</div></div>
+                <div>
+                  <div class="m-lab">Прогоны, 7 дней <span style="color: #f87171">· 1 ошибка</span></div>
+                  <div class="spark">
+                    <i style="height: 8px"></i><i style="height: 14px"></i><i style="height: 8px; background: #f87171"></i><i style="height: 20px"></i><i style="height: 14px"></i><i style="height: 8px"></i><i style="height: 14px"></i>
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                <div class="btn"><svg class="ico-s" viewBox="0 0 18 18" style="fill: currentColor; stroke: none"><path d="M5 3.5v11l9-5.5z"/></svg>Запустить</div>
+                <div class="gbtn"><svg class="ico-s" viewBox="0 0 18 18"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h7A2.5 2.5 0 0 1 15 5.5v4A2.5 2.5 0 0 1 12.5 12H7l-4 3z"/></svg>Чат</div>
+                <div class="gbtn"><svg class="ico-s" viewBox="0 0 18 18"><path d="M6.5 3 5 15"/><path d="M12.5 3 11 15"/><path d="M3.4 6.6h12"/><path d="M2.6 11.4h12"/></svg>81</div>
+                <div class="gbtn"><svg class="ico-s" viewBox="0 0 18 18"><path d="M10 3h5v5"/><path d="M15 3 8 10"/><path d="M13 11v3.5A1.5 1.5 0 0 1 11.5 16h-8A1.5 1.5 0 0 1 2 14.5v-8A1.5 1.5 0 0 1 3.5 5H7"/></svg>/diary</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="glyph">
+              <svg class="ico" viewBox="0 0 20 20"><path d="M3 16.5h14"/><path d="M5.5 16.5V9"/><path d="M10 16.5V4"/><path d="M14.5 16.5v-5"/></svg>
+              <span class="dot" style="background: #6ee7b7"></span>
+            </div>
+            <div style="flex: 1; min-width: 0">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap">
+                <div class="name">KPI-агент</div>
+                <span class="badge" style="background: #0b3a24; color: #6ee7b7">работает</span>
+                <span class="chip" style="margin-left: auto">
+                  <svg class="ico-s" viewBox="0 0 18 18" style="width: 12px; height: 12px"><circle cx="9" cy="9" r="6.5"/><path d="M9 5.2V9l2.6 1.6"/></svg>
+                  ночной крон · кнопка на /kpi
+                </span>
+              </div>
+              <div class="desc" style="margin-bottom: 14px">Самооценка по метрикам бэклога и таймера — модель играет роль руководителя. Последняя оценка: <b style="color: #e8e8e8; font-weight: 600">74</b> за период до 27.08.</div>
+              <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 12px 0; border-top: 1px solid #1e1e1e; border-bottom: 1px solid #1e1e1e; margin-bottom: 14px">
+                <div><div class="m-lab">Сегодня</div><div class="m-val">4,6&nbsp;₽ <small>· 1 прогон</small></div></div>
+                <div><div class="m-lab">За 7 дней</div><div class="m-val">23,1&nbsp;₽ <small>· 7 прогонов</small></div></div>
+                <div><div class="m-lab">Последний прогон</div><div class="m-val">сегодня, 03:41</div></div>
+                <div>
+                  <div class="m-lab">Прогоны, 7 дней</div>
+                  <div class="spark">
+                    <i style="height: 8px"></i><i style="height: 8px"></i><i style="height: 8px"></i><i style="height: 14px"></i><i style="height: 8px"></i><i style="height: 8px"></i><i style="height: 8px"></i>
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                <div class="btn"><svg class="ico-s" viewBox="0 0 18 18" style="fill: currentColor; stroke: none"><path d="M5 3.5v11l9-5.5z"/></svg>Запустить</div>
+                <div class="gbtn"><svg class="ico-s" viewBox="0 0 18 18"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h7A2.5 2.5 0 0 1 15 5.5v4A2.5 2.5 0 0 1 12.5 12H7l-4 3z"/></svg>Чат</div>
+                <div class="gbtn"><svg class="ico-s" viewBox="0 0 18 18"><path d="M6.5 3 5 15"/><path d="M12.5 3 11 15"/><path d="M3.4 6.6h12"/><path d="M2.6 11.4h12"/></svg>239</div>
+                <div class="gbtn"><svg class="ico-s" viewBox="0 0 18 18"><path d="M10 3h5v5"/><path d="M15 3 8 10"/><path d="M13 11v3.5A1.5 1.5 0 0 1 11.5 16h-8A1.5 1.5 0 0 1 2 14.5v-8A1.5 1.5 0 0 1 3.5 5H7"/></svg>/kpi</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="glyph">
+              <svg class="ico" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><path d="M3 10h14"/><path d="M10 3a11 11 0 0 1 0 14 11 11 0 0 1 0-14"/></svg>
+              <span class="dot" style="background: #6ee7b7"></span>
+            </div>
+            <div style="flex: 1; min-width: 0">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap">
+                <div class="name">Проверка сайтов</div>
+                <span class="badge" style="background: #0b3a24; color: #6ee7b7">работает</span>
+                <span class="chip" style="margin-left: auto">
+                  <svg class="ico-s" viewBox="0 0 18 18" style="width: 12px; height: 12px"><path d="M9.5 2 4 10h4l-.5 6L14 8h-4z"/></svg>
+                  вручную, по сайту
+                </span>
+              </div>
+              <div class="desc" style="margin-bottom: 14px">Добирает поля паспорта сайта — хостинг, РКН, CMS — через AI-шлюз.</div>
+              <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 12px 0; border-top: 1px solid #1e1e1e; border-bottom: 1px solid #1e1e1e; margin-bottom: 14px">
+                <div><div class="m-lab">Сегодня</div><div class="m-val" style="color: #6a6a6a">0&nbsp;₽</div></div>
+                <div><div class="m-lab">За 7 дней</div><div class="m-val">12,7&nbsp;₽ <small>· 4 прогона</small></div></div>
+                <div><div class="m-lab">Последний прогон</div><div class="m-val">вчера, 16:22</div></div>
+                <div>
+                  <div class="m-lab">Прогоны, 7 дней</div>
+                  <div class="spark">
+                    <i style="height: 8px"></i><i style="height: 8px; background: #2a2a2a"></i><i style="height: 14px"></i><i style="height: 8px; background: #2a2a2a"></i><i style="height: 8px"></i><i style="height: 8px"></i><i style="height: 8px; background: #2a2a2a"></i>
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
+                <div class="gbtn"><svg class="ico-s" viewBox="0 0 18 18"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h7A2.5 2.5 0 0 1 15 5.5v4A2.5 2.5 0 0 1 12.5 12H7l-4 3z"/></svg>Чат</div>
+                <div class="gbtn"><svg class="ico-s" viewBox="0 0 18 18"><path d="M10 3h5v5"/><path d="M15 3 8 10"/><path d="M13 11v3.5A1.5 1.5 0 0 1 11.5 16h-8A1.5 1.5 0 0 1 2 14.5v-8A1.5 1.5 0 0 1 3.5 5H7"/></svg>/sites</div>
+                <div class="hint">
+                  <svg class="ico-s" viewBox="0 0 18 18"><circle cx="9" cy="9" r="6.5"/><path d="M9 8.5v4"/><path d="M9 5.7h.01"/></svg>
+                  Запускается по конкретному сайту — общей кнопки нет
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="border-color: #f8717133">
+            <div class="glyph" style="background: #2a1010; border-color: #f8717144">
+              <svg class="ico" viewBox="0 0 20 20" style="stroke: #f87171; opacity: .8"><path d="M2 10h4l2.4-6 3.4 12 2.4-6H18"/></svg>
+              <span class="dot" style="background: #f87171"></span>
+            </div>
+            <div style="flex: 1; min-width: 0">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap">
+                <div class="name">Диагностика каналов</div>
+                <span class="badge" style="background: #3a0d0d; color: #f87171">ошибка</span>
+                <span class="chip" style="margin-left: auto">
+                  <svg class="ico-s" viewBox="0 0 18 18" style="width: 12px; height: 12px"><circle cx="9" cy="9" r="6.5"/><path d="M9 5.2V9l2.6 1.6"/></svg>
+                  каждый час · алерт в TG
+                </span>
+              </div>
+              <div class="desc" style="margin-bottom: 14px">Проверяет AI-шлюз и Telegram-прокси, ставит диагноз по симптомам и показывает, кого обрыв задел.</div>
+              <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 12px 0; border-top: 1px solid #1e1e1e; border-bottom: 1px solid #1e1e1e; margin-bottom: 14px">
+                <div><div class="m-lab">Сегодня</div><div class="m-val" style="color: #6a6a6a">без модели</div></div>
+                <div><div class="m-lab">За 7 дней</div><div class="m-val" style="color: #6a6a6a">без модели</div></div>
+                <div><div class="m-lab">Последняя проверка</div><div class="m-val" style="color: #f87171">сегодня, 12:00</div></div>
+                <div>
+                  <div class="m-lab">Проверки, 7 дней</div>
+                  <div class="spark">
+                    <i style="height: 20px"></i><i style="height: 20px"></i><i style="height: 20px"></i><i style="height: 20px"></i><i style="height: 20px"></i><i style="height: 20px"></i><i style="height: 20px; background: #f87171"></i>
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                <div class="btn"><svg class="ico-s" viewBox="0 0 18 18" style="fill: currentColor; stroke: none"><path d="M5 3.5v11l9-5.5z"/></svg>Запустить</div>
+                <div class="gbtn"><svg class="ico-s" viewBox="0 0 18 18"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h7A2.5 2.5 0 0 1 15 5.5v4A2.5 2.5 0 0 1 12.5 12H7l-4 3z"/></svg>Чат</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="glyph">
+              <svg class="ico" viewBox="0 0 20 20"><path d="M8 3.5V7l-4.2 7.2A1.8 1.8 0 0 0 5.4 17h9.2a1.8 1.8 0 0 0 1.6-2.8L12 7V3.5"/><path d="M7 3.5h6"/><path d="M5.8 12.6h8.4"/></svg>
+              <span class="dot" style="background: #6ee7b7"></span>
+            </div>
+            <div style="flex: 1; min-width: 0">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap">
+                <div class="name">Расшифровка анализов</div>
+                <span class="badge" style="background: #0b3a24; color: #6ee7b7">работает</span>
+                <span class="chip" style="margin-left: auto">
+                  <svg class="ico-s" viewBox="0 0 18 18" style="width: 12px; height: 12px"><path d="M9.5 2 4 10h4l-.5 6L14 8h-4z"/></svg>
+                  вручную, по пациенту
+                </span>
+              </div>
+              <div class="desc" style="margin-bottom: 14px">Разбор лабораторных бланков в медкарте: расшифровка и наблюдения по показателям.</div>
+              <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 12px 0; border-top: 1px solid #1e1e1e; border-bottom: 1px solid #1e1e1e; margin-bottom: 14px">
+                <div><div class="m-lab">Сегодня</div><div class="m-val" style="color: #6a6a6a">0&nbsp;₽</div></div>
+                <div><div class="m-lab">За 7 дней</div><div class="m-val">7,4&nbsp;₽ <small>· 3 прогона</small></div></div>
+                <div><div class="m-lab">Последний прогон</div><div class="m-val">26.08, 11:07</div></div>
+                <div>
+                  <div class="m-lab">Прогоны, 7 дней</div>
+                  <div class="spark">
+                    <i style="height: 8px; background: #2a2a2a"></i><i style="height: 14px"></i><i style="height: 8px"></i><i style="height: 8px; background: #2a2a2a"></i><i style="height: 8px; background: #2a2a2a"></i><i style="height: 8px; background: #2a2a2a"></i><i style="height: 8px; background: #2a2a2a"></i>
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
+                <div class="gbtn"><svg class="ico-s" viewBox="0 0 18 18"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h7A2.5 2.5 0 0 1 15 5.5v4A2.5 2.5 0 0 1 12.5 12H7l-4 3z"/></svg>Чат</div>
+                <div class="gbtn"><svg class="ico-s" viewBox="0 0 18 18"><path d="M6.5 3 5 15"/><path d="M12.5 3 11 15"/><path d="M3.4 6.6h12"/><path d="M2.6 11.4h12"/></svg>166</div>
+                <div class="hint">
+                  <svg class="ico-s" viewBox="0 0 18 18"><circle cx="9" cy="9" r="6.5"/><path d="M9 8.5v4"/><path d="M9 5.7h.01"/></svg>
+                  Запускается по пациенту в медкарте
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="background: #111; border-style: dashed; border-color: #2a2a2a">
+            <div class="glyph" style="background: #161616; border-style: dashed">
+              <svg class="ico" viewBox="0 0 20 20" style="opacity: .35"><rect x="4" y="4" width="12" height="14" rx="2"/><path d="M7.5 2.4h5v3h-5z"/><path d="M7.5 10h5"/><path d="M7.5 13.4h3"/></svg>
+              <span class="dot" style="background: #3a3a3a"></span>
+            </div>
+            <div style="flex: 1; min-width: 0">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap">
+                <div class="name" style="color: #9a9a9a">Агент-контролёр (бэклог + CRM)</div>
+                <span class="badge" style="background: #1c1c1c; color: #888">в разработке</span>
+                <span class="chip" style="margin-left: auto">запланирован: ежедневно</span>
+              </div>
+              <div class="desc" style="color: #6a6a6a">7 проверок задач — просрочка, зависшие, без описания — плюс контроль CRM: сроки лидов, стадии, дубли ежемесячных сделок, счета, акты.</div>
+              <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap">
+                <div class="gbtn"><svg class="ico-s" viewBox="0 0 18 18"><path d="M6.5 3 5 15"/><path d="M12.5 3 11 15"/><path d="M3.4 6.6h12"/><path d="M2.6 11.4h12"/></svg>Задача 249</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <div style="background: #141414; border: 1px solid #232323; border-radius: 14px; padding: 16px 18px">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px">
+              <div style="font-size: 13px; font-weight: 600">Последняя активность</div>
+              <span style="font-size: 11px; color: #6a6a6a">все агенты</span>
+            </div>
+            <div style="font-size: 11px; color: #6a6a6a; margin-bottom: 6px">Данные уже считаются на бэкенде (spend.recent) и сейчас нигде не показываются.</div>
+
+            <div class="act">
+              <span style="font-size: 11px; color: #6a6a6a; width: 38px; flex: 0 0 38px">04:02</span>
+              <span style="flex: 1; min-width: 0"><span style="font-size: 12px; color: #ccc">Дневник</span><br><span style="font-size: 11px; color: #6a6a6a">sonnet · 21 400 т · 2,1 с</span></span>
+              <span style="font-size: 12px; color: #9a9a9a">4,9&nbsp;₽</span>
+            </div>
+            <div class="act">
+              <span style="font-size: 11px; color: #6a6a6a; width: 38px; flex: 0 0 38px">04:01</span>
+              <span style="flex: 1; min-width: 0"><span style="font-size: 12px; color: #ccc">Дневник</span><br><span style="font-size: 11px; color: #6a6a6a">sonnet · 19 900 т · 1,9 с</span></span>
+              <span style="font-size: 12px; color: #9a9a9a">4,9&nbsp;₽</span>
+            </div>
+            <div class="act">
+              <span style="font-size: 11px; color: #6a6a6a; width: 38px; flex: 0 0 38px">03:41</span>
+              <span style="flex: 1; min-width: 0"><span style="font-size: 12px; color: #ccc">KPI-агент</span><br><span style="font-size: 11px; color: #6a6a6a">sonnet · 18 940 т · 3,4 с</span></span>
+              <span style="font-size: 12px; color: #9a9a9a">4,6&nbsp;₽</span>
+            </div>
+            <div class="act">
+              <span style="font-size: 11px; color: #6a6a6a; width: 38px; flex: 0 0 38px">вчера</span>
+              <span style="flex: 1; min-width: 0"><span style="font-size: 12px; color: #ccc">Дневник</span><br><span style="font-size: 11px; color: #f87171">ошибка: fetch failed</span></span>
+              <span style="font-size: 12px; color: #6a6a6a">—</span>
+            </div>
+            <div class="act">
+              <span style="font-size: 11px; color: #6a6a6a; width: 38px; flex: 0 0 38px">вчера</span>
+              <span style="flex: 1; min-width: 0"><span style="font-size: 12px; color: #ccc">Проверка сайтов</span><br><span style="font-size: 11px; color: #6a6a6a">haiku · 13 000 т · 1,2 с</span></span>
+              <span style="font-size: 12px; color: #9a9a9a">3,2&nbsp;₽</span>
+            </div>
+            <div class="act" style="border-bottom: none; padding-bottom: 0">
+              <span style="font-size: 11px; color: #6a6a6a; width: 38px; flex: 0 0 38px">26.08</span>
+              <span style="flex: 1; min-width: 0"><span style="font-size: 12px; color: #ccc">Расшифровка анализов</span><br><span style="font-size: 11px; color: #6a6a6a">sonnet · 10 600 т · 4,1 с</span></span>
+              <span style="font-size: 12px; color: #9a9a9a">2,5&nbsp;₽</span>
+            </div>
+          </div>
+
+          <div style="background: #141414; border: 1px solid #232323; border-radius: 14px; padding: 16px 18px">
+            <div style="font-size: 13px; font-weight: 600; margin-bottom: 10px">Спросить любого агента</div>
+            <div style="background: #191919; border: 1px solid #262626; border-radius: 10px; padding: 10px 12px; font-size: 13px; color: #6a6a6a; margin-bottom: 8px">Что случилось с каналом ночью?</div>
+            <div style="display: flex; align-items: center; gap: 8px">
+              <div class="chip" style="border-color: #00a0ff44; color: #00a0ff">Роутер выберет сам</div>
+              <div class="btn" style="margin-left: auto; height: 30px; font-size: 12px">Отправить</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
