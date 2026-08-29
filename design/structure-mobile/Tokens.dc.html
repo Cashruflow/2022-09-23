@@ -1,0 +1,395 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+  /* ===== токены /set (THEME_DEFAULTS → /theme.css) ===== */
+  :root{
+    --ui-brand:#00a0ff; --ui-danger:#f87171;
+    --ui-radius:8px; --ui-card-radius:12px;
+    --ui-page-pad-m:14px; --ui-field-h:44px; --ui-sheet-radius:22px;
+    --ui-inp-bg:#1a1a1a; --ui-inp-border:#333333; --ui-inp-ph:#666666;
+    --ui-inp-radius:8px; --ui-ico:#e8e8e8; --ui-ico-stroke:2;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#0f0f0f;color:#fff;
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+       -webkit-font-smoothing:antialiased;}
+  a{color:var(--ui-brand);text-decoration:none;}
+  a:hover{color:#1aacff;}
+  svg{width:18px;height:18px;flex:0 0 auto;fill:none;stroke:currentColor;
+      stroke-width:var(--ui-ico-stroke,2);stroke-linecap:round;stroke-linejoin:round;}
+
+  .scr{position:relative;width:390px;height:844px;overflow:hidden;
+       display:flex;flex-direction:column;background:#0f0f0f;}
+
+  /* кнопка меню — sidebar.js: fixed top:12 right:12, 42x42, radius 10 */
+  .brg{position:absolute;top:12px;right:12px;z-index:6;width:42px;height:42px;
+       border-radius:10px;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;
+       display:flex;align-items:center;justify-content:center;font-size:19px;}
+
+  /* ===== закреплённая шапка: заголовок + поиск + путь ===== */
+  .top{flex:0 0 auto;background:#0f0f0f;border-bottom:1px solid #1c1c1c;
+       padding:14px var(--ui-page-pad-m) 8px;display:flex;flex-direction:column;gap:10px;}
+  .hdr{display:flex;flex-direction:column;gap:3px;}
+  h1{font-size:17px;font-weight:600;padding-right:54px;letter-spacing:-.01em;}
+  h1 .count{font-size:13px;color:#666;font-weight:400;margin-left:6px;}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#666;}
+  .back .v{color:#444;}
+
+  .srch{position:relative;display:flex;align-items:center;}
+  .srch .mag{position:absolute;left:12px;color:#5c5c5c;width:17px;height:17px;}
+  .srch input{width:100%;height:var(--ui-field-h,44px);padding:0 44px;
+              background:var(--ui-inp-bg,#1a1a1a);border:1px solid var(--ui-inp-border,#333);
+              border-radius:var(--ui-inp-radius,8px);color:#fff;font-family:inherit;
+              font-size:16px;outline:none;}
+  .srch input::placeholder{color:var(--ui-inp-ph,#666);}
+  .srch input.on{border-color:#00a0ff55;}
+  .clr{position:absolute;right:1px;width:42px;height:42px;color:#7a7a7a;
+       display:flex;align-items:center;justify-content:center;}
+  .clr svg{width:16px;height:16px;}
+
+  .crumbs{display:flex;align-items:center;gap:7px;min-height:34px;
+          font-family:var(--mono);font-size:12.5px;color:#666;overflow:hidden;}
+  .crumbs .sep{color:#333;}
+  .crumbs .up{color:#6ab0f5;}
+  .crumbs b{color:#e8e8e8;font-weight:600;}
+  .found{display:flex;align-items:center;justify-content:space-between;min-height:34px;
+         font-size:12.5px;color:#666;}
+  .found em{font-style:normal;color:#e8e8e8;}
+  .found a{font-size:12.5px;color:#6ab0f5;}
+
+  /* ===== список ===== */
+  .list{flex:1 1 auto;overflow:hidden;}
+  .grp{padding:15px var(--ui-page-pad-m) 6px;font-size:10px;letter-spacing:.08em;
+       text-transform:uppercase;color:#555;}
+  .row{display:flex;align-items:center;gap:12px;min-height:60px;
+       padding:10px var(--ui-page-pad-m);border-bottom:1px solid #171717;color:inherit;}
+  .row.sel{background:#141414;}
+  .row .body{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px;}
+  .nm{font-family:var(--mono);font-size:14.5px;line-height:1.25;word-break:break-all;}
+  .cm{font-size:12px;line-height:1.35;color:#6a6a6a;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pth{font-family:var(--mono);font-size:11.5px;color:#4e4e4e;
+       overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .hit{color:var(--ui-brand);background:rgba(0,160,255,.14);border-radius:3px;padding:0 1px;}
+  .dir{color:#6ab0f5;} .js{color:#4ade80;} .htm{color:#fb923c;}
+  .md{color:#c084fc;} .file{color:#8a8a8a;}
+  .ic{opacity:.85;}
+  .chev{color:#3f3f3f;width:17px;height:17px;transform:rotate(-90deg);}
+  .more{width:44px;height:44px;margin-right:-12px;color:#5a5a5a;
+        display:flex;align-items:center;justify-content:center;}
+  .more svg{width:17px;height:17px;}
+
+  /* ===== аккордеон: шеврон слева, шаг уровня 18px, направляющая линия ===== */
+  .row{position:relative;}
+  .row.lv1{padding-left:calc(var(--ui-page-pad-m) + 18px);}
+  .row.lv2{padding-left:calc(var(--ui-page-pad-m) + 36px);}
+  .tog{width:17px;height:17px;color:#3f3f3f;transform:rotate(-90deg);
+       transition:transform .18s, color .18s;}
+  .row.open > .tog{transform:rotate(0deg);color:var(--ui-brand);}
+  .row.lf .tog{visibility:hidden;}
+  .gd{position:absolute;top:0;bottom:0;width:1px;background:#1c1c1c;}
+  .row.last .gd.deep{bottom:auto;height:30px;}
+
+  /* ===== шторка действий ===== */
+  .dim{position:absolute;inset:0;background:rgba(0,0,0,.55);}
+  .sheet{position:absolute;left:0;right:0;bottom:0;background:#0a0a0a;
+         border-top:1px solid #1a1a1a;
+         border-radius:var(--ui-sheet-radius,22px) var(--ui-sheet-radius,22px) 0 0;
+         box-shadow:0 -10px 30px rgba(0,0,0,.6);padding:8px 0 26px;}
+  .grab{width:38px;height:4px;border-radius:2px;background:#2c2c2c;margin:4px auto 14px;}
+  .sh-hd{padding:0 18px 12px;border-bottom:1px solid #161616;display:flex;
+         flex-direction:column;gap:5px;}
+  .sh-hd .nm{font-size:16px;}
+  .sh-note{margin:12px 18px 6px;padding:10px 12px;background:#101010;
+           border:1px solid #1e1e1e;border-radius:var(--ui-card-radius,12px);
+           font-size:12.5px;line-height:1.45;color:#8a8a8a;}
+  .act{display:flex;align-items:center;gap:13px;min-height:54px;padding:7px 18px;
+       color:#e8e8e8;font-size:15px;}
+  .act svg{width:19px;height:19px;color:#8a8a8a;}
+  .act .sub{display:block;margin-top:2px;font-family:var(--mono);font-size:11.5px;color:#5a5a5a;}
+
+  /* =========== ПК: сайдбар портала (sidebar.js) + плотное дерево =========== */
+  .dsk{display:flex;width:1440px;height:900px;background:#0f0f0f;overflow:hidden;}
+  .sb{flex:0 0 230px;background:#0a0a0a;border-right:1px solid #1a1a1a;
+      display:flex;flex-direction:column;padding:16px 0;overflow:hidden;}
+  .sb-logo{display:flex;align-items:center;gap:8px;padding:6px 20px 18px;
+           font-size:16px;font-weight:700;color:#fff;}
+  .sb-logo .v{font-size:11px;color:#555;font-weight:400;}
+  .sb-logo .dot{width:8px;height:8px;border-radius:50%;background:#2ecc71;
+                box-shadow:0 0 5px #2ecc7166;}
+  .sb-ses{margin-top:-8px;padding:0 20px 10px;font-size:10px;color:#555;line-height:1.5;}
+  .sb-nav{flex:1 1 auto;min-height:0;overflow:hidden;}
+  .sb-grp{display:flex;align-items:center;justify-content:space-between;
+          padding:14px 20px 6px;font-size:10px;letter-spacing:.08em;
+          text-transform:uppercase;color:#555;}
+  .sb-grp .ar{font-size:10px;display:inline-block;}
+  .sb-grp.cl .ar{transform:rotate(-90deg);}
+  .sb-items{position:relative;}
+  .sb-items::before{content:'';position:absolute;left:27px;top:0;bottom:6px;
+                    width:1px;background:#1c1c1c;}
+  .sb-link{position:relative;display:flex;align-items:center;gap:var(--ui-nav-gap,11px);
+           padding:var(--ui-nav-pad,8px) 14px var(--ui-nav-pad,8px) 44px;margin-right:10px;
+           border-radius:0 8px 8px 0;color:#aaa;font-size:var(--ui-nav-fs,14px);}
+  .sb-link .ico{width:var(--ui-nav-ico,18px);height:var(--ui-nav-ico,18px);color:#8a8a8a;}
+  .sb-link::before{content:'';position:absolute;left:28px;top:50%;width:9px;height:1px;
+                   background:#232323;}
+  .sb-link.act{color:#00a0ff;font-weight:600;
+               background:linear-gradient(90deg,rgba(0,160,255,.14),rgba(0,160,255,.03));}
+  .sb-link.act .ico{color:#00a0ff;}
+  .sb-link.act::before{background:#00a0ff;width:12px;box-shadow:0 0 6px rgba(0,160,255,.6);}
+  .sb-foot{flex:0 0 auto;padding:14px 20px;border-top:1px solid #1a1a1a;
+           display:flex;flex-direction:column;gap:8px;}
+  .sb-set{display:flex;align-items:center;gap:9px;margin:0 -10px;padding:8px 10px;
+          font-size:13px;color:#aaa;background:#101010;border:1px solid #1e1e1e;
+          border-radius:8px;}
+  .sb-set .ico{width:16px;height:16px;color:#8a8a8a;}
+  .sb-inp{width:100%;margin:0 -10px;background:#101010;border:1px solid #1e1e1e;
+          border-radius:8px;padding:8px 10px;color:#eee;font-size:13px;font-family:inherit;}
+  .sb-home{display:flex;align-items:center;gap:7px;font-size:12px;color:#666;}
+  .sb-home .ico{width:14px;height:14px;color:#666;}
+
+  .dmain{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;}
+  .dhead{display:flex;align-items:center;justify-content:space-between;
+         padding:16px var(--ui-page-pad,44px);border-bottom:1px solid #222;}
+  .dhead h1{font-size:18px;font-weight:600;padding:0;}
+  .dhead .back{font-size:13px;color:#666;}
+  .dwrap{flex:1 1 auto;min-height:0;padding:22px var(--ui-page-pad,44px) 60px;overflow:hidden;}
+  .dcont{width:100%;}
+  .dsrch{position:relative;margin-bottom:12px;}
+  .dsrch .mag{position:absolute;left:11px;top:50%;margin-top:-8px;
+              width:15px;height:15px;color:#5c5c5c;}
+  .dsrch input{width:100%;padding:9px 11px 9px 34px;color:#fff;font-family:inherit;
+               background:var(--ui-inp-bg,#1a1a1a);border:1px solid var(--ui-inp-border,#333);
+               border-radius:var(--ui-inp-radius,8px);font-size:var(--ui-inp-fs,13px);outline:none;}
+  .dsrch input.on{border-color:#00a0ff55;}
+  .dsrch input::placeholder{color:var(--ui-inp-ph,#666);}
+  .dbar{display:flex;align-items:center;justify-content:space-between;
+        padding:0 8px 8px;font-family:var(--mono);font-size:12px;color:#666;}
+  .dbar .r{display:flex;gap:14px;font-family:-apple-system,sans-serif;}
+  .dbar b{color:#e8e8e8;font-weight:600;} .dbar .sep{color:#333;} .dbar .up{color:#6ab0f5;}
+
+  .drow{position:relative;display:flex;align-items:center;gap:8px;min-width:0;
+        padding:4px 8px;border-radius:6px;font-family:var(--mono);font-size:13px;line-height:1.7;}
+  .drow.hov{background:#141414;}
+  .drow .tog{width:14px;height:14px;color:#3f3f3f;transform:rotate(-90deg);}
+  .drow.open > .tog{transform:none;color:var(--ui-brand);}
+  .drow.lf .tog{visibility:hidden;}
+  .drow .ic svg{width:15px;height:15px;}
+  .dnm{white-space:nowrap;}
+  .dpth{color:#4e4e4e;}
+  .dcm{min-width:0;color:#555;font-size:12.5px;
+       overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .dact{margin-left:auto;display:flex;gap:2px;padding-left:10px;opacity:0;}
+  .drow.hov .dact{opacity:1;}
+  .dact span{width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+             color:var(--ui-btni-text,#8a8a8a);border-radius:var(--ui-btni-radius,4px);}
+  .dact span svg{width:var(--ui-btni-ico,15px);height:var(--ui-btni-ico,15px);}
+  .dact span.hi{color:var(--ui-brand);}
+  .dgd{position:absolute;top:0;bottom:0;width:1px;background:#1c1c1c;}
+
+  /* уведомление о копировании — как в structure.html (toast) */
+  .toast{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);
+         background:#1a1a1a;border:1px solid #333;color:#fff;padding:9px 14px;
+         border-radius:8px;font-size:13px;max-width:90%;white-space:nowrap;
+         overflow:hidden;text-overflow:ellipsis;}
+</style>
+</helmet>
+
+<div style="width:760px;min-height:1000px;background:#0f0f0f;padding:34px 36px 40px;
+            display:flex;flex-direction:column;gap:26px;">
+  <div style="display:flex;flex-direction:column;gap:7px;">
+    <div style="font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:#555;">
+      /structure — телефон и ПК</div>
+    <div style="font-size:23px;font-weight:600;letter-spacing:-.01em;">Что берём из /set</div>
+    <div style="font-size:13px;line-height:1.5;color:#777;max-width:56ch;">
+      Ни одного литерала в новой вёрстке: геометрия и цвета читаются переменными из
+      <span style="font-family:var(--mono);color:#6ab0f5;">/theme.css</span>, который отдаёт
+      <span style="font-family:var(--mono);color:#6ab0f5;">server.js → themeVars()</span>.
+      Второй столбец — тёмное значение, третий светлое: после ADR-142 у платформы две темы,
+      и зашитый литерал остаётся тёмной заплатой в светлой.
+    </div>
+  </div>
+
+  
+  <div style="display:flex;flex-direction:column;gap:0;">
+    <div style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#555;
+                padding-bottom:9px;">Шапка и поля</div>
+    
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 170px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="font-size:13.5px;color:#d8d8d8;">Боковые отступы экрана</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-page-pad-m</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">14px</span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 170px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="font-size:13.5px;color:#d8d8d8;">Фон, рамка, кегль поля</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-inp-*</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">inpCss()</span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 170px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="font-size:13.5px;color:#d8d8d8;">Рамка в фокусе</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-inp-focus</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">var(--ui-brand)</span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 170px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="font-size:13.5px;color:#d8d8d8;">Минимальный тач-таргет</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-tap</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">44px</span>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:0;">
+    <div style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#555;
+                padding-bottom:9px;">Поверхности и текст</div>
+    
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 170px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="font-size:13.5px;color:#d8d8d8;">Фон страницы</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-bg</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">#0a0a0a / #f6f8fb</span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 170px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="font-size:13.5px;color:#d8d8d8;">Поверхность шторки</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-surface</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">#141414 / #ffffff</span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 170px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="font-size:13.5px;color:#d8d8d8;">Подложка подписи</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-surface-3</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">#111111 / #f3f6fa</span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 170px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="font-size:13.5px;color:#d8d8d8;">Разделители</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-line-2</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">#1e1e1e / #e6ecf3</span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 170px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="font-size:13.5px;color:#d8d8d8;">Основной текст</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-tx</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">#e8e8e8 / #0f1c2e</span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 170px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="font-size:13.5px;color:#d8d8d8;">Подпись и мета</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-tx-3</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">#6a6a6a / #8595a8</span>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:0;">
+    <div style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#555;
+                padding-bottom:9px;">Список и шторка</div>
+    
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 170px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="font-size:13.5px;color:#d8d8d8;">Скругление блоков</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-card-radius</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">12px</span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 170px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="font-size:13.5px;color:#d8d8d8;">Скругление верха шторки</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-sheet-radius</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">22px</span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 170px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="font-size:13.5px;color:#d8d8d8;">Толщина штриха иконок</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-ico-stroke</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">2</span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 170px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="font-size:13.5px;color:#d8d8d8;">Значок действия — вид целиком</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">.ibtn</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">btnCss()</span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 170px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="font-size:13.5px;color:#d8d8d8;">Акцент платформы</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-brand</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">#00a0ff / #0072c6</span>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:0;">
+    <div style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#555;
+                padding-bottom:9px;">Цвета типов файлов — новые токены, заведены этой правкой</div>
+    
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 85px 85px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="display:flex;align-items:center;gap:10px;font-size:13.5px;color:#d8d8d8;">
+        <span style="width:13px;height:13px;border-radius:3px;background:#6ab0f5;"></span>Папка</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-ft-dir</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#6ab0f5;">#6ab0f5</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">#1d63a8</span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 85px 85px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="display:flex;align-items:center;gap:10px;font-size:13.5px;color:#d8d8d8;">
+        <span style="width:13px;height:13px;border-radius:3px;background:#4ade80;"></span>.js / .mjs</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-ft-code</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#4ade80;">#4ade80</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">#15803d</span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 85px 85px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="display:flex;align-items:center;gap:10px;font-size:13.5px;color:#d8d8d8;">
+        <span style="width:13px;height:13px;border-radius:3px;background:#fb923c;"></span>.html</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-ft-page</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#fb923c;">#fb923c</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">#b45309</span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 85px 85px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="display:flex;align-items:center;gap:10px;font-size:13.5px;color:#d8d8d8;">
+        <span style="width:13px;height:13px;border-radius:3px;background:#c084fc;"></span>.md</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-ft-doc</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#c084fc;">#c084fc</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">#7e22ce</span>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 85px 85px;gap:16px;
+                align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
+      <span style="display:flex;align-items:center;gap:10px;font-size:13.5px;color:#d8d8d8;">
+        <span style="width:13px;height:13px;border-radius:3px;background:#8b8b8b;"></span>Прочие файлы</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">--ui-tx-2</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#8b8b8b;">#8b8b8b</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">#5a6b80</span>
+    </div>
+  </div>
+
+  <div style="margin-top:4px;padding:14px 16px;background:#101010;border:1px solid #1e1e1e;
+              border-radius:var(--ui-card-radius,12px);display:flex;flex-direction:column;gap:9px;">
+    <div style="font-size:12.5px;font-weight:600;color:#e8e8e8;">Две поправки к первой версии макета</div>
+    <div style="font-size:12.5px;line-height:1.5;color:#8a8a8a;">
+      <b style="color:#4ade80;font-weight:600;">Кегль поля на мобиле уже решён.</b>
+      Анти-зум iOS сидит в <span style="font-family:var(--mono);">inpCss()</span> последней
+      строкой — <span style="font-family:var(--mono);">font-size:16px !important</span> внутри
+      <span style="font-family:var(--mono);">max-width:768px</span> (ADR-081/082). Своего кегля
+      поле на странице не задаёт вообще.
+    </div>
+    <div style="font-size:12.5px;line-height:1.5;color:#8a8a8a;">
+      <b style="color:#4ade80;font-weight:600;">Токен высоты строки тоже есть.</b>
+      <span style="font-family:var(--mono);">--ui-tap</span> (44px) в
+      <span style="font-family:var(--mono);">ui.css</span> — минимальный тач-таргет платформы.
+      Строка на телефоне взяла его как <span style="font-family:var(--mono);">min-height</span>,
+      на ПК тач-таргет не нужен и строка остаётся плотной.
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

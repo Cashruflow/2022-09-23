@@ -1,0 +1,546 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+  /* ===== токены /set (THEME_DEFAULTS → /theme.css) ===== */
+  :root{
+    --ui-brand:#00a0ff; --ui-danger:#f87171;
+    --ui-radius:8px; --ui-card-radius:12px;
+    --ui-page-pad-m:14px; --ui-field-h:44px; --ui-sheet-radius:22px;
+    --ui-inp-bg:#1a1a1a; --ui-inp-border:#333333; --ui-inp-ph:#666666;
+    --ui-inp-radius:8px; --ui-ico:#e8e8e8; --ui-ico-stroke:2;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#0f0f0f;color:#fff;
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+       -webkit-font-smoothing:antialiased;}
+  a{color:var(--ui-brand);text-decoration:none;}
+  a:hover{color:#1aacff;}
+  svg{width:18px;height:18px;flex:0 0 auto;fill:none;stroke:currentColor;
+      stroke-width:var(--ui-ico-stroke,2);stroke-linecap:round;stroke-linejoin:round;}
+
+  .scr{position:relative;width:390px;height:844px;overflow:hidden;
+       display:flex;flex-direction:column;background:#0f0f0f;}
+
+  /* кнопка меню — sidebar.js: fixed top:12 right:12, 42x42, radius 10 */
+  .brg{position:absolute;top:12px;right:12px;z-index:6;width:42px;height:42px;
+       border-radius:10px;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;
+       display:flex;align-items:center;justify-content:center;font-size:19px;}
+
+  /* ===== закреплённая шапка: заголовок + поиск + путь ===== */
+  .top{flex:0 0 auto;background:#0f0f0f;border-bottom:1px solid #1c1c1c;
+       padding:14px var(--ui-page-pad-m) 8px;display:flex;flex-direction:column;gap:10px;}
+  .hdr{display:flex;flex-direction:column;gap:3px;}
+  h1{font-size:17px;font-weight:600;padding-right:54px;letter-spacing:-.01em;}
+  h1 .count{font-size:13px;color:#666;font-weight:400;margin-left:6px;}
+  .back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#666;}
+  .back .v{color:#444;}
+
+  .srch{position:relative;display:flex;align-items:center;}
+  .srch .mag{position:absolute;left:12px;color:#5c5c5c;width:17px;height:17px;}
+  .srch input{width:100%;height:var(--ui-field-h,44px);padding:0 44px;
+              background:var(--ui-inp-bg,#1a1a1a);border:1px solid var(--ui-inp-border,#333);
+              border-radius:var(--ui-inp-radius,8px);color:#fff;font-family:inherit;
+              font-size:16px;outline:none;}
+  .srch input::placeholder{color:var(--ui-inp-ph,#666);}
+  .srch input.on{border-color:#00a0ff55;}
+  .clr{position:absolute;right:1px;width:42px;height:42px;color:#7a7a7a;
+       display:flex;align-items:center;justify-content:center;}
+  .clr svg{width:16px;height:16px;}
+
+  .crumbs{display:flex;align-items:center;gap:7px;min-height:34px;
+          font-family:var(--mono);font-size:12.5px;color:#666;overflow:hidden;}
+  .crumbs .sep{color:#333;}
+  .crumbs .up{color:#6ab0f5;}
+  .crumbs b{color:#e8e8e8;font-weight:600;}
+  .found{display:flex;align-items:center;justify-content:space-between;min-height:34px;
+         font-size:12.5px;color:#666;}
+  .found em{font-style:normal;color:#e8e8e8;}
+  .found a{font-size:12.5px;color:#6ab0f5;}
+
+  /* ===== список ===== */
+  .list{flex:1 1 auto;overflow:hidden;}
+  .grp{padding:15px var(--ui-page-pad-m) 6px;font-size:10px;letter-spacing:.08em;
+       text-transform:uppercase;color:#555;}
+  .row{display:flex;align-items:center;gap:12px;min-height:60px;
+       padding:10px var(--ui-page-pad-m);border-bottom:1px solid #171717;color:inherit;}
+  .row.sel{background:#141414;}
+  .row .body{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px;}
+  .nm{font-family:var(--mono);font-size:14.5px;line-height:1.25;word-break:break-all;}
+  .cm{font-size:12px;line-height:1.35;color:#6a6a6a;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pth{font-family:var(--mono);font-size:11.5px;color:#4e4e4e;
+       overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .hit{color:var(--ui-brand);background:rgba(0,160,255,.14);border-radius:3px;padding:0 1px;}
+  .dir{color:#6ab0f5;} .js{color:#4ade80;} .htm{color:#fb923c;}
+  .md{color:#c084fc;} .file{color:#8a8a8a;}
+  .ic{opacity:.85;}
+  .chev{color:#3f3f3f;width:17px;height:17px;transform:rotate(-90deg);}
+  .more{width:44px;height:44px;margin-right:-12px;color:#5a5a5a;
+        display:flex;align-items:center;justify-content:center;}
+  .more svg{width:17px;height:17px;}
+
+  /* ===== аккордеон: шеврон слева, шаг уровня 18px, направляющая линия ===== */
+  .row{position:relative;}
+  .row.lv1{padding-left:calc(var(--ui-page-pad-m) + 18px);}
+  .row.lv2{padding-left:calc(var(--ui-page-pad-m) + 36px);}
+  .tog{width:17px;height:17px;color:#3f3f3f;transform:rotate(-90deg);
+       transition:transform .18s, color .18s;}
+  .row.open > .tog{transform:rotate(0deg);color:var(--ui-brand);}
+  .row.lf .tog{visibility:hidden;}
+  .gd{position:absolute;top:0;bottom:0;width:1px;background:#1c1c1c;}
+  .row.last .gd.deep{bottom:auto;height:30px;}
+
+  /* ===== шторка действий ===== */
+  .dim{position:absolute;inset:0;background:rgba(0,0,0,.55);}
+  .sheet{position:absolute;left:0;right:0;bottom:0;background:#0a0a0a;
+         border-top:1px solid #1a1a1a;
+         border-radius:var(--ui-sheet-radius,22px) var(--ui-sheet-radius,22px) 0 0;
+         box-shadow:0 -10px 30px rgba(0,0,0,.6);padding:8px 0 26px;}
+  .grab{width:38px;height:4px;border-radius:2px;background:#2c2c2c;margin:4px auto 14px;}
+  .sh-hd{padding:0 18px 12px;border-bottom:1px solid #161616;display:flex;
+         flex-direction:column;gap:5px;}
+  .sh-hd .nm{font-size:16px;}
+  .sh-note{margin:12px 18px 6px;padding:10px 12px;background:#101010;
+           border:1px solid #1e1e1e;border-radius:var(--ui-card-radius,12px);
+           font-size:12.5px;line-height:1.45;color:#8a8a8a;}
+  .act{display:flex;align-items:center;gap:13px;min-height:54px;padding:7px 18px;
+       color:#e8e8e8;font-size:15px;}
+  .act svg{width:19px;height:19px;color:#8a8a8a;}
+  .act .sub{display:block;margin-top:2px;font-family:var(--mono);font-size:11.5px;color:#5a5a5a;}
+
+  /* =========== ПК: сайдбар портала (sidebar.js) + плотное дерево =========== */
+  .dsk{display:flex;width:1440px;height:900px;background:#0f0f0f;overflow:hidden;}
+  .sb{flex:0 0 230px;background:#0a0a0a;border-right:1px solid #1a1a1a;
+      display:flex;flex-direction:column;padding:16px 0;overflow:hidden;}
+  .sb-logo{display:flex;align-items:center;gap:8px;padding:6px 20px 18px;
+           font-size:16px;font-weight:700;color:#fff;}
+  .sb-logo .v{font-size:11px;color:#555;font-weight:400;}
+  .sb-logo .dot{width:8px;height:8px;border-radius:50%;background:#2ecc71;
+                box-shadow:0 0 5px #2ecc7166;}
+  .sb-ses{margin-top:-8px;padding:0 20px 10px;font-size:10px;color:#555;line-height:1.5;}
+  .sb-nav{flex:1 1 auto;min-height:0;overflow:hidden;}
+  .sb-grp{display:flex;align-items:center;justify-content:space-between;
+          padding:14px 20px 6px;font-size:10px;letter-spacing:.08em;
+          text-transform:uppercase;color:#555;}
+  .sb-grp .ar{font-size:10px;display:inline-block;}
+  .sb-grp.cl .ar{transform:rotate(-90deg);}
+  .sb-items{position:relative;}
+  .sb-items::before{content:'';position:absolute;left:27px;top:0;bottom:6px;
+                    width:1px;background:#1c1c1c;}
+  .sb-link{position:relative;display:flex;align-items:center;gap:var(--ui-nav-gap,11px);
+           padding:var(--ui-nav-pad,8px) 14px var(--ui-nav-pad,8px) 44px;margin-right:10px;
+           border-radius:0 8px 8px 0;color:#aaa;font-size:var(--ui-nav-fs,14px);}
+  .sb-link .ico{width:var(--ui-nav-ico,18px);height:var(--ui-nav-ico,18px);color:#8a8a8a;}
+  .sb-link::before{content:'';position:absolute;left:28px;top:50%;width:9px;height:1px;
+                   background:#232323;}
+  .sb-link.act{color:#00a0ff;font-weight:600;
+               background:linear-gradient(90deg,rgba(0,160,255,.14),rgba(0,160,255,.03));}
+  .sb-link.act .ico{color:#00a0ff;}
+  .sb-link.act::before{background:#00a0ff;width:12px;box-shadow:0 0 6px rgba(0,160,255,.6);}
+  .sb-foot{flex:0 0 auto;padding:14px 20px;border-top:1px solid #1a1a1a;
+           display:flex;flex-direction:column;gap:8px;}
+  .sb-set{display:flex;align-items:center;gap:9px;margin:0 -10px;padding:8px 10px;
+          font-size:13px;color:#aaa;background:#101010;border:1px solid #1e1e1e;
+          border-radius:8px;}
+  .sb-set .ico{width:16px;height:16px;color:#8a8a8a;}
+  .sb-inp{width:100%;margin:0 -10px;background:#101010;border:1px solid #1e1e1e;
+          border-radius:8px;padding:8px 10px;color:#eee;font-size:13px;font-family:inherit;}
+  .sb-home{display:flex;align-items:center;gap:7px;font-size:12px;color:#666;}
+  .sb-home .ico{width:14px;height:14px;color:#666;}
+
+  .dmain{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;}
+  .dhead{display:flex;align-items:center;justify-content:space-between;
+         padding:16px var(--ui-page-pad,44px);border-bottom:1px solid #222;}
+  .dhead h1{font-size:18px;font-weight:600;padding:0;}
+  .dhead .back{font-size:13px;color:#666;}
+  .dwrap{flex:1 1 auto;min-height:0;padding:22px var(--ui-page-pad,44px) 60px;overflow:hidden;}
+  .dcont{width:100%;}
+  .dsrch{position:relative;margin-bottom:12px;}
+  .dsrch .mag{position:absolute;left:11px;top:50%;margin-top:-8px;
+              width:15px;height:15px;color:#5c5c5c;}
+  .dsrch input{width:100%;padding:9px 11px 9px 34px;color:#fff;font-family:inherit;
+               background:var(--ui-inp-bg,#1a1a1a);border:1px solid var(--ui-inp-border,#333);
+               border-radius:var(--ui-inp-radius,8px);font-size:var(--ui-inp-fs,13px);outline:none;}
+  .dsrch input.on{border-color:#00a0ff55;}
+  .dsrch input::placeholder{color:var(--ui-inp-ph,#666);}
+  .dbar{display:flex;align-items:center;justify-content:space-between;
+        padding:0 8px 8px;font-family:var(--mono);font-size:12px;color:#666;}
+  .dbar .r{display:flex;gap:14px;font-family:-apple-system,sans-serif;}
+  .dbar b{color:#e8e8e8;font-weight:600;} .dbar .sep{color:#333;} .dbar .up{color:#6ab0f5;}
+
+  .drow{position:relative;display:flex;align-items:center;gap:8px;min-width:0;
+        padding:4px 8px;border-radius:6px;font-family:var(--mono);font-size:13px;line-height:1.7;}
+  .drow.hov{background:#141414;}
+  .drow .tog{width:14px;height:14px;color:#3f3f3f;transform:rotate(-90deg);}
+  .drow.open > .tog{transform:none;color:var(--ui-brand);}
+  .drow.lf .tog{visibility:hidden;}
+  .drow .ic svg{width:15px;height:15px;}
+  .dnm{white-space:nowrap;}
+  .dpth{color:#4e4e4e;}
+  .dcm{min-width:0;color:#555;font-size:12.5px;
+       overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .dact{margin-left:auto;display:flex;gap:2px;padding-left:10px;opacity:0;}
+  .drow.hov .dact{opacity:1;}
+  .dact span{width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+             color:var(--ui-btni-text,#8a8a8a);border-radius:var(--ui-btni-radius,4px);}
+  .dact span svg{width:var(--ui-btni-ico,15px);height:var(--ui-btni-ico,15px);}
+  .dact span.hi{color:var(--ui-brand);}
+  .dgd{position:absolute;top:0;bottom:0;width:1px;background:#1c1c1c;}
+
+  /* уведомление о копировании — как в structure.html (toast) */
+  .toast{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);
+         background:#1a1a1a;border:1px solid #333;color:#fff;padding:9px 14px;
+         border-radius:8px;font-size:13px;max-width:90%;white-space:nowrap;
+         overflow:hidden;text-overflow:ellipsis;}
+</style>
+</helmet>
+
+<div class="dsk">
+  
+  <div class="sb">
+    <div class="sb-logo">
+      <span style="color:#00a0ff;"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg></span>
+      AI-платформа <span class="v">v1.99.0</span><span class="dot"></span>
+    </div>
+    <div class="sb-ses">Вход: 22.08, 09:14<br>осталось 29д 4ч</div>
+    <div class="sb-nav">
+      <div class="sb-grp cl"><span>РАБОТА</span><span class="ar">▾</span></div><div class="sb-grp cl"><span>AI-CRM</span><span class="ar">▾</span></div><div class="sb-grp cl"><span>СПРАВОЧНИКИ</span><span class="ar">▾</span></div><div class="sb-grp cl"><span>ФИНАНСЫ</span><span class="ar">▾</span></div><div class="sb-grp cl"><span>ЛИЧНОЕ</span><span class="ar">▾</span></div><div class="sb-grp cl"><span>МЕДКАРТА</span><span class="ar">▾</span></div>
+      <div class="sb-grp"><span>ИНТЕГРАЦИИ</span><span class="ar">▾</span></div>
+      <div class="sb-items">
+        <a class="sb-link"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>MCP-серверы</a><a class="sb-link"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A4 4 0 0 1 2 17c.01-.7.2-1.4.57-2"/><path d="m6 17 3.13-5.78c.53-.97.1-2.18-.5-3.1a4 4 0 1 1 6.89-4.06"/><path d="m12 6 3.13 5.73C15.66 12.7 16.9 13 18 13a4 4 0 0 1 0 8"/></svg>Вебхуки</a><a class="sb-link"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>Загрузки</a><a class="sb-link"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4"/><path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></svg>Журнал входов</a><a class="sb-link act"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>Структура</a><a class="sb-link"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>Бэкапы</a><a class="sb-link"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Короткие ссылки</a><a class="sb-link"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>AI-навыки</a><a class="sb-link"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>Краулер</a><a class="sb-link"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg>Промты</a><a class="sb-link"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg>Тест</a>
+      </div>
+    </div>
+    <div class="sb-foot">
+      <div class="sb-set"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>Настройка</div>
+      <input class="sb-inp" type="text" placeholder="Поиск по порталу…">
+      <div class="sb-home"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>На главную</div>
+    </div>
+  </div>
+  <div class="dmain">
+    
+  <div class="dhead">
+    <h1>Структура проекта</h1>
+    <span class="back">← AI-платформа <span style="color:#444;">v1.99.0</span></span>
+  </div>
+    <div class="dwrap"><div class="dcont">
+      
+  <div class="dsrch">
+    <svg class="mag" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+    <input type="text" 
+           placeholder="Фильтр (например: mjs, dnevnik, web)...">
+  </div>
+      <div class="dbar"><span><b>/home/cashruflow</b></span><span class="r"><a>Развернуть всё</a><a>Свернуть всё</a></span></div>
+      <div class="drow lf" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="file ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
+      
+      <span class="dnm file">add_adr_013.py</span>
+      <span class="dcm">// разовый скрипт: ADR-013</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow lf" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="file ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
+      
+      <span class="dnm file">add_changelog_v162.py</span>
+      <span class="dcm">// разовый скрипт: CHANGELOG v1.6.2</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow lf" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="file ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
+      
+      <span class="dnm file">add_token_stats.py</span>
+      <span class="dcm">// разовый скрипт: статистика токенов</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">agents</span>
+      <span class="dcm">// AI-агенты: diary_agent, gpt_diary_agent</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">analytics</span>
+      <span class="dcm">// аналитика (план: diary analytics)</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">apps</span>
+      <span class="dcm">// пустая папка (резерв)</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">backups</span>
+      <span class="dcm">// бэкапы перед правками — дата в имени файла</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">config</span>
+      <span class="dcm">// пустая папка (резерв)</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">data</span>
+      <span class="dcm">// SQLite: tasks.db (бэклог + промты), med.sqlite (медкарта)</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">database</span>
+      <span class="dcm">// пустая папка (резерв)</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">design</span>
+      <span class="dcm">// макеты из Claude Design — переносятся навыком design-transfer</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">docs</span>
+      <span class="dcm">// документация: VERSION, ARCHITECTURE, ADR</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow lf" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="file ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
+      
+      <span class="dnm file">fix_diary_usage.py</span>
+      <span class="dcm">// разовый фикс: usage дневника</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow lf" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="file ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
+      
+      <span class="dnm file">fix_telegram_debug.py</span>
+      <span class="dcm">// разовый фикс: debug Telegram-бота</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">gpt</span>
+      <span class="dcm">// GPT-ядро: точка входа, реестр агентов, клиент OpenAI</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">integrations</span>
+      <span class="dcm">// пустая папка (резерв)</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">knowledge</span>
+      <span class="dcm">// пустая папка (резерв)</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">logs</span>
+      <span class="dcm">// логи</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">mcp</span>
+      <span class="dcm">// старый бэкап MCP-ядра</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow hov" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">mcp-server</span>
+      <span class="dcm">// ядро: MCP API (3000), SSE-коннектор (3002), бот дневника</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">memory</span>
+      <span class="dcm">// состояние: timezone.txt и др.</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">notediscovery</span>
+      <span class="dcm">// дневник и база знаний (8000)</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">patch-backup</span>
+      <span class="dcm">// бэкапы patch.sh — unix-время в имени</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow lf" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="file ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span>
+      
+      <span class="dnm file">purge.log</span>
+      <span class="dcm">// лог очистки загрузок</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+      <div class="drow" style="padding-left:8px;">
+      
+      <svg class="tog" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      <span class="dir ic"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+      
+      <span class="dnm dir">reports</span>
+      <span class="dcm">// выгрузки отчётов SEO Auto</span>
+      <span class="dact">
+        <span class=""><svg class="" viewBox="0 0 24 24" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></span>
+        
+      </span>
+    </div>
+    </div></div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
