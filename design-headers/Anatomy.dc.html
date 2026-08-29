@@ -1,0 +1,157 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <style>
+    :root{
+      --bg:#0e0e0e; --pane:#0a0a0a; --line:#262626; --hair:#1c1c1c;
+      --tx:#e8e8e8; --tx2:#8a8a93; --muted:#6a6a6a;
+      --brand:#00a0ff; --good:#4ade80; --surf2:#1a1a1a; --btnline:#2a2a2a;
+      --sys:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
+    body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--sys);}
+    a{color:var(--brand);} a:hover{color:#3fb9ff;}
+    .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+    .kbtn{width:42px;height:42px;border-radius:10px;background:var(--surf2);border:1px solid var(--btnline);
+          display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;}
+    .kbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .h1{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin:0;color:#fff;}
+    .sub{font-size:15px;font-weight:500;color:var(--tx2);line-height:1.35;margin:4px 0 0;}
+    /* размерные линии */
+    .dim{position:absolute;font-family:var(--mono);font-size:10px;color:var(--brand);white-space:nowrap;}
+    .dimline{position:absolute;background:rgba(0,160,255,.5);}
+    .guide{position:absolute;background:rgba(0,160,255,.22);}
+    table{border-collapse:collapse;width:100%;font-size:13px;}
+    th{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+       text-align:left;font-weight:500;padding:0 0 10px;border-bottom:1px solid var(--line);}
+    td{padding:11px 0;border-bottom:1px solid var(--hair);vertical-align:top;color:#b4b4b4;line-height:1.45;}
+    td:first-child{color:#fff;font-weight:600;white-space:nowrap;padding-right:22px;}
+    code{font-family:var(--mono);font-size:11.5px;color:#8fd3ff;background:rgba(0,160,255,.08);
+         border-radius:4px;padding:1px 5px;}
+  </style>
+</helmet>
+
+<div style="padding:56px;">
+
+  <div class="lbl">Спецификация</div>
+  <h1 style="font-size:34px;font-weight:800;letter-spacing:-.025em;margin:10px 0 0;color:#fff;">Анатомия и размеры</h1>
+  <p style="font-size:14.5px;line-height:1.5;color:var(--tx2);margin:8px 0 0;max-width:600px;">
+    Все значения — токены темы <code>/set</code>. Литералов в новом компоненте нет.
+  </p>
+
+  <div style="height:1px;background:var(--line);margin:34px 0 30px;"></div>
+
+  <!-- ——— МОБИЛА ——— -->
+  <div class="lbl" style="margin-bottom:16px;">Мобила · ≤768px · 390pt</div>
+
+  <div style="position:relative;padding-left:74px;">
+    <div style="width:390px;background:var(--pane);border:1px solid var(--hair);border-radius:16px;position:relative;">
+      <!-- боковые направляющие -->
+      <div class="guide" style="left:14px;top:0;bottom:0;width:1px;"></div>
+      <div class="guide" style="right:14px;top:0;bottom:0;width:1px;"></div>
+
+      <div style="padding:14px 14px 18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;position:relative;">
+          <h1 class="h1">Заголовок</h1>
+          <div style="display:flex;gap:8px;">
+            <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg></div>
+            <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+          </div>
+        </div>
+        <p class="sub">Подзаголовок — одна строка</p>
+      </div>
+      <div style="height:1px;background:rgba(74,222,128,.25);"></div>
+      <div style="padding:18px 14px 20px;">
+        <div style="height:44px;border-radius:12px;background:#141414;border:1px dashed #333;
+                    display:flex;align-items:center;justify-content:center;
+                    font-family:var(--mono);font-size:11px;color:var(--muted);">контент страницы</div>
+      </div>
+    </div>
+
+    <!-- размеры слева -->
+    <div class="dim" style="left:0;top:2px;">14px ↑</div>
+    <div class="dim" style="left:0;top:26px;">42px</div>
+    <div class="dim" style="left:0;top:66px;">4px</div>
+    <div class="dim" style="left:0;top:84px;">20px</div>
+    <div class="dim" style="left:0;top:112px;color:var(--good);">18px ↓</div>
+  </div>
+
+  <div style="display:flex;gap:26px;margin-top:24px;flex-wrap:wrap;">
+    <div style="font-family:var(--mono);font-size:11.5px;color:var(--muted);">высота шапки <span style="color:var(--good);">80px</span></div>
+    <div style="font-family:var(--mono);font-size:11.5px;color:var(--muted);">поля <span style="color:#b4b4b4;">--ui-page-pad-m · 14px</span></div>
+    <div style="font-family:var(--mono);font-size:11.5px;color:var(--muted);">тач-таргет <span style="color:#b4b4b4;">--ui-tap · 44px</span></div>
+  </div>
+
+  <div style="height:1px;background:var(--line);margin:34px 0 30px;"></div>
+
+  <!-- ——— ДЕСКТОП ——— -->
+  <div class="lbl" style="margin-bottom:16px;">Десктоп · ≥769px · бургер скрыт, кнопок в шапке нет</div>
+
+  <div style="width:766px;background:var(--pane);border:1px solid var(--hair);border-radius:16px;position:relative;">
+    <div class="guide" style="left:44px;top:0;bottom:0;width:1px;"></div>
+    <div class="guide" style="right:44px;top:0;bottom:0;width:1px;"></div>
+    <div style="padding:26px 44px 22px;">
+      <h1 class="h1" style="font-size:34px;">Заголовок</h1>
+      <p class="sub" style="font-size:15.5px;">Подзаголовок — одна строка</p>
+    </div>
+    <div style="height:1px;background:rgba(74,222,128,.25);"></div>
+    <div style="padding:22px 44px 24px;">
+      <div style="height:44px;border-radius:12px;background:#141414;border:1px dashed #333;
+                  display:flex;align-items:center;justify-content:center;
+                  font-family:var(--mono);font-size:11px;color:var(--muted);">контент страницы</div>
+    </div>
+  </div>
+  <p style="font-size:13px;color:var(--muted);margin:14px 0 0;line-height:1.5;max-width:700px;">
+    Кнопки исчезают вместе с бургером (<code>#sb-burger</code> скрыт от 769px) — ряд схлопывается
+    в один заголовок, дырки справа не остаётся.
+  </p>
+
+  <div style="height:1px;background:var(--line);margin:34px 0 30px;"></div>
+
+  <!-- ——— ТАБЛИЦА ТОКЕНОВ ——— -->
+  <div class="lbl" style="margin-bottom:18px;">Элементы</div>
+  <table>
+    <tr><th style="width:150px;">Элемент</th><th style="width:230px;">Значения</th><th>Правило</th></tr>
+    <tr>
+      <td>H1</td>
+      <td><code>32px / 800 / -.02em</code><br><code>#fff</code>, margin 0</td>
+      <td>Только текст. Ни иконки, ни эмодзи, ни счётчика, ни бейджа слева. На десктопе 34px.</td>
+    </tr>
+    <tr>
+      <td>Подзаголовок</td>
+      <td><code>15px / 500</code><br><code>#8a8a93</code>, margin-top 4px</td>
+      <td>Одна строка, <code>text-overflow: ellipsis</code>. Сюда уходят счётчики: «22 доступа · 5 проектов».</td>
+    </tr>
+    <tr>
+      <td>Кнопки</td>
+      <td><code>42×42</code>, r <code>10px</code><br><code>--ui-surface-2</code> / <code>--ui-line</code></td>
+      <td>Обновить + бургер, gap 8px, прижаты вправо. Иконки — SVG 18px, stroke 2. Только ≤768px.</td>
+    </tr>
+    <tr>
+      <td>Ряд шапки</td>
+      <td><code>flex</code>, <code>align-items:center</code><br><code>min-height: 42px</code></td>
+      <td><code>justify-content: space-between</code>, gap 12px. Заголовок <code>min-width:0</code>, кнопки <code>flex:none</code>.</td>
+    </tr>
+    <tr>
+      <td>Отбивка</td>
+      <td><code>18px</code> до контента</td>
+      <td>Воздухом, не полосой. Разделителя нет ни на одной странице.</td>
+    </tr>
+    <tr>
+      <td>Кнопка действия</td>
+      <td>своим рядом<br>margin-top <code>18px</code></td>
+      <td>Слева, под шапкой. В ряд с H1 не ставится никогда — на мобиле она дерётся с бургером.</td>
+    </tr>
+  </table>
+
+</div>
+</x-dc>
+</body>
+</html>
