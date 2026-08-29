@@ -1,0 +1,173 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; background: #0f0f0f; color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+    a { color: #00a0ff; text-decoration: none; }
+    a:hover { color: #4dbcff; }
+    .sb-l { display: flex; align-items: center; gap: 11px; padding: 8px 20px; font-size: 14px; color: #aaa; border-left: 3px solid transparent; }
+    .sb-l.on { color: #00a0ff; border-left-color: #00a0ff; background: #00a0ff11; font-weight: 600; }
+    .sb-g { padding: 14px 20px 6px; font-size: 10px; letter-spacing: .08em; color: #555; text-transform: uppercase; }
+    .card { background: #141414; border: 1px solid #232323; border-radius: 14px; padding: 20px; display: flex; gap: 16px; align-items: flex-start; }
+    .name { font-size: 15px; font-weight: 600; }
+    .desc { font-size: 13px; color: #aaa; line-height: 1.5; margin-bottom: 8px; }
+    .meta { font-size: 12px; color: #777; display: flex; gap: 14px; flex-wrap: wrap; }
+    .badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+    .note { font-size: 12px; color: #8b8b8b; margin-top: 6px; }
+    .spend { font-size: 12px; color: #8b8b8b; margin-top: 8px; display: flex; gap: 16px; flex-wrap: wrap; border-top: 1px solid #1e1e1e; padding-top: 8px; }
+    .spend b { color: #ccc; font-weight: 600; }
+    .btn { background: #00a0ff; color: #04121e; border: none; border-radius: 10px; padding: 9px 16px; font-size: 13px; font-weight: 600; margin-top: 10px; display: inline-block; }
+    .tab { background: #161616; border: 1px solid #262626; border-radius: 10px; padding: 7px 14px; font-size: 13px; color: #aaa; }
+    .tab.on { background: #00a0ff; border-color: #00a0ff; color: #04121e; font-weight: 600; }
+  </style>
+</helmet>
+
+<div style="display: flex; min-height: 1400px; background: #0f0f0f">
+
+  <div style="width: 230px; flex: 0 0 230px; background: #0a0a0a; border-right: 1px solid #1a1a1a; padding: 16px 0">
+    <div style="padding: 6px 20px 18px; font-size: 16px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px">
+      Digital CashFlow <span style="font-size: 11px; color: #555; font-weight: 400">v1.84</span>
+      <span style="width: 8px; height: 8px; border-radius: 50%; background: #e05252; box-shadow: 0 0 6px #e0525288"></span>
+    </div>
+    <div class="sb-g">Работа</div>
+    <div class="sb-l">Уведомления</div>
+    <div class="sb-l">Неделя</div>
+    <div class="sb-l">Бэклог</div>
+    <div class="sb-l">Проекты</div>
+    <div class="sb-g">Личное</div>
+    <div class="sb-l">Дневник</div>
+    <div class="sb-l">Ai-трекер привычек</div>
+    <div class="sb-l">KPI</div>
+    <div class="sb-l on">Ai-агенты</div>
+    <div class="sb-g">Интеграции</div>
+    <div class="sb-l">MCP-серверы</div>
+    <div class="sb-l">Вебхуки</div>
+    <div class="sb-l">AI-навыки</div>
+  </div>
+
+  <div style="flex: 1; min-width: 0">
+    <div style="padding: 16px 24px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; gap: 12px">
+      <div style="font-size: 18px; font-weight: 600">Ai-агенты <span style="color: #666; font-weight: 400">(6)</span></div>
+      <div style="display: flex; gap: 4px">
+        <div class="tab on">Агенты</div>
+        <div class="tab">Чаты</div>
+      </div>
+    </div>
+
+    <div style="padding: 24px; max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px">
+
+      <div class="card"><div style="flex: 1; min-width: 0">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px">
+          <div class="name">Дневник</div>
+          <span class="badge" style="background: #0b3a24; color: #6ee7b7">работает</span>
+        </div>
+        <div class="desc">Читает записи дневника, делает сводку через Claude, шлёт в Telegram.</div>
+        <div class="meta">
+          <span>Запуск: ежедневно 04:00 + вс 09:00 (крон)</span>
+          <span>Последний прогон: 28.08, 04:02</span>
+          <a href="#">Задача #81</a>
+        </div>
+        <div class="note"> Ручной запуск (кнопка ниже) пишет результат в чат «Дневник», не в TG.</div>
+        <div class="spend">
+          <span>Сегодня: <b>2</b> прогонов, <b>41&nbsp;300</b> токенов, <b>9.8&nbsp;₽</b></span>
+          <span>За неделю: <b>11</b> прогонов, <b>214&nbsp;700</b> токенов, <b>52.3&nbsp;₽</b>, <span style="color: #f87171">ошибок: <b style="color: #f87171">1</b></span></span>
+        </div>
+        <div class="btn">▶ Запустить сейчас</div>
+      </div></div>
+
+      <div class="card"><div style="flex: 1; min-width: 0">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px">
+          <div class="name">KPI-агент</div>
+          <span class="badge" style="background: #0b3a24; color: #6ee7b7">работает</span>
+        </div>
+        <div class="desc">Самооценка по метрикам бэклога/таймера — модель играет роль руководителя.</div>
+        <div class="meta">
+          <span>Запуск: по кнопке на /kpi + ночной крон (kpi_cron.mjs)</span>
+          <span>Последний прогон: 28.08, 03:41</span>
+          <a href="#">Задача #239</a>
+          <a href="#">Открыть →</a>
+        </div>
+        <div class="note">Оценка 74 за период до 2026-08-27</div>
+        <div class="spend">
+          <span>Сегодня: <b>1</b> прогонов, <b>18&nbsp;940</b> токенов, <b>4.6&nbsp;₽</b></span>
+          <span>За неделю: <b>7</b> прогонов, <b>96&nbsp;400</b> токенов, <b>23.1&nbsp;₽</b></span>
+        </div>
+        <div class="btn">▶ Запустить сейчас</div>
+      </div></div>
+
+      <div class="card"><div style="flex: 1; min-width: 0">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px">
+          <div class="name">Проверка сайтов</div>
+          <span class="badge" style="background: #0b3a24; color: #6ee7b7">работает</span>
+        </div>
+        <div class="desc">Добирает поля паспорта сайта (хостинг, РКН, CMS и т.д.) через AI-шлюз.</div>
+        <div class="meta">
+          <span>Запуск: по кнопке ⚡ на /sites</span>
+          <span>Последний прогон: 27.08, 16:22</span>
+          <a href="#">Открыть →</a>
+        </div>
+        <div class="note">Сегодня прогонов: 0. Запускается по сайту отдельно на /sites — общей кнопки тут нет.</div>
+        <div class="spend">
+          <span>Сегодня: <b>0</b> прогонов, <b>0</b> токенов, <b>0&nbsp;₽</b></span>
+          <span>За неделю: <b>4</b> прогонов, <b>52&nbsp;100</b> токенов, <b>12.7&nbsp;₽</b></span>
+        </div>
+      </div></div>
+
+      <div class="card"><div style="flex: 1; min-width: 0">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px">
+          <div class="name">Диагностика каналов</div>
+          <span class="badge" style="background: #3a0d0d; color: #f87171">ошибка</span>
+        </div>
+        <div class="desc">Проверяет AI-шлюз (ai-gw → Anthropic) и Telegram-прокси, ставит диагноз по симптомам и показывает, кого обрыв задел (журнал загрузок).</div>
+        <div class="meta">
+          <span>Запуск: по кнопке + каждый час (таймер web-interface, алерт в TG при обрыве)</span>
+          <span>Последний прогон: 28.08, 12:00</span>
+        </div>
+        <div class="note" style="color: #f87171">Обрыв: ai-gw → Anthropic вернул 403 Request not allowed; Telegram-прокси в порядке</div>
+        <div class="btn">▶ Запустить сейчас</div>
+      </div></div>
+
+      <div class="card"><div style="flex: 1; min-width: 0">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px">
+          <div class="name">Агент-контролёр (бэклог + CRM)</div>
+          <span class="badge" style="background: #1c1c1c; color: #888">в разработке</span>
+        </div>
+        <div class="desc">7 проверок задач (просрочка, зависшие, без описания и т.д.) + контроль CRM: сроки лидов, стадии, дубли ежемесячных сделок, счета, акты.</div>
+        <div class="meta">
+          <span>Запуск: ежедневно (крон) — планируется</span>
+          <a href="#">Задача #249</a>
+        </div>
+        <div class="note">Ещё не реализован</div>
+      </div></div>
+
+      <div class="card"><div style="flex: 1; min-width: 0">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px">
+          <div class="name">Расшифровка анализов</div>
+          <span class="badge" style="background: #0b3a24; color: #6ee7b7">работает</span>
+        </div>
+        <div class="desc">Разбор лабораторных анализов в медкарте (decode/observe) — расшифровка бланка и наблюдения по показателям.</div>
+        <div class="meta">
+          <span>Запуск: по запросу в медкарте пациента (пока не в TG-боте)</span>
+          <span>Последний прогон: 26.08, 11:07</span>
+          <a href="#">Задача #166</a>
+        </div>
+        <div class="note">Сегодня прогонов: 0. Запускается по пациенту в медкарте — общей кнопки тут нет.</div>
+        <div class="spend">
+          <span>Сегодня: <b>0</b> прогонов, <b>0</b> токенов, <b>0&nbsp;₽</b></span>
+          <span>За неделю: <b>3</b> прогонов, <b>31&nbsp;800</b> токенов, <b>7.4&nbsp;₽</b></span>
+        </div>
+      </div></div>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
