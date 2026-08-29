@@ -659,34 +659,32 @@ out('DeskSearch.dc.html', `
 const SPEC = [
   ['Шапка и поля', [
     ['Боковые отступы экрана', '--ui-page-pad-m', '14px'],
-    ['Высота строки поиска', '--ui-field-h', '44px'],
-    ['Фон строки поиска', '--ui-inp-bg', '#1a1a1a'],
-    ['Рамка строки поиска', '--ui-inp-border', '#333333'],
-    ['Подсказка в поиске', '--ui-inp-ph', '#666666'],
-    ['Скругление поиска', '--ui-inp-radius', '8px'],
+    ['Фон, рамка, кегль поля', '--ui-inp-*', 'inpCss()'],
     ['Рамка в фокусе', '--ui-inp-focus', 'var(--ui-brand)'],
+    ['Минимальный тач-таргет', '--ui-tap', '44px'],
+  ]],
+  ['Поверхности и текст', [
+    ['Фон страницы', '--ui-bg', '#0a0a0a / #f6f8fb'],
+    ['Поверхность шторки', '--ui-surface', '#141414 / #ffffff'],
+    ['Подложка подписи', '--ui-surface-3', '#111111 / #f3f6fa'],
+    ['Разделители', '--ui-line-2', '#1e1e1e / #e6ecf3'],
+    ['Основной текст', '--ui-tx', '#e8e8e8 / #0f1c2e'],
+    ['Подпись и мета', '--ui-tx-3', '#6a6a6a / #8595a8'],
   ]],
   ['Список и шторка', [
-    ['Скругление карточек/блоков', '--ui-card-radius', '12px'],
+    ['Скругление блоков', '--ui-card-radius', '12px'],
     ['Скругление верха шторки', '--ui-sheet-radius', '22px'],
-    ['Общее скругление', '--ui-radius', '8px'],
     ['Толщина штриха иконок', '--ui-ico-stroke', '2'],
-    ['Размер иконки действия', '--ui-btni-ico', '15px'],
-    ['Цвет иконки действия', '--ui-btni-text', '#8a8a8a'],
-    ['Наведение иконки', '--ui-btni-hover-text', 'var(--ui-brand)'],
-  ]],
-  ['Акценты', [
-    ['Акцент платформы', '--ui-brand', '#00a0ff'],
-    ['Опасное действие', '--ui-danger', '#f87171'],
+    ['Значок действия — вид целиком', '.ibtn', 'btnCss()'],
+    ['Акцент платформы', '--ui-brand', '#00a0ff / #0072c6'],
   ]],
 ];
 const PAL = [
-  ['Папка', '#6ab0f5', '.dir'],
-  ['.js / .mjs', '#4ade80', '.mjs'],
-  ['.html', '#fb923c', '.html'],
-  ['.md', '#c084fc', '.md'],
-  ['Прочие файлы', '#8a8a8a', '.file'],
-  ['Комментарий', '#555555', 'структура: // подпись'],
+  ['Папка', '--ui-ft-dir', '#6ab0f5', '#1d63a8'],
+  ['.js / .mjs', '--ui-ft-code', '#4ade80', '#15803d'],
+  ['.html', '--ui-ft-page', '#fb923c', '#b45309'],
+  ['.md', '--ui-ft-doc', '#c084fc', '#7e22ce'],
+  ['Прочие файлы', '--ui-tx-2', '#8b8b8b', '#5a6b80'],
 ];
 
 out('Tokens.dc.html', `
@@ -694,14 +692,14 @@ out('Tokens.dc.html', `
             display:flex;flex-direction:column;gap:26px;">
   <div style="display:flex;flex-direction:column;gap:7px;">
     <div style="font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:#555;">
-      Мобильный /structure</div>
+      /structure — телефон и ПК</div>
     <div style="font-size:23px;font-weight:600;letter-spacing:-.01em;">Что берём из /set</div>
     <div style="font-size:13px;line-height:1.5;color:#777;max-width:56ch;">
       Ни одного литерала в новой вёрстке: геометрия и цвета читаются переменными из
       <span style="font-family:var(--mono);color:#6ab0f5;">/theme.css</span>, который отдаёт
-      <span style="font-family:var(--mono);color:#6ab0f5;">server.js → getTheme()</span>.
-      Фолбэк в <span style="font-family:var(--mono);color:#8a8a8a;">var(--x, …)</span> = текущее
-      значение THEME_DEFAULTS, чтобы включение ничего не перекрасило.
+      <span style="font-family:var(--mono);color:#6ab0f5;">server.js → themeVars()</span>.
+      Второй столбец — тёмное значение, третий светлое: после ADR-142 у платформы две темы,
+      и зашитый литерал остаётся тёмной заплатой в светлой.
     </div>
   </div>
 
@@ -710,7 +708,7 @@ out('Tokens.dc.html', `
     <div style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#555;
                 padding-bottom:9px;">${title}</div>
     ${rows.map(([what, token, val]) => `
-    <div style="display:grid;grid-template-columns:minmax(0,1fr) 210px 150px;gap:16px;
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 170px;gap:16px;
                 align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
       <span style="font-size:13.5px;color:#d8d8d8;">${what}</span>
       <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">${token}</span>
@@ -720,34 +718,34 @@ out('Tokens.dc.html', `
 
   <div style="display:flex;flex-direction:column;gap:0;">
     <div style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#555;
-                padding-bottom:9px;">Палитра типов — из structure.html, не из /set</div>
-    ${PAL.map(([what, hex, sel]) => `
-    <div style="display:grid;grid-template-columns:minmax(0,1fr) 210px 150px;gap:16px;
+                padding-bottom:9px;">Цвета типов файлов — новые токены, заведены этой правкой</div>
+    ${PAL.map(([what, token, dark, light]) => `
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 190px 85px 85px;gap:16px;
                 align-items:center;padding:10px 0;border-top:1px solid #1a1a1a;">
       <span style="display:flex;align-items:center;gap:10px;font-size:13.5px;color:#d8d8d8;">
-        <span style="width:13px;height:13px;border-radius:3px;background:${hex};"></span>${what}</span>
-      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">${sel}</span>
-      <span style="font-family:var(--mono);font-size:12.5px;color:${hex};">${hex}</span>
+        <span style="width:13px;height:13px;border-radius:3px;background:${dark};"></span>${what}</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#00a0ff;">${token}</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:${dark};">${dark}</span>
+      <span style="font-family:var(--mono);font-size:12.5px;color:#7a7a7a;">${light}</span>
     </div>`).join('')}
   </div>
 
   <div style="margin-top:4px;padding:14px 16px;background:#101010;border:1px solid #1e1e1e;
               border-radius:var(--ui-card-radius,12px);display:flex;flex-direction:column;gap:9px;">
-    <div style="font-size:12.5px;font-weight:600;color:#e8e8e8;">Два места, где токенов не хватает</div>
+    <div style="font-size:12.5px;font-weight:600;color:#e8e8e8;">Две поправки к первой версии макета</div>
     <div style="font-size:12.5px;line-height:1.5;color:#8a8a8a;">
-      <b style="color:#fb923c;font-weight:600;">Кегль поля поиска.</b>
-      <span style="font-family:var(--mono);">--ui-inp-fs</span> = 13px, и на iOS Safari при фокусе
-      на поле меньше 16px страницу зумит. На ПК поле остаётся на 13px, на мобиле в макете 16px —
-      либо новый ключ <span style="font-family:var(--mono);">ui_inp_fs_m</span> в /set, либо
-      <span style="font-family:var(--mono);">max(16px, var(--ui-inp-fs))</span> только внутри
-      <span style="font-family:var(--mono);">@media (max-width:768px)</span>.
+      <b style="color:#4ade80;font-weight:600;">Кегль поля на мобиле уже решён.</b>
+      Анти-зум iOS сидит в <span style="font-family:var(--mono);">inpCss()</span> последней
+      строкой — <span style="font-family:var(--mono);">font-size:16px !important</span> внутри
+      <span style="font-family:var(--mono);">max-width:768px</span> (ADR-081/082). Своего кегля
+      поле на странице не задаёт вообще.
     </div>
     <div style="font-size:12.5px;line-height:1.5;color:#8a8a8a;">
-      <b style="color:#fb923c;font-weight:600;">Высота строки списка.</b>
-      Отдельного токена нет. На мобиле взят
-      <span style="font-family:var(--mono);">--ui-field-h</span> (44px) как минимум тач-таргета,
-      фактическая строка 60px из-за второй строки с подписью. На ПК строка 30px и подпись
-      в той же строке — там тач-таргет не нужен, а плотность важнее.
+      <b style="color:#4ade80;font-weight:600;">Токен высоты строки тоже есть.</b>
+      <span style="font-family:var(--mono);">--ui-tap</span> (44px) в
+      <span style="font-family:var(--mono);">ui.css</span> — минимальный тач-таргет платформы.
+      Строка на телефоне взяла его как <span style="font-family:var(--mono);">min-height</span>,
+      на ПК тач-таргет не нужен и строка остаётся плотной.
     </div>
   </div>
 </div>`);
