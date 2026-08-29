@@ -4,8 +4,9 @@
 
 | Файл | Что это |
 |---|---|
-| `Main.dc.html` | ДО / ПОСЛЕ на пяти страницах: access, clients, jsonld, sites, projects |
+| `Main.dc.html` | ДО / ПОСЛЕ на восьми страницах: access, clients, jsonld, sites, projects, medcard, crm/leads, habits |
 | `Anatomy.dc.html` | Анатомия и размеры: мобила ≤768px и десктоп, таблица токенов |
+| `Components.dc.html` | Кнопки, табы и меню — срисованы с `btnCss()`, `.med-tabs`, `sidebar.js` |
 | `Rules.dc.html` | Правила, готовая разметка `.ph*` и список файлов под правку |
 | `canvas.json` | Раскладка артбордов на холсте |
 
@@ -21,7 +22,8 @@ node <skill>/seed-canvas.mjs \
   --template <skill>/payload.template.html \
   --out headers-before-after.html \
   --title "Шапка страницы" \
-  --artboard Main.dc.html --artboard Anatomy.dc.html --artboard Rules.dc.html \
+  --artboard Main.dc.html --artboard Anatomy.dc.html \
+  --artboard Components.dc.html --artboard Rules.dc.html \
   --canvas canvas.json
 ```
 
@@ -34,6 +36,11 @@ node <skill>/seed-canvas.mjs \
 - Кнопка действия — своим рядом под шапкой, слева.
 - «← AI-платформа» убрана: навигация живёт в бургере.
 - Иконок и эмодзи слева от H1 нет нигде.
+- Версия модуля — в строке с H1, по базовой линии, `gap: 10px`. Размер прежний,
+  как рисует `module-version-badge.js`: `14px / 600 / mono #666` + глаз `15px`.
+  Есть у медкарты (v1.8.2), CRM (v1.3.1) и трекера привычек (v1.9.1);
+  на остальных страницах слот пустой и высоту не занимает.
+- Кнопок-значков внутри текста H1 нет («+» в трекере становится обычной кнопкой).
 
 ## Открытый вопрос
 

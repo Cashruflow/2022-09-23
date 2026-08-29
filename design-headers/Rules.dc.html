@@ -56,7 +56,8 @@
         <li><span style="color:var(--good);">03</span>Счётчики и статистика — в подзаголовок, словами.</li>
         <li><span style="color:var(--good);">04</span>Кнопка действия — своим рядом под шапкой, слева.</li>
         <li><span style="color:var(--good);">05</span>Отбивка воздухом: 18px до контента.</li>
-        <li><span style="color:var(--good);">06</span>Геометрия — только токены <code>--ui-*</code>.</li>
+        <li><span style="color:var(--good);">06</span>Версия модуля — в строке с H1, по базовой линии.</li>
+        <li><span style="color:var(--good);">07</span>Геометрия — только токены <code>--ui-*</code>.</li>
       </ul>
     </div>
     <div class="box" style="border-color:rgba(248,113,113,.22);">
@@ -69,6 +70,7 @@
         <li><span style="color:var(--bad);">05</span>Счётчик «(262)» внутри H1.</li>
         <li><span style="color:var(--bad);">06</span>Абзац описания вместо подзаголовка.</li>
         <li><span style="color:var(--bad);">07</span><code>position:fixed</code> кнопки + распорку под них.</li>
+        <li><span style="color:var(--bad);">08</span>Кнопки-значки внутри текста H1 (как «+» в трекере).</li>
       </ul>
     </div>
   </div>
@@ -80,7 +82,10 @@
 <pre><span class="c">&lt;!-- шапка страницы: единый компонент, копий на страницах нет --&gt;</span>
 <span class="k">&lt;header</span> <span class="t">class</span>=<span class="s">"ph"</span><span class="k">&gt;</span>
   <span class="k">&lt;div</span> <span class="t">class</span>=<span class="s">"ph-row"</span><span class="k">&gt;</span>
-    <span class="k">&lt;h1</span> <span class="t">class</span>=<span class="s">"ph-t"</span><span class="k">&gt;</span>Доступы<span class="k">&lt;/h1&gt;</span>
+    <span class="k">&lt;div</span> <span class="t">class</span>=<span class="s">"ph-ttl"</span><span class="k">&gt;</span>
+      <span class="k">&lt;h1</span> <span class="t">class</span>=<span class="s">"ph-t"</span><span class="k">&gt;</span>Доступы<span class="k">&lt;/h1&gt;</span>
+      <span class="k">&lt;span</span> <span class="t">id</span>=<span class="s">"mvBadge-medcard"</span><span class="k">&gt;&lt;/span&gt;</span>  <span class="c">&lt;!-- версия; нет модуля — нет узла --&gt;</span>
+    <span class="k">&lt;/div&gt;</span>
     <span class="k">&lt;div</span> <span class="t">class</span>=<span class="s">"ph-act"</span><span class="k">&gt;&lt;/div&gt;</span>  <span class="c">&lt;!-- сюда JS кладёт обновить + бургер --&gt;</span>
   <span class="k">&lt;/div&gt;</span>
   <span class="k">&lt;p</span> <span class="t">class</span>=<span class="s">"ph-s"</span><span class="k">&gt;</span>22 доступа · 5 проектов<span class="k">&lt;/p&gt;</span>
@@ -92,6 +97,7 @@
 <span class="t">.ph</span>      { padding: <span class="s">26px var(--ui-page-pad,44px) 0</span>; }
 <span class="t">.ph-row</span>  { display: flex; align-items: center; justify-content: space-between;
             gap: 12px; min-height: 42px; }
+<span class="t">.ph-ttl</span>  { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
 <span class="t">.ph-t</span>    { font-size: 34px; font-weight: 800; letter-spacing: -.02em;
             margin: 0; min-width: 0; color: <span class="s">var(--ui-tx,#fff)</span>;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -114,10 +120,12 @@
   <table>
     <tr><th style="width:200px;">Файл</th><th>Правка</th></tr>
     <tr><td>ui.css</td><td>Добавить блок <code>.ph*</code> — единый источник шапки для всей платформы.</td></tr>
+    <tr><td>module-version-badge.js</td><td>Не трогается: рисует то же самое, просто внутрь <code>.ph-ttl</code>. Модули с версией — медкарта, CRM, трекер привычек.</td></tr>
     <tr><td>sidebar.js</td><td><code>#sb-burger</code> вместо <code>position:fixed</code> вставляется в <code>.ph-act</code> текущей страницы. Глиф <code>☰</code> → SVG.</td></tr>
     <tr><td>hard-refresh.js</td><td>То же для <code>#hard-refresh</code>: в <code>.ph-act</code>, без <code>right:62px</code>.</td></tr>
     <tr><td>burger-space.js</td><td>Удаляется целиком — распорка больше не нужна.</td></tr>
-    <tr><td>medcard.html</td><td>Инлайн-шапка → <code>.ph</code>. Секция («Профиль») становится подзаголовком.</td></tr>
+    <tr><td>medcard.html</td><td>Инлайн-шапка → <code>.ph</code>. Секция («Профиль») и слоган сливаются в один подзаголовок.</td></tr>
+    <tr><td>leads.html · habits.html<br>crm-dashboard.html</td><td>То же. Из H1 убрать «CRM —» и длинное «AI-Трекер привычек» — они уходят в подзаголовок; «+» из заголовка трекера становится обычной кнопкой своим рядом.</td></tr>
     <tr><td>access · clients<br>projects · sites<br>jsonld · crawl · vo<br>skills · structure</td><td>Свою вёрстку шапки заменить на <code>&lt;header class="ph"&gt;</code>. Убрать иконки слева от H1, ссылки «← AI-платформа», полосы-разделители и киккер.</td></tr>
   </table>
 

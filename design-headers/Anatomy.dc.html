@@ -24,6 +24,11 @@
     .kbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
     .h1{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin:0;color:#fff;}
     .sub{font-size:15px;font-weight:500;color:var(--tx2);line-height:1.35;margin:4px 0 0;}
+    /* версия модуля — значения из module-version-badge.js, не меняются */
+    .ver{font-size:14px;color:#666;font-weight:600;font-family:var(--mono);}
+    .eye{width:15px;height:15px;flex:none;fill:none;stroke:#666;stroke-width:2;
+         stroke-linecap:round;stroke-linejoin:round;align-self:center;}
+    .ttl{display:flex;align-items:baseline;gap:10px;min-width:0;}
     /* размерные линии */
     .dim{position:absolute;font-family:var(--mono);font-size:10px;color:var(--brand);white-space:nowrap;}
     .dimline{position:absolute;background:rgba(0,160,255,.5);}
@@ -59,7 +64,11 @@
 
       <div style="padding:14px 14px 18px;">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;position:relative;">
-          <h1 class="h1">Заголовок</h1>
+          <div class="ttl">
+            <h1 class="h1">Заголовок</h1>
+            <span class="ver">v1.8.2</span>
+            <svg viewBox="0 0 24 24" class="eye"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
           <div style="display:flex;gap:8px;">
             <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg></div>
             <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
@@ -87,6 +96,7 @@
     <div style="font-family:var(--mono);font-size:11.5px;color:var(--muted);">высота шапки <span style="color:var(--good);">80px</span></div>
     <div style="font-family:var(--mono);font-size:11.5px;color:var(--muted);">поля <span style="color:#b4b4b4;">--ui-page-pad-m · 14px</span></div>
     <div style="font-family:var(--mono);font-size:11.5px;color:var(--muted);">тач-таргет <span style="color:#b4b4b4;">--ui-tap · 44px</span></div>
+    <div style="font-family:var(--mono);font-size:11.5px;color:var(--muted);">версия <span style="color:#b4b4b4;">14px mono #666</span></div>
   </div>
 
   <div style="height:1px;background:var(--line);margin:34px 0 30px;"></div>
@@ -98,7 +108,11 @@
     <div class="guide" style="left:44px;top:0;bottom:0;width:1px;"></div>
     <div class="guide" style="right:44px;top:0;bottom:0;width:1px;"></div>
     <div style="padding:26px 44px 22px;">
-      <h1 class="h1" style="font-size:34px;">Заголовок</h1>
+      <div class="ttl">
+        <h1 class="h1" style="font-size:34px;">Заголовок</h1>
+        <span class="ver">v1.8.2</span>
+        <svg viewBox="0 0 24 24" class="eye"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
       <p class="sub" style="font-size:15.5px;">Подзаголовок — одна строка</p>
     </div>
     <div style="height:1px;background:rgba(74,222,128,.25);"></div>
@@ -128,6 +142,11 @@
       <td>Подзаголовок</td>
       <td><code>15px / 500</code><br><code>#8a8a93</code>, margin-top 4px</td>
       <td>Одна строка, <code>text-overflow: ellipsis</code>. Сюда уходят счётчики: «22 доступа · 5 проектов».</td>
+    </tr>
+    <tr>
+      <td>Версия</td>
+      <td><code>14px / 600 / mono</code><br><code>#666</code> + глаз <code>15px</code></td>
+      <td>В строке с H1, по базовой линии, <code>gap 10px</code>. Размер прежний — как рисует <code>module-version-badge.js</code>. Есть у медкарты <code>v1.8.2</code>, CRM <code>v1.3.1</code>, трекера <code>v1.9.1</code>; на остальных страницах слот пустой и ничего не занимает.</td>
     </tr>
     <tr>
       <td>Кнопки</td>
