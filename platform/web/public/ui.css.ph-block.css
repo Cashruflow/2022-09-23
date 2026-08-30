@@ -1,0 +1,78 @@
+
+/* ===== ШАПКА СТРАНИЦЫ (.ph) — ЕДИНСТВЕННЫЙ ИСТОЧНИК (ADR-147) =====
+   Эталон — «Медкарта / Профиль». Своей вёрстки шапки на страницах больше нет:
+   разметку либо пишут классами .ph* (см. ниже), либо её собирает из голого <h1>
+   нормализатор /page-header.js. Проверяет соблюдение tools/check-page-headers.mjs.
+
+   Анатомия — ровно три строки, всегда в этом порядке:
+     .ph-row    заголовок + версия слева, обновить/бургер справа (одна строка);
+     .ph-s      подзаголовок, ОДНА строка, режется многоточием;
+     .ph-tools  кнопки действий страницы (необязательная).
+
+   Чего в шапке нет и быть не может: иконки или эмодзи слева от H1, полосы-
+   разделителя, капс-киккера над заголовком, ссылки «← AI-платформа» (навигация
+   живёт в бургере), счётчика внутри H1 (он идёт в подзаголовок словами).
+
+   !important здесь — по той же причине, что в btnCss(): у полусотни страниц
+   есть свой `header{...}` и свой `h1{...}`, и без этого единый вид не приедет
+   туда, где уже написана локальная вёрстка. Ради этого всё и затевалось. */
+.ph {
+  display: block !important;
+  max-width: 1360px; margin: 0 auto;
+  padding: 26px var(--ui-page-pad, 44px) 0 !important;
+  border: 0 !important; background: none !important;
+}
+/* шапка, вставленная ВНУТРЬ уже отбитого контейнера (.wrap/.container/.ui-page):
+   свои поля не добавляет, иначе к отступу страницы приедет второй */
+.ph.ph-inner { max-width: none; margin: 0; padding: 0 !important; }
+
+.ph-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 42px; }
+
+/* заголовок и версия — по базовой линии; выравнивание по центру ряда даёт .ph-row */
+.ph-ttl { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.ph-ttl > h1, .ph-t {
+  display: block !important;
+  font-size: 34px; font-weight: 800; letter-spacing: -.02em; line-height: 1.2;
+  margin: 0 !important; padding: 0 !important; min-width: 0;
+  color: var(--ui-tx, #fff);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* значок в заголовке не рисуем нигде — правило, а не оформление */
+.ph-ttl > h1 > svg, .ph-t > svg { display: none !important; }
+
+/* сюда /page-header.js кладёт #hard-refresh и #sb-burger — обе кнопки платформы */
+.ph-act { display: flex; gap: 8px; flex: none; }
+.ph-act:empty { display: none; }
+.ph-act > #sb-burger, .ph-act > #hard-refresh {
+  position: static !important; top: auto !important; right: auto !important; left: auto !important;
+}
+
+.ph-s {
+  font-size: 15.5px; font-weight: 500; line-height: 1.35; margin: 4px 0 0 !important;
+  color: var(--ui-tx-2, #8a8a93);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ph-s:empty { display: none; }
+/* Счётчики и секции переезжают в подзаголовок ВМЕСТЕ С УЗЛОМ (страница продолжает
+   писать в них по id), а вместе с узлом приезжает и его кегль: h2 рисовался 24px,
+   а .count — 0.62em. Подзаголовок — одна строка одним кеглем, поэтому гасим. */
+.ph-s > * { font: inherit !important; color: inherit !important;
+            margin: 0 !important; padding: 0 !important; display: inline !important;
+            letter-spacing: inherit !important; }
+
+/* кнопки действий страницы — своим рядом под шапкой, слева; в ряд с H1 не ставим
+   никогда: на мобиле они дерутся с бургером за место */
+.ph-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
+.ph-tools:empty { display: none; }
+
+/* отбивка от контента — воздухом, не полосой */
+.ph + * { margin-top: 18px; }
+
+@media (max-width: 768px) {
+  .ph { padding: 14px var(--ui-page-pad-m, 14px) 0 !important; }
+  .ph-ttl > h1, .ph-t { font-size: 32px; }
+  .ph-s { font-size: 15px; }
+  .ph-tools { margin-top: 14px; }
+  /* тач-таргет кнопок шапки */
+  .ph-act > * { min-width: var(--ui-tap, 44px); min-height: 42px; }
+}
