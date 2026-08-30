@@ -15,10 +15,18 @@
          .stats-tile   radius 14, padding 14px 16px, .icon 38/11px, .num 30px/800, .lbl 12px
          .stats-section-title  12px uppercase .06em
          .stats-list   radius 14, .row padding 12px 14px / 14px
-         .stats-bar-fill  linear-gradient(90deg,#0090ff,#7a5cff)
+         .hab-tile.is-wide  плитка во всю ширину сетки — для плитки риска
+       Градиент столбиков — .stats-bar-fill (#0090ff → #7a5cff), развёрнутый по вертикали:
+       у горизонтальной полосы он идёт по длине, у столбика длина вертикальная.
        Палитра — C из medcard_habits.js: card #141414, in #111, bd #262626, bd2 #1e1e1e,
        tx #e8e8e8, tx2 #8b8b8b, tx3 #666, br #00a0ff, ok #4ade80, wn #fbbf24, dg #f87171.
-       Тач-таргеты — var(--ui-tap) 44px. */
+       Тач-таргеты — var(--ui-tap) 44px.
+
+       Данные пересчитаны из одного основания: цель 2 520 раз на 22 дня (12 авг → 2 сент),
+       набрано 1 874 за 19 дней. Отсюда 74,4%, остаток 646, факт 99/день при плане 115/день
+       (−14%), прогноз 646/99 ≈ 6,5 дн. после 30 авг → 7 сент., то есть на 5 дней позже срока.
+       Дневные значения (19 шт.) дают в сумме ровно 1 874, максимум 155, ниже минимума 60
+       три дня — из них ритм 16 из 19 = 84%. */
     body { margin:0; background:#0a0a0a; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
            -webkit-font-smoothing:antialiased; color:#e8e8e8; }
     a { color:#00a0ff; } a:hover { color:#31b6ff; }
@@ -36,15 +44,23 @@
                  color:#e8e8e8; font-variant-numeric:tabular-nums; }
     .tile .lbl { flex:1 0 100%; font-size:12px; line-height:1.4; color:#8b8b8b; margin-top:9px; }
     .tile .lbl b { font-weight:700; }
+    .tile.is-wide { grid-column:1 / -1; }
     .row { display:flex; align-items:center; justify-content:space-between; gap:12px;
            padding:12px 14px; font-size:14px; min-height:44px; box-sizing:border-box; }
     .row + .row { border-top:1px solid #262626; }
     .row .k { color:#e8e8e8; }
     .row .v { color:#8b8b8b; font-weight:600; font-variant-numeric:tabular-nums; }
     .seg { display:flex; background:#111; border:1px solid #262626; border-radius:12px; padding:4px; gap:4px; }
-    .seg span { flex:1; height:36px; display:flex; align-items:center; justify-content:center;
+    .seg span { flex:1; height:44px; display:flex; align-items:center; justify-content:center;
                 font-size:13px; font-weight:600; color:#8b8b8b; border-radius:9px; }
     .seg span.on { background:#1f1f1f; color:#e8e8e8; }
+    /* Календарь активности: одна клетка — один день миссии, неделя в строке.
+       Недельный грид GitHub на 19-дневной миссии занимал бы 4 колонки из семи
+       и оставлял три четверти карточки пустыми. */
+    .cal { display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:6px; }
+    .cal-dow { font-size:11px; color:#666; text-align:center; padding-bottom:2px; }
+    .cal-d { aspect-ratio:1; border-radius:9px; display:flex; align-items:center; justify-content:center;
+             font-size:12px; font-weight:600; font-variant-numeric:tabular-nums; }
     .btn { height:52px; border-radius:14px; border:none; font-size:16px; font-weight:600;
            display:inline-flex; align-items:center; justify-content:center; gap:8px; }
     .btn svg { width:18px; height:18px; }
@@ -72,7 +88,7 @@
     </div>
 
     <!-- ГЕРОЙ — паттерн .stats-hero из сводки медкарты. Главный ответ экрана числом,
-         кольцо процента, полоса с засечками чекпоинтов и прогноз внизу. -->
+         кольцо процента, полоса с засечками чекпоинтов и итог внизу. -->
     <div style="position:relative; overflow:hidden; border-radius:18px; padding:22px 20px; margin-bottom:22px;
                 background:linear-gradient(135deg,#0a5fd6 0%,#0090ff 46%,#7a5cff 100%);
                 box-shadow:0 14px 34px rgba(0,120,255,.25);">
@@ -83,7 +99,7 @@
         <span style="font-size:13px; font-weight:700; color:rgba(255,255,255,.86); text-transform:uppercase; letter-spacing:.06em;">Цель миссии</span>
         <span style="display:inline-flex; align-items:center; gap:6px; padding:5px 11px; border-radius:16px;
                      background:rgba(0,0,0,.22); font-size:11.5px; font-weight:700; color:#fff;">
-          <span style="width:7px; height:7px; border-radius:50%; background:#fbbf24;"></span>Отстаёшь от плана
+          <span style="width:7px; height:7px; border-radius:50%; background:#fbbf24;"></span>Отставание от плана
         </span>
       </div>
 
@@ -103,8 +119,8 @@
         </div>
       </div>
 
-      <!-- Полоса цели с засечками чекпоинтов: 10/25/50 взяты, 75 и 100 впереди.
-           Раньше это был отдельный ряд из пяти чипов в две строки. -->
+      <!-- Полоса цели с засечками чекпоинтов: 10, 25 и 50 пройдены, 75 впереди,
+           100 — сам конец полосы. Раньше это был отдельный ряд из пяти чипов. -->
       <div style="position:relative; height:10px; border-radius:5px; background:rgba(0,0,0,.26); margin-top:18px;">
         <div style="position:absolute; left:0; top:0; bottom:0; width:74.4%; border-radius:5px; background:#fff;"></div>
         <span style="position:absolute; top:-3px; left:10%; width:2px; height:16px; background:rgba(255,255,255,.55);"></span>
@@ -119,74 +135,76 @@
       </div>
     </div>
 
-    <!-- ПОКАЗАТЕЛИ — .stats-tile, две колонки. То, что раньше жило только на карточке
-         в списке и на экран статистики не попадало вовсе. -->
+    <!-- ПОКАЗАТЕЛИ — .stats-tile. То, что раньше жило только на карточке в списке
+         и на экран статистики не попадало. Прогноз — плиткой во всю ширину:
+         это единственная плохая новость экрана, ей нужен вес. -->
     <div class="sec" style="margin-bottom:10px;">Показатели</div>
     <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; margin-bottom:22px;">
+      <div class="tile is-wide">
+        <span class="icon" style="background:rgba(248,113,113,.14); color:#f87171;"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path><path d="m9 16 2 2 4-4"></path></svg></span>
+        <span class="num">7 сент.</span>
+        <span class="lbl">прогноз при текущем темпе — <b style="color:#f87171;">на 5 дней позже срока 2 сент.</b> Чтобы успеть, нужно 215 раз в день вместо нынешних 99.</span>
+      </div>
       <div class="tile">
         <span class="icon"><svg class="ic" viewBox="0 0 24 24"><path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path></svg></span>
         <span class="num">99</span>
-        <span class="lbl">раз в день при плане 115 — <b style="color:#f87171;">−14%</b><br>среднее за 30 дн.</span>
-      </div>
-      <div class="tile">
-        <span class="icon" style="background:rgba(248,113,113,.14); color:#f87171;"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path><path d="m9 16 2 2 4-4"></path></svg></span>
-        <span class="num" style="font-size:26px;">7 сент.</span>
-        <span class="lbl">прогноз при нынешнем темпе —<br><b style="color:#f87171;">на 5 дней позже срока</b></span>
+        <span class="lbl">раз в день при плане 115 — <b style="color:#f87171;">−14%</b><br>среднее за 19 дн.</span>
       </div>
       <div class="tile">
         <span class="icon" style="background:rgba(74,222,128,.14); color:#4ade80;"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg></span>
-        <span class="num">89%</span>
-        <span class="lbl">ритм: <b style="color:#e8e8e8;">17 из 19</b> дней<br>с минимумом 60 раз</span>
-      </div>
-      <div class="tile">
-        <span class="icon"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></span>
-        <span class="num">80</span>
-        <span class="lbl">сегодня из 115 раз —<br>осталось <b style="color:#e8e8e8;">35</b></span>
+        <span class="num">84%</span>
+        <span class="lbl">ритм: <b style="color:#e8e8e8;">16 из 19</b> дней<br>с минимумом 60 раз</span>
       </div>
     </div>
 
-    <!-- АКТИВНОСТЬ — тот же heatmap, но от старта миссии, крупной клеткой,
-         с днями недели, подписью месяца и шкалой. -->
+    <!-- АКТИВНОСТЬ — календарём по неделям миссии, а не годовым гридом:
+         на 19 днях годовой грид занимал бы четыре колонки из 53. -->
     <div class="sec" style="margin-bottom:10px;">Активность</div>
     <div class="card" style="padding:16px; margin-bottom:22px;">
       <div style="display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:14px;">
         <span class="mono" style="font-size:14px; color:#e8e8e8;">19 дней миссии</span>
-        <span class="mono" style="font-size:12.5px; color:#8b8b8b;">17 с записью · лучший 155</span>
+        <span class="mono" style="font-size:12.5px; color:#8b8b8b;">все с записью · лучший 155</span>
       </div>
-      <div style="display:flex; gap:8px;">
-        <div style="display:flex; flex-direction:column; gap:3px; font-size:10px; color:#666; padding-top:19px;">
-          <div style="height:13px; line-height:13px;">Пн</div><div style="height:13px;"></div>
-          <div style="height:13px; line-height:13px;">Ср</div><div style="height:13px;"></div>
-          <div style="height:13px; line-height:13px;">Пт</div><div style="height:13px;"></div>
-          <div style="height:13px;"></div>
-        </div>
-        <div style="flex:1 1 auto; min-width:0;">
-          <div style="position:relative; height:15px; font-size:10.5px; color:#666;">
-            <span style="position:absolute; left:0;">авг.</span>
-          </div>
-          <div style="display:flex; gap:3px; margin-top:4px;">
-            <div style="display:flex; flex-direction:column; gap:3px;"><div style="width:13px;height:13px;border-radius:3px;background:#141414;"></div><div style="width:13px;height:13px;border-radius:3px;background:#141414;"></div><div style="width:13px;height:13px;border-radius:3px;background:#141414;"></div><div style="width:13px;height:13px;border-radius:3px;background:#14a35a;"></div><div style="width:13px;height:13px;border-radius:3px;background:#22e07a;"></div><div style="width:13px;height:13px;border-radius:3px;background:#14a35a;"></div><div style="width:13px;height:13px;border-radius:3px;background:#22e07a;"></div></div>
-            <div style="display:flex; flex-direction:column; gap:3px;"><div style="width:13px;height:13px;border-radius:3px;background:#22e07a;"></div><div style="width:13px;height:13px;border-radius:3px;background:#22e07a;"></div><div style="width:13px;height:13px;border-radius:3px;background:#14a35a;"></div><div style="width:13px;height:13px;border-radius:3px;background:#14a35a;"></div><div style="width:13px;height:13px;border-radius:3px;background:#0d3a2e;"></div><div style="width:13px;height:13px;border-radius:3px;background:#22e07a;"></div><div style="width:13px;height:13px;border-radius:3px;background:#22e07a;"></div></div>
-            <div style="display:flex; flex-direction:column; gap:3px;"><div style="width:13px;height:13px;border-radius:3px;background:#0d3a2e;"></div><div style="width:13px;height:13px;border-radius:3px;background:#0f6b45;"></div><div style="width:13px;height:13px;border-radius:3px;background:#14a35a;"></div><div style="width:13px;height:13px;border-radius:3px;background:#22e07a;"></div><div style="width:13px;height:13px;border-radius:3px;background:#14a35a;"></div><div style="width:13px;height:13px;border-radius:3px;background:#0f6b45;"></div><div style="width:13px;height:13px;border-radius:3px;background:#22e07a;"></div></div>
-            <div style="display:flex; flex-direction:column; gap:3px;"><div style="width:13px;height:13px;border-radius:3px;background:#22e07a;"></div><div style="width:13px;height:13px;border-radius:3px;background:#0f6b45;"></div><div style="width:13px;height:13px;border-radius:3px;background:#1a1a1a;"></div><div style="width:13px;height:13px;border-radius:3px;background:#1a1a1a;"></div><div style="width:13px;height:13px;border-radius:3px;background:#1a1a1a;"></div><div style="width:13px;height:13px;border-radius:3px;background:#1a1a1a;"></div><div style="width:13px;height:13px;border-radius:3px;background:#1a1a1a;"></div></div>
-          </div>
-        </div>
-        <div style="display:flex; flex-direction:column; align-items:flex-end; justify-content:flex-end; gap:6px; padding-bottom:2px;">
-          <span style="font-size:10.5px; color:#666;">больше</span>
-          <div style="display:flex; flex-direction:column; gap:3px;">
-            <div style="width:13px;height:13px;border-radius:3px;background:#22e07a;"></div>
-            <div style="width:13px;height:13px;border-radius:3px;background:#14a35a;"></div>
-            <div style="width:13px;height:13px;border-radius:3px;background:#0f6b45;"></div>
-            <div style="width:13px;height:13px;border-radius:3px;background:#0d3a2e;"></div>
-            <div style="width:13px;height:13px;border-radius:3px;background:#1a1a1a;"></div>
-          </div>
-          <span style="font-size:10.5px; color:#666;">меньше</span>
-        </div>
+      <div class="cal">
+        <div class="cal-dow">Пн</div><div class="cal-dow">Вт</div><div class="cal-dow">Ср</div><div class="cal-dow">Чт</div><div class="cal-dow">Пт</div><div class="cal-dow">Сб</div><div class="cal-dow">Вс</div>
+
+        <div class="cal-d" style="background:#141414; color:#3a3a3a;">10</div>
+        <div class="cal-d" style="background:#141414; color:#3a3a3a;">11</div>
+        <div class="cal-d" style="background:#14a35a; color:#04240f;">12</div>
+        <div class="cal-d" style="background:#14a35a; color:#04240f;">13</div>
+        <div class="cal-d" style="background:#22e07a; color:#063a1e;">14</div>
+        <div class="cal-d" style="background:#14a35a; color:#04240f;">15</div>
+        <div class="cal-d" style="background:#22e07a; color:#063a1e;">16</div>
+
+        <div class="cal-d" style="background:#22e07a; color:#063a1e;">17</div>
+        <div class="cal-d" style="background:#22e07a; color:#063a1e;">18</div>
+        <div class="cal-d" style="background:#14a35a; color:#04240f;">19</div>
+        <div class="cal-d" style="background:#14a35a; color:#04240f;">20</div>
+        <div class="cal-d" style="background:#0d3a2e; color:rgba(255,255,255,.62);">21</div>
+        <div class="cal-d" style="background:#14a35a; color:#04240f;">22</div>
+        <div class="cal-d" style="background:#22e07a; color:#063a1e;">23</div>
+
+        <div class="cal-d" style="background:#0d3a2e; color:rgba(255,255,255,.62);">24</div>
+        <div class="cal-d" style="background:#0f6b45; color:rgba(255,255,255,.82);">25</div>
+        <div class="cal-d" style="background:#0f6b45; color:rgba(255,255,255,.82);">26</div>
+        <div class="cal-d" style="background:#14a35a; color:#04240f;">27</div>
+        <div class="cal-d" style="background:#22e07a; color:#063a1e;">28</div>
+        <div class="cal-d" style="background:#0f6b45; color:rgba(255,255,255,.82);">29</div>
+        <div class="cal-d" style="background:#14a35a; color:#04240f;">30</div>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:flex-end; gap:6px; margin-top:12px; font-size:10.5px; color:#666;">
+        меньше
+        <span style="width:12px; height:12px; border-radius:3px; background:#0d3a2e;"></span>
+        <span style="width:12px; height:12px; border-radius:3px; background:#0f6b45;"></span>
+        <span style="width:12px; height:12px; border-radius:3px; background:#14a35a;"></span>
+        <span style="width:12px; height:12px; border-radius:3px; background:#22e07a;"></span>
+        больше
       </div>
     </div>
 
-    <!-- ДИНАМИКА — факт столбиками, накопительно линией и ПУНКТИР ПЛАНА,
-         которого на прежнем графике не было: без него столбики не с чем сравнить. -->
+    <!-- ДИНАМИКА — факт столбиками, накопительно линией по ПРАВОЙ оси и пунктир плана,
+         которого на прежнем графике не было: без него столбики не с чем сравнить.
+         19 столбиков = 19 дней миссии, 12 → 30 авг. -->
     <div class="sec" style="margin-bottom:10px;">Динамика</div>
     <div class="card" style="padding:16px; margin-bottom:22px;">
       <div class="seg" style="margin-bottom:16px;">
@@ -194,7 +212,7 @@
       </div>
       <div style="display:flex; flex-wrap:wrap; gap:8px 16px; font-size:11.5px; color:#8b8b8b; margin-bottom:14px;">
         <span style="display:inline-flex; align-items:center; gap:6px;">
-          <span style="width:10px; height:10px; border-radius:2px; background:linear-gradient(180deg,#0090ff,#7a5cff);"></span>факт за день</span>
+          <span style="width:10px; height:10px; border-radius:2px; background:linear-gradient(180deg,#7a5cff,#0090ff);"></span>факт за день</span>
         <span style="display:inline-flex; align-items:center; gap:6px;">
           <span style="width:14px; height:2px; background:#4ade80;"></span>накопительно</span>
         <span style="display:inline-flex; align-items:center; gap:6px;">
@@ -206,45 +224,63 @@
             <stop offset="0%" stop-color="#7a5cff"></stop><stop offset="100%" stop-color="#0090ff"></stop>
           </linearGradient>
         </defs>
+        <!-- Общая сетка: y=168 → 0, y=12 → 200 по левой оси (факт) и → 2 000 по правой
+             (накопительно). Шаг сетки 39px = 50 раз слева и 500 раз справа. -->
         <g stroke="#1e1e1e" stroke-width="1">
-          <line x1="30" y1="12" x2="322" y2="12"></line><line x1="30" y1="51" x2="322" y2="51"></line>
-          <line x1="30" y1="90" x2="322" y2="90"></line><line x1="30" y1="129" x2="322" y2="129"></line>
-          <line x1="30" y1="168" x2="322" y2="168"></line>
+          <line x1="28" y1="12" x2="286" y2="12"></line><line x1="28" y1="51" x2="286" y2="51"></line>
+          <line x1="28" y1="90" x2="286" y2="90"></line><line x1="28" y1="129" x2="286" y2="129"></line>
+          <line x1="28" y1="168" x2="286" y2="168"></line>
         </g>
-        <g font-size="10" fill="#666" text-anchor="end">
+        <g font-size="9" fill="#666" text-anchor="end">
           <text x="24" y="16">200</text><text x="24" y="55">150</text>
           <text x="24" y="94">100</text><text x="24" y="133">50</text><text x="24" y="172">0</text>
         </g>
-        <g fill="url(#barg)">
-          <rect x="34" y="74" width="12" height="94" rx="3"></rect><rect x="51" y="55" width="12" height="113" rx="3"></rect>
-          <rect x="68" y="70" width="12" height="98" rx="3"></rect><rect x="85" y="51" width="12" height="117" rx="3"></rect>
-          <rect x="102" y="53" width="12" height="115" rx="3"></rect><rect x="119" y="47" width="12" height="121" rx="3"></rect>
-          <rect x="136" y="70" width="12" height="98" rx="3"></rect><rect x="153" y="73" width="12" height="95" rx="3"></rect>
-          <rect x="170" y="154" width="12" height="14" rx="3"></rect><rect x="187" y="64" width="12" height="104" rx="3"></rect>
-          <rect x="204" y="63" width="12" height="105" rx="3"></rect><rect x="221" y="152" width="12" height="16" rx="3"></rect>
-          <rect x="238" y="129" width="12" height="39" rx="3"></rect><rect x="255" y="106" width="12" height="62" rx="3"></rect>
-          <rect x="272" y="70" width="12" height="98" rx="3"></rect><rect x="289" y="51" width="12" height="117" rx="3"></rect>
-          <rect x="306" y="106" width="12" height="62" rx="3"></rect>
+        <g font-size="9" fill="#4ade80" text-anchor="start">
+          <text x="291" y="16">2 000</text><text x="291" y="55">1 500</text>
+          <text x="291" y="94">1 000</text><text x="291" y="133">500</text><text x="291" y="172">0</text>
         </g>
-        <line x1="30" y1="78" x2="322" y2="78" stroke="#666" stroke-width="2" stroke-dasharray="5 4"></line>
-        <path d="M40 165 L57 158 L74 151 L91 143 L108 134 L125 125 L142 118 L159 111 L176 110 L193 102 L210 94 L227 93 L244 90 L261 85 L278 77 L295 68 L312 63"
+        <g fill="url(#barg)">
+          <rect x="29.8" y="101.7" width="10" height="66.3" rx="3"></rect>
+          <rect x="43.4" y="82.2" width="10" height="85.8" rx="3"></rect>
+          <rect x="56.9" y="74.4" width="10" height="93.6" rx="3"></rect>
+          <rect x="70.5" y="78.3" width="10" height="89.7" rx="3"></rect>
+          <rect x="84.1" y="65.0" width="10" height="103.0" rx="3"></rect>
+          <rect x="97.7" y="71.3" width="10" height="96.7" rx="3"></rect>
+          <rect x="111.3" y="47.1" width="10" height="120.9" rx="3"></rect>
+          <rect x="124.8" y="82.2" width="10" height="85.8" rx="3"></rect>
+          <rect x="138.4" y="88.4" width="10" height="79.6" rx="3"></rect>
+          <rect x="152.0" y="154.0" width="10" height="14.0" rx="3"></rect>
+          <rect x="165.6" y="80.6" width="10" height="87.4" rx="3"></rect>
+          <rect x="179.2" y="76.7" width="10" height="91.3" rx="3"></rect>
+          <rect x="192.7" y="152.4" width="10" height="15.6" rx="3"></rect>
+          <rect x="206.3" y="129.0" width="10" height="39.0" rx="3"></rect>
+          <rect x="219.9" y="109.5" width="10" height="58.5" rx="3"></rect>
+          <rect x="233.5" y="82.2" width="10" height="85.8" rx="3"></rect>
+          <rect x="247.1" y="65.0" width="10" height="103.0" rx="3"></rect>
+          <rect x="260.6" y="109.5" width="10" height="58.5" rx="3"></rect>
+          <rect x="274.2" y="80.6" width="10" height="87.4" rx="3"></rect>
+        </g>
+        <!-- план 115 раз/день: (168 − 78) / 0.78 = 115 -->
+        <line x1="28" y1="78" x2="286" y2="78" stroke="#666" stroke-width="2" stroke-dasharray="5 4"></line>
+        <!-- накопительно по правой оси: y = 168 − сумма / 2000 × 156 -->
+        <path d="M34.8 161.4 L48.4 152.8 L61.9 143.4 L75.5 134.5 L89.1 124.2 L102.7 114.5 L116.3 102.4 L129.8 93.8 L143.4 85.9 L157.0 84.5 L170.6 75.7 L184.2 66.6 L197.7 65.0 L211.3 61.1 L224.9 55.3 L238.5 46.7 L252.1 36.4 L265.6 30.6 L279.2 21.8"
               fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></path>
-        <circle cx="312" cy="63" r="3.5" fill="#4ade80"></circle>
+        <circle cx="279.2" cy="21.8" r="3.5" fill="#4ade80"></circle>
         <g font-size="10" fill="#666" text-anchor="middle">
-          <text x="40" y="190">13</text><text x="108" y="190">17</text><text x="176" y="190">21</text>
-          <text x="244" y="190">26</text><text x="312" y="190">30</text>
+          <text x="34.8" y="190">12</text><text x="102.7" y="190">17</text><text x="170.6" y="190">22</text>
+          <text x="238.5" y="190">27</text><text x="279.2" y="190">30</text>
         </g>
       </svg>
     </div>
 
     <!-- ДЕТАЛИ — .stats-list. Условия миссии, которых на экране не было: план,
-         минимум (по нему миссия уходит в «Под угрозой») и окно правки. -->
+         минимум (по нему миссия уходит в «Под угрозой») и срок. -->
     <div class="sec" style="margin-bottom:10px;">Детали миссии</div>
     <div class="card" style="overflow:hidden; margin-bottom:12px;">
       <div class="row"><span class="k">План в день</span><span class="v">115 раз</span></div>
       <div class="row"><span class="k">Минимум в день</span><span class="v" style="color:#fbbf24;">60 раз</span></div>
       <div class="row"><span class="k">Срок</span><span class="v">12 авг. → 2 сент. · 22 дн.</span></div>
-      <div class="row"><span class="k">Последняя запись</span><span class="v">+80 · сегодня 18:04</span></div>
+      <div class="row"><span class="k">Последняя запись</span><span class="v">+112 · сегодня 18:04</span></div>
     </div>
 
     <div class="card" style="overflow:hidden; margin-bottom:22px;">
