@@ -1,0 +1,237 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; font-family: -apple-system, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; background: #0e0e0e; color: #e8e8e8; -webkit-font-smoothing: antialiased; }
+    a { color: #00a0ff; } a:hover { color: #4db8ff; }
+    .num { font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+    .ico { flex-shrink: 0; }
+  </style>
+</helmet>
+
+<div style="width: 390px; background: #0e0e0e; box-sizing: border-box; position: relative;">
+  <div style="padding: 18px 14px 100px;">
+
+    <!-- ШАПКА -->
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
+      <div style="min-width: 0;">
+        <h1 style="font-size: 25px; font-weight: 800; letter-spacing: -0.02em; margin: 0; display: flex; align-items: baseline; gap: 8px; color: #f2f2f4;">AI-Медкарта<span style="font-size: 11px; font-weight: 600; color: #5a5a62; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;">v1.8.2</span></h1>
+        <h2 style="font-size: 15px; font-weight: 600; color: #8a8a93; margin: 5px 0 0;">Половая активность</h2>
+      </div>
+      <div style="display: flex; gap: 8px; flex-shrink: 0;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 10px; background: #171717; border: 1px solid #262626; color: #cfcfcf;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" style="width:18px;height:18px;"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></span>
+        <span style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 10px; background: #171717; border: 1px solid #262626; color: #cfcfcf;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" style="width:18px;height:18px;"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span>
+      </div>
+    </div>
+
+    <!-- ВКЛАДКИ (горизонтальный скролл, «Секс» подтянут в видимую зону) -->
+    <div style="display: flex; gap: 5px; padding: 3px; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.06); border-radius: 8px; margin: 16px 0 14px; overflow: hidden;">
+      <span style="display: inline-flex; align-items: center; gap: 6px; padding: 9px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; color: #8a8a93; white-space: nowrap;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico" style="width:15px;height:15px;"><path d="M10 2v6.5L4.5 18A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-3L14 8.5V2"/><path d="M8.5 2h7M7 15h10"/></svg>Анализы</span>
+      <span style="display: inline-flex; align-items: center; gap: 6px; padding: 9px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; color: #8a8a93; white-space: nowrap;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico" style="width:15px;height:15px;"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>Жизнь</span>
+      <span style="display: inline-flex; align-items: center; gap: 6px; padding: 9px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; background: #262626; color: #e8e8e8; white-space: nowrap;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico" style="width:15px;height:15px;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>Секс</span>
+      <span style="display: inline-flex; align-items: center; padding: 9px 11px; border-radius: 6px; color: #8a8a93;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico" style="width:15px;height:15px;"><path d="M5 12h14M12 5v14"/></svg></span>
+    </div>
+
+    <!-- ДЕНЬ + ДЕЙСТВИЯ: ничего не уезжает за край, все цели ≥44px -->
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+      <span style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 10px; border: 1px solid #333; color: #ccc; font-size: 15px; flex-shrink: 0;">‹</span>
+      <span style="flex: 1; display: flex; align-items: center; justify-content: center; height: 44px; border-radius: 10px; background: #171717; border: 1px solid #262626; font-size: 14px; font-weight: 600; color: #e8e8e8;">Вс, 30 августа</span>
+      <span style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 10px; border: 1px solid #333; color: #ccc; font-size: 15px; flex-shrink: 0;">›</span>
+    </div>
+
+    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+      <span style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 44px; border-radius: 10px; border: 1px solid #333; color: #ccc; font-size: 13px; font-weight: 500;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" style="width:15px;height:15px;"><path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2zM7 11V7a5 5 0 0 1 10 0v4"/></svg>Приватно</span>
+      <span style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 44px; border-radius: 10px; border: 1px solid #333; color: #ccc; font-size: 13px; font-weight: 500;">Позы</span>
+      <span style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 44px; border-radius: 10px; border: 1px solid #333; color: #ccc; font-size: 13px; font-weight: 500;">Сегодня</span>
+    </div>
+
+    <span style="display: flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border-radius: 10px; background: #00a0ff; color: #fff; font-size: 14px; font-weight: 600; margin-bottom: 16px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="ico" style="width:17px;height:17px;"><path d="M5 12h14M12 5v14"/></svg>Запись активности</span>
+
+    <!-- ПОКАЗАТЕЛИ -->
+    <div style="background: #141414; border: 1px solid #262626; border-radius: 12px; padding: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,.03); background-image: radial-gradient(300px 140px at 100% 0%, rgba(168,85,247,.08), rgba(0,0,0,0) 70%); margin-bottom: 14px;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+        <div style="width: 34px; height: 34px; border-radius: 9px; background: rgba(168,85,247,.12); border: 1px solid rgba(168,85,247,.22); display: flex; align-items: center; justify-content: center; color: #a855f7; flex-shrink: 0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" style="width:17px;height:17px;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        </div>
+        <div>
+          <div style="font-size: 15px; font-weight: 700; letter-spacing: -0.01em;">Половая активность</div>
+          <div style="font-size: 12px; color: #8b8b8b; margin-top: 2px;">день цикла <b class="num" style="color: #e8e8e8; font-weight: 600;">12</b></div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+        <div style="padding: 13px 14px; background: #191919; border: 1px solid #1e1e1e; border-radius: 10px;">
+          <div style="font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #6a6a6a;">За август</div>
+          <div style="display: flex; align-items: baseline; gap: 6px; margin-top: 7px;"><span class="num" style="font-size: 24px; font-weight: 700; line-height: 1;">9</span><span style="font-size: 11.5px; color: #6a6a6a;">записей</span></div>
+          <div style="display: flex; align-items: center; gap: 4px; margin-top: 7px; font-size: 11.5px; color: #4ade80;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="ico" style="width:11px;height:11px;"><path d="M6 15l6-6 6 6"/></svg><span class="num">+3</span><span style="color: #6a6a6a;">к июлю</span></div>
+        </div>
+        <div style="padding: 13px 14px; background: #191919; border: 1px solid #1e1e1e; border-radius: 10px;">
+          <div style="font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #6a6a6a;">Своё среднее</div>
+          <div style="display: flex; align-items: baseline; gap: 6px; margin-top: 7px;"><span class="num" style="font-size: 24px; font-weight: 700; line-height: 1;">7,4</span><span style="font-size: 11.5px; color: #6a6a6a;">в месяц</span></div>
+          <div style="margin-top: 7px; font-size: 11.5px; color: #6a6a6a;">по 6 месяцам</div>
+        </div>
+        <div style="padding: 13px 14px; background: #191919; border: 1px solid #1e1e1e; border-radius: 10px;">
+          <div style="font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #6a6a6a;">Ср. длительность</div>
+          <div style="display: flex; align-items: baseline; gap: 6px; margin-top: 7px;"><span class="num" style="font-size: 24px; font-weight: 700; line-height: 1;">24</span><span style="font-size: 11.5px; color: #6a6a6a;">мин</span></div>
+          <div style="margin-top: 7px; font-size: 11.5px; color: #6a6a6a;">за август</div>
+        </div>
+        <div style="padding: 13px 14px; background: #191919; border: 1px solid rgba(168,85,247,.28); border-radius: 10px;">
+          <div style="font-size: 10.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #a855f7;">Этот день</div>
+          <div style="display: flex; align-items: baseline; gap: 6px; margin-top: 7px;"><span class="num" style="font-size: 24px; font-weight: 700; line-height: 1;">1</span><span style="font-size: 11.5px; color: #6a6a6a;">· 35 мин</span></div>
+          <div style="margin-top: 7px; font-size: 11.5px; color: #6a6a6a;">30 августа</div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: flex-start; gap: 9px; margin-top: 12px; padding: 11px 12px; background: #111; border: 1px solid #1e1e1e; border-radius: 9px;">
+        <span style="display: inline-flex; align-items: center; padding: 3px 7px; border-radius: 5px; background: rgba(168,85,247,.14); color: #a855f7; font-size: 9.5px; font-weight: 700; letter-spacing: .1em; flex-shrink: 0; margin-top: 1px;">СЧЁТ</span>
+        <span style="font-size: 12px; color: #8b8b8b; line-height: 1.5; text-wrap: pretty;">Июль: <b class="num" style="color: #e8e8e8; font-weight: 600;">6</b> · своё среднее за 6 мес: <b class="num" style="color: #e8e8e8; font-weight: 600;">7,4</b> · для 40–44 лет ≈ <b class="num" style="color: #e8e8e8; font-weight: 600;">5</b></span>
+      </div>
+    </div>
+
+    <!-- ЗАПИСИ ДНЯ В ПРИВАТНОМ РЕЖИМЕ: осознанное «закрыто», а не размытый брак -->
+    <div style="background: #141414; border: 1px solid #262626; border-radius: 12px; padding: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,.03); margin-bottom: 14px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px;">
+        <span style="font-size: 14px; font-weight: 700; letter-spacing: -0.01em;">Записи · 30 августа</span>
+        <span class="num" style="font-size: 12px; color: #6a6a6a;">1</span>
+      </div>
+
+      <div style="position: relative; border-radius: 10px; overflow: hidden;">
+        <div style="padding: 15px 16px; background: #191919; border: 1px solid #1e1e1e; border-radius: 10px; filter: blur(7px); user-select: none;">
+          <div style="font-size: 15px; font-weight: 600;">Наездница</div>
+          <div style="font-size: 12px; color: #8b8b8b; margin-top: 6px;">35 мин</div>
+          <div style="font-size: 13px; color: #8b8b8b; line-height: 1.5; margin-top: 8px;">Вечером, без спешки. Утром была тренировка.</div>
+        </div>
+        <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; background: rgba(20,20,20,.55);">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background: rgba(168,85,247,.14); border: 1px solid rgba(168,85,247,.24); display: flex; align-items: center; justify-content: center; color: #a855f7;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" style="width:16px;height:16px;"><path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2zM7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <span style="display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 8px; background: #1f1f1f; border: 1px solid #3a3a3a; color: #e8e8e8; font-size: 12.5px; font-weight: 600;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" style="width:14px;height:14px;"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>Показать</span>
+        </div>
+      </div>
+
+      <div style="text-align: center; font-size: 11.5px; color: #5a5a5a; margin-top: 10px;">Приватный режим включён — записи скрыты от чужих глаз</div>
+    </div>
+
+    <!-- КАЛЕНДАРЬ -->
+    <div style="background: #141414; border: 1px solid #262626; border-radius: 12px; padding: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,.03); margin-bottom: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 14px;">
+        <span style="font-size: 14px; font-weight: 700; letter-spacing: -0.01em;">Август 2026</span>
+        <div style="display: flex; gap: 6px;">
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; border: 1px solid #333; color: #ccc; font-size: 13px;">‹</span>
+          <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; border: 1px solid #333; color: #ccc; font-size: 13px;">›</span>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; margin-bottom: 7px; font-size: 10.5px; font-weight: 600; color: #5a5a5a; text-align: center;">
+        <div>пн</div><div>вт</div><div>ср</div><div>чт</div><div>пт</div><div>сб</div><div>вс</div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px;">
+        <div style="visibility: hidden; height: 44px;"></div><div style="visibility: hidden; height: 44px;"></div><div style="visibility: hidden; height: 44px;"></div><div style="visibility: hidden; height: 44px;"></div><div style="visibility: hidden; height: 44px;"></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">1</div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">2</div><div style="display: flex; gap: 2px; justify-content: center; margin-top: 4px;"><i style="width:4px;height:4px;border-radius:50%;background:#a855f7;display:block;"></i></div></div>
+
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">3</div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">4</div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">5</div><div style="display: flex; gap: 2px; justify-content: center; margin-top: 4px;"><i style="width:4px;height:4px;border-radius:50%;background:#a855f7;display:block;"></i></div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">6</div><div style="display: flex; gap: 2px; justify-content: center; margin-top: 4px;"><i style="width:4px;height:4px;border-radius:50%;background:#a855f7;display:block;"></i><i style="width:4px;height:4px;border-radius:50%;background:#a855f7;display:block;"></i></div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">7</div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">8</div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">9</div></div>
+
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">10</div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">11</div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">12</div><div style="display: flex; gap: 2px; justify-content: center; margin-top: 4px;"><i style="width:4px;height:4px;border-radius:50%;background:#a855f7;display:block;"></i></div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">13</div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">14</div><div style="display: flex; gap: 2px; justify-content: center; margin-top: 4px;"><i style="width:4px;height:4px;border-radius:50%;background:#a855f7;display:block;"></i></div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">15</div><div style="display: flex; gap: 2px; justify-content: center; margin-top: 4px;"><i style="width:4px;height:4px;border-radius:50%;background:#a855f7;display:block;"></i></div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">16</div><div style="display: flex; gap: 2px; justify-content: center; margin-top: 4px;"><i style="width:4px;height:4px;border-radius:50%;background:#a855f7;display:block;"></i><i style="width:4px;height:4px;border-radius:50%;background:#a855f7;display:block;"></i></div></div>
+
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">17</div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">18</div><div style="display: flex; gap: 2px; justify-content: center; margin-top: 4px;"><i style="width:4px;height:4px;border-radius:50%;background:#a855f7;display:block;"></i></div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">19</div><div style="display: flex; gap: 2px; justify-content: center; margin-top: 4px;"><i style="width:4px;height:4px;border-radius:50%;background:#a855f7;display:block;"></i></div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">20</div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">21</div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">22</div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">23</div></div>
+
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">24</div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">25</div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">26</div><div style="display: flex; gap: 2px; justify-content: center; margin-top: 4px;"><i style="width:4px;height:4px;border-radius:50%;background:#a855f7;display:block;"></i></div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">27</div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">28</div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #3a3a3a; color: #8b8b8b;"><div class="num" style="font-size: 13px;">29</div></div>
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: rgba(168,85,247,.16); border: 1px solid #a855f7; color: #f2f2f4;"><div class="num" style="font-size: 13px; font-weight: 700;">30</div><div style="display: flex; gap: 2px; justify-content: center; margin-top: 4px;"><i style="width:4px;height:4px;border-radius:50%;background:#e9d5ff;display:block;"></i></div></div>
+
+        <div style="height: 44px; box-sizing: border-box; padding: 7px 0 0; text-align: center; border-radius: 8px; background: #191919; border: 1px solid #1e1e1e; color: #8b8b8b;"><div class="num" style="font-size: 13px;">31</div></div>
+      </div>
+      <div style="display: flex; gap: 12px; margin-top: 12px; font-size: 10.5px; color: #6a6a6a;">
+        <span style="display: inline-flex; align-items: center; gap: 5px;"><i style="width:5px;height:5px;border-radius:50%;background:#a855f7;display:block;"></i>активность</span>
+        <span style="display: inline-flex; align-items: center; gap: 5px;"><i style="width:9px;height:9px;border-radius:3px;border:1px solid #3a3a3a;display:block;"></i>сегодня</span>
+      </div>
+    </div>
+
+    <!-- ГРАФИК -->
+    <div style="background: #141414; border: 1px solid #262626; border-radius: 12px; padding: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,.03);">
+      <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 14px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#6a6a6a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" style="width:15px;height:15px;"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>Активность за цикл
+      </div>
+      <div style="display: flex; align-items: flex-end; gap: 3px; height: 74px;">
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+        <div style="flex:1;height:62%;border-radius:2px;background:#a855f7;"></div>
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+        <div style="flex:1;height:62%;border-radius:2px;background:#a855f7;"></div>
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+        <div style="flex:1;height:62%;border-radius:2px;background:#a855f7;"></div>
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+        <div style="flex:1;height:100%;border-radius:2px;background:#00a0ff;"></div>
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+        <div style="flex:1;height:62%;border-radius:2px;background:#a855f7;"></div>
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+        <div style="flex:1;height:62%;border-radius:2px;background:#a855f7;"></div>
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+        <div style="flex:1;height:62%;border-radius:2px;background:#a855f7;"></div>
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+        <div style="flex:1;height:62%;border-radius:2px;background:#a855f7;"></div>
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+        <div style="flex:1;height:62%;border-radius:2px;background:#a855f7;"></div>
+        <div style="flex:1;height:9%;border-radius:2px;background:#232323;"></div>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-top: 9px; font-size: 10.5px; color: #5a5a5a;">
+        <span class="num">День 1</span><span class="num">День 14</span><span class="num">День 28</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- НИЖНИЙ ДОК ПЛАТФОРМЫ -->
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 86px;">
+    <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 68px; background: #131313; border-top: 1px solid #232323; display: flex; align-items: center; justify-content: space-around; padding: 0 14px; box-sizing: border-box;">
+      <span style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: rgba(0,160,255,.10); border: 1px solid #00a0ff; color: #00a0ff;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" style="width:19px;height:19px;"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></span>
+      <span style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; color: #5a5a5a;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" style="width:19px;height:19px;"><path d="M2 13l4 4L13 8M12 17l1 1 8-9"/></svg></span>
+      <span style="width: 62px;"></span>
+      <span style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; color: #5a5a5a;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" style="width:19px;height:19px;"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></span>
+      <span style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; color: #5a5a5a;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ico" style="width:19px;height:19px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span>
+    </div>
+    <div style="position: absolute; left: 50%; transform: translateX(-50%); bottom: 26px; width: 62px; height: 62px; border-radius: 50%; background: #00a0ff; display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 0 0 6px #0e0e0e;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" class="ico" style="width:26px;height:26px;"><path d="M5 12h14M12 5v14"/></svg>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
