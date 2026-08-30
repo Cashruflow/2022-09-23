@@ -8,7 +8,7 @@
 <x-dc>
 <helmet>
   <style>
-    /* «ПОСЛЕ» — экран статистики миссии на паттернах сводки медкарты.
+    /* «ПОСЛЕ» — вкладка СТАТИСТИКА модалки миссии, на паттернах сводки медкарты.
        Взято из ui.css как есть, без округлений:
          .stats-hero   linear-gradient(135deg,#0a5fd6 0%,#0090ff 46%,#7a5cff 100%),
                        radius 18, padding 22px 20px, shadow 0 14px 34px rgba(0,120,255,.25)
@@ -18,15 +18,15 @@
          .hab-tile.is-wide  плитка во всю ширину сетки — для плитки риска
        Градиент столбиков — .stats-bar-fill (#0090ff → #7a5cff), развёрнутый по вертикали:
        у горизонтальной полосы он идёт по длине, у столбика длина вертикальная.
-       Палитра — C из medcard_habits.js: card #141414, in #111, bd #262626, bd2 #1e1e1e,
-       tx #e8e8e8, tx2 #8b8b8b, tx3 #666, br #00a0ff, ok #4ade80, wn #fbbf24, dg #f87171.
-       Тач-таргеты — var(--ui-tap) 44px.
+       Палитра — C из medcard_habits.js. Тач-таргеты — var(--ui-tap) 44px.
 
-       Данные пересчитаны из одного основания: цель 2 520 раз на 22 дня (12 авг → 2 сент),
-       набрано 1 874 за 19 дней. Отсюда 74,4%, остаток 646, факт 99/день при плане 115/день
-       (−14%), прогноз 646/99 ≈ 6,5 дн. после 30 авг → 7 сент., то есть на 5 дней позже срока.
-       Дневные значения (19 шт.) дают в сумме ровно 1 874, максимум 155, ниже минимума 60
-       три дня — из них ритм 16 из 19 = 84%. */
+       Одно основание для всех цифр: цель 2 520 раз на 22 дня (12 авг → 2 сент),
+       набрано 1 874 за 19 дней → 74,4%, остаток 646. Дневные значения (19 шт.) дают
+       в сумме ровно 1 874, максимум 155 (18 авг), ниже минимума 60 три дня → ритм 16
+       из 19 = 84%. Темп 99 — среднее за ПОСЛЕДНИЕ 7 ДНЕЙ (693/7): habit_engine.js
+       берёт окно 7 дн. при duration_days ≤ 30, а не за всю миссию. При плане 115 это −14%.
+       Прогноз 7 сент. — met.forecast_date с исходного экрана; до срока 2 сент. остаётся
+       3 дня, значит 646/3 = 215 раз в день, чтобы успеть. */
     body { margin:0; background:#0a0a0a; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
            -webkit-font-smoothing:antialiased; color:#e8e8e8; }
     a { color:#00a0ff; } a:hover { color:#31b6ff; }
@@ -35,6 +35,14 @@
     .sheet { background:#141414; border:1px solid #262626; border-radius:18px; }
     .sec { font-size:12px; color:#8b8b8b; text-transform:uppercase; letter-spacing:.06em; }
     .card { background:#111; border:1px solid #262626; border-radius:14px; }
+    /* Вкладки модалки. Подчёркиванием, а не пилюлей: пилюля на этом же экране уже занята
+       переключателем периода графика, две одинаковые формы читались бы как один контрол. */
+    .tabs { display:flex; border-bottom:1px solid #262626; }
+    .tab { flex:1; height:48px; display:flex; align-items:center; justify-content:center; gap:8px;
+           font-size:15px; font-weight:600; color:#8b8b8b; }
+    .tab svg { width:18px; height:18px; }
+    .tab.on { color:#e8e8e8; box-shadow:inset 0 -2px 0 0 #00a0ff; }
+    .tab .cnt { font-size:12px; font-weight:700; color:#666; font-variant-numeric:tabular-nums; }
     .tile { background:#111; border:1px solid #262626; border-radius:14px; padding:14px 16px;
             display:flex; flex-wrap:wrap; align-items:center; gap:0 12px; }
     .tile .icon { width:38px; height:38px; border-radius:11px; background:rgba(0,160,255,.14);
@@ -54,9 +62,6 @@
     .seg span { flex:1; height:44px; display:flex; align-items:center; justify-content:center;
                 font-size:13px; font-weight:600; color:#8b8b8b; border-radius:9px; }
     .seg span.on { background:#1f1f1f; color:#e8e8e8; }
-    /* Календарь активности: одна клетка — один день миссии, неделя в строке.
-       Недельный грид GitHub на 19-дневной миссии занимал бы 4 колонки из семи
-       и оставлял три четверти карточки пустыми. */
     .cal { display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:6px; }
     .cal-dow { font-size:11px; color:#666; text-align:center; padding-bottom:2px; }
     .cal-d { aspect-ratio:1; border-radius:9px; display:flex; align-items:center; justify-content:center;
@@ -72,8 +77,7 @@
 <div style="padding:10px;">
   <div class="sheet" style="padding:16px 16px 18px;">
 
-    <!-- ШАПКА: иконка миссии 44px (тач-таргет), название, срок и ритм -->
-    <div style="display:flex; align-items:flex-start; gap:12px; margin-bottom:18px;">
+    <div style="display:flex; align-items:flex-start; gap:12px; margin-bottom:14px;">
       <span style="width:44px; height:44px; border-radius:50%; background:#00a0ff; flex:0 0 auto;
                    display:flex; align-items:center; justify-content:center;">
         <svg class="ic" viewBox="0 0 24 24" style="width:22px;height:22px;color:#fff;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
@@ -87,8 +91,20 @@
       </span>
     </div>
 
-    <!-- ГЕРОЙ — паттерн .stats-hero из сводки медкарты. Главный ответ экрана числом,
-         кольцо процента, полоса с засечками чекпоинтов и итог внизу. -->
+    <!-- Вкладки: та же модалка открывается на нужной по тому, что нажали на карточке —
+         значок графика ведёт сюда, глаз — на «Историю». -->
+    <div class="tabs" style="margin-bottom:20px;">
+      <span class="tab on">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
+        Статистика
+      </span>
+      <span class="tab">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        История <span class="cnt">88</span>
+      </span>
+    </div>
+
+    <!-- ГЕРОЙ — паттерн .stats-hero из сводки медкарты. -->
     <div style="position:relative; overflow:hidden; border-radius:18px; padding:22px 20px; margin-bottom:22px;
                 background:linear-gradient(135deg,#0a5fd6 0%,#0090ff 46%,#7a5cff 100%);
                 box-shadow:0 14px 34px rgba(0,120,255,.25);">
@@ -119,25 +135,31 @@
         </div>
       </div>
 
-      <!-- Полоса цели с засечками чекпоинтов: 10, 25 и 50 пройдены, 75 впереди,
-           100 — сам конец полосы. Раньше это был отдельный ряд из пяти чипов. -->
-      <div style="position:relative; height:10px; border-radius:5px; background:rgba(0,0,0,.26); margin-top:18px;">
+      <!-- ЧЕКПОИНТЫ — на самой полосе цели и с подписями: та же шкала, что и прогресс,
+           поэтому отдельный ряд из пяти чипов ей больше не нужен. Взятые — с галочкой. -->
+      <div style="position:relative; height:10px; border-radius:5px; background:rgba(0,0,0,.26); margin-top:20px;">
         <div style="position:absolute; left:0; top:0; bottom:0; width:74.4%; border-radius:5px; background:#fff;"></div>
         <span style="position:absolute; top:-3px; left:10%; width:2px; height:16px; background:rgba(255,255,255,.55);"></span>
         <span style="position:absolute; top:-3px; left:25%; width:2px; height:16px; background:rgba(255,255,255,.55);"></span>
         <span style="position:absolute; top:-3px; left:50%; width:2px; height:16px; background:rgba(255,255,255,.55);"></span>
         <span style="position:absolute; top:-3px; left:75%; width:2px; height:16px; background:rgba(0,0,0,.30);"></span>
       </div>
+      <div class="mono" style="position:relative; height:16px; margin-top:9px; font-size:10.5px; font-weight:700;">
+        <span style="position:absolute; left:10%; transform:translateX(-50%); color:#fff;">✓ 10%</span>
+        <span style="position:absolute; left:25%; transform:translateX(-50%); color:#fff;">✓ 25%</span>
+        <span style="position:absolute; left:50%; transform:translateX(-50%); color:#fff;">✓ 50%</span>
+        <span style="position:absolute; left:75%; transform:translateX(-50%); color:rgba(255,255,255,.55);">75%</span>
+        <span style="position:absolute; right:0; color:rgba(255,255,255,.55);">100%</span>
+      </div>
       <div class="mono" style="position:relative; display:flex; justify-content:space-between; gap:10px;
-                  font-size:12px; color:rgba(255,255,255,.80); margin-top:10px;">
+                  font-size:12px; color:rgba(255,255,255,.80); margin-top:12px;">
         <span>1 874 из 2 520 раз</span>
-        <span>чекпоинты 3 из 5</span>
+        <span>до 75% — 16 раз</span>
       </div>
     </div>
 
-    <!-- ПОКАЗАТЕЛИ — .stats-tile. То, что раньше жило только на карточке в списке
-         и на экран статистики не попадало. Прогноз — плиткой во всю ширину:
-         это единственная плохая новость экрана, ей нужен вес. -->
+    <!-- ПОКАЗАТЕЛИ — .stats-tile. Прогноз плиткой во всю ширину: это единственная
+         плохая новость экрана, ей нужен вес. -->
     <div class="sec" style="margin-bottom:10px;">Показатели</div>
     <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; margin-bottom:22px;">
       <div class="tile is-wide">
@@ -148,7 +170,7 @@
       <div class="tile">
         <span class="icon"><svg class="ic" viewBox="0 0 24 24"><path d="M16 7h6v6"></path><path d="m22 7-8.5 8.5-5-5L2 17"></path></svg></span>
         <span class="num">99</span>
-        <span class="lbl">раз в день при плане 115 — <b style="color:#f87171;">−14%</b><br>среднее за 19 дн.</span>
+        <span class="lbl">раз в день при плане 115 — <b style="color:#f87171;">−14%</b><br>среднее за последние 7 дн.</span>
       </div>
       <div class="tile">
         <span class="icon" style="background:rgba(74,222,128,.14); color:#4ade80;"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg></span>
@@ -158,7 +180,7 @@
     </div>
 
     <!-- АКТИВНОСТЬ — календарём по неделям миссии, а не годовым гридом:
-         на 19 днях годовой грид занимал бы четыре колонки из 53. -->
+         на 19 днях годовой грид занимал четыре колонки из 53. -->
     <div class="sec" style="margin-bottom:10px;">Активность</div>
     <div class="card" style="padding:16px; margin-bottom:22px;">
       <div style="display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:14px;">
@@ -170,26 +192,26 @@
 
         <div class="cal-d" style="background:#141414; color:#3a3a3a;">10</div>
         <div class="cal-d" style="background:#141414; color:#3a3a3a;">11</div>
-        <div class="cal-d" style="background:#14a35a; color:#04240f;">12</div>
+        <div class="cal-d" style="background:#0f6b45; color:rgba(255,255,255,.82);">12</div>
         <div class="cal-d" style="background:#14a35a; color:#04240f;">13</div>
         <div class="cal-d" style="background:#22e07a; color:#063a1e;">14</div>
         <div class="cal-d" style="background:#14a35a; color:#04240f;">15</div>
         <div class="cal-d" style="background:#22e07a; color:#063a1e;">16</div>
 
-        <div class="cal-d" style="background:#22e07a; color:#063a1e;">17</div>
+        <div class="cal-d" style="background:#14a35a; color:#04240f;">17</div>
         <div class="cal-d" style="background:#22e07a; color:#063a1e;">18</div>
         <div class="cal-d" style="background:#14a35a; color:#04240f;">19</div>
         <div class="cal-d" style="background:#14a35a; color:#04240f;">20</div>
         <div class="cal-d" style="background:#0d3a2e; color:rgba(255,255,255,.62);">21</div>
         <div class="cal-d" style="background:#14a35a; color:#04240f;">22</div>
-        <div class="cal-d" style="background:#22e07a; color:#063a1e;">23</div>
+        <div class="cal-d" style="background:#14a35a; color:#04240f;">23</div>
 
         <div class="cal-d" style="background:#0d3a2e; color:rgba(255,255,255,.62);">24</div>
         <div class="cal-d" style="background:#0f6b45; color:rgba(255,255,255,.82);">25</div>
-        <div class="cal-d" style="background:#0f6b45; color:rgba(255,255,255,.82);">26</div>
-        <div class="cal-d" style="background:#14a35a; color:#04240f;">27</div>
+        <div class="cal-d" style="background:#14a35a; color:#04240f;">26</div>
+        <div class="cal-d" style="background:#22e07a; color:#063a1e;">27</div>
         <div class="cal-d" style="background:#22e07a; color:#063a1e;">28</div>
-        <div class="cal-d" style="background:#0f6b45; color:rgba(255,255,255,.82);">29</div>
+        <div class="cal-d" style="background:#22e07a; color:#063a1e;">29</div>
         <div class="cal-d" style="background:#14a35a; color:#04240f;">30</div>
       </div>
       <div style="display:flex; align-items:center; justify-content:flex-end; gap:6px; margin-top:12px; font-size:10.5px; color:#666;">
@@ -202,9 +224,8 @@
       </div>
     </div>
 
-    <!-- ДИНАМИКА — факт столбиками, накопительно линией по ПРАВОЙ оси и пунктир плана,
-         которого на прежнем графике не было: без него столбики не с чем сравнить.
-         19 столбиков = 19 дней миссии, 12 → 30 авг. -->
+    <!-- ДИНАМИКА — 19 столбиков по дням миссии, накопительно по ПРАВОЙ оси
+         и пунктир плана, которого на прежнем графике не было. -->
     <div class="sec" style="margin-bottom:10px;">Динамика</div>
     <div class="card" style="padding:16px; margin-bottom:22px;">
       <div class="seg" style="margin-bottom:16px;">
@@ -240,30 +261,30 @@
           <text x="291" y="94">1 000</text><text x="291" y="133">500</text><text x="291" y="172">0</text>
         </g>
         <g fill="url(#barg)">
-          <rect x="29.8" y="101.7" width="10" height="66.3" rx="3"></rect>
-          <rect x="43.4" y="82.2" width="10" height="85.8" rx="3"></rect>
+          <rect x="29.8" y="113.4" width="10" height="54.6" rx="3"></rect>
+          <rect x="43.4" y="93.9" width="10" height="74.1" rx="3"></rect>
           <rect x="56.9" y="74.4" width="10" height="93.6" rx="3"></rect>
-          <rect x="70.5" y="78.3" width="10" height="89.7" rx="3"></rect>
+          <rect x="70.5" y="90.0" width="10" height="78.0" rx="3"></rect>
           <rect x="84.1" y="65.0" width="10" height="103.0" rx="3"></rect>
-          <rect x="97.7" y="71.3" width="10" height="96.7" rx="3"></rect>
+          <rect x="97.7" y="82.2" width="10" height="85.8" rx="3"></rect>
           <rect x="111.3" y="47.1" width="10" height="120.9" rx="3"></rect>
-          <rect x="124.8" y="82.2" width="10" height="85.8" rx="3"></rect>
-          <rect x="138.4" y="88.4" width="10" height="79.6" rx="3"></rect>
+          <rect x="124.8" y="93.9" width="10" height="74.1" rx="3"></rect>
+          <rect x="138.4" y="100.1" width="10" height="67.9" rx="3"></rect>
           <rect x="152.0" y="154.0" width="10" height="14.0" rx="3"></rect>
-          <rect x="165.6" y="80.6" width="10" height="87.4" rx="3"></rect>
-          <rect x="179.2" y="76.7" width="10" height="91.3" rx="3"></rect>
+          <rect x="165.6" y="92.3" width="10" height="75.7" rx="3"></rect>
+          <rect x="179.2" y="88.4" width="10" height="79.6" rx="3"></rect>
           <rect x="192.7" y="152.4" width="10" height="15.6" rx="3"></rect>
           <rect x="206.3" y="129.0" width="10" height="39.0" rx="3"></rect>
-          <rect x="219.9" y="109.5" width="10" height="58.5" rx="3"></rect>
-          <rect x="233.5" y="82.2" width="10" height="85.8" rx="3"></rect>
-          <rect x="247.1" y="65.0" width="10" height="103.0" rx="3"></rect>
-          <rect x="260.6" y="109.5" width="10" height="58.5" rx="3"></rect>
-          <rect x="274.2" y="80.6" width="10" height="87.4" rx="3"></rect>
+          <rect x="219.9" y="93.9" width="10" height="74.1" rx="3"></rect>
+          <rect x="233.5" y="66.6" width="10" height="101.4" rx="3"></rect>
+          <rect x="247.1" y="52.6" width="10" height="115.4" rx="3"></rect>
+          <rect x="260.6" y="51.0" width="10" height="117.0" rx="3"></rect>
+          <rect x="274.2" y="90.0" width="10" height="78.0" rx="3"></rect>
         </g>
         <!-- план 115 раз/день: (168 − 78) / 0.78 = 115 -->
         <line x1="28" y1="78" x2="286" y2="78" stroke="#666" stroke-width="2" stroke-dasharray="5 4"></line>
         <!-- накопительно по правой оси: y = 168 − сумма / 2000 × 156 -->
-        <path d="M34.8 161.4 L48.4 152.8 L61.9 143.4 L75.5 134.5 L89.1 124.2 L102.7 114.5 L116.3 102.4 L129.8 93.8 L143.4 85.9 L157.0 84.5 L170.6 75.7 L184.2 66.6 L197.7 65.0 L211.3 61.1 L224.9 55.3 L238.5 46.7 L252.1 36.4 L265.6 30.6 L279.2 21.8"
+        <path d="M34.8 162.5 L48.4 155.1 L61.9 145.8 L75.5 138.0 L89.1 127.7 L102.7 119.1 L116.3 107.0 L129.8 99.6 L143.4 92.8 L157.0 91.4 L170.6 83.8 L184.2 75.9 L197.7 74.3 L211.3 70.4 L224.9 63.0 L238.5 52.9 L252.1 41.3 L265.6 29.6 L279.2 21.8"
               fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></path>
         <circle cx="279.2" cy="21.8" r="3.5" fill="#4ade80"></circle>
         <g font-size="10" fill="#666" text-anchor="middle">
@@ -276,21 +297,11 @@
     <!-- ДЕТАЛИ — .stats-list. Условия миссии, которых на экране не было: план,
          минимум (по нему миссия уходит в «Под угрозой») и срок. -->
     <div class="sec" style="margin-bottom:10px;">Детали миссии</div>
-    <div class="card" style="overflow:hidden; margin-bottom:12px;">
+    <div class="card" style="overflow:hidden; margin-bottom:22px;">
       <div class="row"><span class="k">План в день</span><span class="v">115 раз</span></div>
       <div class="row"><span class="k">Минимум в день</span><span class="v" style="color:#fbbf24;">60 раз</span></div>
       <div class="row"><span class="k">Срок</span><span class="v">12 авг. → 2 сент. · 22 дн.</span></div>
-      <div class="row"><span class="k">Последняя запись</span><span class="v">+112 · сегодня 18:04</span></div>
-    </div>
-
-    <div class="card" style="overflow:hidden; margin-bottom:22px;">
-      <div class="row">
-        <span class="k">История записей</span>
-        <span style="display:inline-flex; align-items:center; gap:8px; color:#8b8b8b;">
-          <span class="v">88</span>
-          <svg class="ic" viewBox="0 0 24 24" style="width:18px;height:18px;color:#666;"><path d="m9 18 6-6-6-6"></path></svg>
-        </span>
-      </div>
+      <div class="row"><span class="k">Последняя запись</span><span class="v">+22 · сегодня 18:04</span></div>
     </div>
 
     <div style="display:flex; gap:10px;">

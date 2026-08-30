@@ -1,0 +1,221 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    /* КАРТОЧКА МИССИИ в списке /habits — точка входа в обе вкладки.
+       Разметка повторяет fullBody() из medcard_habits.js: шапка с иконкой и кольцом
+       цели, блок «Сегодня», плитки темпа/ритма/прогноза, ряд дней Пн..Вс, последняя
+       запись и ряд действий. Классы и размеры — .hab-* из ui.css:
+         .hab-card__ico 52px, .hab-card__title 19px, .hab-ring 76px (r=48 в viewBox,
+         stroke 7), .hab-day__mark 30px, .hab-abtn 44px со значком 26px,
+         .hab-btn-result h52 r14, .hab-tile radius 8 padding 9/10.
+
+       ЧТО МЕНЯЕТСЯ: сейчас в ряду действий кнопка «Статистика» нарисована ГЛАЗОМ
+       (svgIco('i-eye'), medcard_habits.js — строка с habitOpenCard), и другой кнопки
+       нет: история спрятана внутрь статистики свёрнутым блоком. Здесь их две —
+       глаз ведёт на вкладку «История», значок графика на вкладку «Статистика».
+       Обе открывают одну и ту же модалку, просто на разной вкладке. */
+    body { margin:0; background:#0a0a0a; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+           -webkit-font-smoothing:antialiased; color:#e8e8e8; }
+    a { color:#00a0ff; } a:hover { color:#31b6ff; }
+    .mono { font-variant-numeric:tabular-nums; }
+    svg.ic { fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .hab-card { position:relative; background:#141414; border:1px solid #262626;
+                border-radius:14px; padding:16px; }
+    .hab-chev { position:absolute; top:4px; right:4px; width:44px; height:44px; display:flex;
+                align-items:center; justify-content:center; border:none; background:transparent; padding:0; }
+    .hab-chev svg { width:18px; height:18px; color:#666; transform:rotate(180deg); }
+    .hab-card__top { display:flex; align-items:center; gap:10px; min-width:0; padding-right:34px; }
+    .hab-card__head { flex:1 1 auto; display:flex; align-items:center; gap:12px; min-width:0; }
+    .hab-card__ico { flex-shrink:0; width:52px; height:52px; border-radius:50%; background:#00a0ff;
+                     display:flex; align-items:center; justify-content:center; }
+    .hab-card__ico svg { width:24px; height:24px; color:#fff; }
+    .hab-card__title { font-size:19px; font-weight:700; color:#e8e8e8; line-height:1.25; }
+    .hab-card__sub { font-size:13px; color:#8b8b8b; margin-top:3px; font-variant-numeric:tabular-nums; }
+    .hab-ring { position:relative; flex:0 0 auto; width:76px; height:76px; }
+    .hab-ring svg { width:100%; height:100%; transform:rotate(-90deg); }
+    .hab-ring__txt { position:absolute; inset:0; display:flex; flex-direction:column;
+                     align-items:center; justify-content:center; gap:1px; }
+    .hab-ring__pct { font-size:19px; font-weight:700; color:#e8e8e8; line-height:1.1;
+                     font-variant-numeric:tabular-nums; }
+    .hab-ring__cap { font-size:9px; letter-spacing:.06em; text-transform:uppercase; color:#666; line-height:1.1; }
+    .hab-today { margin-top:14px; padding-top:12px; border-top:1px solid #1e1e1e; }
+    .hab-today__head { display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+                       font-size:11px; color:#666; text-transform:uppercase; letter-spacing:.05em; }
+    .hab-today__head .v { font-size:12.5px; letter-spacing:0; text-transform:none; color:#8b8b8b;
+                          font-variant-numeric:tabular-nums; }
+    .hab-today__head .v b { color:#e8e8e8; font-weight:700; }
+    .hab-today__hero { margin-top:5px; font-size:14px; color:#8b8b8b; display:flex;
+                       align-items:baseline; gap:7px; }
+    .hab-today__hero b { font-size:30px; font-weight:800; letter-spacing:-.02em; color:#e8e8e8;
+                         line-height:1; font-variant-numeric:tabular-nums; }
+    .hab-bar { position:relative; height:10px; border-radius:5px; background:#1e1e1e;
+               margin-top:11px; overflow:hidden; }
+    .hab-bar__fill { position:absolute; left:0; top:0; bottom:0; border-radius:5px; background:#00a0ff; }
+    .hab-bar__min { position:absolute; top:-1px; bottom:-1px; width:2px; background:#facc15; }
+    .hab-legend { position:relative; height:14px; margin-top:5px; font-size:10.5px; color:#666;
+                  font-variant-numeric:tabular-nums; }
+    .hab-tiles { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; margin-top:12px; }
+    .hab-tile { background:#191919; border:1px solid #262626; border-radius:8px; padding:9px 10px; min-width:0; }
+    .hab-tile.is-wide { grid-column:1 / -1; }
+    .hab-tile__lbl { font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:#666; }
+    .hab-tile__val { margin-top:2px; font-size:16px; font-weight:700; color:#e8e8e8;
+                     font-variant-numeric:tabular-nums; display:flex; align-items:baseline; gap:6px; flex-wrap:wrap; }
+    .hab-tile__val .u { font-size:12px; font-weight:500; color:#8b8b8b; }
+    .hab-tile__val .d { font-size:13px; font-weight:700; }
+    .hab-tile__val .d.is-bad { color:#f87171; }
+    .hab-tile__sub { margin-top:2px; font-size:11px; color:#666; line-height:1.35; }
+    .hab-card__week { margin-top:12px; min-width:0; }
+    .hab-week-days { display:flex; justify-content:space-between; gap:5px; min-width:0; }
+    .hab-day { display:flex; flex-direction:column; align-items:center; gap:7px; }
+    .hab-day__lbl { font-size:11px; color:#666; }
+    .hab-day__mark { width:30px; height:30px; border-radius:50%; display:flex; align-items:center;
+                     justify-content:center; border:1.5px solid #333; }
+    .hab-day__mark svg { width:15px; height:15px; color:#fff; stroke-width:2.5; }
+    .hab-day__mark.is-full { background:#00a0ff; border-color:#00a0ff; }
+    .hab-day__mark.is-partial { background:#facc15; border-color:#facc15; }
+    .hab-day__mark.is-partial svg { color:#3a2e00; }
+    .hab-last { margin-top:12px; display:flex; align-items:center; gap:8px; min-width:0;
+                background:#191919; border:1px solid #262626; border-radius:8px;
+                padding:0 6px 0 10px; min-height:44px; font-size:12px; color:#8b8b8b; }
+    .hab-last > svg { width:14px; height:14px; flex:0 0 auto; color:#666; }
+    .hab-last__txt { flex:1 1 auto; min-width:0; font-variant-numeric:tabular-nums; }
+    .hab-last__txt b { color:#e8e8e8; font-weight:700; }
+    .btn-sm { background:#1a1a1a; border:1px solid #2c2c2c; color:#e8e8e8; font-size:12px;
+              padding:6px 10px; border-radius:7px; }
+    .hab-last__win { flex:0 0 auto; font-size:10.5px; color:#666; padding-right:4px;
+                     font-variant-numeric:tabular-nums; }
+    .hab-card__actions { display:flex; align-items:center; gap:6px; margin-top:12px; }
+    .hab-abtn { width:44px; height:44px; display:flex; align-items:center; justify-content:center;
+                border:none; background:transparent; flex-shrink:0; position:relative; padding:0; }
+    .hab-abtn svg { width:26px; height:26px; color:#00a0ff; stroke-width:2; }
+    .hab-abtn.is-danger svg { color:#f87171; }
+    .hab-abtn__badge { position:absolute; top:2px; right:1px; background:#00a0ff; color:#fff;
+                       font-size:10px; font-weight:700; border-radius:9px; padding:1px 6px;
+                       line-height:1.4; border:2px solid #141414; }
+    .hab-btn-result { flex:1; margin-left:6px; display:inline-flex; align-items:center;
+                      justify-content:center; gap:8px; height:52px; border-radius:14px; border:none;
+                      background:#00a0ff; color:#fff; font-size:16px; font-weight:600; }
+    .hab-btn-result svg { width:18px; height:18px; color:#fff; stroke-width:2.5; }
+  </style>
+</helmet>
+
+<div style="padding:10px;">
+  <div class="hab-card">
+    <button class="hab-chev" type="button" aria-label="Свернуть">
+      <svg class="ic" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg>
+    </button>
+
+    <div class="hab-card__top">
+      <div class="hab-card__head">
+        <div class="hab-card__ico">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+        </div>
+        <div style="flex:1 1 auto; min-width:0;">
+          <div class="hab-card__title">Отжимания</div>
+          <div class="hab-card__sub">1 874 из 2 520 раз</div>
+        </div>
+      </div>
+      <!-- кольцо цели: r=48 в viewBox 104, длина 301.6, при 74% смещение 78.4 -->
+      <div class="hab-ring">
+        <svg viewBox="0 0 104 104">
+          <circle cx="52" cy="52" r="48" fill="none" stroke="#262626" stroke-width="7"></circle>
+          <circle cx="52" cy="52" r="48" fill="none" stroke="#00a0ff" stroke-width="7"
+                  stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="78.4"></circle>
+        </svg>
+        <div class="hab-ring__txt">
+          <span class="hab-ring__pct">74%</span>
+          <span class="hab-ring__cap">цель</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hab-today">
+      <div class="hab-today__head">
+        <span>Сегодня · вс, 30 авг.</span>
+        <span class="v mono">сделано <b>100</b> из 115</span>
+      </div>
+      <div class="hab-today__hero">осталось <b>15</b> раз</div>
+      <!-- заливка 100/115 = 87%, жёлтая засечка минимума 60/115 = 52,2% -->
+      <div class="hab-bar">
+        <span class="hab-bar__fill" style="width:87.0%;"></span>
+        <span class="hab-bar__min" style="left:52.2%;"></span>
+      </div>
+      <div class="hab-legend">
+        <span style="position:absolute; left:0;">100</span>
+        <span style="position:absolute; left:52.2%; transform:translateX(-50%); color:#facc15;">минимум 60</span>
+        <span style="position:absolute; right:0;">план 115 раз</span>
+      </div>
+    </div>
+
+    <div class="hab-tiles">
+      <div class="hab-tile is-wide">
+        <div class="hab-tile__lbl">Темп</div>
+        <div class="hab-tile__val">99 <span class="u">раз в день при плане 115</span>
+          <span class="d is-bad">−14%</span></div>
+        <div class="hab-tile__sub">среднее за последние 7 дн.</div>
+      </div>
+      <div class="hab-tile">
+        <div class="hab-tile__lbl">Ритм</div>
+        <div class="hab-tile__val">84% <span class="u">16 из 19</span></div>
+        <div class="hab-tile__sub">периодов с минимумом 60 раз</div>
+      </div>
+      <div class="hab-tile">
+        <div class="hab-tile__lbl">Прогноз</div>
+        <div class="hab-tile__val">7 сент.</div>
+        <div class="hab-tile__sub">позже срока 2 сент.</div>
+      </div>
+    </div>
+
+    <div class="hab-card__week">
+      <div class="hab-week-days">
+        <div class="hab-day"><span class="hab-day__lbl">Пн</span><span class="hab-day__mark is-full"><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg></span></div>
+        <div class="hab-day"><span class="hab-day__lbl">Вт</span><span class="hab-day__mark is-partial"><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg></span></div>
+        <div class="hab-day"><span class="hab-day__lbl">Ср</span><span class="hab-day__mark is-full"><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg></span></div>
+        <div class="hab-day"><span class="hab-day__lbl">Чт</span><span class="hab-day__mark is-full"><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg></span></div>
+        <div class="hab-day"><span class="hab-day__lbl">Пт</span><span class="hab-day__mark is-full"><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg></span></div>
+        <div class="hab-day"><span class="hab-day__lbl">Сб</span><span class="hab-day__mark is-full"><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg></span></div>
+        <div class="hab-day"><span class="hab-day__lbl">Вс</span><span class="hab-day__mark is-full"><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg></span></div>
+      </div>
+    </div>
+
+    <div class="hab-last">
+      <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+      <span class="hab-last__txt">Последняя <b>+22</b> · 18:04</span>
+      <button class="btn-sm" type="button">Исправить</button>
+      <span class="hab-last__win">26 мин</span>
+    </div>
+
+    <!-- РЯД ДЕЙСТВИЙ. Было: [правка 24ч] [глаз = Статистика] [череп] [+ Результат].
+         Стало: глаз отдан Истории, статистика получила свой значок графика. -->
+    <div class="hab-card__actions">
+      <button class="hab-abtn" type="button" title="Изменить (первые 24ч)">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+        <span class="hab-abtn__badge">24</span>
+      </button>
+      <button class="hab-abtn" type="button" title="История">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+      </button>
+      <button class="hab-abtn" type="button" title="Статистика">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
+      </button>
+      <button class="hab-abtn is-danger" type="button" title="Сдаться">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 2a8 8 0 0 0-8 8v3.5a2 2 0 0 0 1 1.73V18a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2.77a2 2 0 0 0 1-1.73V10a8 8 0 0 0-8-8Z"></path><circle cx="9" cy="11" r="1.5"></circle><circle cx="15" cy="11" r="1.5"></circle></svg>
+      </button>
+      <button class="hab-btn-result" type="button">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+        <span>Результат</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
