@@ -66,13 +66,13 @@ const CSS = `
   .list{flex:1 1 auto;overflow:hidden;}
   .grp{padding:15px var(--ui-page-pad-m) 6px;font-size:10px;letter-spacing:.08em;
        text-transform:uppercase;color:#555;}
-  .row{display:flex;align-items:center;gap:12px;min-height:60px;
-       padding:10px var(--ui-page-pad-m);border-bottom:1px solid #171717;color:inherit;}
+  .row{display:flex;align-items:center;gap:6px;min-height:44px;
+       padding:6px var(--ui-page-pad-m);border-bottom:1px solid #171717;color:inherit;}
   .row.sel{background:#141414;}
   .row .body{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px;}
   .nm{font-family:var(--mono);font-size:14.5px;line-height:1.25;word-break:break-all;}
-  .cm{font-size:12px;line-height:1.35;color:#6a6a6a;
-      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cm{font-size:12px;line-height:1.4;color:#6a6a6a;overflow:hidden;
+      display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
   .pth{font-family:var(--mono);font-size:11.5px;color:#4e4e4e;
        overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .hit{color:var(--ui-brand);background:rgba(0,160,255,.14);border-radius:3px;padding:0 1px;}
@@ -88,7 +88,7 @@ const CSS = `
   .row{position:relative;}
   .row.lv1{padding-left:calc(var(--ui-page-pad-m) + 18px);}
   .row.lv2{padding-left:calc(var(--ui-page-pad-m) + 36px);}
-  .tog{width:17px;height:17px;color:#3f3f3f;transform:rotate(-90deg);
+  .tog{width:15px;height:15px;color:#3f3f3f;transform:rotate(-90deg);
        transition:transform .18s, color .18s;}
   .row.open > .tog{transform:rotate(0deg);color:var(--ui-brand);}
   .row.lf .tog{visibility:hidden;}
