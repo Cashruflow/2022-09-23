@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    /* «ДО» — побайтовая реконструкция текущего экрана статистики миссии.
+       Все значения сняты с исходника: medcard_habits.js (habitOpenCard, goalStripHtml,
+       heatmapHtml, drawHabitChart) и палитра C={bg,card,in,bd,tx,tx2,tx3,br,ok,wn,dg}. */
+    body { margin:0; background:#0a0a0a; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+           -webkit-font-smoothing:antialiased; }
+    a { color:#00a0ff; } a:hover { color:#31b6ff; }
+    .mono { font-variant-numeric:tabular-nums; }
+    .sheet { background:#141414; border:1px solid #262626; border-radius:18px; padding:18px; }
+    .h3 { margin:0 0 4px; font-size:18px; font-weight:700; color:#e8e8e8; display:flex; align-items:center; gap:9px; }
+    .mico { width:30px; height:30px; border-radius:50%; background:#00a0ff; flex-shrink:0;
+            display:inline-flex; align-items:center; justify-content:center; }
+    .mico svg { width:15px; height:15px; color:#fff; fill:none; stroke:currentColor;
+                stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .meta { font-size:12.5px; color:#666; margin-bottom:16px; line-height:1.55; }
+    /* goalStripHtml(): background C.in, border C.bd, radius 10, padding 12px 14px */
+    .goal { background:#111; border:1px solid #262626; border-radius:10px; padding:12px 14px; margin-bottom:14px; }
+    .goal-top { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
+    .goal-lbl { font-size:11px; color:#666; text-transform:uppercase; letter-spacing:.05em; }
+    .goal-pct { font-size:12.5px; font-weight:600; color:#8b8b8b; }
+    .goal-big { font-size:20px; font-weight:700; color:#e8e8e8; margin-bottom:8px; }
+    .goal-big span { font-size:13px; font-weight:400; color:#666; }
+    .goal-track { height:6px; background:#262626; border-radius:3px; overflow:hidden; }
+    .goal-fill { height:100%; width:74.4%; background:#00a0ff; border-radius:3px; }
+    .goal-foot { display:flex; justify-content:space-between; font-size:11px; color:#666; margin-top:6px; }
+    /* чипы чекпоинтов — inline-flex, margin 0 8px 8px 0, перенос на вторую строку */
+    .cps { margin-bottom:14px; font-size:0; }
+    .cp { display:inline-flex; align-items:center; gap:5px; margin:0 8px 8px 0; padding:5px 10px;
+          border-radius:20px; font-size:12px; background:#1a1a1a; color:#666; border:1px solid #2c2c2c; }
+    .cp.on { background:rgba(74,222,128,.12); color:#4ade80; border-color:rgba(74,222,128,.35); }
+    .cp svg { width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:3;
+              stroke-linecap:round; stroke-linejoin:round; }
+    .sec { font-size:12px; color:#8b8b8b; text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px; }
+    .heat { margin-bottom:14px; }
+    .heat-labels { position:relative; height:13px; margin-bottom:4px; font-size:10px; color:#666; }
+    .heat-grid { display:flex; gap:2px; width:max-content; }
+    .heat-col { display:flex; flex-direction:column; gap:2px; }
+    .heat-c { width:9px; height:9px; border-radius:2px; }
+    .rng { display:flex; gap:6px; justify-content:flex-end; margin-bottom:8px; }
+    .rng span { padding:4px 10px; border-radius:6px; font-size:11.5px; color:#8b8b8b; }
+    .rng span.on { background:#1f1f1f; color:#e8e8e8; }
+    .chart { position:relative; height:180px; background:#111; border:1px solid #262626;
+             border-radius:10px; padding:10px; margin-bottom:14px; }
+    .hist { font-size:12px; color:#8b8b8b; text-transform:uppercase; letter-spacing:.05em;
+            margin-bottom:14px; display:flex; align-items:center; gap:6px; }
+    .hist svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2;
+                stroke-linecap:round; stroke-linejoin:round; transform:rotate(-90deg); }
+    .hist i { color:#666; text-transform:none; letter-spacing:0; font-style:normal; }
+    .acts { display:flex; gap:8px; justify-content:flex-end; }
+    .tbtn { background:#1a1a1a; border:1px solid #2c2c2c; color:#e8e8e8; font-size:14px;
+            padding:9px 16px; border-radius:8px; }
+  </style>
+</helmet>
+
+<div style="padding:10px;">
+  <div class="sheet">
+
+    <div class="h3">
+      <span class="mico"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></span>Отжимания
+    </div>
+    <div class="meta">12 авг. → 2 сент. · Активна<br>каждый день</div>
+
+    <div class="goal">
+      <div class="goal-top"><span class="goal-lbl">Цель</span><span class="goal-pct mono">74%</span></div>
+      <div class="goal-big mono">осталось 646 <span>раз</span></div>
+      <div class="goal-track"><div class="goal-fill"></div></div>
+      <div class="goal-foot mono"><span>1 874 из 2 520 раз</span><span>на конец: 7 сент.</span></div>
+    </div>
+
+    <div class="cps">
+      <span class="cp on"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg>10%</span><span class="cp on"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg>25%</span><span class="cp on"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></svg>50%</span><span class="cp">75%</span><span class="cp">100%</span>
+    </div>
+
+    <div class="heat">
+      <div class="sec">Активность с начала миссии</div>
+      <div class="heat-labels"><span style="position:absolute;left:0;">июль</span><span style="position:absolute;left:44px;">авг.</span></div>
+      <div class="heat-grid">
+        <div class="heat-col"><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div></div>
+        <div class="heat-col"><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div></div>
+        <div class="heat-col"><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div></div>
+        <div class="heat-col"><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div></div>
+        <div class="heat-col"><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#1a1a1a;"></div><div class="heat-c" style="background:#22e07a;"></div><div class="heat-c" style="background:#22e07a;"></div><div class="heat-c" style="background:#22e07a;"></div></div>
+        <div class="heat-col"><div class="heat-c" style="background:#22e07a;"></div><div class="heat-c" style="background:#22e07a;"></div><div class="heat-c" style="background:#22e07a;"></div><div class="heat-c" style="background:#22e07a;"></div><div class="heat-c" style="background:#22e07a;"></div><div class="heat-c" style="background:#22e07a;"></div><div class="heat-c" style="background:#22e07a;"></div></div>
+        <div class="heat-col"><div class="heat-c" style="background:#22e07a;"></div><div class="heat-c" style="background:#0d3a2e;"></div><div class="heat-c" style="background:#22e07a;"></div><div class="heat-c" style="background:#22e07a;"></div><div class="heat-c" style="background:#0d3a2e;"></div><div class="heat-c" style="background:#22e07a;"></div><div class="heat-c" style="background:#22e07a;"></div></div>
+        <div class="heat-col"><div class="heat-c" style="background:#22e07a;"></div><div class="heat-c" style="background:#0f6b45;"></div><div class="heat-c" style="background:transparent;"></div><div class="heat-c" style="background:transparent;"></div><div class="heat-c" style="background:transparent;"></div><div class="heat-c" style="background:transparent;"></div><div class="heat-c" style="background:transparent;"></div></div>
+      </div>
+    </div>
+
+    <div class="rng"><span class="on">1M</span><span>3M</span><span>1Y</span><span>All</span></div>
+
+    <div class="chart">
+      <svg viewBox="0 0 350 160" width="100%" height="160" preserveAspectRatio="none" style="display:block;">
+        <g font-size="9" fill="#8b8b8b" font-family="system-ui,sans-serif">
+          <rect x="118" y="2" width="9" height="9" fill="none" stroke="#4ade80" stroke-width="2"></rect>
+          <text x="132" y="10">Накопительно</text>
+          <rect x="210" y="2" width="9" height="9" fill="#00a0ff"></rect>
+          <text x="224" y="10">Факт</text>
+        </g>
+        <g stroke="#1e1e1e" stroke-width="1">
+          <line x1="30" y1="24" x2="318" y2="24"></line><line x1="30" y1="53" x2="318" y2="53"></line>
+          <line x1="30" y1="82" x2="318" y2="82"></line><line x1="30" y1="111" x2="318" y2="111"></line>
+          <line x1="30" y1="140" x2="318" y2="140"></line>
+        </g>
+        <g font-size="9" fill="#666" text-anchor="end" font-family="system-ui,sans-serif">
+          <text x="26" y="27">200</text><text x="26" y="56">150</text>
+          <text x="26" y="85">100</text><text x="26" y="114">50</text><text x="26" y="143">0</text>
+        </g>
+        <g font-size="9" fill="#4ade80" text-anchor="start" font-family="system-ui,sans-serif">
+          <text x="322" y="27">2 000</text><text x="322" y="56">1 500</text>
+          <text x="322" y="85">1 000</text><text x="322" y="114">500</text><text x="322" y="143">0</text>
+        </g>
+        <g fill="#00a0ff">
+          <rect x="34" y="70" width="11" height="70"></rect><rect x="51" y="56" width="11" height="84"></rect>
+          <rect x="68" y="68" width="11" height="72"></rect><rect x="85" y="53" width="11" height="87"></rect>
+          <rect x="102" y="55" width="11" height="85"></rect><rect x="119" y="50" width="11" height="90"></rect>
+          <rect x="136" y="68" width="11" height="72"></rect><rect x="153" y="69" width="11" height="71"></rect>
+          <rect x="170" y="130" width="11" height="10"></rect><rect x="187" y="63" width="11" height="77"></rect>
+          <rect x="204" y="62" width="11" height="78"></rect><rect x="221" y="129" width="11" height="11"></rect>
+          <rect x="238" y="111" width="11" height="29"></rect><rect x="255" y="94" width="11" height="46"></rect>
+          <rect x="272" y="68" width="11" height="72"></rect><rect x="289" y="53" width="11" height="87"></rect>
+          <rect x="306" y="94" width="11" height="46"></rect>
+        </g>
+        <path d="M39 137 L56 130 L73 123 L90 114 L107 105 L124 96 L141 89 L158 82 L175 81 L192 73 L209 65 L226 64 L243 61 L260 56 L277 48 L294 39 L311 34"
+              fill="none" stroke="#4ade80" stroke-width="2"></path>
+        <g font-size="9" fill="#666" font-family="system-ui,sans-serif">
+          <text x="39" y="155" transform="rotate(-30 39 155)">13 авг.</text>
+          <text x="90" y="155" transform="rotate(-30 90 155)">15 авг.</text>
+          <text x="141" y="155" transform="rotate(-30 141 155)">17 авг.</text>
+          <text x="192" y="155" transform="rotate(-30 192 155)">19 авг.</text>
+          <text x="243" y="155" transform="rotate(-30 243 155)">21 авг.</text>
+          <text x="294" y="155" transform="rotate(-30 294 155)">23 авг.</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="hist">
+      <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>История <i>(88)</i>
+    </div>
+
+    <div class="acts">
+      <button class="tbtn" type="button">Поделиться</button>
+      <button class="tbtn" type="button">Закрыть</button>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
