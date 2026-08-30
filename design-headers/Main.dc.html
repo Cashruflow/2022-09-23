@@ -36,6 +36,7 @@
 
     /* H1 платформы */
     .h1{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin:0;color:#fff;}
+    .h1.wrap2{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
     .cnt{color:var(--muted);font-weight:700;}
     .sub{font-size:15px;font-weight:500;color:var(--tx2);line-height:1.35;margin:4px 0 0;}
 
@@ -444,7 +445,7 @@
         <div class="pad" style="padding-top:14px;">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;">
             <div style="display:flex;align-items:baseline;gap:10px;min-width:0;">
-              <h1 class="h1" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Медкарта</h1>
+              <h1 class="h1 wrap2">AI-Медкарта</h1>
               <span class="ver">v1.8.2</span>
               <svg viewBox="0 0 24 24" class="eye"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
             </div>
@@ -453,7 +454,7 @@
               <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
             </div>
           </div>
-          <p class="sub">AI-Медкарта · Профиль · данные в динамике</p>
+          <p class="sub">Профиль · данные о здоровье в динамике</p>
           <div class="medtabs" style="margin-top:18px;">
             <div class="mtab on"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>Профиль</div>
             <div class="mtab"><svg viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Цикл</div>
@@ -465,7 +466,7 @@
         <div class="n good"><b>v</b><span>Версия и глаз истории — в одну строку с H1, по базовой линии. Размер прежний: <span style="font-family:var(--mono);font-size:11px;color:#8a8a93;">14px mono #666</span>.</span></div>
         <div class="n good"><b>15</b><span>Подзаголовок 15px: секция и слоган слились в одну строку вместо трёх.</span></div>
         <div class="n good"><b>≡</b><span>Табы медкарты — тот же компонент, отбивка 18px, полосы под шапкой нет.</span></div>
-        <div class="n good"><b>H1</b><span>«AI-» ушло в подзаголовок: с версией и двумя кнопками полное имя не влезает в 390pt и ломает строку.</span></div>
+        <div class="n good"><b>H1</b><span>Название раздела не сокращаем. Не влезает в 390pt — переносится на вторую строку, а не режется многоточием.</span></div>
       </div>
     </div>
   </div>
@@ -507,7 +508,7 @@
         <div class="pad" style="padding-top:14px;">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;">
             <div style="display:flex;align-items:baseline;gap:10px;min-width:0;">
-              <h1 class="h1" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Лиды</h1>
+              <h1 class="h1 wrap2">CRM — Лиды</h1>
               <span class="ver">v1.3.1</span>
               <svg viewBox="0 0 24 24" class="eye"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
             </div>
@@ -516,7 +517,7 @@
               <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
             </div>
           </div>
-          <p class="sub">CRM · 48 лидов · 12 в работе</p>
+          <p class="sub">48 лидов · 12 в работе</p>
           <div style="display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;">
             <div class="b prim">+ Лид</div>
             <div class="b tbtn"><svg viewBox="0 0 24 24"><path d="M12 21V9M7 14l5-5 5 5M5 3h14"/></svg>Импорт</div>
@@ -525,7 +526,7 @@
         </div>
       </div>
       <div class="notes">
-        <div class="n good"><b>H1</b><span>«CRM —» ушло из заголовка в подзаголовок: раздел и так виден в бургере.</span></div>
+        <div class="n good"><b>H1</b><span>Заголовок оставлен как есть — «CRM — Лиды». Сокращать название раздела ради ширины не надо.</span></div>
         <div class="n good"><b>↓</b><span>Кнопки своим рядом под шапкой, главная слева первой.</span></div>
         <div class="n good"><b>v</b><span>Версия на том же месте, что и у медкарты, — слот один на все модули.</span></div>
       </div>
@@ -555,7 +556,7 @@
         </div>
       </div>
       <div class="notes">
-        <div class="n bad"><b>↩</b><span>Длинный H1 переносится на две строки и утаскивает версию с «плюсом» на третью.</span></div>
+        <div class="n bad"><b>↩</b><span>Длинный H1 переносится и утаскивает версию с «плюсом» на третью строку — заголовок и кнопки расходятся.</span></div>
         <div class="n bad"><b>+</b><span>Кнопка «добавить модуль» вклеена в заголовок между слов — не кнопка, а часть текста.</span></div>
       </div>
     </div>
@@ -565,7 +566,7 @@
         <div class="pad" style="padding-top:14px;">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;">
             <div style="display:flex;align-items:baseline;gap:10px;min-width:0;">
-              <h1 class="h1" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Привычки</h1>
+              <h1 class="h1 wrap2">Ai-трекер привычек</h1>
               <span class="ver">v1.9.1</span>
               <svg viewBox="0 0 24 24" class="eye"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
             </div>
@@ -574,12 +575,12 @@
               <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
             </div>
           </div>
-          <p class="sub">AI-трекер · 7 привычек · серия 12 дней</p>
+          <p class="sub">7 привычек · серия 12 дней</p>
           <div style="margin-top:18px;"><div class="b prim"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Привычка</div></div>
         </div>
       </div>
       <div class="notes">
-        <div class="n good"><b>H1</b><span>Короткий заголовок, полное имя модуля — в подзаголовке. Строка не переносится никогда.</span></div>
+        <div class="n good"><b>H1</b><span>«Ai-трекер привычек» остаётся целиком: на 390pt переносится на две строки, кнопки держатся у верхней.</span></div>
         <div class="n good"><b>+</b><span>«Добавить» — нормальная кнопка своим рядом, а не значок внутри текста.</span></div>
         <div class="n good"><b>=</b><span>Три модуля с версией — одна и та же строка заголовка.</span></div>
       </div>

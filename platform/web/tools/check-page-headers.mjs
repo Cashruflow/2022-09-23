@@ -13,11 +13,13 @@ import { join, basename } from 'node:path';
 
 const DIR = new URL('../public/', import.meta.url).pathname;
 
-// Не страницы портала: лендинги, экраны входа и публичные документы. У них нет
-// ни сайдбара, ни бургера, и шапка платформы им не положена.
+// Не страницы портала: те, что НЕ подключают /sidebar.js ни в одном режиме, —
+// лендинги, экраны входа, публичные документы и кабинетные шаблоны на
+// /cab-sidebar.js. Шапка платформы им не положена, page-header.js там не работает.
+// Список сверять с `grep -l "sidebar.js" web/public/*.html`, а не додумывать.
 const NOT_PORTAL = new Set([
-  'index.html', 'policy.html', 'patient-auth.html', 'crm-auth.html',
-  'booking.html', 'slots.html', 'client.html', 'crm-tenant.html', 'test.html',
+  'policy.html', 'patient-auth.html', 'crm-auth.html', 'booking.html',
+  'client.html', 'admin-patients.html', 'talents.html', 'team.html', 'test.html',
 ]);
 
 // H1 целиком, вместе с содержимым.
