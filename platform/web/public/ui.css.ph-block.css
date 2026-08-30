@@ -26,26 +26,30 @@
    свои поля не добавляет, иначе к отступу страницы приедет второй */
 .ph.ph-inner { max-width: none; margin: 0; padding: 0 !important; }
 
-.ph-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 42px; }
+/* Ряд: слева заголовок, справа блок-виджет из кнопок и версии.
+   align-items:flex-start — кнопки держатся у ПЕРВОЙ строки заголовка. */
+.ph-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 
-/* заголовок и версия — по базовой линии; выравнивание по центру ряда даёт .ph-row */
-.ph-ttl { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+/* Заголовок занимает всё оставшееся место и переносится на столько строк, сколько
+   нужно. Ни nowrap, ни многоточия, ни line-clamp: название раздела — часть продукта. */
+.ph-ttl { flex: 1 1 auto; min-width: 0; }
 .ph-ttl > h1, .ph-t {
   display: block !important;
   font-size: 34px; font-weight: 800; letter-spacing: -.02em; line-height: 1.2;
-  margin: 0 !important; padding: 0 !important; min-width: 0;
+  margin: 0 !important; padding: 0 !important;
   color: var(--ui-tx, #fff);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  white-space: normal; overflow-wrap: anywhere; text-wrap: balance;
 }
-/* значок в заголовке не рисуем нигде — правило, а не оформление */
 .ph-ttl > h1 > svg, .ph-t > svg { display: none !important; }
 
-/* сюда /page-header.js кладёт #hard-refresh и #sb-burger — обе кнопки платформы */
-.ph-act { display: flex; gap: 8px; flex: none; }
-.ph-act:empty { display: none; }
+/* Правый блок-виджет: первой строкой две кнопки, под ними версия со значком истории. */
+.ph-side { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.ph-act { display: flex; gap: 8px; }
 .ph-act > #sb-burger, .ph-act > #hard-refresh {
   position: static !important; top: auto !important; right: auto !important; left: auto !important;
 }
+.ph-ver { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+.ph-ver:empty { display: none; }
 
 .ph-s {
   font-size: 15.5px; font-weight: 500; line-height: 1.35; margin: 4px 0 0 !important;
@@ -70,16 +74,7 @@
 
 @media (max-width: 768px) {
   .ph { padding: 14px var(--ui-page-pad-m, 14px) 0 !important; }
-  /* Длинное название модуля («Ai-трекер привычек», «CRM — Лиды», «AI-Медкарта»)
-     вместе с версией и двумя кнопками в 390pt не помещается. Тексты заголовков
-     НЕ сокращаем — переносим на вторую строку: обрезанное посреди слова название
-     модуля читается хуже переноса. Дальше второй строки — многоточие. */
-  .ph-ttl { flex-wrap: wrap; }
-  .ph-ttl > h1, .ph-t {
-    font-size: 32px;
-    white-space: normal;
-    display: -webkit-box !important; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-  }
+  .ph-ttl > h1, .ph-t { font-size: 32px; }
   .ph-s { font-size: 15px; }
   .ph-tools { margin-top: 14px; }
   /* тач-таргет кнопок шапки */
