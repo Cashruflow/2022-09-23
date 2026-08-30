@@ -9,8 +9,12 @@
 | `Components.dc.html` | Кнопки, табы и меню — срисованы с `btnCss()`, `.med-tabs`, `sidebar.js` |
 | `Rules.dc.html` | Правила, готовая разметка `.ph*` и список файлов под правку |
 | `canvas.json` | Раскладка артбордов на холсте |
+| `view.html` | Лёгкий просмотр без редактора (~100 КБ) — то, что открывается на телефоне |
 
-Опубликованный холст: https://claude.ai/code/artifact/da15422e-a087-461c-9a6b-9c2e5b9b09f2
+Опубликовано:
+
+- холст с редактором (2.5 МБ, десктоп) — https://claude.ai/code/artifact/da15422e-a087-461c-9a6b-9c2e5b9b09f2
+- лёгкий просмотр (~100 КБ, телефон) — https://claude.ai/code/artifact/68a2d6ae-7a6a-497b-a55a-0fd3ccaff63a
 
 ## Пересборка
 
@@ -26,6 +30,23 @@ node <skill>/seed-canvas.mjs \
   --artboard Components.dc.html --artboard Rules.dc.html \
   --canvas canvas.json
 ```
+
+## Просмотр и картинки
+
+`view.html` собирается тем же скриптом-однострочником из `.dc.html` (см. историю коммитов):
+каждый артборд кладётся в `<iframe srcdoc>` — так их CSS не конфликтует между собой, —
+и подгоняется по ширине экрана; кнопка «1:1» возвращает натуральный масштаб.
+
+PNG-версии рендерятся headless-хромом из тех же файлов:
+
+```
+chrome --headless --no-sandbox --hide-scrollbars --force-device-scale-factor=2 \
+  --window-size=<w>,<h> --screenshot=Main.png file://.../Main.html
+```
+
+где `Main.html` — тот же `.dc.html` без строки `support.js` и с `x-dc{display:block}`.
+Учти: Chrome не даёт окно уже ~500px, поэтому проверять мобильную ширину надо
+через вложенный `<iframe width="390">`, а не через `--window-size=390`.
 
 ## Решения (согласованы квизом)
 
