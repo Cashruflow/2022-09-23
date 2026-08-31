@@ -40,7 +40,9 @@ const RULES = [
   {
     id: 'counter-in-h1',
     say: 'счётчик внутри H1 — он идёт в подзаголовок (data-sub)',
-    hit: (attrs, inner) => /<span[^>]*\b(class|id)\s*=\s*"[^"]*\b(cnt|count|total)\b/i.test(inner),
+    // Список тот же, что у COUNTER в page-header.js: проверка должна ругаться ровно
+    // на то, что скрипт молча уносит в подзаголовок, иначе она недоговаривает.
+    hit: (attrs, inner) => /<span[^>]*\b(class|id)\s*=\s*"[^"]*\b(cnt|count|total|stats|badge|kick|muted|shown)\b/i.test(inner),
   },
 ];
 
