@@ -1,0 +1,1353 @@
+<title>Шапка платформы</title>
+<style>
+  :root{
+    --bg:#0b0b0c; --panel:#111113; --line:#232326; --hair:#1a1a1d;
+    --tx:#ececee; --tx2:#9a9aa2; --muted:#6c6c74; --brand:#00a0ff;
+    --sys:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  /* Ничто не имеет права раздвинуть страницу вширь: артборды внутри .stage
+     шириной до 1040px, полоса вкладок — длиннее экрана. Оба скроллятся сами. */
+  html{overflow-x:hidden}
+  body{margin:0;max-width:100vw;overflow-x:hidden;background:var(--bg);color:var(--tx);
+       font-family:var(--sys);-webkit-font-smoothing:antialiased;}
+  a{color:var(--brand)}
+
+  .top{position:sticky;top:0;z-index:20;background:rgba(11,11,12,.92);
+       backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
+       max-width:100vw;overflow:hidden;}
+  .top .in{max-width:1180px;margin:0 auto;padding:14px 20px;
+           display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .brand{display:flex;align-items:baseline;gap:10px;min-width:0;}
+  .brand b{font-size:17px;font-weight:800;letter-spacing:-.02em;white-space:nowrap;}
+  .brand span{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;
+              overflow:hidden;text-overflow:ellipsis;}
+  .fit{flex:none;font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+       text-transform:uppercase;color:var(--tx2);background:var(--panel);
+       border:1px solid var(--line);border-radius:8px;padding:9px 12px;cursor:pointer;
+       min-height:38px;}
+  .fit:hover{color:var(--tx);border-color:#3a3a40;}
+  .fit:focus-visible{outline:2px solid var(--brand);outline-offset:2px;}
+
+  .tabs{max-width:1180px;margin:0 auto;padding:0 20px 12px;
+        display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;min-width:0;}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs a{flex:none;font-size:13px;color:var(--tx2);text-decoration:none;
+          background:var(--panel);border:1px solid var(--line);border-radius:999px;
+          padding:8px 14px;white-space:nowrap;}
+  .tabs a:hover{color:var(--tx);border-color:#3a3a40;}
+
+  main{max-width:1180px;margin:0 auto;padding:26px 20px 80px;
+       display:flex;flex-direction:column;gap:44px;min-width:0;}
+  /* без min-width:0 флекс-элемент не сжимается ниже min-content своего
+     содержимого — а внутри лежит артборд на 960–1040px */
+  .sheet{min-width:0;}
+
+  .sh{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+  .sh h2{font-size:20px;font-weight:800;letter-spacing:-.02em;margin:0;}
+  .sh p{font-size:13.5px;color:var(--tx2);margin:0;flex:1 1 240px;min-width:0;}
+  .dims{font-family:var(--mono);font-size:11px;color:var(--muted);
+        font-variant-numeric:tabular-nums;}
+
+  .stage{border:1px solid var(--hair);border-radius:14px;overflow:hidden;
+         background:#0e0e0e;position:relative;}
+  .stage iframe{border:0;display:block;transform-origin:0 0;background:#0e0e0e;}
+  body.raw .stage{overflow:auto;-webkit-overflow-scrolling:touch;}
+
+  .foot{border-top:1px solid var(--line);margin-top:10px;padding-top:22px;
+        font-size:13px;line-height:1.6;color:var(--muted);}
+  .foot code{font-family:var(--mono);font-size:12px;color:#8fd3ff;}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="top">
+  <div class="in">
+    <span class="brand"><b>Шапка платформы</b><span>ai.cashruflow.ru</span></span>
+    <button class="fit" id="fit" type="button">1:1</button>
+  </div>
+  <nav class="tabs">
+    <a href="#s0">ДО / ПОСЛЕ</a><a href="#s1">Компоненты</a><a href="#s2">Анатомия</a><a href="#s3">Правила</a>
+  </nav>
+</div>
+
+<main>
+  <section class="sheet" id="s0">
+    <header class="sh">
+      <h2>ДО / ПОСЛЕ</h2>
+      <p>Восемь страниц платформы: что было и что станет</p>
+      <span class="dims">960&thinsp;&times;&thinsp;4000</span>
+    </header>
+    <div class="stage" data-w="960" data-h="4000">
+      <iframe loading="lazy" title="ДО / ПОСЛЕ" sandbox srcdoc="<!doctype html>
+<html>
+<head>
+  <meta charset=&quot;utf-8&quot;>
+  
+<style>x-dc{display:block}helmet{display:none}html,body{width:960px;overflow:hidden}</style></head>
+<body>
+<x-dc>
+<helmet>
+  <link rel=&quot;stylesheet&quot; href=&quot;https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap&quot;>
+  <style>
+    :root{
+      --bg:#0e0e0e; --pane:#0a0a0a; --line:#262626; --hair:#1c1c1c;
+      --tx:#e8e8e8; --tx2:#8a8a93; --muted:#6a6a6a;
+      --brand:#00a0ff; --bad:#f87171; --good:#4ade80; --surf2:#1a1a1a; --btnline:#2a2a2a;
+      --sys:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
+    body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--sys);}
+    a{color:var(--brand);} a:hover{color:#3fb9ff;}
+
+    .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+
+    /* ——— телефон-кроп ——— */
+    .ph{width:390px;background:var(--pane);border:1px solid var(--hair);border-radius:16px;
+        overflow:hidden;position:relative;font-family:var(--sys);}
+    .ph .pad{padding:0 14px;}
+
+    /* кнопки обновить/бургер — реальная геометрия платформы (42×42, r10) */
+    .btns{display:flex;gap:8px;}
+    .kbtn{width:42px;height:42px;border-radius:10px;background:var(--surf2);
+          border:1px solid var(--btnline);display:flex;align-items:center;justify-content:center;
+          color:#fff;flex-shrink:0;}
+    .kbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;
+              stroke-linecap:round;stroke-linejoin:round;}
+
+    /* H1 платформы */
+    .h1{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin:0;color:#fff;}
+    .h1.wrap2{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .cnt{color:var(--muted);font-weight:700;}
+    .sub{font-size:15px;font-weight:500;color:var(--tx2);line-height:1.35;margin:4px 0 0;}
+
+    /* содержимое-заглушка под шапкой */
+    .chips{display:flex;gap:10px;}
+    .chip{height:44px;padding:0 20px;border-radius:12px;background:#141414;border:1px solid #2b2b2b;
+          color:#8b8b8b;font-size:14px;display:flex;align-items:center;}
+    .chip.on{background:rgba(0,160,255,.12);border-color:var(--brand);color:var(--brand);font-weight:600;}
+    .cta{height:44px;padding:0 18px;border-radius:12px;background:#3d9bfa;color:#fff;
+         font-size:14.5px;font-weight:600;display:inline-flex;align-items:center;}
+    .card{background:#141414;border:1px solid var(--line);border-radius:14px;padding:14px 16px;}
+    .lead{font-size:13.5px;line-height:1.5;color:var(--muted);margin:0;}
+    .tabs{display:flex;gap:6px;}
+    .tab{height:38px;padding:0 14px;border-radius:9px;background:#141414;border:1px solid #2b2b2b;
+         color:#8b8b8b;font-size:12.5px;display:flex;align-items:center;}
+    .tab.on{background:rgba(0,160,255,.14);border-color:var(--brand);color:var(--brand);font-weight:600;}
+
+    /* ——— разбор под кропом ——— */
+    .notes{margin-top:14px;display:flex;flex-direction:column;gap:7px;}
+    .n{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.45;color:#9a9a9a;}
+    .n b{flex:none;font-family:var(--mono);font-size:11px;line-height:1.6;}
+    .n.bad b{color:var(--bad);} .n.good b{color:var(--good);}
+
+    /* версия модуля — как в module-version-badge.js */
+    .ver{font-size:14px;color:#666;font-weight:600;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;flex:none;}
+    .eye{width:15px;height:15px;flex:none;fill:none;stroke:#666;stroke-width:2;
+         stroke-linecap:round;stroke-linejoin:round;align-self:center;}
+
+    /* кнопки платформы — роли из btnCss() */
+    .b{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:8px;
+       border:1px solid;font-size:13px;font-weight:500;line-height:1.2;padding:10px 18px;white-space:nowrap;}
+    .b svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2;
+           stroke-linecap:round;stroke-linejoin:round;}
+    .b.prim{background:var(--brand);color:#fff;border-color:var(--brand);}
+    .b.tbtn{background:transparent;color:#ccc;border-color:#333;}
+
+    /* табы медкарты — .med-tabs */
+    .medtabs{display:inline-flex;gap:6px;padding:3px;background:rgba(255,255,255,.045);
+             border:1px solid rgba(255,255,255,.06);border-radius:8px;max-width:100%;}
+    .mtab{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:6px;
+          background:transparent;color:#8a8a93;font-size:13.5px;font-weight:600;white-space:nowrap;}
+    .mtab svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:2;
+              stroke-linecap:round;stroke-linejoin:round;}
+    .mtab.on{background:#262626;color:var(--tx);}
+
+    .row{display:flex;gap:68px;align-items:flex-start;}
+    .cell{width:390px;}
+    .rule{height:1px;background:var(--hair);margin:34px 0;}
+  </style>
+</helmet>
+
+<div style=&quot;padding:56px 56px 60px;&quot;>
+
+  <!-- ——— шапка макета ——— -->
+  <div style=&quot;display:flex;align-items:flex-end;justify-content:space-between;gap:32px;&quot;>
+    <div>
+      <div class=&quot;lbl&quot;>ai.cashruflow.ru · design system</div>
+      <h1 style=&quot;font-size:38px;font-weight:800;letter-spacing:-.025em;margin:10px 0 0;color:#fff;&quot;>Шапка страницы</h1>
+      <p style=&quot;font-size:15px;line-height:1.5;color:var(--tx2);margin:8px 0 0;max-width:620px;&quot;>
+        Один паттерн на все страницы платформы. Эталон — «Медкарта / Профиль»:
+        заголовок и кнопки на одной строке, подзаголовок под ним, ничего лишнего слева.
+      </p>
+    </div>
+    <div style=&quot;text-align:right;flex:none;&quot;>
+      <div class=&quot;lbl&quot;>выигрыш по высоте</div>
+      <div style=&quot;font-family:var(--mono);font-size:34px;font-weight:600;color:var(--good);line-height:1.1;margin-top:8px;&quot;>−52<span style=&quot;font-size:18px;color:var(--muted);&quot;>px</span></div>
+      <div style=&quot;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px;&quot;>132px → 80px</div>
+    </div>
+  </div>
+
+  <div style=&quot;height:1px;background:var(--line);margin:36px 0 26px;&quot;></div>
+
+  <!-- ——— подписи колонок ——— -->
+  <div class=&quot;row&quot; style=&quot;margin-bottom:18px;&quot;>
+    <div class=&quot;cell&quot; style=&quot;display:flex;align-items:center;gap:10px;&quot;>
+      <span style=&quot;width:8px;height:8px;border-radius:50%;background:var(--bad);display:block;&quot;></span>
+      <span class=&quot;lbl&quot; style=&quot;color:var(--bad);letter-spacing:.2em;&quot;>Было</span>
+    </div>
+    <div class=&quot;cell&quot; style=&quot;display:flex;align-items:center;gap:10px;&quot;>
+      <span style=&quot;width:8px;height:8px;border-radius:50%;background:var(--good);display:block;&quot;></span>
+      <span class=&quot;lbl&quot; style=&quot;color:var(--good);letter-spacing:.2em;&quot;>Стало</span>
+    </div>
+  </div>
+
+  <!-- ═══════════ 1. ДОСТУПЫ ═══════════ -->
+  <div class=&quot;lbl&quot; style=&quot;margin-bottom:12px;&quot;>01 · /access — Доступы</div>
+  <div class=&quot;row&quot;>
+    <div class=&quot;cell&quot;>
+      <div class=&quot;ph&quot; style=&quot;height:224px;&quot;>
+        <div class=&quot;pad&quot; style=&quot;padding-top:14px;&quot;>
+          <!-- распорка burger-space: 104×46, кнопки fixed сверху справа -->
+          <div style=&quot;display:flex;justify-content:flex-end;height:46px;&quot;>
+            <div class=&quot;btns&quot;>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8&quot;/><polyline points=&quot;21 3 21 8 16 8&quot;/></svg></div>
+              <div class=&quot;kbtn&quot; style=&quot;font-size:20px;line-height:1;&quot;>☰</div>
+            </div>
+          </div>
+          <h1 class=&quot;h1&quot; style=&quot;margin-top:8px;&quot;>Доступы <span class=&quot;cnt&quot; style=&quot;font-size:22px;&quot;>(22)</span></h1>
+          <div class=&quot;chips&quot; style=&quot;margin-top:16px;&quot;>
+            <div class=&quot;chip on&quot;>Личное</div>
+            <div class=&quot;chip&quot;>Проекты</div>
+          </div>
+        </div>
+      </div>
+      <div class=&quot;notes&quot;>
+        <div class=&quot;n bad&quot;><b>46px</b><span>Пустая строка сверху: место под fixed-кнопки резервирует распорка <span style=&quot;font-family:var(--mono);font-size:11px;color:#8a8a93;&quot;>burger-space.js</span>.</span></div>
+        <div class=&quot;n bad&quot;><b>()</b><span>Счётчик вклеен в H1 — заголовок скачет по ширине при каждой смене числа.</span></div>
+        <div class=&quot;n bad&quot;><b>—</b><span>Подзаголовка нет вообще.</span></div>
+      </div>
+    </div>
+
+    <div class=&quot;cell&quot;>
+      <div class=&quot;ph&quot; style=&quot;height:224px;&quot;>
+        <div class=&quot;pad&quot; style=&quot;padding-top:14px;&quot;>
+          <div style=&quot;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;&quot;>
+            <h1 class=&quot;h1&quot;>Доступы</h1>
+            <div class=&quot;btns&quot;>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8&quot;/><polyline points=&quot;21 3 21 8 16 8&quot;/></svg></div>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M4 7h16M4 12h16M4 17h16&quot;/></svg></div>
+            </div>
+          </div>
+          <p class=&quot;sub&quot;>22 доступа · 5 проектов</p>
+          <div class=&quot;chips&quot; style=&quot;margin-top:18px;&quot;>
+            <div class=&quot;chip on&quot;>Личное</div>
+            <div class=&quot;chip&quot;>Проекты</div>
+          </div>
+        </div>
+      </div>
+      <div class=&quot;notes&quot;>
+        <div class=&quot;n good&quot;><b>0px</b><span>Кнопки в потоке, на одной строке с H1 — распорка и пустая строка не нужны.</span></div>
+        <div class=&quot;n good&quot;><b>·</b><span>Счётчик ушёл в подзаголовок: заголовок стабилен, число читается словами.</span></div>
+        <div class=&quot;n good&quot;><b>☰</b><span>Бургер — SVG вместо глифа <span style=&quot;font-family:var(--mono);font-size:11px;color:#8a8a93;&quot;>☰</span>: одинаковая толщина линий на всех шрифтах.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class=&quot;rule&quot;></div>
+
+  <!-- ═══════════ 2. КЛИЕНТЫ ═══════════ -->
+  <div class=&quot;lbl&quot; style=&quot;margin-bottom:12px;&quot;>02 · /clients — Клиенты</div>
+  <div class=&quot;row&quot;>
+    <div class=&quot;cell&quot;>
+      <div class=&quot;ph&quot; style=&quot;height:246px;&quot;>
+        <div class=&quot;pad&quot; style=&quot;padding-top:14px;&quot;>
+          <div style=&quot;display:flex;justify-content:flex-end;height:46px;&quot;>
+            <div class=&quot;btns&quot;>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8&quot;/><polyline points=&quot;21 3 21 8 16 8&quot;/></svg></div>
+              <div class=&quot;kbtn&quot; style=&quot;font-size:20px;line-height:1;&quot;>☰</div>
+            </div>
+          </div>
+          <div style=&quot;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;&quot;>
+            <h1 class=&quot;h1&quot;>Клиенты</h1>
+            <div class=&quot;cta&quot;>+ Кабинет клиента</div>
+          </div>
+          <div class=&quot;card&quot; style=&quot;margin-top:16px;&quot;>
+            <div style=&quot;display:flex;align-items:center;gap:8px;&quot;>
+              <b style=&quot;font-size:17px;color:#fff;&quot;>Пакка</b>
+              <span style=&quot;color:var(--muted);font-size:13px;&quot;>↗</span>
+            </div>
+            <div style=&quot;font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:3px;&quot;>/pakka</div>
+          </div>
+        </div>
+      </div>
+      <div class=&quot;notes&quot;>
+        <div class=&quot;n bad&quot;><b>46px</b><span>Та же пустая строка под кнопками.</span></div>
+        <div class=&quot;n bad&quot;><b>⚠</b><span>Синяя CTA стоит вплотную под бургером и тянет взгляд на себя вместо заголовка.</span></div>
+        <div class=&quot;n bad&quot;><b>↔</b><span>Длинное имя кабинета сожмёт H1 — ряд ломается на узком экране.</span></div>
+      </div>
+    </div>
+
+    <div class=&quot;cell&quot;>
+      <div class=&quot;ph&quot; style=&quot;height:246px;&quot;>
+        <div class=&quot;pad&quot; style=&quot;padding-top:14px;&quot;>
+          <div style=&quot;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;&quot;>
+            <h1 class=&quot;h1&quot;>Клиенты</h1>
+            <div class=&quot;btns&quot;>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8&quot;/><polyline points=&quot;21 3 21 8 16 8&quot;/></svg></div>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M4 7h16M4 12h16M4 17h16&quot;/></svg></div>
+            </div>
+          </div>
+          <p class=&quot;sub&quot;>12 кабинетов · 3 на модерации</p>
+          <div style=&quot;margin-top:18px;&quot;><div class=&quot;cta&quot;>+ Кабинет клиента</div></div>
+          <div class=&quot;card&quot; style=&quot;margin-top:12px;&quot;>
+            <div style=&quot;display:flex;align-items:center;gap:8px;&quot;>
+              <b style=&quot;font-size:17px;color:#fff;&quot;>Пакка</b>
+              <span style=&quot;color:var(--muted);font-size:13px;&quot;>↗</span>
+            </div>
+            <div style=&quot;font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:3px;&quot;>/pakka</div>
+          </div>
+        </div>
+      </div>
+      <div class=&quot;notes&quot;>
+        <div class=&quot;n good&quot;><b>↓</b><span>CTA переехала своим рядом под шапку, слева — не конкурирует с бургером.</span></div>
+        <div class=&quot;n good&quot;><b>=</b><span>Шапка одинаковой высоты на всех страницах, есть кнопка действия или нет.</span></div>
+        <div class=&quot;n good&quot;><b>44</b><span>Тач-таргеты 42–44px, как требует <span style=&quot;font-family:var(--mono);font-size:11px;color:#8a8a93;&quot;>--ui-tap</span>.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class=&quot;rule&quot;></div>
+
+  <!-- ═══════════ 3. JSON-LD ═══════════ -->
+  <div class=&quot;lbl&quot; style=&quot;margin-bottom:12px;&quot;>03 · /jsonld — JSON-LD</div>
+  <div class=&quot;row&quot;>
+    <div class=&quot;cell&quot;>
+      <div class=&quot;ph&quot; style=&quot;height:250px;&quot;>
+        <div style=&quot;padding:14px 14px 0;&quot;>
+          <div style=&quot;display:flex;justify-content:flex-end;height:46px;&quot;>
+            <div class=&quot;btns&quot;>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8&quot;/><polyline points=&quot;21 3 21 8 16 8&quot;/></svg></div>
+              <div class=&quot;kbtn&quot; style=&quot;font-size:20px;line-height:1;&quot;>☰</div>
+            </div>
+          </div>
+          <div style=&quot;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;&quot;>
+            <div style=&quot;display:flex;align-items:center;gap:12px;min-width:0;&quot;>
+              <svg viewBox=&quot;0 0 24 24&quot; style=&quot;width:26px;height:26px;flex:none;fill:none;stroke:var(--brand);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;&quot;><rect x=&quot;9&quot; y=&quot;2&quot; width=&quot;6&quot; height=&quot;6&quot; rx=&quot;1&quot;/><rect x=&quot;2&quot; y=&quot;16&quot; width=&quot;6&quot; height=&quot;6&quot; rx=&quot;1&quot;/><rect x=&quot;16&quot; y=&quot;16&quot; width=&quot;6&quot; height=&quot;6&quot; rx=&quot;1&quot;/><path d=&quot;M12 8v4M5 16v-2h14v2&quot;/></svg>
+              <h1 class=&quot;h1&quot;>JSON-LD</h1>
+            </div>
+            <span style=&quot;font-size:14px;color:var(--muted);white-space:nowrap;&quot;>← AI-платформа</span>
+          </div>
+        </div>
+        <div style=&quot;height:1px;background:#2a2a2a;margin-top:16px;&quot;></div>
+        <div style=&quot;padding:14px;&quot;>
+          <p class=&quot;lead&quot;>Генератор структурированных данных (schema.org) для SEO: Organization, LocalBusiness, WebSite, Service, BreadcrumbList, FAQPage. Название, сайт, телефон…</p>
+        </div>
+      </div>
+      <div class=&quot;notes&quot;>
+        <div class=&quot;n bad&quot;><b>◧</b><span>Иконка слева от заголовка — сдвигает текстовую ось, на разных страницах разного размера.</span></div>
+        <div class=&quot;n bad&quot;><b>←</b><span>«AI-платформа» дублирует бургер и на узком экране налезает на H1.</span></div>
+        <div class=&quot;n bad&quot;><b>—</b><span>Полоса-разделитель: здесь есть, на медкарте и /projects её нет.</span></div>
+        <div class=&quot;n bad&quot;><b>¶</b><span>Вместо подзаголовка — абзац на 40 слов, читать нечего.</span></div>
+      </div>
+    </div>
+
+    <div class=&quot;cell&quot;>
+      <div class=&quot;ph&quot; style=&quot;height:250px;&quot;>
+        <div class=&quot;pad&quot; style=&quot;padding-top:14px;&quot;>
+          <div style=&quot;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;&quot;>
+            <h1 class=&quot;h1&quot;>JSON-LD</h1>
+            <div class=&quot;btns&quot;>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8&quot;/><polyline points=&quot;21 3 21 8 16 8&quot;/></svg></div>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M4 7h16M4 12h16M4 17h16&quot;/></svg></div>
+            </div>
+          </div>
+          <p class=&quot;sub&quot;>Разметка schema.org для сайтов проекта</p>
+          <div class=&quot;tabs&quot; style=&quot;margin-top:18px;&quot;>
+            <div class=&quot;tab on&quot;>Organization</div>
+            <div class=&quot;tab&quot;>WebSite</div>
+            <div class=&quot;tab&quot;>FAQ</div>
+          </div>
+          <p class=&quot;lead&quot; style=&quot;margin-top:16px;&quot;>Полное описание генератора — в «Справке», а не в шапке.</p>
+        </div>
+      </div>
+      <div class=&quot;notes&quot;>
+        <div class=&quot;n good&quot;><b>◨</b><span>Иконки слева от H1 нет ни на одной странице — единая текстовая ось 14px от края.</span></div>
+        <div class=&quot;n good&quot;><b>☰</b><span>Возврат на платформу живёт в бургере, ссылка-дубль убрана.</span></div>
+        <div class=&quot;n good&quot;><b>—</b><span>Полосы нет нигде: шапку от контента отбивает воздух (18px), как на медкарте.</span></div>
+        <div class=&quot;n good&quot;><b>¶</b><span>Подзаголовок — одна строка. Длинное описание уходит в «Справку».</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class=&quot;rule&quot;></div>
+
+  <!-- ═══════════ 4. САЙТЫ ═══════════ -->
+  <div class=&quot;lbl&quot; style=&quot;margin-bottom:12px;&quot;>04 · /sites — Сайты</div>
+  <div class=&quot;row&quot;>
+    <div class=&quot;cell&quot;>
+      <div class=&quot;ph&quot; style=&quot;height:236px;&quot;>
+        <div style=&quot;padding:14px 14px 0;&quot;>
+          <div style=&quot;display:flex;justify-content:flex-end;height:46px;&quot;>
+            <div class=&quot;btns&quot;>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8&quot;/><polyline points=&quot;21 3 21 8 16 8&quot;/></svg></div>
+              <div class=&quot;kbtn&quot; style=&quot;font-size:20px;line-height:1;&quot;>☰</div>
+            </div>
+          </div>
+          <div style=&quot;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;&quot;>
+            <div style=&quot;display:flex;align-items:center;gap:12px;&quot;>
+              <svg viewBox=&quot;0 0 24 24&quot; style=&quot;width:26px;height:26px;flex:none;fill:none;stroke:var(--brand);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;10&quot;/><path d=&quot;M2 12h20M12 2a15.3 15.3 0 0 1 0 20a15.3 15.3 0 0 1 0-20&quot;/></svg>
+              <h1 class=&quot;h1&quot;>Сайты</h1>
+            </div>
+            <span style=&quot;font-size:14px;color:var(--muted);white-space:nowrap;&quot;>← AI-платформа</span>
+          </div>
+        </div>
+        <div style=&quot;height:1px;background:#2a2a2a;margin-top:16px;&quot;></div>
+        <div style=&quot;padding:14px;&quot;>
+          <p class=&quot;lead&quot;>Паспорт сайтов проекта: до 5 сайтов в сравнении — CMS, хостинг, домен и доступы…</p>
+        </div>
+      </div>
+      <div class=&quot;notes&quot;>
+        <div class=&quot;n bad&quot;><b>◧</b><span>Ещё одна иконка слева, другого рисунка и веса — системы нет.</span></div>
+        <div class=&quot;n bad&quot;><b>≠</b><span>Та же схема, что у JSON-LD, но отступы отличаются на пару пикселей — вёрстка скопирована руками.</span></div>
+        <div class=&quot;n bad&quot;><b>↕</b><span>До первого полезного элемента — 190px пустоты.</span></div>
+      </div>
+    </div>
+
+    <div class=&quot;cell&quot;>
+      <div class=&quot;ph&quot; style=&quot;height:236px;&quot;>
+        <div class=&quot;pad&quot; style=&quot;padding-top:14px;&quot;>
+          <div style=&quot;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;&quot;>
+            <h1 class=&quot;h1&quot;>Сайты</h1>
+            <div class=&quot;btns&quot;>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8&quot;/><polyline points=&quot;21 3 21 8 16 8&quot;/></svg></div>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M4 7h16M4 12h16M4 17h16&quot;/></svg></div>
+            </div>
+          </div>
+          <p class=&quot;sub&quot;>Паспорт сайтов проекта — до 5 в сравнении</p>
+          <div class=&quot;card&quot; style=&quot;margin-top:18px;&quot;>
+            <div style=&quot;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);&quot;>Сайт 1</div>
+            <div style=&quot;font-size:16px;font-weight:600;color:#fff;margin-top:4px;&quot;>pakka.ru</div>
+          </div>
+        </div>
+      </div>
+      <div class=&quot;notes&quot;>
+        <div class=&quot;n good&quot;><b>≡</b><span>Один компонент на обе страницы — отступы не могут разъехаться.</span></div>
+        <div class=&quot;n good&quot;><b>↕</b><span>До первого полезного элемента — 80px вместо 190px.</span></div>
+        <div class=&quot;n good&quot;><b>16</b><span>Подзаголовок на одну строку, режется многоточием, а не переносится на три.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class=&quot;rule&quot;></div>
+
+  <!-- ═══════════ 5. ПРОЕКТЫ ═══════════ -->
+  <div class=&quot;lbl&quot; style=&quot;margin-bottom:12px;&quot;>05 · /projects — Проекты</div>
+  <div class=&quot;row&quot;>
+    <div class=&quot;cell&quot;>
+      <div class=&quot;ph&quot; style=&quot;height:206px;&quot;>
+        <div class=&quot;pad&quot; style=&quot;padding-top:14px;&quot;>
+          <div style=&quot;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;&quot;>
+            <div>
+              <div style=&quot;font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#7a7a7a;font-weight:600;&quot;>Работа · Проекты</div>
+              <h1 class=&quot;h1&quot; style=&quot;margin-top:10px;&quot;>Проекты <span class=&quot;cnt&quot; style=&quot;font-size:22px;&quot;>(262)</span></h1>
+            </div>
+            <div class=&quot;btns&quot;>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8&quot;/><polyline points=&quot;21 3 21 8 16 8&quot;/></svg></div>
+              <div class=&quot;kbtn&quot; style=&quot;font-size:20px;line-height:1;&quot;>☰</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class=&quot;notes&quot;>
+        <div class=&quot;n bad&quot;><b>ᴀᴀ</b><span>Капс-киккер «РАБОТА · ПРОЕКТЫ» есть только здесь — четвёртый вариант шапки на платформе.</span></div>
+        <div class=&quot;n bad&quot;><b>↕</b><span>Под шапкой 70px пустоты до первой карточки.</span></div>
+        <div class=&quot;n bad&quot;><b>()</b><span>«(262)» в заголовке — то же, что на «Доступах».</span></div>
+      </div>
+    </div>
+
+    <div class=&quot;cell&quot;>
+      <div class=&quot;ph&quot; style=&quot;height:206px;&quot;>
+        <div class=&quot;pad&quot; style=&quot;padding-top:14px;&quot;>
+          <div style=&quot;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;&quot;>
+            <h1 class=&quot;h1&quot;>Проекты</h1>
+            <div class=&quot;btns&quot;>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8&quot;/><polyline points=&quot;21 3 21 8 16 8&quot;/></svg></div>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M4 7h16M4 12h16M4 17h16&quot;/></svg></div>
+            </div>
+          </div>
+          <p class=&quot;sub&quot;>262 проекта · 18 в работе</p>
+          <div class=&quot;chips&quot; style=&quot;margin-top:18px;&quot;>
+            <div class=&quot;chip on&quot;>Все</div>
+            <div class=&quot;chip&quot;>В работе</div>
+          </div>
+        </div>
+      </div>
+      <div class=&quot;notes&quot;>
+        <div class=&quot;n good&quot;><b>ᴀᴀ</b><span>Киккера нет: раздел показывает бургер, дублировать его в шапке незачем.</span></div>
+        <div class=&quot;n good&quot;><b>↕</b><span>Пустота убрана — фильтр начинается сразу под подзаголовком.</span></div>
+        <div class=&quot;n good&quot;><b>1</b><span>Пять страниц — одна шапка. Пиксель в пиксель.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class=&quot;rule&quot;></div>
+
+  <!-- ═══════════ 6. AI-МЕДКАРТА ═══════════ -->
+  <div class=&quot;lbl&quot; style=&quot;margin-bottom:12px;&quot;>06 · /medcard — AI-Медкарта · эталон, модуль с версией</div>
+  <div class=&quot;row&quot;>
+    <div class=&quot;cell&quot;>
+      <div class=&quot;ph&quot; style=&quot;height:250px;&quot;>
+        <div class=&quot;pad&quot; style=&quot;padding-top:14px;&quot;>
+          <div style=&quot;display:flex;justify-content:flex-end;height:46px;&quot;>
+            <div class=&quot;btns&quot;>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8&quot;/><polyline points=&quot;21 3 21 8 16 8&quot;/></svg></div>
+              <div class=&quot;kbtn&quot; style=&quot;font-size:20px;line-height:1;&quot;>☰</div>
+            </div>
+          </div>
+          <div style=&quot;display:flex;align-items:baseline;gap:10px;margin-top:8px;&quot;>
+            <h1 class=&quot;h1&quot;>AI-Медкарта</h1>
+            <span class=&quot;ver&quot;>v1.8.2</span>
+            <svg viewBox=&quot;0 0 24 24&quot; class=&quot;eye&quot;><path d=&quot;M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z&quot;/><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;3&quot;/></svg>
+          </div>
+          <div style=&quot;font-size:24px;font-weight:600;color:var(--tx2);margin-top:6px;line-height:1.2;&quot;>Профиль</div>
+          <div style=&quot;font-size:13px;color:#6f6f78;font-style:italic;margin-top:8px;&quot;>Все данные о здоровье в динамике всегда под рукой</div>
+        </div>
+      </div>
+      <div class=&quot;notes&quot;>
+        <div class=&quot;n bad&quot;><b>24</b><span>Подзаголовок «Профиль» рисуется браузерным <span style=&quot;font-family:var(--mono);font-size:11px;color:#8a8a93;&quot;>24px</span> — <span style=&quot;font-family:var(--mono);font-size:11px;color:#8a8a93;&quot;>font-size</span> у <span style=&quot;font-family:var(--mono);font-size:11px;color:#8a8a93;&quot;>.ph1-sub</span> не задан.</span></div>
+        <div class=&quot;n bad&quot;><b>“”</b><span>Слоган-курсив третьей строкой — есть только здесь, на других страницах места под него нет.</span></div>
+        <div class=&quot;n bad&quot;><b>46px</b><span>Пустая строка сверху та же, что и везде.</span></div>
+      </div>
+    </div>
+
+    <div class=&quot;cell&quot;>
+      <div class=&quot;ph&quot; style=&quot;height:250px;&quot;>
+        <div class=&quot;pad&quot; style=&quot;padding-top:14px;&quot;>
+          <div style=&quot;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;&quot;>
+            <div style=&quot;display:flex;align-items:baseline;gap:10px;min-width:0;&quot;>
+              <h1 class=&quot;h1 wrap2&quot;>AI-Медкарта</h1>
+              <span class=&quot;ver&quot;>v1.8.2</span>
+              <svg viewBox=&quot;0 0 24 24&quot; class=&quot;eye&quot;><path d=&quot;M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z&quot;/><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;3&quot;/></svg>
+            </div>
+            <div class=&quot;btns&quot;>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8&quot;/><polyline points=&quot;21 3 21 8 16 8&quot;/></svg></div>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M4 7h16M4 12h16M4 17h16&quot;/></svg></div>
+            </div>
+          </div>
+          <p class=&quot;sub&quot;>Профиль · данные о здоровье в динамике</p>
+          <div class=&quot;medtabs&quot; style=&quot;margin-top:18px;&quot;>
+            <div class=&quot;mtab on&quot;><svg viewBox=&quot;0 0 24 24&quot;><circle cx=&quot;12&quot; cy=&quot;8&quot; r=&quot;4&quot;/><path d=&quot;M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8&quot;/></svg>Профиль</div>
+            <div class=&quot;mtab&quot;><svg viewBox=&quot;0 0 24 24&quot;><rect width=&quot;18&quot; height=&quot;18&quot; x=&quot;3&quot; y=&quot;4&quot; rx=&quot;2&quot;/><path d=&quot;M16 2v4M8 2v4M3 10h18&quot;/></svg>Цикл</div>
+            <div class=&quot;mtab&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M10 2v6.5L4.5 18A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-3L14 8.5V2&quot;/><path d=&quot;M8.5 2h7M7 15h10&quot;/></svg>Анализы</div>
+          </div>
+        </div>
+      </div>
+      <div class=&quot;notes&quot;>
+        <div class=&quot;n good&quot;><b>v</b><span>Версия и глаз истории — в одну строку с H1, по базовой линии. Размер прежний: <span style=&quot;font-family:var(--mono);font-size:11px;color:#8a8a93;&quot;>14px mono #666</span>.</span></div>
+        <div class=&quot;n good&quot;><b>15</b><span>Подзаголовок 15px: секция и слоган слились в одну строку вместо трёх.</span></div>
+        <div class=&quot;n good&quot;><b>≡</b><span>Табы медкарты — тот же компонент, отбивка 18px, полосы под шапкой нет.</span></div>
+        <div class=&quot;n good&quot;><b>H1</b><span>Название раздела не сокращаем. Не влезает в 390pt — переносится на вторую строку, а не режется многоточием.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class=&quot;rule&quot;></div>
+
+  <!-- ═══════════ 7. CRM — ЛИДЫ ═══════════ -->
+  <div class=&quot;lbl&quot; style=&quot;margin-bottom:12px;&quot;>07 · /crm/leads — CRM · модуль с версией</div>
+  <div class=&quot;row&quot;>
+    <div class=&quot;cell&quot;>
+      <div class=&quot;ph&quot; style=&quot;height:236px;&quot;>
+        <div class=&quot;pad&quot; style=&quot;padding-top:14px;&quot;>
+          <div style=&quot;display:flex;justify-content:flex-end;height:46px;&quot;>
+            <div class=&quot;btns&quot;>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8&quot;/><polyline points=&quot;21 3 21 8 16 8&quot;/></svg></div>
+              <div class=&quot;kbtn&quot; style=&quot;font-size:20px;line-height:1;&quot;>☰</div>
+            </div>
+          </div>
+          <div style=&quot;display:flex;align-items:baseline;gap:10px;margin-top:8px;flex-wrap:wrap;&quot;>
+            <h1 class=&quot;h1&quot;>CRM — Лиды</h1>
+            <span class=&quot;ver&quot;>v1.3.1</span>
+            <svg viewBox=&quot;0 0 24 24&quot; class=&quot;eye&quot;><path d=&quot;M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z&quot;/><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;3&quot;/></svg>
+          </div>
+          <div style=&quot;display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;&quot;>
+            <div class=&quot;b tbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M12 3v12M7 10l5 5 5-5M5 21h14&quot;/></svg>Шаблон</div>
+            <div class=&quot;b tbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M12 21V9M7 14l5-5 5 5M5 3h14&quot;/></svg>Импорт</div>
+            <div class=&quot;b prim&quot;>+ Лид</div>
+          </div>
+        </div>
+      </div>
+      <div class=&quot;notes&quot;>
+        <div class=&quot;n bad&quot;><b>—</b><span>Подзаголовка нет: непонятно, сколько лидов и сколько в работе.</span></div>
+        <div class=&quot;n bad&quot;><b>⇥</b><span>Три кнопки в ряд с заголовком — на мобиле ряд переносится и шапка растёт вдвое.</span></div>
+      </div>
+    </div>
+
+    <div class=&quot;cell&quot;>
+      <div class=&quot;ph&quot; style=&quot;height:236px;&quot;>
+        <div class=&quot;pad&quot; style=&quot;padding-top:14px;&quot;>
+          <div style=&quot;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;&quot;>
+            <div style=&quot;display:flex;align-items:baseline;gap:10px;min-width:0;&quot;>
+              <h1 class=&quot;h1 wrap2&quot;>CRM — Лиды</h1>
+              <span class=&quot;ver&quot;>v1.3.1</span>
+              <svg viewBox=&quot;0 0 24 24&quot; class=&quot;eye&quot;><path d=&quot;M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z&quot;/><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;3&quot;/></svg>
+            </div>
+            <div class=&quot;btns&quot;>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8&quot;/><polyline points=&quot;21 3 21 8 16 8&quot;/></svg></div>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M4 7h16M4 12h16M4 17h16&quot;/></svg></div>
+            </div>
+          </div>
+          <p class=&quot;sub&quot;>48 лидов · 12 в работе</p>
+          <div style=&quot;display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;&quot;>
+            <div class=&quot;b prim&quot;>+ Лид</div>
+            <div class=&quot;b tbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M12 21V9M7 14l5-5 5 5M5 3h14&quot;/></svg>Импорт</div>
+            <div class=&quot;b tbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M12 3v12M7 10l5 5 5-5M5 21h14&quot;/></svg>Шаблон</div>
+          </div>
+        </div>
+      </div>
+      <div class=&quot;notes&quot;>
+        <div class=&quot;n good&quot;><b>H1</b><span>Заголовок оставлен как есть — «CRM — Лиды». Сокращать название раздела ради ширины не надо.</span></div>
+        <div class=&quot;n good&quot;><b>↓</b><span>Кнопки своим рядом под шапкой, главная слева первой.</span></div>
+        <div class=&quot;n good&quot;><b>v</b><span>Версия на том же месте, что и у медкарты, — слот один на все модули.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class=&quot;rule&quot;></div>
+
+  <!-- ═══════════ 8. ТРЕКЕР ПРИВЫЧЕК ═══════════ -->
+  <div class=&quot;lbl&quot; style=&quot;margin-bottom:12px;&quot;>08 · /habits — Ai-трекер привычек · модуль с версией</div>
+  <div class=&quot;row&quot;>
+    <div class=&quot;cell&quot;>
+      <div class=&quot;ph&quot; style=&quot;height:214px;&quot;>
+        <div class=&quot;pad&quot; style=&quot;padding-top:14px;&quot;>
+          <div style=&quot;display:flex;justify-content:flex-end;height:46px;&quot;>
+            <div class=&quot;btns&quot;>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8&quot;/><polyline points=&quot;21 3 21 8 16 8&quot;/></svg></div>
+              <div class=&quot;kbtn&quot; style=&quot;font-size:20px;line-height:1;&quot;>☰</div>
+            </div>
+          </div>
+          <div style=&quot;display:flex;align-items:baseline;gap:10px;margin-top:8px;flex-wrap:wrap;&quot;>
+            <h1 class=&quot;h1&quot;>AI-Трекер привычек</h1>
+            <span class=&quot;ver&quot;>v1.9.1</span>
+            <svg viewBox=&quot;0 0 24 24&quot; class=&quot;eye&quot;><path d=&quot;M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z&quot;/><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;3&quot;/></svg>
+            <svg viewBox=&quot;0 0 24 24&quot; class=&quot;eye&quot;><path d=&quot;M12 5v14M5 12h14&quot;/></svg>
+          </div>
+        </div>
+      </div>
+      <div class=&quot;notes&quot;>
+        <div class=&quot;n bad&quot;><b>↩</b><span>Длинный H1 переносится и утаскивает версию с «плюсом» на третью строку — заголовок и кнопки расходятся.</span></div>
+        <div class=&quot;n bad&quot;><b>+</b><span>Кнопка «добавить модуль» вклеена в заголовок между слов — не кнопка, а часть текста.</span></div>
+      </div>
+    </div>
+
+    <div class=&quot;cell&quot;>
+      <div class=&quot;ph&quot; style=&quot;height:214px;&quot;>
+        <div class=&quot;pad&quot; style=&quot;padding-top:14px;&quot;>
+          <div style=&quot;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;&quot;>
+            <div style=&quot;display:flex;align-items:baseline;gap:10px;min-width:0;&quot;>
+              <h1 class=&quot;h1 wrap2&quot;>Ai-трекер привычек</h1>
+              <span class=&quot;ver&quot;>v1.9.1</span>
+              <svg viewBox=&quot;0 0 24 24&quot; class=&quot;eye&quot;><path d=&quot;M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z&quot;/><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;3&quot;/></svg>
+            </div>
+            <div class=&quot;btns&quot;>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8&quot;/><polyline points=&quot;21 3 21 8 16 8&quot;/></svg></div>
+              <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M4 7h16M4 12h16M4 17h16&quot;/></svg></div>
+            </div>
+          </div>
+          <p class=&quot;sub&quot;>7 привычек · серия 12 дней</p>
+          <div style=&quot;margin-top:18px;&quot;><div class=&quot;b prim&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M12 5v14M5 12h14&quot;/></svg>Привычка</div></div>
+        </div>
+      </div>
+      <div class=&quot;notes&quot;>
+        <div class=&quot;n good&quot;><b>H1</b><span>«Ai-трекер привычек» остаётся целиком: на 390pt переносится на две строки, кнопки держатся у верхней.</span></div>
+        <div class=&quot;n good&quot;><b>+</b><span>«Добавить» — нормальная кнопка своим рядом, а не значок внутри текста.</span></div>
+        <div class=&quot;n good&quot;><b>=</b><span>Три модуля с версией — одна и та же строка заголовка.</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
+"></iframe>
+    </div>
+  </section>
+  <section class="sheet" id="s1">
+    <header class="sh">
+      <h2>Компоненты</h2>
+      <p>Кнопки, табы и меню — срисованы с кода</p>
+      <span class="dims">1040&thinsp;&times;&thinsp;1720</span>
+    </header>
+    <div class="stage" data-w="1040" data-h="1720">
+      <iframe loading="lazy" title="Компоненты" sandbox srcdoc="<!doctype html>
+<html>
+<head>
+  <meta charset=&quot;utf-8&quot;>
+  
+<style>x-dc{display:block}helmet{display:none}html,body{width:1040px;overflow:hidden}</style></head>
+<body>
+<x-dc>
+<helmet>
+  <link rel=&quot;stylesheet&quot; href=&quot;https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap&quot;>
+  <style>
+    :root{
+      --bg:#0e0e0e; --pane:#0a0a0a; --line:#262626; --hair:#1c1c1c;
+      --tx:#e8e8e8; --tx2:#8a8a93; --muted:#6a6a6a;
+      --brand:#00a0ff; --bad:#f87171; --good:#4ade80;
+      --sys:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
+    body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--sys);}
+    a{color:var(--brand);} a:hover{color:#3fb9ff;}
+    .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+    code{font-family:var(--mono);font-size:11.5px;color:#8fd3ff;background:rgba(0,160,255,.08);border-radius:4px;padding:1px 5px;}
+    h2{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0;color:#fff;}
+    .note{font-size:13px;line-height:1.5;color:var(--muted);margin:6px 0 0;max-width:640px;}
+    .rule{height:1px;background:var(--line);margin:38px 0 30px;}
+
+    /* ——— кнопки: роли из btnCss(), server.js ——— */
+    .b{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:8px;
+       border:1px solid;font-size:13px;font-weight:500;line-height:1.2;padding:10px 18px;white-space:nowrap;}
+    .b svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .b.prim{background:var(--brand);color:#fff;border-color:var(--brand);}
+    .b.prim.hov{background:transparent;color:#fff;border-color:var(--brand);}
+    .b.ghost{background:transparent;color:#ccc;border-color:#333;}
+    .b.ghost.hov{background:#1f1f1f;color:#fff;border-color:var(--brand);}
+    .b.dang{background:#3a1010;color:#f87171;border-color:#7a2e2e;}
+    .b.dang.hov{background:#4a1414;color:#ffb4b4;border-color:var(--bad);}
+    .b.sm{padding:6px 12px;font-size:12px;}
+    .b.off{opacity:.5;}
+    .b.pm{background:#3a0d0d;color:#f87171;border-color:#7a2e0b;}
+    .ib{display:inline-flex;align-items:center;justify-content:center;padding:4px;border-radius:4px;
+        background:transparent;border:1px solid transparent;}
+    .ib svg{width:15px;height:15px;fill:none;stroke:#8a8a8a;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .ib.hov svg{stroke:var(--brand);}
+    .ib.del.hov svg{stroke:var(--bad);}
+
+    .brow{display:flex;align-items:center;gap:14px;}
+    .btab{display:grid;grid-template-columns:118px 1fr 1fr 250px;gap:18px;align-items:center;
+          padding:14px 0;border-bottom:1px solid var(--hair);}
+    .btab.hd{padding:0 0 10px;border-bottom:1px solid var(--line);}
+    .btab.hd span{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+    .rolename{font-family:var(--mono);font-size:12px;color:#fff;}
+    .rolehint{font-size:12px;line-height:1.45;color:var(--muted);}
+
+    /* ——— табы медкарты (.med-tabs) ——— */
+    .medtabs{display:inline-flex;gap:6px;padding:3px;background:rgba(255,255,255,.045);
+             border:1px solid rgba(255,255,255,.06);border-radius:8px;max-width:100%;}
+    .mtab{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:6px;
+          background:transparent;color:#8a8a93;font-size:13.5px;font-weight:600;white-space:nowrap;}
+    .mtab svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .mtab.on{background:#262626;color:var(--tx);}
+    .mtab.hov{background:rgba(255,255,255,.05);color:#f2f2f4;}
+    /* мобильный вариант: значок сверху, подпись снизу, во всю ширину */
+    .medtabs.mob{display:flex;width:390px;gap:4px;}
+    .medtabs.mob .mtab{flex:1 1 0;flex-direction:column;gap:4px;font-size:10.5px;padding:8px 2px;min-height:44px;justify-content:center;}
+
+    /* ——— сайдбар (sidebar.js) ——— */
+    .sb{width:230px;background:var(--pane);border:1px solid var(--hair);border-radius:14px;
+        padding:16px 0;display:flex;flex-direction:column;overflow:hidden;}
+    .sb-logo{padding:6px 20px 14px;font-size:16px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px;}
+    .sb-logo .v{font-size:11px;color:#555;font-weight:400;}
+    .dot{width:8px;height:8px;border-radius:50%;background:#2ecc71;box-shadow:0 0 5px #2ecc7166;flex:none;}
+    .sb-group{padding:14px 20px 6px;font-size:10px;letter-spacing:.08em;color:#555;text-transform:uppercase;
+              display:flex;align-items:center;justify-content:space-between;}
+    .sb-items{position:relative;}
+    .sb-items::before{content:'';position:absolute;left:27px;top:0;bottom:6px;width:1px;background:var(--hair);}
+    .sb-link{display:flex;align-items:center;gap:11px;padding:8px 14px 8px 44px;margin-right:10px;
+             color:#aaa;font-size:14px;border-radius:0 8px 8px 0;position:relative;text-decoration:none;}
+    .sb-link::before{content:'';position:absolute;left:28px;top:50%;width:9px;height:1px;background:#232323;}
+    .sb-link svg{width:18px;height:18px;flex:none;fill:none;stroke:#8a8a8a;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .sb-link.hov{background:#141414;color:#fff;}
+    .sb-link.hov::before{background:#3d3d3d;width:11px;}
+    .sb-link.hov svg{stroke:#fff;}
+    .sb-link.act{background:linear-gradient(90deg, rgba(0,160,255,.14), rgba(0,160,255,.03));color:var(--brand);font-weight:600;}
+    .sb-link.act::before{background:var(--brand);width:12px;box-shadow:0 0 6px rgba(0,160,255,.6);}
+    .sb-link.act svg{stroke:var(--brand);}
+    .sb-badge{margin-left:auto;background:#e05252;color:#fff;font-size:10px;min-width:18px;height:18px;
+              border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;}
+    .sb-foot{padding:14px 20px;border-top:1px solid var(--hair);display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+    .sb-set{display:flex;align-items:center;gap:9px;font-size:13px;color:#aaa;padding:8px 10px;margin:0 -10px;
+            border-radius:8px;border:1px solid #1e1e1e;background:#101010;}
+    .sb-set svg{width:16px;height:16px;flex:none;fill:none;stroke:#8a8a8a;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .sb-inp{background:#101010;border:1px solid #1e1e1e;border-radius:8px;padding:8px 10px;color:#666;font-size:13px;margin:0 -10px;}
+    .sb-home{display:flex;align-items:center;gap:7px;color:#666;font-size:12px;}
+    .sb-home svg{width:14px;height:14px;flex:none;fill:none;stroke:#666;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+    /* ——— мобильная шторка меню ——— */
+    .sheet{width:390px;background:var(--pane);border:1px solid var(--hair);
+           border-radius:22px 22px 0 0;padding:8px 0 14px;box-shadow:0 -10px 30px rgba(0,0,0,.6);}
+    .grab{width:38px;height:4px;border-radius:2px;background:#2c2c2c;margin:4px auto 10px;}
+  </style>
+</helmet>
+
+<div style=&quot;padding:56px;&quot;>
+
+  <div class=&quot;lbl&quot;>Компоненты платформы</div>
+  <h1 style=&quot;font-size:34px;font-weight:800;letter-spacing:-.025em;margin:10px 0 0;color:#fff;&quot;>Кнопки, табы, меню</h1>
+  <p class=&quot;note&quot; style=&quot;max-width:660px;&quot;>
+    Всё уже существует в коде — эти образцы срисованы с него, а не придуманы:
+    роли кнопок из <code>btnCss()</code> в <code>server.js</code>, табы из <code>.med-tabs</code>
+    медкарты, меню из <code>sidebar.js</code>. Новая шапка ничего из этого не меняет.
+  </p>
+
+  <div class=&quot;rule&quot;></div>
+
+  <!-- ═══════ КНОПКИ ═══════ -->
+  <h2>Кнопки</h2>
+  <p class=&quot;note&quot;>
+    Пять ролей. Геометрия одна: <code>padding 10px 18px</code>, <code>radius --ui-radius 8px</code>,
+    <code>13px / 500</code>, значок <code>15px</code>, <code>gap 7px</code>. Цвета — из <code>/set → «Кнопки»</code>,
+    литералов на страницах не пишем.
+  </p>
+
+  <div style=&quot;margin-top:24px;&quot;>
+    <div class=&quot;btab hd&quot;><span>Роль</span><span>Покой</span><span>Наведение</span><span>Когда</span></div>
+
+    <div class=&quot;btab&quot;>
+      <div class=&quot;rolename&quot;>.btn</div>
+      <div><div class=&quot;b prim&quot;>Сохранить</div></div>
+      <div><div class=&quot;b prim hov&quot;>Сохранить</div></div>
+      <div class=&quot;rolehint&quot;>Главное действие на экране: сохранить, создать, отправить. Одна на страницу.</div>
+    </div>
+
+    <div class=&quot;btab&quot;>
+      <div class=&quot;rolename&quot;>.tbtn</div>
+      <div><div class=&quot;b ghost&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M12 21V9M7 14l5-5 5 5M5 3h14&quot;/></svg>Импорт</div></div>
+      <div><div class=&quot;b ghost hov&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M12 21V9M7 14l5-5 5 5M5 3h14&quot;/></svg>Импорт</div></div>
+      <div class=&quot;rolehint&quot;>Всё остальное: отмена, импорт, «найти», мелкие действия в строках.</div>
+    </div>
+
+    <div class=&quot;btab&quot;>
+      <div class=&quot;rolename&quot;>.btn-danger</div>
+      <div><div class=&quot;b dang&quot;>Удалить</div></div>
+      <div><div class=&quot;b dang hov&quot;>Удалить</div></div>
+      <div class=&quot;rolehint&quot;>Необратимое: удалить, закрыть навсегда, сбросить.</div>
+    </div>
+
+    <div class=&quot;btab&quot;>
+      <div class=&quot;rolename&quot;>.ibtn</div>
+      <div class=&quot;brow&quot;>
+        <div class=&quot;ib&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z&quot;/><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;3&quot;/></svg></div>
+        <div class=&quot;ib&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z&quot;/></svg></div>
+        <div class=&quot;ib del&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6&quot;/></svg></div>
+      </div>
+      <div class=&quot;brow&quot;>
+        <div class=&quot;ib hov&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z&quot;/><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;3&quot;/></svg></div>
+        <div class=&quot;ib hov&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z&quot;/></svg></div>
+        <div class=&quot;ib del hov&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6&quot;/></svg></div>
+      </div>
+      <div class=&quot;rolehint&quot;>Голый значок без подписи: глаз, карандаш, корзина. Корзина краснеет на наведении — единственная подсказка «необратимо».</div>
+    </div>
+
+    <div class=&quot;btab&quot;>
+      <div class=&quot;rolename&quot;>.btn-sm</div>
+      <div class=&quot;brow&quot;><div class=&quot;b prim sm&quot;>Прогнать</div><div class=&quot;b ghost sm&quot;>Добавить</div></div>
+      <div class=&quot;brow&quot;><div class=&quot;b prim hov sm&quot;>Прогнать</div><div class=&quot;b ghost hov sm&quot;>Добавить</div></div>
+      <div class=&quot;rolehint&quot;>Модификатор поверх любой роли: те же цвета, <code>6px 12px / 12px</code>.</div>
+    </div>
+
+    <div class=&quot;btab&quot; style=&quot;border-bottom:none;&quot;>
+      <div class=&quot;rolename&quot; style=&quot;color:var(--muted);&quot;>состояния</div>
+      <div class=&quot;brow&quot;><div class=&quot;b prim off&quot;>Недоступно</div></div>
+      <div class=&quot;brow&quot;><div class=&quot;b pm&quot;>Только ПМ</div></div>
+      <div class=&quot;rolehint&quot;><code>:disabled</code> — <code>opacity .5</code>. <code>.pm-only</code> красное: то, чего не видит клиент.</div>
+    </div>
+  </div>
+
+  <div class=&quot;rule&quot;></div>
+
+  <!-- ═══════ ТАБЫ ═══════ -->
+  <h2>Табы</h2>
+  <p class=&quot;note&quot;>
+    Сегментированный переключатель медкарты. Подложка-«ванночка» <code>rgba(255,255,255,.045)</code>
+    с рамкой <code>.06</code> и внутренним отступом <code>3px</code>; активный таб — плашка <code>#262626</code>.
+    Не переносятся, а уезжают прокруткой вбок.
+  </p>
+
+  <div style=&quot;margin-top:24px;display:flex;gap:48px;align-items:flex-start;flex-wrap:wrap;&quot;>
+    <div>
+      <div class=&quot;lbl&quot; style=&quot;margin-bottom:12px;&quot;>Десктоп</div>
+      <div class=&quot;medtabs&quot;>
+        <div class=&quot;mtab on&quot;><svg viewBox=&quot;0 0 24 24&quot;><circle cx=&quot;12&quot; cy=&quot;8&quot; r=&quot;4&quot;/><path d=&quot;M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8&quot;/></svg>Профиль</div>
+        <div class=&quot;mtab hov&quot;><svg viewBox=&quot;0 0 24 24&quot;><rect width=&quot;18&quot; height=&quot;18&quot; x=&quot;3&quot; y=&quot;4&quot; rx=&quot;2&quot;/><path d=&quot;M16 2v4M8 2v4M3 10h18&quot;/></svg>Цикл</div>
+        <div class=&quot;mtab&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M12 5.5c-1.5-1.4-3-2-4.5-2C5 3.5 3 5.7 3 9c0 4 1.5 6 2.5 9 .7 2 1.3 3.5 2.5 3.5 1.5 0 1.8-2 4-2s2.5 2 4 2c1.2 0 1.8-1.5 2.5-3.5C19.5 15 21 13 21 9c0-3.3-2-5.5-4.5-5.5-1.5 0-3 .6-4.5 2z&quot;/></svg>Зубы</div>
+        <div class=&quot;mtab&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M10 2v6.5L4.5 18A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-3L14 8.5V2&quot;/><path d=&quot;M8.5 2h7M7 15h10&quot;/></svg>Анализы</div>
+      </div>
+      <p class=&quot;note&quot; style=&quot;margin-top:12px;font-size:12px;&quot;>
+        Слева направо: активный · наведение · покой.
+      </p>
+    </div>
+
+    <div>
+      <div class=&quot;lbl&quot; style=&quot;margin-bottom:12px;&quot;>Мобила ≤768px · 390pt</div>
+      <div class=&quot;medtabs mob&quot;>
+        <div class=&quot;mtab on&quot;><svg viewBox=&quot;0 0 24 24&quot;><circle cx=&quot;12&quot; cy=&quot;8&quot; r=&quot;4&quot;/><path d=&quot;M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8&quot;/></svg>Профиль</div>
+        <div class=&quot;mtab&quot;><svg viewBox=&quot;0 0 24 24&quot;><rect width=&quot;18&quot; height=&quot;18&quot; x=&quot;3&quot; y=&quot;4&quot; rx=&quot;2&quot;/><path d=&quot;M16 2v4M8 2v4M3 10h18&quot;/></svg>Цикл</div>
+        <div class=&quot;mtab&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M12 5.5c-1.5-1.4-3-2-4.5-2C5 3.5 3 5.7 3 9c0 4 1.5 6 2.5 9 .7 2 1.3 3.5 2.5 3.5 1.5 0 1.8-2 4-2s2.5 2 4 2c1.2 0 1.8-1.5 2.5-3.5C19.5 15 21 13 21 9c0-3.3-2-5.5-4.5-5.5-1.5 0-3 .6-4.5 2z&quot;/></svg>Зубы</div>
+        <div class=&quot;mtab&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M10 2v6.5L4.5 18A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-3L14 8.5V2&quot;/><path d=&quot;M8.5 2h7M7 15h10&quot;/></svg>Анализы</div>
+        <div class=&quot;mtab&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M12 5v14M5 12h14&quot;/></svg>Ещё</div>
+      </div>
+      <p class=&quot;note&quot; style=&quot;margin-top:12px;font-size:12px;&quot;>
+        Значок сверху, подпись снизу, кнопки во всю ширину, высота <code>44px</code>.
+      </p>
+    </div>
+  </div>
+
+  <div class=&quot;rule&quot;></div>
+
+  <!-- ═══════ МЕНЮ ═══════ -->
+  <h2>Меню</h2>
+  <p class=&quot;note&quot;>
+    Одно на всю платформу. На десктопе — колонка <code>230px</code> слева, на мобиле та же
+    разметка приезжает нижней шторкой из-под кнопки-бургера. Группы складываются, у активного
+    пункта голубая засечка со свечением.
+  </p>
+
+  <div style=&quot;margin-top:24px;display:flex;gap:56px;align-items:flex-start;flex-wrap:wrap;&quot;>
+    <div>
+      <div class=&quot;lbl&quot; style=&quot;margin-bottom:12px;&quot;>Десктоп · колонка 230px</div>
+      <div class=&quot;sb&quot;>
+        <div class=&quot;sb-logo&quot;>
+          <svg viewBox=&quot;0 0 24 24&quot; style=&quot;width:22px;height:22px;flex:none;fill:none;stroke:var(--brand);stroke-width:2;stroke-linejoin:round;&quot;><path d=&quot;M12 2 3 7v10l9 5 9-5V7z&quot;/><path d=&quot;m3 7 9 5 9-5M12 12v10&quot;/></svg>
+          AI-платформа <span class=&quot;v&quot;>v3.2</span><span class=&quot;dot&quot;></span>
+        </div>
+        <div class=&quot;sb-group&quot;><span>Работа</span><span style=&quot;font-size:10px;&quot;>▾</span></div>
+        <div class=&quot;sb-items&quot;>
+          <div class=&quot;sb-link&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9&quot;/><path d=&quot;M13.7 21a2 2 0 0 1-3.4 0&quot;/></svg>Уведомления<span class=&quot;sb-badge&quot;>3</span></div>
+          <div class=&quot;sb-link hov&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M3 6h11M3 12h11M3 18h11M18 6l2 2 3-3&quot;/></svg>Бэклог</div>
+          <div class=&quot;sb-link act&quot;><svg viewBox=&quot;0 0 24 24&quot;><rect x=&quot;3&quot; y=&quot;4&quot; width=&quot;18&quot; height=&quot;16&quot; rx=&quot;2&quot;/><path d=&quot;M3 10h18M9 4v16&quot;/></svg>Проекты</div>
+          <div class=&quot;sb-link&quot;><svg viewBox=&quot;0 0 24 24&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;10&quot;/><path d=&quot;M2 12h20M12 2a15.3 15.3 0 0 1 0 20a15.3 15.3 0 0 1 0-20&quot;/></svg>Сайты</div>
+          <div class=&quot;sb-link&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M16 21v-2a4 4 0 0 0-8 0v2&quot;/><circle cx=&quot;12&quot; cy=&quot;7&quot; r=&quot;4&quot;/></svg>Клиенты</div>
+          <div class=&quot;sb-link&quot;><svg viewBox=&quot;0 0 24 24&quot;><rect x=&quot;3&quot; y=&quot;11&quot; width=&quot;18&quot; height=&quot;10&quot; rx=&quot;2&quot;/><path d=&quot;M7 11V7a5 5 0 0 1 10 0v4&quot;/></svg>Доступы</div>
+        </div>
+        <div class=&quot;sb-group&quot;><span>Медкарта</span><span style=&quot;font-size:10px;&quot;>▾</span></div>
+        <div class=&quot;sb-items&quot;>
+          <div class=&quot;sb-link&quot;><svg viewBox=&quot;0 0 24 24&quot;><rect x=&quot;3&quot; y=&quot;4&quot; width=&quot;18&quot; height=&quot;17&quot; rx=&quot;2&quot;/><path d=&quot;M12 9v6M9 12h6M8 2v4M16 2v4&quot;/></svg>Медкарта</div>
+          <div class=&quot;sb-link&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z&quot;/></svg>Активность</div>
+        </div>
+        <div class=&quot;sb-foot&quot;>
+          <div class=&quot;sb-set&quot;><svg viewBox=&quot;0 0 24 24&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;4&quot;/><path d=&quot;M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2&quot;/></svg>Тема<span style=&quot;margin-left:auto;font-size:12px;color:#666;&quot;>Тёмная</span></div>
+          <div class=&quot;sb-set&quot;><svg viewBox=&quot;0 0 24 24&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;3&quot;/><path d=&quot;M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.1a2 2 0 1 1-4 0a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15a2 2 0 1 1 0-4a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 4V3a2 2 0 1 1 4 0a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 11a2 2 0 1 1 0 4Z&quot;/></svg>Настройка</div>
+          <div class=&quot;sb-inp&quot;>Поиск по порталу…</div>
+          <div class=&quot;sb-home&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z&quot;/><path d=&quot;M9 22V12h6v10&quot;/></svg>На главную</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class=&quot;lbl&quot; style=&quot;margin-bottom:12px;&quot;>Мобила · шторка снизу из-под ☰</div>
+      <div class=&quot;sheet&quot;>
+        <div class=&quot;grab&quot;></div>
+        <div class=&quot;sb-logo&quot;>
+          <svg viewBox=&quot;0 0 24 24&quot; style=&quot;width:22px;height:22px;flex:none;fill:none;stroke:var(--brand);stroke-width:2;stroke-linejoin:round;&quot;><path d=&quot;M12 2 3 7v10l9 5 9-5V7z&quot;/><path d=&quot;m3 7 9 5 9-5M12 12v10&quot;/></svg>
+          AI-платформа <span class=&quot;v&quot;>v3.2</span><span class=&quot;dot&quot;></span>
+        </div>
+        <div class=&quot;sb-group&quot;><span>Работа</span><span style=&quot;font-size:10px;&quot;>▾</span></div>
+        <div class=&quot;sb-items&quot;>
+          <div class=&quot;sb-link&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9&quot;/><path d=&quot;M13.7 21a2 2 0 0 1-3.4 0&quot;/></svg>Уведомления<span class=&quot;sb-badge&quot;>3</span></div>
+          <div class=&quot;sb-link act&quot;><svg viewBox=&quot;0 0 24 24&quot;><rect x=&quot;3&quot; y=&quot;11&quot; width=&quot;18&quot; height=&quot;10&quot; rx=&quot;2&quot;/><path d=&quot;M7 11V7a5 5 0 0 1 10 0v4&quot;/></svg>Доступы</div>
+          <div class=&quot;sb-link&quot;><svg viewBox=&quot;0 0 24 24&quot;><rect x=&quot;3&quot; y=&quot;4&quot; width=&quot;18&quot; height=&quot;16&quot; rx=&quot;2&quot;/><path d=&quot;M3 10h18M9 4v16&quot;/></svg>Проекты</div>
+          <div class=&quot;sb-link&quot;><svg viewBox=&quot;0 0 24 24&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;10&quot;/><path d=&quot;M2 12h20M12 2a15.3 15.3 0 0 1 0 20a15.3 15.3 0 0 1 0-20&quot;/></svg>Сайты</div>
+        </div>
+        <div class=&quot;sb-foot&quot; style=&quot;margin-top:6px;&quot;>
+          <div class=&quot;sb-inp&quot;>Поиск по порталу…</div>
+          <div class=&quot;sb-home&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z&quot;/><path d=&quot;M9 22V12h6v10&quot;/></svg>На главную</div>
+        </div>
+      </div>
+      <p class=&quot;note&quot; style=&quot;margin-top:14px;font-size:12px;max-width:390px;&quot;>
+        Шторка приезжает снизу — в зону большого пальца, а не растягивается на весь рост экрана.
+        «Ручка» сверху: за неё же тянут вниз, чтобы закрыть.
+      </p>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
+"></iframe>
+    </div>
+  </section>
+  <section class="sheet" id="s2">
+    <header class="sh">
+      <h2>Анатомия</h2>
+      <p>Размеры шапки на мобиле и десктопе</p>
+      <span class="dims">880&thinsp;&times;&thinsp;1680</span>
+    </header>
+    <div class="stage" data-w="880" data-h="2100">
+      <iframe loading="lazy" title="Анатомия" sandbox srcdoc="<!doctype html>
+<html>
+<head>
+  <meta charset=&quot;utf-8&quot;>
+  
+<style>x-dc{display:block}helmet{display:none}html,body{width:880px;overflow:hidden}</style></head>
+<body>
+<x-dc>
+<helmet>
+  <link rel=&quot;stylesheet&quot; href=&quot;https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap&quot;>
+  <style>
+    :root{
+      --bg:#0e0e0e; --pane:#0a0a0a; --line:#262626; --hair:#1c1c1c;
+      --tx:#e8e8e8; --tx2:#8a8a93; --muted:#6a6a6a;
+      --brand:#00a0ff; --good:#4ade80; --surf2:#1a1a1a; --btnline:#2a2a2a;
+      --sys:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
+    body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--sys);}
+    a{color:var(--brand);} a:hover{color:#3fb9ff;}
+    .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+    .kbtn{width:42px;height:42px;border-radius:10px;background:var(--surf2);border:1px solid var(--btnline);
+          display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;}
+    .kbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .h1{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin:0;color:#fff;}
+    .sub{font-size:15px;font-weight:500;color:var(--tx2);line-height:1.35;margin:4px 0 0;}
+    /* версия модуля — значения из module-version-badge.js, не меняются */
+    .ver{font-size:14px;color:#666;font-weight:600;font-family:var(--mono);}
+    .eye{width:15px;height:15px;flex:none;fill:none;stroke:#666;stroke-width:2;
+         stroke-linecap:round;stroke-linejoin:round;align-self:center;}
+    .ttl{display:flex;align-items:baseline;gap:10px;min-width:0;}
+    /* размерные линии */
+    .dim{position:absolute;font-family:var(--mono);font-size:10px;color:var(--brand);white-space:nowrap;}
+    .dimline{position:absolute;background:rgba(0,160,255,.5);}
+    .guide{position:absolute;background:rgba(0,160,255,.22);}
+    table{border-collapse:collapse;width:100%;font-size:13px;}
+    th{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+       text-align:left;font-weight:500;padding:0 0 10px;border-bottom:1px solid var(--line);}
+    td{padding:11px 0;border-bottom:1px solid var(--hair);vertical-align:top;color:#b4b4b4;line-height:1.45;}
+    td:first-child{color:#fff;font-weight:600;white-space:nowrap;padding-right:22px;}
+    code{font-family:var(--mono);font-size:11.5px;color:#8fd3ff;background:rgba(0,160,255,.08);
+         border-radius:4px;padding:1px 5px;}
+  </style>
+</helmet>
+
+<div style=&quot;padding:56px;&quot;>
+
+  <div class=&quot;lbl&quot;>Спецификация</div>
+  <h1 style=&quot;font-size:34px;font-weight:800;letter-spacing:-.025em;margin:10px 0 0;color:#fff;&quot;>Анатомия и размеры</h1>
+  <p style=&quot;font-size:14.5px;line-height:1.5;color:var(--tx2);margin:8px 0 0;max-width:600px;&quot;>
+    Все значения — токены темы <code>/set</code>. Литералов в новом компоненте нет.
+  </p>
+
+  <div style=&quot;height:1px;background:var(--line);margin:34px 0 30px;&quot;></div>
+
+  <!-- ——— МОБИЛА ——— -->
+  <div class=&quot;lbl&quot; style=&quot;margin-bottom:16px;&quot;>Мобила · ≤768px · 390pt</div>
+
+  <div style=&quot;position:relative;padding-left:74px;&quot;>
+    <div style=&quot;width:390px;background:var(--pane);border:1px solid var(--hair);border-radius:16px;position:relative;&quot;>
+      <!-- боковые направляющие -->
+      <div class=&quot;guide&quot; style=&quot;left:14px;top:0;bottom:0;width:1px;&quot;></div>
+      <div class=&quot;guide&quot; style=&quot;right:14px;top:0;bottom:0;width:1px;&quot;></div>
+
+      <div style=&quot;padding:14px 14px 18px;&quot;>
+        <div style=&quot;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;position:relative;&quot;>
+          <div class=&quot;ttl&quot;>
+            <h1 class=&quot;h1&quot;>Заголовок</h1>
+            <span class=&quot;ver&quot;>v1.8.2</span>
+            <svg viewBox=&quot;0 0 24 24&quot; class=&quot;eye&quot;><path d=&quot;M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z&quot;/><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;3&quot;/></svg>
+          </div>
+          <div style=&quot;display:flex;gap:8px;&quot;>
+            <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8&quot;/><polyline points=&quot;21 3 21 8 16 8&quot;/></svg></div>
+            <div class=&quot;kbtn&quot;><svg viewBox=&quot;0 0 24 24&quot;><path d=&quot;M4 7h16M4 12h16M4 17h16&quot;/></svg></div>
+          </div>
+        </div>
+        <p class=&quot;sub&quot;>Подзаголовок — одна строка</p>
+      </div>
+      <div style=&quot;height:1px;background:rgba(74,222,128,.25);&quot;></div>
+      <div style=&quot;padding:18px 14px 20px;&quot;>
+        <div style=&quot;height:44px;border-radius:12px;background:#141414;border:1px dashed #333;
+                    display:flex;align-items:center;justify-content:center;
+                    font-family:var(--mono);font-size:11px;color:var(--muted);&quot;>контент страницы</div>
+      </div>
+    </div>
+
+    <!-- размеры слева -->
+    <div class=&quot;dim&quot; style=&quot;left:0;top:2px;&quot;>14px ↑</div>
+    <div class=&quot;dim&quot; style=&quot;left:0;top:26px;&quot;>42px</div>
+    <div class=&quot;dim&quot; style=&quot;left:0;top:66px;&quot;>4px</div>
+    <div class=&quot;dim&quot; style=&quot;left:0;top:84px;&quot;>20px</div>
+    <div class=&quot;dim&quot; style=&quot;left:0;top:112px;color:var(--good);&quot;>18px ↓</div>
+  </div>
+
+  <div style=&quot;display:flex;gap:26px;margin-top:24px;flex-wrap:wrap;&quot;>
+    <div style=&quot;font-family:var(--mono);font-size:11.5px;color:var(--muted);&quot;>высота шапки <span style=&quot;color:var(--good);&quot;>80px</span></div>
+    <div style=&quot;font-family:var(--mono);font-size:11.5px;color:var(--muted);&quot;>поля <span style=&quot;color:#b4b4b4;&quot;>--ui-page-pad-m · 14px</span></div>
+    <div style=&quot;font-family:var(--mono);font-size:11.5px;color:var(--muted);&quot;>тач-таргет <span style=&quot;color:#b4b4b4;&quot;>--ui-tap · 44px</span></div>
+    <div style=&quot;font-family:var(--mono);font-size:11.5px;color:var(--muted);&quot;>версия <span style=&quot;color:#b4b4b4;&quot;>14px mono #666</span></div>
+  </div>
+
+  <div style=&quot;height:1px;background:var(--line);margin:34px 0 30px;&quot;></div>
+
+  <!-- ——— ДЕСКТОП ——— -->
+  <div class=&quot;lbl&quot; style=&quot;margin-bottom:16px;&quot;>Десктоп · ≥769px · бургер скрыт, кнопок в шапке нет</div>
+
+  <div style=&quot;width:766px;background:var(--pane);border:1px solid var(--hair);border-radius:16px;position:relative;&quot;>
+    <div class=&quot;guide&quot; style=&quot;left:44px;top:0;bottom:0;width:1px;&quot;></div>
+    <div class=&quot;guide&quot; style=&quot;right:44px;top:0;bottom:0;width:1px;&quot;></div>
+    <div style=&quot;padding:26px 44px 22px;&quot;>
+      <div class=&quot;ttl&quot;>
+        <h1 class=&quot;h1&quot; style=&quot;font-size:34px;&quot;>Заголовок</h1>
+        <span class=&quot;ver&quot;>v1.8.2</span>
+        <svg viewBox=&quot;0 0 24 24&quot; class=&quot;eye&quot;><path d=&quot;M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z&quot;/><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;3&quot;/></svg>
+      </div>
+      <p class=&quot;sub&quot; style=&quot;font-size:15.5px;&quot;>Подзаголовок — одна строка</p>
+    </div>
+    <div style=&quot;height:1px;background:rgba(74,222,128,.25);&quot;></div>
+    <div style=&quot;padding:22px 44px 24px;&quot;>
+      <div style=&quot;height:44px;border-radius:12px;background:#141414;border:1px dashed #333;
+                  display:flex;align-items:center;justify-content:center;
+                  font-family:var(--mono);font-size:11px;color:var(--muted);&quot;>контент страницы</div>
+    </div>
+  </div>
+  <p style=&quot;font-size:13px;color:var(--muted);margin:14px 0 0;line-height:1.5;max-width:700px;&quot;>
+    Кнопки исчезают вместе с бургером (<code>#sb-burger</code> скрыт от 769px) — ряд схлопывается
+    в один заголовок, дырки справа не остаётся.
+  </p>
+
+  <div style=&quot;height:1px;background:var(--line);margin:34px 0 30px;&quot;></div>
+
+  <!-- ——— ТАБЛИЦА ТОКЕНОВ ——— -->
+  <div class=&quot;lbl&quot; style=&quot;margin-bottom:18px;&quot;>Элементы</div>
+  <table>
+    <tr><th style=&quot;width:150px;&quot;>Элемент</th><th style=&quot;width:230px;&quot;>Значения</th><th>Правило</th></tr>
+    <tr>
+      <td>H1</td>
+      <td><code>32px / 800 / -.02em</code><br><code>#fff</code>, margin 0</td>
+      <td>Только текст. Ни иконки, ни эмодзи, ни счётчика, ни бейджа слева. На десктопе 34px.</td>
+    </tr>
+    <tr>
+      <td>Подзаголовок</td>
+      <td><code>15px / 500</code><br><code>#8a8a93</code>, margin-top 4px</td>
+      <td>Одна строка, <code>text-overflow: ellipsis</code>. Сюда уходят счётчики: «22 доступа · 5 проектов».</td>
+    </tr>
+    <tr>
+      <td>Версия</td>
+      <td><code>14px / 600 / mono</code><br><code>#666</code> + глаз <code>15px</code></td>
+      <td>В строке с H1, по базовой линии, <code>gap 10px</code>. Размер прежний — как рисует <code>module-version-badge.js</code>. Есть у медкарты <code>v1.8.2</code>, CRM <code>v1.3.1</code>, трекера <code>v1.9.1</code>; на остальных страницах слот пустой и ничего не занимает.</td>
+    </tr>
+    <tr>
+      <td>Кнопки</td>
+      <td><code>42×42</code>, r <code>10px</code><br><code>--ui-surface-2</code> / <code>--ui-line</code></td>
+      <td>Обновить + бургер, gap 8px, прижаты вправо. Иконки — SVG 18px, stroke 2. Только ≤768px.</td>
+    </tr>
+    <tr>
+      <td>Ряд шапки</td>
+      <td><code>flex</code>, <code>align-items:center</code><br><code>min-height: 42px</code></td>
+      <td><code>justify-content: space-between</code>, gap 12px. Заголовок <code>min-width:0</code>, кнопки <code>flex:none</code>.</td>
+    </tr>
+    <tr>
+      <td>Отбивка</td>
+      <td><code>18px</code> до контента</td>
+      <td>Воздухом, не полосой. Разделителя нет ни на одной странице.</td>
+    </tr>
+    <tr>
+      <td>Кнопка действия</td>
+      <td>своим рядом<br>margin-top <code>18px</code></td>
+      <td>Слева, под шапкой. В ряд с H1 не ставится никогда — на мобиле она дерётся с бургером.</td>
+    </tr>
+  </table>
+
+</div>
+</x-dc>
+</body>
+</html>
+"></iframe>
+    </div>
+  </section>
+  <section class="sheet" id="s3">
+    <header class="sh">
+      <h2>Правила</h2>
+      <p>Что делаем, чего не делаем, готовая разметка</p>
+      <span class="dims">880&thinsp;&times;&thinsp;2100</span>
+    </header>
+    <div class="stage" data-w="880" data-h="2100">
+      <iframe loading="lazy" title="Правила" sandbox srcdoc="<!doctype html>
+<html>
+<head>
+  <meta charset=&quot;utf-8&quot;>
+  
+<style>x-dc{display:block}helmet{display:none}html,body{width:880px;overflow:hidden}</style></head>
+<body>
+<x-dc>
+<helmet>
+  <link rel=&quot;stylesheet&quot; href=&quot;https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap&quot;>
+  <style>
+    :root{
+      --bg:#0e0e0e; --pane:#0a0a0a; --line:#262626; --hair:#1c1c1c;
+      --tx:#e8e8e8; --tx2:#8a8a93; --muted:#6a6a6a;
+      --brand:#00a0ff; --bad:#f87171; --good:#4ade80; --warn:#fbbf24;
+      --sys:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
+    body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--sys);}
+    a{color:var(--brand);} a:hover{color:#3fb9ff;}
+    .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+    code{font-family:var(--mono);font-size:11.5px;color:#8fd3ff;background:rgba(0,160,255,.08);border-radius:4px;padding:1px 5px;}
+    pre{font-family:var(--mono);font-size:11.5px;line-height:1.65;color:#c9d6e0;background:#0a0a0a;
+        border:1px solid var(--hair);border-radius:12px;padding:18px 20px;margin:0;overflow-x:auto;}
+    .k{color:#8fd3ff;} .s{color:#a5d6a5;} .c{color:#5d5d5d;} .t{color:#e0a878;}
+    .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;}
+    .box{background:#111;border:1px solid var(--hair);border-radius:14px;padding:20px 22px;}
+    .box h3{font-size:14px;font-weight:700;margin:0 0 12px;display:flex;align-items:center;gap:9px;}
+    .box ul{margin:0;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:9px;}
+    .box li{font-size:13px;line-height:1.5;color:#a8a8a8;display:flex;gap:9px;align-items:flex-start;}
+    .box li span{flex:none;font-family:var(--mono);font-size:11px;line-height:1.7;}
+    .pill{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+          border-radius:20px;padding:3px 9px;}
+    table{border-collapse:collapse;width:100%;font-size:13px;}
+    th{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+       text-align:left;font-weight:500;padding:0 0 10px;border-bottom:1px solid var(--line);}
+    td{padding:10px 0;border-bottom:1px solid var(--hair);color:#b4b4b4;line-height:1.45;}
+    td:first-child{font-family:var(--mono);font-size:12px;color:#fff;white-space:nowrap;padding-right:20px;}
+  </style>
+</helmet>
+
+<div style=&quot;padding:56px;&quot;>
+
+  <div class=&quot;lbl&quot;>Правила</div>
+  <h1 style=&quot;font-size:34px;font-weight:800;letter-spacing:-.025em;margin:10px 0 0;color:#fff;&quot;>Как собирать шапку</h1>
+
+  <div style=&quot;height:1px;background:var(--line);margin:30px 0;&quot;></div>
+
+  <!-- ——— DO / DON'T ——— -->
+  <div class=&quot;grid2&quot;>
+    <div class=&quot;box&quot; style=&quot;border-color:rgba(74,222,128,.22);&quot;>
+      <h3><span class=&quot;pill&quot; style=&quot;background:rgba(74,222,128,.14);color:var(--good);&quot;>Делаем</span></h3>
+      <ul>
+        <li><span style=&quot;color:var(--good);&quot;>01</span>Заголовок и кнопки — одним flex-рядом, кнопки прижаты вправо.</li>
+        <li><span style=&quot;color:var(--good);&quot;>02</span>Ровно один подзаголовок, ровно одна строка.</li>
+        <li><span style=&quot;color:var(--good);&quot;>03</span>Счётчики и статистика — в подзаголовок, словами.</li>
+        <li><span style=&quot;color:var(--good);&quot;>04</span>Кнопка действия — своим рядом под шапкой, слева.</li>
+        <li><span style=&quot;color:var(--good);&quot;>05</span>Отбивка воздухом: 18px до контента.</li>
+        <li><span style=&quot;color:var(--good);&quot;>06</span>Версия модуля — в строке с H1, по базовой линии.</li>
+        <li><span style=&quot;color:var(--good);&quot;>07</span>Текст заголовка — название раздела как есть; длинный переносится на две строки.</li>
+        <li><span style=&quot;color:var(--good);&quot;>08</span>Геометрия — только токены <code>--ui-*</code>.</li>
+      </ul>
+    </div>
+    <div class=&quot;box&quot; style=&quot;border-color:rgba(248,113,113,.22);&quot;>
+      <h3><span class=&quot;pill&quot; style=&quot;background:rgba(248,113,113,.14);color:var(--bad);&quot;>Не делаем</span></h3>
+      <ul>
+        <li><span style=&quot;color:var(--bad);&quot;>01</span>Иконку или эмодзи слева от H1 — ни на одной странице.</li>
+        <li><span style=&quot;color:var(--bad);&quot;>02</span>Полосу-разделитель под шапкой.</li>
+        <li><span style=&quot;color:var(--bad);&quot;>03</span>Капс-киккер над заголовком («РАБОТА · ПРОЕКТЫ»).</li>
+        <li><span style=&quot;color:var(--bad);&quot;>04</span>Ссылку «← AI-платформа» — это дубль бургера.</li>
+        <li><span style=&quot;color:var(--bad);&quot;>05</span>Счётчик «(262)» внутри H1.</li>
+        <li><span style=&quot;color:var(--bad);&quot;>06</span>Абзац описания вместо подзаголовка.</li>
+        <li><span style=&quot;color:var(--bad);&quot;>07</span><code>position:fixed</code> кнопки + распорку под них.</li>
+        <li><span style=&quot;color:var(--bad);&quot;>08</span>Кнопки-значки внутри текста H1 (как «+» в трекере).</li>
+        <li><span style=&quot;color:var(--bad);&quot;>09</span>Сокращать название раздела ради ширины.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style=&quot;height:1px;background:var(--line);margin:32px 0;&quot;></div>
+
+  <!-- ——— РАЗМЕТКА ——— -->
+  <div class=&quot;lbl&quot; style=&quot;margin-bottom:16px;&quot;>Разметка — одна на все страницы</div>
+<pre><span class=&quot;c&quot;>&amp;lt;!-- шапка страницы: единый компонент, копий на страницах нет --&amp;gt;</span>
+<span class=&quot;k&quot;>&amp;lt;header</span> <span class=&quot;t&quot;>class</span>=<span class=&quot;s&quot;>&quot;ph&quot;</span><span class=&quot;k&quot;>&amp;gt;</span>
+  <span class=&quot;k&quot;>&amp;lt;div</span> <span class=&quot;t&quot;>class</span>=<span class=&quot;s&quot;>&quot;ph-row&quot;</span><span class=&quot;k&quot;>&amp;gt;</span>
+    <span class=&quot;k&quot;>&amp;lt;div</span> <span class=&quot;t&quot;>class</span>=<span class=&quot;s&quot;>&quot;ph-ttl&quot;</span><span class=&quot;k&quot;>&amp;gt;</span>
+      <span class=&quot;k&quot;>&amp;lt;h1</span> <span class=&quot;t&quot;>class</span>=<span class=&quot;s&quot;>&quot;ph-t&quot;</span><span class=&quot;k&quot;>&amp;gt;</span>Доступы<span class=&quot;k&quot;>&amp;lt;/h1&amp;gt;</span>
+      <span class=&quot;k&quot;>&amp;lt;span</span> <span class=&quot;t&quot;>id</span>=<span class=&quot;s&quot;>&quot;mvBadge-medcard&quot;</span><span class=&quot;k&quot;>&amp;gt;&amp;lt;/span&amp;gt;</span>  <span class=&quot;c&quot;>&amp;lt;!-- версия; нет модуля — нет узла --&amp;gt;</span>
+    <span class=&quot;k&quot;>&amp;lt;/div&amp;gt;</span>
+    <span class=&quot;k&quot;>&amp;lt;div</span> <span class=&quot;t&quot;>class</span>=<span class=&quot;s&quot;>&quot;ph-act&quot;</span><span class=&quot;k&quot;>&amp;gt;&amp;lt;/div&amp;gt;</span>  <span class=&quot;c&quot;>&amp;lt;!-- сюда JS кладёт обновить + бургер --&amp;gt;</span>
+  <span class=&quot;k&quot;>&amp;lt;/div&amp;gt;</span>
+  <span class=&quot;k&quot;>&amp;lt;p</span> <span class=&quot;t&quot;>class</span>=<span class=&quot;s&quot;>&quot;ph-s&quot;</span><span class=&quot;k&quot;>&amp;gt;</span>22 доступа · 5 проектов<span class=&quot;k&quot;>&amp;lt;/p&amp;gt;</span>
+<span class=&quot;k&quot;>&amp;lt;/header&amp;gt;</span></pre>
+
+  <div style=&quot;height:24px;&quot;></div>
+
+<pre><span class=&quot;c&quot;>/* ui.css — единственное место, где это описано */</span>
+<span class=&quot;t&quot;>.ph</span>      { padding: <span class=&quot;s&quot;>26px var(--ui-page-pad,44px) 0</span>; }
+<span class=&quot;t&quot;>.ph-row</span>  { display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; min-height: 42px; }
+<span class=&quot;t&quot;>.ph-ttl</span>  { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+<span class=&quot;t&quot;>.ph-t</span>    { font-size: 34px; font-weight: 800; letter-spacing: -.02em;
+            margin: 0; min-width: 0; color: <span class=&quot;s&quot;>var(--ui-tx,#fff)</span>;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+<span class=&quot;t&quot;>.ph-s</span>    { font-size: 15.5px; font-weight: 500; margin: 4px 0 0;
+            color: <span class=&quot;s&quot;>var(--ui-tx2,#8a8a93)</span>;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+<span class=&quot;t&quot;>.ph-act</span>  { display: flex; gap: 8px; flex: none; }
+<span class=&quot;t&quot;>.ph + *</span>  { margin-top: <span class=&quot;s&quot;>18px</span>; }   <span class=&quot;c&quot;>/* отбивка воздухом, не полосой */</span>
+
+<span class=&quot;k&quot;>@media</span> (max-width: 768px) {
+  <span class=&quot;t&quot;>.ph</span>    { padding: <span class=&quot;s&quot;>14px var(--ui-page-pad-m,14px) 0</span>; }
+  <span class=&quot;t&quot;>.ph-t</span>  { font-size: 32px; }
+  <span class=&quot;t&quot;>.ph-s</span>  { font-size: 15px; }
+}</pre>
+
+  <div style=&quot;height:1px;background:var(--line);margin:32px 0;&quot;></div>
+
+  <!-- ——— ЧТО МЕНЯЕТСЯ В КОДЕ ——— -->
+  <div class=&quot;lbl&quot; style=&quot;margin-bottom:18px;&quot;>Что правится в существующих файлах</div>
+  <table>
+    <tr><th style=&quot;width:200px;&quot;>Файл</th><th>Правка</th></tr>
+    <tr><td>ui.css</td><td>Добавить блок <code>.ph*</code> — единый источник шапки для всей платформы.</td></tr>
+    <tr><td>module-version-badge.js</td><td>Не трогается: рисует то же самое, просто внутрь <code>.ph-ttl</code>. Модули с версией — медкарта, CRM, трекер привычек.</td></tr>
+    <tr><td>sidebar.js</td><td><code>#sb-burger</code> вместо <code>position:fixed</code> вставляется в <code>.ph-act</code> текущей страницы. Глиф <code>☰</code> → SVG.</td></tr>
+    <tr><td>hard-refresh.js</td><td>То же для <code>#hard-refresh</code>: в <code>.ph-act</code>, без <code>right:62px</code>.</td></tr>
+    <tr><td>burger-space.js</td><td>Удаляется целиком — распорка больше не нужна.</td></tr>
+    <tr><td>medcard.html</td><td>Инлайн-шапка → <code>.ph</code>. Секция («Профиль») и слоган сливаются в один подзаголовок.</td></tr>
+    <tr><td>leads.html · habits.html<br>crm-dashboard.html</td><td>То же. Из H1 убрать «CRM —» и длинное «AI-Трекер привычек» — они уходят в подзаголовок; «+» из заголовка трекера становится обычной кнопкой своим рядом.</td></tr>
+    <tr><td>access · clients<br>projects · sites<br>jsonld · crawl · vo<br>skills · structure</td><td>Свою вёрстку шапки заменить на <code>&amp;lt;header class=&quot;ph&quot;&amp;gt;</code>. Убрать иконки слева от H1, ссылки «← AI-платформа», полосы-разделители и киккер.</td></tr>
+  </table>
+
+  <div style=&quot;margin-top:26px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.22);
+              border-radius:12px;padding:16px 18px;display:flex;gap:12px;align-items:flex-start;&quot;>
+    <span style=&quot;font-family:var(--mono);font-size:11px;color:var(--warn);flex:none;line-height:1.6;&quot;>NB</span>
+    <p style=&quot;font-size:13px;line-height:1.55;color:#b8ab8a;margin:0;&quot;>
+      Одно отступление от текущей медкарты: её <code>&amp;lt;h2 class=&quot;ph1-sub&quot;&amp;gt;</code> сейчас без
+      <code>font-size</code>, то есть рисуется браузерным <code>24px</code>. Под описания
+      («Паспорт сайтов проекта…») это слишком крупно и съедает ровно ту высоту, на которую жалоба.
+      В компоненте подзаголовок зафиксирован на <code>15px</code> — значит, на медкарте строка
+      «Профиль» станет мельче. Если оставляем 24px, компонент придётся делить на два вида.
+    </p>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
+"></iframe>
+    </div>
+  </section>
+  <p class="foot">
+    Единый компонент шапки для всех страниц. Эталон — «Медкарта&nbsp;/&nbsp;Профиль».
+    Значения — токены темы <code>/set</code>; кнопки, табы и меню срисованы с
+    <code>btnCss()</code>, <code>.med-tabs</code> и <code>sidebar.js</code>.
+  </p>
+</main>
+
+<script>
+(function(){
+  var raw = false;
+  var btn = document.getElementById('fit');
+  function layout(){
+    document.querySelectorAll('.stage').forEach(function(st){
+      var fr = st.querySelector('iframe');
+      var w = +st.dataset.w, h = +st.dataset.h;
+      fr.style.width = w + 'px';
+      fr.style.height = h + 'px';
+      if (raw) { fr.style.transform = 'none'; st.style.height = Math.min(h, 640) + 'px'; return; }
+      var k = Math.min(1, st.clientWidth / w);
+      fr.style.transform = 'scale(' + k + ')';
+      st.style.height = Math.round(h * k) + 'px';
+    });
+  }
+  btn.addEventListener('click', function(){
+    raw = !raw;
+    document.body.classList.toggle('raw', raw);
+    btn.textContent = raw ? 'По ширине' : '1:1';
+    layout();
+  });
+  window.addEventListener('resize', layout);
+  layout();
+  setTimeout(layout, 300);
+})();
+</script>

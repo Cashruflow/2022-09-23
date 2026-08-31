@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <style>
+    :root{
+      --bg:#0e0e0e; --pane:#0a0a0a; --line:#262626; --hair:#1c1c1c;
+      --tx:#e8e8e8; --tx2:#8a8a93; --muted:#6a6a6a;
+      --brand:#00a0ff; --bad:#f87171; --good:#4ade80; --warn:#fbbf24;
+      --sys:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
+    body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--sys);}
+    a{color:var(--brand);} a:hover{color:#3fb9ff;}
+    .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+    code{font-family:var(--mono);font-size:11.5px;color:#8fd3ff;background:rgba(0,160,255,.08);border-radius:4px;padding:1px 5px;}
+    pre{font-family:var(--mono);font-size:11.5px;line-height:1.65;color:#c9d6e0;background:#0a0a0a;
+        border:1px solid var(--hair);border-radius:12px;padding:18px 20px;margin:0;overflow-x:auto;}
+    .k{color:#8fd3ff;} .s{color:#a5d6a5;} .c{color:#5d5d5d;} .t{color:#e0a878;}
+    .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;}
+    .box{background:#111;border:1px solid var(--hair);border-radius:14px;padding:20px 22px;}
+    .box h3{font-size:14px;font-weight:700;margin:0 0 12px;display:flex;align-items:center;gap:9px;}
+    .box ul{margin:0;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:9px;}
+    .box li{font-size:13px;line-height:1.5;color:#a8a8a8;display:flex;gap:9px;align-items:flex-start;}
+    .box li span{flex:none;font-family:var(--mono);font-size:11px;line-height:1.7;}
+    .pill{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+          border-radius:20px;padding:3px 9px;}
+    table{border-collapse:collapse;width:100%;font-size:13px;}
+    th{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+       text-align:left;font-weight:500;padding:0 0 10px;border-bottom:1px solid var(--line);}
+    td{padding:10px 0;border-bottom:1px solid var(--hair);color:#b4b4b4;line-height:1.45;}
+    td:first-child{font-family:var(--mono);font-size:12px;color:#fff;white-space:nowrap;padding-right:20px;}
+  </style>
+</helmet>
+
+<div style="padding:56px;">
+
+  <div class="lbl">Правила</div>
+  <h1 style="font-size:34px;font-weight:800;letter-spacing:-.025em;margin:10px 0 0;color:#fff;">Как собирать шапку</h1>
+
+  <div style="height:1px;background:var(--line);margin:30px 0;"></div>
+
+  <!-- ——— DO / DON'T ——— -->
+  <div class="grid2">
+    <div class="box" style="border-color:rgba(74,222,128,.22);">
+      <h3><span class="pill" style="background:rgba(74,222,128,.14);color:var(--good);">Делаем</span></h3>
+      <ul>
+        <li><span style="color:var(--good);">01</span>Заголовок и кнопки — одним flex-рядом, кнопки прижаты вправо.</li>
+        <li><span style="color:var(--good);">02</span>Ровно один подзаголовок, ровно одна строка.</li>
+        <li><span style="color:var(--good);">03</span>Счётчики и статистика — в подзаголовок, словами.</li>
+        <li><span style="color:var(--good);">04</span>Кнопка действия — своим рядом под шапкой, слева.</li>
+        <li><span style="color:var(--good);">05</span>Отбивка воздухом: 18px до контента.</li>
+        <li><span style="color:var(--good);">06</span>Версия модуля — в строке с H1, по базовой линии.</li>
+        <li><span style="color:var(--good);">07</span>Текст заголовка — название раздела как есть; длинный переносится на две строки.</li>
+        <li><span style="color:var(--good);">08</span>Геометрия — только токены <code>--ui-*</code>.</li>
+      </ul>
+    </div>
+    <div class="box" style="border-color:rgba(248,113,113,.22);">
+      <h3><span class="pill" style="background:rgba(248,113,113,.14);color:var(--bad);">Не делаем</span></h3>
+      <ul>
+        <li><span style="color:var(--bad);">01</span>Иконку или эмодзи слева от H1 — ни на одной странице.</li>
+        <li><span style="color:var(--bad);">02</span>Полосу-разделитель под шапкой.</li>
+        <li><span style="color:var(--bad);">03</span>Капс-киккер над заголовком («РАБОТА · ПРОЕКТЫ»).</li>
+        <li><span style="color:var(--bad);">04</span>Ссылку «← AI-платформа» — это дубль бургера.</li>
+        <li><span style="color:var(--bad);">05</span>Счётчик «(262)» внутри H1.</li>
+        <li><span style="color:var(--bad);">06</span>Абзац описания вместо подзаголовка.</li>
+        <li><span style="color:var(--bad);">07</span><code>position:fixed</code> кнопки + распорку под них.</li>
+        <li><span style="color:var(--bad);">08</span>Кнопки-значки внутри текста H1 (как «+» в трекере).</li>
+        <li><span style="color:var(--bad);">09</span>Сокращать название раздела ради ширины.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="height:1px;background:var(--line);margin:32px 0;"></div>
+
+  <!-- ——— РАЗМЕТКА ——— -->
+  <div class="lbl" style="margin-bottom:16px;">Разметка — одна на все страницы</div>
+<pre><span class="c">&lt;!-- шапка страницы: единый компонент, копий на страницах нет --&gt;</span>
+<span class="k">&lt;header</span> <span class="t">class</span>=<span class="s">"ph"</span><span class="k">&gt;</span>
+  <span class="k">&lt;div</span> <span class="t">class</span>=<span class="s">"ph-row"</span><span class="k">&gt;</span>
+    <span class="k">&lt;div</span> <span class="t">class</span>=<span class="s">"ph-ttl"</span><span class="k">&gt;</span>
+      <span class="k">&lt;h1</span> <span class="t">class</span>=<span class="s">"ph-t"</span><span class="k">&gt;</span>Доступы<span class="k">&lt;/h1&gt;</span>
+      <span class="k">&lt;span</span> <span class="t">id</span>=<span class="s">"mvBadge-medcard"</span><span class="k">&gt;&lt;/span&gt;</span>  <span class="c">&lt;!-- версия; нет модуля — нет узла --&gt;</span>
+    <span class="k">&lt;/div&gt;</span>
+    <span class="k">&lt;div</span> <span class="t">class</span>=<span class="s">"ph-act"</span><span class="k">&gt;&lt;/div&gt;</span>  <span class="c">&lt;!-- сюда JS кладёт обновить + бургер --&gt;</span>
+  <span class="k">&lt;/div&gt;</span>
+  <span class="k">&lt;p</span> <span class="t">class</span>=<span class="s">"ph-s"</span><span class="k">&gt;</span>22 доступа · 5 проектов<span class="k">&lt;/p&gt;</span>
+<span class="k">&lt;/header&gt;</span></pre>
+
+  <div style="height:24px;"></div>
+
+<pre><span class="c">/* ui.css — единственное место, где это описано */</span>
+<span class="t">.ph</span>      { padding: <span class="s">26px var(--ui-page-pad,44px) 0</span>; }
+<span class="t">.ph-row</span>  { display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; min-height: 42px; }
+<span class="t">.ph-ttl</span>  { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+<span class="t">.ph-t</span>    { font-size: 34px; font-weight: 800; letter-spacing: -.02em;
+            margin: 0; min-width: 0; color: <span class="s">var(--ui-tx,#fff)</span>;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+<span class="t">.ph-s</span>    { font-size: 15.5px; font-weight: 500; margin: 4px 0 0;
+            color: <span class="s">var(--ui-tx2,#8a8a93)</span>;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+<span class="t">.ph-act</span>  { display: flex; gap: 8px; flex: none; }
+<span class="t">.ph + *</span>  { margin-top: <span class="s">18px</span>; }   <span class="c">/* отбивка воздухом, не полосой */</span>
+
+<span class="k">@media</span> (max-width: 768px) {
+  <span class="t">.ph</span>    { padding: <span class="s">14px var(--ui-page-pad-m,14px) 0</span>; }
+  <span class="t">.ph-t</span>  { font-size: 32px; }
+  <span class="t">.ph-s</span>  { font-size: 15px; }
+}</pre>
+
+  <div style="height:1px;background:var(--line);margin:32px 0;"></div>
+
+  <!-- ——— ЧТО МЕНЯЕТСЯ В КОДЕ ——— -->
+  <div class="lbl" style="margin-bottom:18px;">Что правится в существующих файлах</div>
+  <table>
+    <tr><th style="width:200px;">Файл</th><th>Правка</th></tr>
+    <tr><td>ui.css</td><td>Добавить блок <code>.ph*</code> — единый источник шапки для всей платформы.</td></tr>
+    <tr><td>module-version-badge.js</td><td>Не трогается: рисует то же самое, просто внутрь <code>.ph-ttl</code>. Модули с версией — медкарта, CRM, трекер привычек.</td></tr>
+    <tr><td>sidebar.js</td><td><code>#sb-burger</code> вместо <code>position:fixed</code> вставляется в <code>.ph-act</code> текущей страницы. Глиф <code>☰</code> → SVG.</td></tr>
+    <tr><td>hard-refresh.js</td><td>То же для <code>#hard-refresh</code>: в <code>.ph-act</code>, без <code>right:62px</code>.</td></tr>
+    <tr><td>burger-space.js</td><td>Удаляется целиком — распорка больше не нужна.</td></tr>
+    <tr><td>medcard.html</td><td>Инлайн-шапка → <code>.ph</code>. Секция («Профиль») и слоган сливаются в один подзаголовок.</td></tr>
+    <tr><td>leads.html · habits.html<br>crm-dashboard.html</td><td>То же. Из H1 убрать «CRM —» и длинное «AI-Трекер привычек» — они уходят в подзаголовок; «+» из заголовка трекера становится обычной кнопкой своим рядом.</td></tr>
+    <tr><td>access · clients<br>projects · sites<br>jsonld · crawl · vo<br>skills · structure</td><td>Свою вёрстку шапки заменить на <code>&lt;header class="ph"&gt;</code>. Убрать иконки слева от H1, ссылки «← AI-платформа», полосы-разделители и киккер.</td></tr>
+  </table>
+
+  <div style="margin-top:26px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.22);
+              border-radius:12px;padding:16px 18px;display:flex;gap:12px;align-items:flex-start;">
+    <span style="font-family:var(--mono);font-size:11px;color:var(--warn);flex:none;line-height:1.6;">NB</span>
+    <p style="font-size:13px;line-height:1.55;color:#b8ab8a;margin:0;">
+      Одно отступление от текущей медкарты: её <code>&lt;h2 class="ph1-sub"&gt;</code> сейчас без
+      <code>font-size</code>, то есть рисуется браузерным <code>24px</code>. Под описания
+      («Паспорт сайтов проекта…») это слишком крупно и съедает ровно ту высоту, на которую жалоба.
+      В компоненте подзаголовок зафиксирован на <code>15px</code> — значит, на медкарте строка
+      «Профиль» станет мельче. Если оставляем 24px, компонент придётся делить на два вида.
+    </p>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

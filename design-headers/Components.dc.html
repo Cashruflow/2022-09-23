@@ -1,0 +1,287 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <style>
+    :root{
+      --bg:#0e0e0e; --pane:#0a0a0a; --line:#262626; --hair:#1c1c1c;
+      --tx:#e8e8e8; --tx2:#8a8a93; --muted:#6a6a6a;
+      --brand:#00a0ff; --bad:#f87171; --good:#4ade80;
+      --sys:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
+    body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--sys);}
+    a{color:var(--brand);} a:hover{color:#3fb9ff;}
+    .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+    code{font-family:var(--mono);font-size:11.5px;color:#8fd3ff;background:rgba(0,160,255,.08);border-radius:4px;padding:1px 5px;}
+    h2{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0;color:#fff;}
+    .note{font-size:13px;line-height:1.5;color:var(--muted);margin:6px 0 0;max-width:640px;}
+    .rule{height:1px;background:var(--line);margin:38px 0 30px;}
+
+    /* ——— кнопки: роли из btnCss(), server.js ——— */
+    .b{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:8px;
+       border:1px solid;font-size:13px;font-weight:500;line-height:1.2;padding:10px 18px;white-space:nowrap;}
+    .b svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .b.prim{background:var(--brand);color:#fff;border-color:var(--brand);}
+    .b.prim.hov{background:transparent;color:#fff;border-color:var(--brand);}
+    .b.ghost{background:transparent;color:#ccc;border-color:#333;}
+    .b.ghost.hov{background:#1f1f1f;color:#fff;border-color:var(--brand);}
+    .b.dang{background:#3a1010;color:#f87171;border-color:#7a2e2e;}
+    .b.dang.hov{background:#4a1414;color:#ffb4b4;border-color:var(--bad);}
+    .b.sm{padding:6px 12px;font-size:12px;}
+    .b.off{opacity:.5;}
+    .b.pm{background:#3a0d0d;color:#f87171;border-color:#7a2e0b;}
+    .ib{display:inline-flex;align-items:center;justify-content:center;padding:4px;border-radius:4px;
+        background:transparent;border:1px solid transparent;}
+    .ib svg{width:15px;height:15px;fill:none;stroke:#8a8a8a;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .ib.hov svg{stroke:var(--brand);}
+    .ib.del.hov svg{stroke:var(--bad);}
+
+    .brow{display:flex;align-items:center;gap:14px;}
+    .btab{display:grid;grid-template-columns:118px 1fr 1fr 250px;gap:18px;align-items:center;
+          padding:14px 0;border-bottom:1px solid var(--hair);}
+    .btab.hd{padding:0 0 10px;border-bottom:1px solid var(--line);}
+    .btab.hd span{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+    .rolename{font-family:var(--mono);font-size:12px;color:#fff;}
+    .rolehint{font-size:12px;line-height:1.45;color:var(--muted);}
+
+    /* ——— табы медкарты (.med-tabs) ——— */
+    .medtabs{display:inline-flex;gap:6px;padding:3px;background:rgba(255,255,255,.045);
+             border:1px solid rgba(255,255,255,.06);border-radius:8px;max-width:100%;}
+    .mtab{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:6px;
+          background:transparent;color:#8a8a93;font-size:13.5px;font-weight:600;white-space:nowrap;}
+    .mtab svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .mtab.on{background:#262626;color:var(--tx);}
+    .mtab.hov{background:rgba(255,255,255,.05);color:#f2f2f4;}
+    /* мобильный вариант: значок сверху, подпись снизу, во всю ширину */
+    .medtabs.mob{display:flex;width:390px;gap:4px;}
+    .medtabs.mob .mtab{flex:1 1 0;flex-direction:column;gap:4px;font-size:10.5px;padding:8px 2px;min-height:44px;justify-content:center;}
+
+    /* ——— сайдбар (sidebar.js) ——— */
+    .sb{width:230px;background:var(--pane);border:1px solid var(--hair);border-radius:14px;
+        padding:16px 0;display:flex;flex-direction:column;overflow:hidden;}
+    .sb-logo{padding:6px 20px 14px;font-size:16px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px;}
+    .sb-logo .v{font-size:11px;color:#555;font-weight:400;}
+    .dot{width:8px;height:8px;border-radius:50%;background:#2ecc71;box-shadow:0 0 5px #2ecc7166;flex:none;}
+    .sb-group{padding:14px 20px 6px;font-size:10px;letter-spacing:.08em;color:#555;text-transform:uppercase;
+              display:flex;align-items:center;justify-content:space-between;}
+    .sb-items{position:relative;}
+    .sb-items::before{content:'';position:absolute;left:27px;top:0;bottom:6px;width:1px;background:var(--hair);}
+    .sb-link{display:flex;align-items:center;gap:11px;padding:8px 14px 8px 44px;margin-right:10px;
+             color:#aaa;font-size:14px;border-radius:0 8px 8px 0;position:relative;text-decoration:none;}
+    .sb-link::before{content:'';position:absolute;left:28px;top:50%;width:9px;height:1px;background:#232323;}
+    .sb-link svg{width:18px;height:18px;flex:none;fill:none;stroke:#8a8a8a;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .sb-link.hov{background:#141414;color:#fff;}
+    .sb-link.hov::before{background:#3d3d3d;width:11px;}
+    .sb-link.hov svg{stroke:#fff;}
+    .sb-link.act{background:linear-gradient(90deg, rgba(0,160,255,.14), rgba(0,160,255,.03));color:var(--brand);font-weight:600;}
+    .sb-link.act::before{background:var(--brand);width:12px;box-shadow:0 0 6px rgba(0,160,255,.6);}
+    .sb-link.act svg{stroke:var(--brand);}
+    .sb-badge{margin-left:auto;background:#e05252;color:#fff;font-size:10px;min-width:18px;height:18px;
+              border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;}
+    .sb-foot{padding:14px 20px;border-top:1px solid var(--hair);display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+    .sb-set{display:flex;align-items:center;gap:9px;font-size:13px;color:#aaa;padding:8px 10px;margin:0 -10px;
+            border-radius:8px;border:1px solid #1e1e1e;background:#101010;}
+    .sb-set svg{width:16px;height:16px;flex:none;fill:none;stroke:#8a8a8a;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .sb-inp{background:#101010;border:1px solid #1e1e1e;border-radius:8px;padding:8px 10px;color:#666;font-size:13px;margin:0 -10px;}
+    .sb-home{display:flex;align-items:center;gap:7px;color:#666;font-size:12px;}
+    .sb-home svg{width:14px;height:14px;flex:none;fill:none;stroke:#666;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+    /* ——— мобильная шторка меню ——— */
+    .sheet{width:390px;background:var(--pane);border:1px solid var(--hair);
+           border-radius:22px 22px 0 0;padding:8px 0 14px;box-shadow:0 -10px 30px rgba(0,0,0,.6);}
+    .grab{width:38px;height:4px;border-radius:2px;background:#2c2c2c;margin:4px auto 10px;}
+  </style>
+</helmet>
+
+<div style="padding:56px;">
+
+  <div class="lbl">Компоненты платформы</div>
+  <h1 style="font-size:34px;font-weight:800;letter-spacing:-.025em;margin:10px 0 0;color:#fff;">Кнопки, табы, меню</h1>
+  <p class="note" style="max-width:660px;">
+    Всё уже существует в коде — эти образцы срисованы с него, а не придуманы:
+    роли кнопок из <code>btnCss()</code> в <code>server.js</code>, табы из <code>.med-tabs</code>
+    медкарты, меню из <code>sidebar.js</code>. Новая шапка ничего из этого не меняет.
+  </p>
+
+  <div class="rule"></div>
+
+  <!-- ═══════ КНОПКИ ═══════ -->
+  <h2>Кнопки</h2>
+  <p class="note">
+    Пять ролей. Геометрия одна: <code>padding 10px 18px</code>, <code>radius --ui-radius 8px</code>,
+    <code>13px / 500</code>, значок <code>15px</code>, <code>gap 7px</code>. Цвета — из <code>/set → «Кнопки»</code>,
+    литералов на страницах не пишем.
+  </p>
+
+  <div style="margin-top:24px;">
+    <div class="btab hd"><span>Роль</span><span>Покой</span><span>Наведение</span><span>Когда</span></div>
+
+    <div class="btab">
+      <div class="rolename">.btn</div>
+      <div><div class="b prim">Сохранить</div></div>
+      <div><div class="b prim hov">Сохранить</div></div>
+      <div class="rolehint">Главное действие на экране: сохранить, создать, отправить. Одна на страницу.</div>
+    </div>
+
+    <div class="btab">
+      <div class="rolename">.tbtn</div>
+      <div><div class="b ghost"><svg viewBox="0 0 24 24"><path d="M12 21V9M7 14l5-5 5 5M5 3h14"/></svg>Импорт</div></div>
+      <div><div class="b ghost hov"><svg viewBox="0 0 24 24"><path d="M12 21V9M7 14l5-5 5 5M5 3h14"/></svg>Импорт</div></div>
+      <div class="rolehint">Всё остальное: отмена, импорт, «найти», мелкие действия в строках.</div>
+    </div>
+
+    <div class="btab">
+      <div class="rolename">.btn-danger</div>
+      <div><div class="b dang">Удалить</div></div>
+      <div><div class="b dang hov">Удалить</div></div>
+      <div class="rolehint">Необратимое: удалить, закрыть навсегда, сбросить.</div>
+    </div>
+
+    <div class="btab">
+      <div class="rolename">.ibtn</div>
+      <div class="brow">
+        <div class="ib"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <div class="ib"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+        <div class="ib del"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></div>
+      </div>
+      <div class="brow">
+        <div class="ib hov"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <div class="ib hov"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+        <div class="ib del hov"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></div>
+      </div>
+      <div class="rolehint">Голый значок без подписи: глаз, карандаш, корзина. Корзина краснеет на наведении — единственная подсказка «необратимо».</div>
+    </div>
+
+    <div class="btab">
+      <div class="rolename">.btn-sm</div>
+      <div class="brow"><div class="b prim sm">Прогнать</div><div class="b ghost sm">Добавить</div></div>
+      <div class="brow"><div class="b prim hov sm">Прогнать</div><div class="b ghost hov sm">Добавить</div></div>
+      <div class="rolehint">Модификатор поверх любой роли: те же цвета, <code>6px 12px / 12px</code>.</div>
+    </div>
+
+    <div class="btab" style="border-bottom:none;">
+      <div class="rolename" style="color:var(--muted);">состояния</div>
+      <div class="brow"><div class="b prim off">Недоступно</div></div>
+      <div class="brow"><div class="b pm">Только ПМ</div></div>
+      <div class="rolehint"><code>:disabled</code> — <code>opacity .5</code>. <code>.pm-only</code> красное: то, чего не видит клиент.</div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ═══════ ТАБЫ ═══════ -->
+  <h2>Табы</h2>
+  <p class="note">
+    Сегментированный переключатель медкарты. Подложка-«ванночка» <code>rgba(255,255,255,.045)</code>
+    с рамкой <code>.06</code> и внутренним отступом <code>3px</code>; активный таб — плашка <code>#262626</code>.
+    Не переносятся, а уезжают прокруткой вбок.
+  </p>
+
+  <div style="margin-top:24px;display:flex;gap:48px;align-items:flex-start;flex-wrap:wrap;">
+    <div>
+      <div class="lbl" style="margin-bottom:12px;">Десктоп</div>
+      <div class="medtabs">
+        <div class="mtab on"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>Профиль</div>
+        <div class="mtab hov"><svg viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Цикл</div>
+        <div class="mtab"><svg viewBox="0 0 24 24"><path d="M12 5.5c-1.5-1.4-3-2-4.5-2C5 3.5 3 5.7 3 9c0 4 1.5 6 2.5 9 .7 2 1.3 3.5 2.5 3.5 1.5 0 1.8-2 4-2s2.5 2 4 2c1.2 0 1.8-1.5 2.5-3.5C19.5 15 21 13 21 9c0-3.3-2-5.5-4.5-5.5-1.5 0-3 .6-4.5 2z"/></svg>Зубы</div>
+        <div class="mtab"><svg viewBox="0 0 24 24"><path d="M10 2v6.5L4.5 18A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-3L14 8.5V2"/><path d="M8.5 2h7M7 15h10"/></svg>Анализы</div>
+      </div>
+      <p class="note" style="margin-top:12px;font-size:12px;">
+        Слева направо: активный · наведение · покой.
+      </p>
+    </div>
+
+    <div>
+      <div class="lbl" style="margin-bottom:12px;">Мобила ≤768px · 390pt</div>
+      <div class="medtabs mob">
+        <div class="mtab on"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>Профиль</div>
+        <div class="mtab"><svg viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Цикл</div>
+        <div class="mtab"><svg viewBox="0 0 24 24"><path d="M12 5.5c-1.5-1.4-3-2-4.5-2C5 3.5 3 5.7 3 9c0 4 1.5 6 2.5 9 .7 2 1.3 3.5 2.5 3.5 1.5 0 1.8-2 4-2s2.5 2 4 2c1.2 0 1.8-1.5 2.5-3.5C19.5 15 21 13 21 9c0-3.3-2-5.5-4.5-5.5-1.5 0-3 .6-4.5 2z"/></svg>Зубы</div>
+        <div class="mtab"><svg viewBox="0 0 24 24"><path d="M10 2v6.5L4.5 18A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-3L14 8.5V2"/><path d="M8.5 2h7M7 15h10"/></svg>Анализы</div>
+        <div class="mtab"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Ещё</div>
+      </div>
+      <p class="note" style="margin-top:12px;font-size:12px;">
+        Значок сверху, подпись снизу, кнопки во всю ширину, высота <code>44px</code>.
+      </p>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ═══════ МЕНЮ ═══════ -->
+  <h2>Меню</h2>
+  <p class="note">
+    Одно на всю платформу. На десктопе — колонка <code>230px</code> слева, на мобиле та же
+    разметка приезжает нижней шторкой из-под кнопки-бургера. Группы складываются, у активного
+    пункта голубая засечка со свечением.
+  </p>
+
+  <div style="margin-top:24px;display:flex;gap:56px;align-items:flex-start;flex-wrap:wrap;">
+    <div>
+      <div class="lbl" style="margin-bottom:12px;">Десктоп · колонка 230px</div>
+      <div class="sb">
+        <div class="sb-logo">
+          <svg viewBox="0 0 24 24" style="width:22px;height:22px;flex:none;fill:none;stroke:var(--brand);stroke-width:2;stroke-linejoin:round;"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="m3 7 9 5 9-5M12 12v10"/></svg>
+          AI-платформа <span class="v">v3.2</span><span class="dot"></span>
+        </div>
+        <div class="sb-group"><span>Работа</span><span style="font-size:10px;">▾</span></div>
+        <div class="sb-items">
+          <div class="sb-link"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>Уведомления<span class="sb-badge">3</span></div>
+          <div class="sb-link hov"><svg viewBox="0 0 24 24"><path d="M3 6h11M3 12h11M3 18h11M18 6l2 2 3-3"/></svg>Бэклог</div>
+          <div class="sb-link act"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>Проекты</div>
+          <div class="sb-link"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20a15.3 15.3 0 0 1 0-20"/></svg>Сайты</div>
+          <div class="sb-link"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-8 0v2"/><circle cx="12" cy="7" r="4"/></svg>Клиенты</div>
+          <div class="sb-link"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Доступы</div>
+        </div>
+        <div class="sb-group"><span>Медкарта</span><span style="font-size:10px;">▾</span></div>
+        <div class="sb-items">
+          <div class="sb-link"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M12 9v6M9 12h6M8 2v4M16 2v4"/></svg>Медкарта</div>
+          <div class="sb-link"><svg viewBox="0 0 24 24"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/></svg>Активность</div>
+        </div>
+        <div class="sb-foot">
+          <div class="sb-set"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>Тема<span style="margin-left:auto;font-size:12px;color:#666;">Тёмная</span></div>
+          <div class="sb-set"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.1a2 2 0 1 1-4 0a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15a2 2 0 1 1 0-4a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 4V3a2 2 0 1 1 4 0a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 11a2 2 0 1 1 0 4Z"/></svg>Настройка</div>
+          <div class="sb-inp">Поиск по порталу…</div>
+          <div class="sb-home"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>На главную</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="lbl" style="margin-bottom:12px;">Мобила · шторка снизу из-под ☰</div>
+      <div class="sheet">
+        <div class="grab"></div>
+        <div class="sb-logo">
+          <svg viewBox="0 0 24 24" style="width:22px;height:22px;flex:none;fill:none;stroke:var(--brand);stroke-width:2;stroke-linejoin:round;"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="m3 7 9 5 9-5M12 12v10"/></svg>
+          AI-платформа <span class="v">v3.2</span><span class="dot"></span>
+        </div>
+        <div class="sb-group"><span>Работа</span><span style="font-size:10px;">▾</span></div>
+        <div class="sb-items">
+          <div class="sb-link"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>Уведомления<span class="sb-badge">3</span></div>
+          <div class="sb-link act"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Доступы</div>
+          <div class="sb-link"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>Проекты</div>
+          <div class="sb-link"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20a15.3 15.3 0 0 1 0-20"/></svg>Сайты</div>
+        </div>
+        <div class="sb-foot" style="margin-top:6px;">
+          <div class="sb-inp">Поиск по порталу…</div>
+          <div class="sb-home"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>На главную</div>
+        </div>
+      </div>
+      <p class="note" style="margin-top:14px;font-size:12px;max-width:390px;">
+        Шторка приезжает снизу — в зону большого пальца, а не растягивается на весь рост экрана.
+        «Ручка» сверху: за неё же тянут вниз, чтобы закрыть.
+      </p>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

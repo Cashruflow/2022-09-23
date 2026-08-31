@@ -1,0 +1,593 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <style>
+    :root{
+      --bg:#0e0e0e; --pane:#0a0a0a; --line:#262626; --hair:#1c1c1c;
+      --tx:#e8e8e8; --tx2:#8a8a93; --muted:#6a6a6a;
+      --brand:#00a0ff; --bad:#f87171; --good:#4ade80; --surf2:#1a1a1a; --btnline:#2a2a2a;
+      --sys:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
+    body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--sys);}
+    a{color:var(--brand);} a:hover{color:#3fb9ff;}
+
+    .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+
+    /* ——— телефон-кроп ——— */
+    .ph{width:390px;background:var(--pane);border:1px solid var(--hair);border-radius:16px;
+        overflow:hidden;position:relative;font-family:var(--sys);}
+    .ph .pad{padding:0 14px;}
+
+    /* кнопки обновить/бургер — реальная геометрия платформы (42×42, r10) */
+    .btns{display:flex;gap:8px;}
+    .kbtn{width:42px;height:42px;border-radius:10px;background:var(--surf2);
+          border:1px solid var(--btnline);display:flex;align-items:center;justify-content:center;
+          color:#fff;flex-shrink:0;}
+    .kbtn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;
+              stroke-linecap:round;stroke-linejoin:round;}
+
+    /* H1 платформы */
+    .h1{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin:0;color:#fff;}
+    .h1.wrap2{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .cnt{color:var(--muted);font-weight:700;}
+    .sub{font-size:15px;font-weight:500;color:var(--tx2);line-height:1.35;margin:4px 0 0;}
+
+    /* содержимое-заглушка под шапкой */
+    .chips{display:flex;gap:10px;}
+    .chip{height:44px;padding:0 20px;border-radius:12px;background:#141414;border:1px solid #2b2b2b;
+          color:#8b8b8b;font-size:14px;display:flex;align-items:center;}
+    .chip.on{background:rgba(0,160,255,.12);border-color:var(--brand);color:var(--brand);font-weight:600;}
+    .cta{height:44px;padding:0 18px;border-radius:12px;background:#3d9bfa;color:#fff;
+         font-size:14.5px;font-weight:600;display:inline-flex;align-items:center;}
+    .card{background:#141414;border:1px solid var(--line);border-radius:14px;padding:14px 16px;}
+    .lead{font-size:13.5px;line-height:1.5;color:var(--muted);margin:0;}
+    .tabs{display:flex;gap:6px;}
+    .tab{height:38px;padding:0 14px;border-radius:9px;background:#141414;border:1px solid #2b2b2b;
+         color:#8b8b8b;font-size:12.5px;display:flex;align-items:center;}
+    .tab.on{background:rgba(0,160,255,.14);border-color:var(--brand);color:var(--brand);font-weight:600;}
+
+    /* ——— разбор под кропом ——— */
+    .notes{margin-top:14px;display:flex;flex-direction:column;gap:7px;}
+    .n{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.45;color:#9a9a9a;}
+    .n b{flex:none;font-family:var(--mono);font-size:11px;line-height:1.6;}
+    .n.bad b{color:var(--bad);} .n.good b{color:var(--good);}
+
+    /* версия модуля — как в module-version-badge.js */
+    .ver{font-size:14px;color:#666;font-weight:600;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;flex:none;}
+    .eye{width:15px;height:15px;flex:none;fill:none;stroke:#666;stroke-width:2;
+         stroke-linecap:round;stroke-linejoin:round;align-self:center;}
+
+    /* кнопки платформы — роли из btnCss() */
+    .b{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:8px;
+       border:1px solid;font-size:13px;font-weight:500;line-height:1.2;padding:10px 18px;white-space:nowrap;}
+    .b svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2;
+           stroke-linecap:round;stroke-linejoin:round;}
+    .b.prim{background:var(--brand);color:#fff;border-color:var(--brand);}
+    .b.tbtn{background:transparent;color:#ccc;border-color:#333;}
+
+    /* табы медкарты — .med-tabs */
+    .medtabs{display:inline-flex;gap:6px;padding:3px;background:rgba(255,255,255,.045);
+             border:1px solid rgba(255,255,255,.06);border-radius:8px;max-width:100%;}
+    .mtab{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:6px;
+          background:transparent;color:#8a8a93;font-size:13.5px;font-weight:600;white-space:nowrap;}
+    .mtab svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:2;
+              stroke-linecap:round;stroke-linejoin:round;}
+    .mtab.on{background:#262626;color:var(--tx);}
+
+    .row{display:flex;gap:68px;align-items:flex-start;}
+    .cell{width:390px;}
+    .rule{height:1px;background:var(--hair);margin:34px 0;}
+  </style>
+</helmet>
+
+<div style="padding:56px 56px 60px;">
+
+  <!-- ——— шапка макета ——— -->
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;">
+    <div>
+      <div class="lbl">ai.cashruflow.ru · design system</div>
+      <h1 style="font-size:38px;font-weight:800;letter-spacing:-.025em;margin:10px 0 0;color:#fff;">Шапка страницы</h1>
+      <p style="font-size:15px;line-height:1.5;color:var(--tx2);margin:8px 0 0;max-width:620px;">
+        Один паттерн на все страницы платформы. Эталон — «Медкарта / Профиль»:
+        заголовок и кнопки на одной строке, подзаголовок под ним, ничего лишнего слева.
+      </p>
+    </div>
+    <div style="text-align:right;flex:none;">
+      <div class="lbl">выигрыш по высоте</div>
+      <div style="font-family:var(--mono);font-size:34px;font-weight:600;color:var(--good);line-height:1.1;margin-top:8px;">−52<span style="font-size:18px;color:var(--muted);">px</span></div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px;">132px → 80px</div>
+    </div>
+  </div>
+
+  <div style="height:1px;background:var(--line);margin:36px 0 26px;"></div>
+
+  <!-- ——— подписи колонок ——— -->
+  <div class="row" style="margin-bottom:18px;">
+    <div class="cell" style="display:flex;align-items:center;gap:10px;">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--bad);display:block;"></span>
+      <span class="lbl" style="color:var(--bad);letter-spacing:.2em;">Было</span>
+    </div>
+    <div class="cell" style="display:flex;align-items:center;gap:10px;">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--good);display:block;"></span>
+      <span class="lbl" style="color:var(--good);letter-spacing:.2em;">Стало</span>
+    </div>
+  </div>
+
+  <!-- ═══════════ 1. ДОСТУПЫ ═══════════ -->
+  <div class="lbl" style="margin-bottom:12px;">01 · /access — Доступы</div>
+  <div class="row">
+    <div class="cell">
+      <div class="ph" style="height:224px;">
+        <div class="pad" style="padding-top:14px;">
+          <!-- распорка burger-space: 104×46, кнопки fixed сверху справа -->
+          <div style="display:flex;justify-content:flex-end;height:46px;">
+            <div class="btns">
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg></div>
+              <div class="kbtn" style="font-size:20px;line-height:1;">☰</div>
+            </div>
+          </div>
+          <h1 class="h1" style="margin-top:8px;">Доступы <span class="cnt" style="font-size:22px;">(22)</span></h1>
+          <div class="chips" style="margin-top:16px;">
+            <div class="chip on">Личное</div>
+            <div class="chip">Проекты</div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="n bad"><b>46px</b><span>Пустая строка сверху: место под fixed-кнопки резервирует распорка <span style="font-family:var(--mono);font-size:11px;color:#8a8a93;">burger-space.js</span>.</span></div>
+        <div class="n bad"><b>()</b><span>Счётчик вклеен в H1 — заголовок скачет по ширине при каждой смене числа.</span></div>
+        <div class="n bad"><b>—</b><span>Подзаголовка нет вообще.</span></div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="ph" style="height:224px;">
+        <div class="pad" style="padding-top:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;">
+            <h1 class="h1">Доступы</h1>
+            <div class="btns">
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg></div>
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+            </div>
+          </div>
+          <p class="sub">22 доступа · 5 проектов</p>
+          <div class="chips" style="margin-top:18px;">
+            <div class="chip on">Личное</div>
+            <div class="chip">Проекты</div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="n good"><b>0px</b><span>Кнопки в потоке, на одной строке с H1 — распорка и пустая строка не нужны.</span></div>
+        <div class="n good"><b>·</b><span>Счётчик ушёл в подзаголовок: заголовок стабилен, число читается словами.</span></div>
+        <div class="n good"><b>☰</b><span>Бургер — SVG вместо глифа <span style="font-family:var(--mono);font-size:11px;color:#8a8a93;">☰</span>: одинаковая толщина линий на всех шрифтах.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ═══════════ 2. КЛИЕНТЫ ═══════════ -->
+  <div class="lbl" style="margin-bottom:12px;">02 · /clients — Клиенты</div>
+  <div class="row">
+    <div class="cell">
+      <div class="ph" style="height:246px;">
+        <div class="pad" style="padding-top:14px;">
+          <div style="display:flex;justify-content:flex-end;height:46px;">
+            <div class="btns">
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg></div>
+              <div class="kbtn" style="font-size:20px;line-height:1;">☰</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;">
+            <h1 class="h1">Клиенты</h1>
+            <div class="cta">+ Кабинет клиента</div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <b style="font-size:17px;color:#fff;">Пакка</b>
+              <span style="color:var(--muted);font-size:13px;">↗</span>
+            </div>
+            <div style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:3px;">/pakka</div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="n bad"><b>46px</b><span>Та же пустая строка под кнопками.</span></div>
+        <div class="n bad"><b>⚠</b><span>Синяя CTA стоит вплотную под бургером и тянет взгляд на себя вместо заголовка.</span></div>
+        <div class="n bad"><b>↔</b><span>Длинное имя кабинета сожмёт H1 — ряд ломается на узком экране.</span></div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="ph" style="height:246px;">
+        <div class="pad" style="padding-top:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;">
+            <h1 class="h1">Клиенты</h1>
+            <div class="btns">
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg></div>
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+            </div>
+          </div>
+          <p class="sub">12 кабинетов · 3 на модерации</p>
+          <div style="margin-top:18px;"><div class="cta">+ Кабинет клиента</div></div>
+          <div class="card" style="margin-top:12px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <b style="font-size:17px;color:#fff;">Пакка</b>
+              <span style="color:var(--muted);font-size:13px;">↗</span>
+            </div>
+            <div style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:3px;">/pakka</div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="n good"><b>↓</b><span>CTA переехала своим рядом под шапку, слева — не конкурирует с бургером.</span></div>
+        <div class="n good"><b>=</b><span>Шапка одинаковой высоты на всех страницах, есть кнопка действия или нет.</span></div>
+        <div class="n good"><b>44</b><span>Тач-таргеты 42–44px, как требует <span style="font-family:var(--mono);font-size:11px;color:#8a8a93;">--ui-tap</span>.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ═══════════ 3. JSON-LD ═══════════ -->
+  <div class="lbl" style="margin-bottom:12px;">03 · /jsonld — JSON-LD</div>
+  <div class="row">
+    <div class="cell">
+      <div class="ph" style="height:250px;">
+        <div style="padding:14px 14px 0;">
+          <div style="display:flex;justify-content:flex-end;height:46px;">
+            <div class="btns">
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg></div>
+              <div class="kbtn" style="font-size:20px;line-height:1;">☰</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;">
+            <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+              <svg viewBox="0 0 24 24" style="width:26px;height:26px;flex:none;fill:none;stroke:var(--brand);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><rect x="9" y="2" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="16" y="16" width="6" height="6" rx="1"/><path d="M12 8v4M5 16v-2h14v2"/></svg>
+              <h1 class="h1">JSON-LD</h1>
+            </div>
+            <span style="font-size:14px;color:var(--muted);white-space:nowrap;">← AI-платформа</span>
+          </div>
+        </div>
+        <div style="height:1px;background:#2a2a2a;margin-top:16px;"></div>
+        <div style="padding:14px;">
+          <p class="lead">Генератор структурированных данных (schema.org) для SEO: Organization, LocalBusiness, WebSite, Service, BreadcrumbList, FAQPage. Название, сайт, телефон…</p>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="n bad"><b>◧</b><span>Иконка слева от заголовка — сдвигает текстовую ось, на разных страницах разного размера.</span></div>
+        <div class="n bad"><b>←</b><span>«AI-платформа» дублирует бургер и на узком экране налезает на H1.</span></div>
+        <div class="n bad"><b>—</b><span>Полоса-разделитель: здесь есть, на медкарте и /projects её нет.</span></div>
+        <div class="n bad"><b>¶</b><span>Вместо подзаголовка — абзац на 40 слов, читать нечего.</span></div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="ph" style="height:250px;">
+        <div class="pad" style="padding-top:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;">
+            <h1 class="h1">JSON-LD</h1>
+            <div class="btns">
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg></div>
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+            </div>
+          </div>
+          <p class="sub">Разметка schema.org для сайтов проекта</p>
+          <div class="tabs" style="margin-top:18px;">
+            <div class="tab on">Organization</div>
+            <div class="tab">WebSite</div>
+            <div class="tab">FAQ</div>
+          </div>
+          <p class="lead" style="margin-top:16px;">Полное описание генератора — в «Справке», а не в шапке.</p>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="n good"><b>◨</b><span>Иконки слева от H1 нет ни на одной странице — единая текстовая ось 14px от края.</span></div>
+        <div class="n good"><b>☰</b><span>Возврат на платформу живёт в бургере, ссылка-дубль убрана.</span></div>
+        <div class="n good"><b>—</b><span>Полосы нет нигде: шапку от контента отбивает воздух (18px), как на медкарте.</span></div>
+        <div class="n good"><b>¶</b><span>Подзаголовок — одна строка. Длинное описание уходит в «Справку».</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ═══════════ 4. САЙТЫ ═══════════ -->
+  <div class="lbl" style="margin-bottom:12px;">04 · /sites — Сайты</div>
+  <div class="row">
+    <div class="cell">
+      <div class="ph" style="height:236px;">
+        <div style="padding:14px 14px 0;">
+          <div style="display:flex;justify-content:flex-end;height:46px;">
+            <div class="btns">
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg></div>
+              <div class="kbtn" style="font-size:20px;line-height:1;">☰</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <svg viewBox="0 0 24 24" style="width:26px;height:26px;flex:none;fill:none;stroke:var(--brand);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20a15.3 15.3 0 0 1 0-20"/></svg>
+              <h1 class="h1">Сайты</h1>
+            </div>
+            <span style="font-size:14px;color:var(--muted);white-space:nowrap;">← AI-платформа</span>
+          </div>
+        </div>
+        <div style="height:1px;background:#2a2a2a;margin-top:16px;"></div>
+        <div style="padding:14px;">
+          <p class="lead">Паспорт сайтов проекта: до 5 сайтов в сравнении — CMS, хостинг, домен и доступы…</p>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="n bad"><b>◧</b><span>Ещё одна иконка слева, другого рисунка и веса — системы нет.</span></div>
+        <div class="n bad"><b>≠</b><span>Та же схема, что у JSON-LD, но отступы отличаются на пару пикселей — вёрстка скопирована руками.</span></div>
+        <div class="n bad"><b>↕</b><span>До первого полезного элемента — 190px пустоты.</span></div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="ph" style="height:236px;">
+        <div class="pad" style="padding-top:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;">
+            <h1 class="h1">Сайты</h1>
+            <div class="btns">
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg></div>
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+            </div>
+          </div>
+          <p class="sub">Паспорт сайтов проекта — до 5 в сравнении</p>
+          <div class="card" style="margin-top:18px;">
+            <div style="font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);">Сайт 1</div>
+            <div style="font-size:16px;font-weight:600;color:#fff;margin-top:4px;">pakka.ru</div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="n good"><b>≡</b><span>Один компонент на обе страницы — отступы не могут разъехаться.</span></div>
+        <div class="n good"><b>↕</b><span>До первого полезного элемента — 80px вместо 190px.</span></div>
+        <div class="n good"><b>16</b><span>Подзаголовок на одну строку, режется многоточием, а не переносится на три.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ═══════════ 5. ПРОЕКТЫ ═══════════ -->
+  <div class="lbl" style="margin-bottom:12px;">05 · /projects — Проекты</div>
+  <div class="row">
+    <div class="cell">
+      <div class="ph" style="height:206px;">
+        <div class="pad" style="padding-top:14px;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+            <div>
+              <div style="font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#7a7a7a;font-weight:600;">Работа · Проекты</div>
+              <h1 class="h1" style="margin-top:10px;">Проекты <span class="cnt" style="font-size:22px;">(262)</span></h1>
+            </div>
+            <div class="btns">
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg></div>
+              <div class="kbtn" style="font-size:20px;line-height:1;">☰</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="n bad"><b>ᴀᴀ</b><span>Капс-киккер «РАБОТА · ПРОЕКТЫ» есть только здесь — четвёртый вариант шапки на платформе.</span></div>
+        <div class="n bad"><b>↕</b><span>Под шапкой 70px пустоты до первой карточки.</span></div>
+        <div class="n bad"><b>()</b><span>«(262)» в заголовке — то же, что на «Доступах».</span></div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="ph" style="height:206px;">
+        <div class="pad" style="padding-top:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;">
+            <h1 class="h1">Проекты</h1>
+            <div class="btns">
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg></div>
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+            </div>
+          </div>
+          <p class="sub">262 проекта · 18 в работе</p>
+          <div class="chips" style="margin-top:18px;">
+            <div class="chip on">Все</div>
+            <div class="chip">В работе</div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="n good"><b>ᴀᴀ</b><span>Киккера нет: раздел показывает бургер, дублировать его в шапке незачем.</span></div>
+        <div class="n good"><b>↕</b><span>Пустота убрана — фильтр начинается сразу под подзаголовком.</span></div>
+        <div class="n good"><b>1</b><span>Пять страниц — одна шапка. Пиксель в пиксель.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ═══════════ 6. AI-МЕДКАРТА ═══════════ -->
+  <div class="lbl" style="margin-bottom:12px;">06 · /medcard — AI-Медкарта · эталон, модуль с версией</div>
+  <div class="row">
+    <div class="cell">
+      <div class="ph" style="height:250px;">
+        <div class="pad" style="padding-top:14px;">
+          <div style="display:flex;justify-content:flex-end;height:46px;">
+            <div class="btns">
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg></div>
+              <div class="kbtn" style="font-size:20px;line-height:1;">☰</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:10px;margin-top:8px;">
+            <h1 class="h1">AI-Медкарта</h1>
+            <span class="ver">v1.8.2</span>
+            <svg viewBox="0 0 24 24" class="eye"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <div style="font-size:24px;font-weight:600;color:var(--tx2);margin-top:6px;line-height:1.2;">Профиль</div>
+          <div style="font-size:13px;color:#6f6f78;font-style:italic;margin-top:8px;">Все данные о здоровье в динамике всегда под рукой</div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="n bad"><b>24</b><span>Подзаголовок «Профиль» рисуется браузерным <span style="font-family:var(--mono);font-size:11px;color:#8a8a93;">24px</span> — <span style="font-family:var(--mono);font-size:11px;color:#8a8a93;">font-size</span> у <span style="font-family:var(--mono);font-size:11px;color:#8a8a93;">.ph1-sub</span> не задан.</span></div>
+        <div class="n bad"><b>“”</b><span>Слоган-курсив третьей строкой — есть только здесь, на других страницах места под него нет.</span></div>
+        <div class="n bad"><b>46px</b><span>Пустая строка сверху та же, что и везде.</span></div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="ph" style="height:250px;">
+        <div class="pad" style="padding-top:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;">
+            <div style="display:flex;align-items:baseline;gap:10px;min-width:0;">
+              <h1 class="h1 wrap2">AI-Медкарта</h1>
+              <span class="ver">v1.8.2</span>
+              <svg viewBox="0 0 24 24" class="eye"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div class="btns">
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg></div>
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+            </div>
+          </div>
+          <p class="sub">Профиль · данные о здоровье в динамике</p>
+          <div class="medtabs" style="margin-top:18px;">
+            <div class="mtab on"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>Профиль</div>
+            <div class="mtab"><svg viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Цикл</div>
+            <div class="mtab"><svg viewBox="0 0 24 24"><path d="M10 2v6.5L4.5 18A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-3L14 8.5V2"/><path d="M8.5 2h7M7 15h10"/></svg>Анализы</div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="n good"><b>v</b><span>Версия и глаз истории — в одну строку с H1, по базовой линии. Размер прежний: <span style="font-family:var(--mono);font-size:11px;color:#8a8a93;">14px mono #666</span>.</span></div>
+        <div class="n good"><b>15</b><span>Подзаголовок 15px: секция и слоган слились в одну строку вместо трёх.</span></div>
+        <div class="n good"><b>≡</b><span>Табы медкарты — тот же компонент, отбивка 18px, полосы под шапкой нет.</span></div>
+        <div class="n good"><b>H1</b><span>Название раздела не сокращаем. Не влезает в 390pt — переносится на вторую строку, а не режется многоточием.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ═══════════ 7. CRM — ЛИДЫ ═══════════ -->
+  <div class="lbl" style="margin-bottom:12px;">07 · /crm/leads — CRM · модуль с версией</div>
+  <div class="row">
+    <div class="cell">
+      <div class="ph" style="height:236px;">
+        <div class="pad" style="padding-top:14px;">
+          <div style="display:flex;justify-content:flex-end;height:46px;">
+            <div class="btns">
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg></div>
+              <div class="kbtn" style="font-size:20px;line-height:1;">☰</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:10px;margin-top:8px;flex-wrap:wrap;">
+            <h1 class="h1">CRM — Лиды</h1>
+            <span class="ver">v1.3.1</span>
+            <svg viewBox="0 0 24 24" class="eye"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+            <div class="b tbtn"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Шаблон</div>
+            <div class="b tbtn"><svg viewBox="0 0 24 24"><path d="M12 21V9M7 14l5-5 5 5M5 3h14"/></svg>Импорт</div>
+            <div class="b prim">+ Лид</div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="n bad"><b>—</b><span>Подзаголовка нет: непонятно, сколько лидов и сколько в работе.</span></div>
+        <div class="n bad"><b>⇥</b><span>Три кнопки в ряд с заголовком — на мобиле ряд переносится и шапка растёт вдвое.</span></div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="ph" style="height:236px;">
+        <div class="pad" style="padding-top:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;">
+            <div style="display:flex;align-items:baseline;gap:10px;min-width:0;">
+              <h1 class="h1 wrap2">CRM — Лиды</h1>
+              <span class="ver">v1.3.1</span>
+              <svg viewBox="0 0 24 24" class="eye"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div class="btns">
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg></div>
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+            </div>
+          </div>
+          <p class="sub">48 лидов · 12 в работе</p>
+          <div style="display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;">
+            <div class="b prim">+ Лид</div>
+            <div class="b tbtn"><svg viewBox="0 0 24 24"><path d="M12 21V9M7 14l5-5 5 5M5 3h14"/></svg>Импорт</div>
+            <div class="b tbtn"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Шаблон</div>
+          </div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="n good"><b>H1</b><span>Заголовок оставлен как есть — «CRM — Лиды». Сокращать название раздела ради ширины не надо.</span></div>
+        <div class="n good"><b>↓</b><span>Кнопки своим рядом под шапкой, главная слева первой.</span></div>
+        <div class="n good"><b>v</b><span>Версия на том же месте, что и у медкарты, — слот один на все модули.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- ═══════════ 8. ТРЕКЕР ПРИВЫЧЕК ═══════════ -->
+  <div class="lbl" style="margin-bottom:12px;">08 · /habits — Ai-трекер привычек · модуль с версией</div>
+  <div class="row">
+    <div class="cell">
+      <div class="ph" style="height:214px;">
+        <div class="pad" style="padding-top:14px;">
+          <div style="display:flex;justify-content:flex-end;height:46px;">
+            <div class="btns">
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg></div>
+              <div class="kbtn" style="font-size:20px;line-height:1;">☰</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:10px;margin-top:8px;flex-wrap:wrap;">
+            <h1 class="h1">AI-Трекер привычек</h1>
+            <span class="ver">v1.9.1</span>
+            <svg viewBox="0 0 24 24" class="eye"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg viewBox="0 0 24 24" class="eye"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="n bad"><b>↩</b><span>Длинный H1 переносится и утаскивает версию с «плюсом» на третью строку — заголовок и кнопки расходятся.</span></div>
+        <div class="n bad"><b>+</b><span>Кнопка «добавить модуль» вклеена в заголовок между слов — не кнопка, а часть текста.</span></div>
+      </div>
+    </div>
+
+    <div class="cell">
+      <div class="ph" style="height:214px;">
+        <div class="pad" style="padding-top:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:42px;">
+            <div style="display:flex;align-items:baseline;gap:10px;min-width:0;">
+              <h1 class="h1 wrap2">Ai-трекер привычек</h1>
+              <span class="ver">v1.9.1</span>
+              <svg viewBox="0 0 24 24" class="eye"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div class="btns">
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg></div>
+              <div class="kbtn"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+            </div>
+          </div>
+          <p class="sub">7 привычек · серия 12 дней</p>
+          <div style="margin-top:18px;"><div class="b prim"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Привычка</div></div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="n good"><b>H1</b><span>«Ai-трекер привычек» остаётся целиком: на 390pt переносится на две строки, кнопки держатся у верхней.</span></div>
+        <div class="n good"><b>+</b><span>«Добавить» — нормальная кнопка своим рядом, а не значок внутри текста.</span></div>
+        <div class="n good"><b>=</b><span>Три модуля с версией — одна и та же строка заголовка.</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
