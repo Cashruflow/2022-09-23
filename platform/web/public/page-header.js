@@ -42,7 +42,7 @@
   function txt(n) { return (n.textContent || '').trim(); }
   function isCounter(e) { return COUNTER.test(e.className || '') || COUNTER.test(e.id || ''); }
   function isBadge(e) { return /^mvBadge/.test(e.id || ''); }
-  function isSubEl(e) { return e.matches && e.matches('.lead,.sub,.ph1-sub'); }
+  function isSubEl(e) { return e.matches && e.matches('.ph-s,.lead,.sub,.ph1-sub'); }
   function isBack(e) { return e.tagName === 'A' && /^[←‹<]/.test(txt(e)); }
   function isKicker(e) {
     if (!e || e.children.length) return false;
@@ -97,8 +97,8 @@
       node = node.parentElement;
     }
     var row  = el('div', 'ph-row'), ttl  = el('div', 'ph-ttl'), side = el('div', 'ph-side'),
-        act  = el('div', 'ph-act'), ver  = el('div', 'ph-ver'), sub  = el('p', 'ph-s'),
-        tools = el('div', 'ph-tools');
+        act  = el('div', 'ph-act'), ver  = el('div', 'ph-ver'), ownSub = null,
+        sub  = el('p', 'ph-s'), tools = el('div', 'ph-tools');
     var pool = [], wrappers = [];
     if (onHeader) {
       Array.prototype.slice.call(hdr.children).forEach(function (c) {
@@ -120,9 +120,13 @@
         }
       });
     }
+    pool.forEach(function (nd) {
+      if (!ownSub && nd !== h1 && nd.matches && nd.matches('p.ph-s')) ownSub = nd;
+    });
+    if (ownSub) sub = ownSub;
     var subParts = [], leftovers = [];
     pool.forEach(function (nd) {
-      if (nd === h1) return;
+      if (nd === h1 || nd === ownSub) return;
       if (isBack(nd)) { nd.remove(); return; }
       if (isBadge(nd)) { ver.appendChild(nd); return; }
       if (isSubEl(nd)) { if (txt(nd).length <= SUB_MAX) subParts.push(nd); return; }
