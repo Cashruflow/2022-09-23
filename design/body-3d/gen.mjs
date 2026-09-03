@@ -60,7 +60,6 @@ function torsoAt(y){
     let t = (y-a[0])/(b[0]-a[0]); t = t*t*(3-2*t);
     return [a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t, a[3]+(b[3]-a[3])*t];
   }
-  return TORSO[TORSO.length-1].slice(1);
 }
 function torsoPt(y, th){
   const [rx, rz, cz] = torsoAt(y);
@@ -110,7 +109,22 @@ function limbPt(J, i, t, th){
   const n = [u[0]*ct+v[0]*st, u[1]*ct+v[1]*st, u[2]*ct+v[2]*st];
   return { p:[c[0]+n[0]*r, c[1]+n[1]*r, c[2]+n[2]*r], n };
 }
-const limbLen = J => { let s=0; for(let i=0;i<J.length-1;i++) s += frame(J[i].p, J[i+1].p).len; return s; };
+// Площадь боковой поверхности сегмента (усечённый конус).
+const segArea = (J, i) => Math.PI*(J[i].r + J[i+1].r)*frame(J[i].p, J[i+1].p).len;
+const limbArea = (J, segs) => { let a = 0; for (let i=0;i<segs;i++) a += segArea(J, i); return a; };
+// Точка на конечности, выбранная пропорционально ПЛОЩАДИ. Выбор по индексу
+// сегмента сбивал точки к запястью и щиколотке: плечо вдвое длиннее предплечья
+// и вдвое толще, а получало ровно ту же долю точек. dropLast отбрасывает кисть
+// и стопу — жир на них не откладывается.
+function limbPick(J, R, dropLast){
+  const segs = J.length - 1 - (dropLast ? 1 : 0);
+  let u = R() * limbArea(J, segs), si = 0;
+  while (si < segs-1 && u > segArea(J, si)){ u -= segArea(J, si); si++; }
+  const r0 = J[si].r, r1 = J[si+1].r, rm = Math.max(r0, r1);
+  let t = R();                                    // сужение конуса — отбором
+  for (let g=0; g<24 && R() >= (r0 + (r1-r0)*t)/rm; g++) t = R();
+  return { si, t };
+}
 
 // ============================ камера =========================================
 export const ROT = 0.58, TILT = 0.19;    // ~33° рыскания, ~11° наклона камеры
@@ -147,18 +161,23 @@ function runs(pts, isClosed){
 
 /**
  * Одна фигура.
- *   width,height,scale,cx,footY — холст и посадка фигуры
+ *   width,height,scale,cx,footY — холст и посадка фигуры (обязательные)
+ *   view       — [x,y,w,h] viewBox: обрезка холста по самой фигуре
  *   zones      — избыток жира по зонам бланка, кг: {torso,larm,rarm,lleg,rleg}
  *   seed       — зерно, чтобы точки не «дышали» между сборками
  *   style      — 'mesh' (сетка контуров) | 'dots' (тело тоже точками)
  *   zoneColors — перекрасить кольца зоны (вариант «по зонам»)
- *   rot, tilt, colors, dotR
+ *   rot, tilt   — углы камеры; rim — граница класса «кромка»
+ *   colors, fillOpacity, dotR, density, uid, aria
  * Возвращает { svg, dots } — dots это фактическое число точек, его и печатаем.
  */
 export function figure(o){
+  // без них каждая координата уходит в NaN, и SVG выходит пустым без единой ошибки
+  for (const k of ['width','height','scale','cx','footY'])
+    if (typeof o[k] !== 'number') throw new Error('figure(): не задан ' + k);
   const W = o.width, H = o.height, S = o.scale, CX = o.cx, FY = o.footY;
   const cam = mk(o.rot ?? ROT, o.tilt ?? TILT);
-  const R = rng(o.seed || 7);
+  const R = rng(o.seed ?? 7);
   const zones = o.zones || {};
   const px = q => ({ sx: CX + S*q.x, sy: FY - S*q.y, z: q.z });
   // класс линии: 0 — дальняя сторона, 1 — ближняя, 2 — кромка силуэта.
@@ -275,14 +294,13 @@ export function figure(o){
           if (R() < torsoW(y, th)/5.2 || g === 63){ s = torsoPt(y, th); break; }
         }
       } else {
-        const J = LIMBS[zone], segs = J.length - 1, u = R()*(segs - 0.55);
-        const si = Math.min(segs-1, Math.floor(u));
-        s = limbPt(J, si, u - si, R()*TAU);
+        const J = LIMBS[zone], k = limbPick(J, R, true);
+        s = limbPt(J, k.si, k.t, R()*TAU);
       }
       const d = T * (0.30 + 0.70*R());
       const q = px(cam.p([s.p[0]+s.n[0]*d, s.p[1]+s.n[1]*d, s.p[2]+s.n[2]*d]));
       const dep = Math.max(0, Math.min(1, (q.z + 0.25)/0.5));
-      const r = (o.dotR || 1.45) * (0.74 + 0.30*dep);
+      const r = (o.dotR ?? 1.45) * (0.74 + 0.30*dep);
       (cam.nz(s.n) > 0 ? dotsFront : dotsBack)
         .push(`<circle cx="${f1(q.sx)}" cy="${f1(q.sy)}" r="${Math.round(r*100)/100}"/>`);
     }
@@ -293,7 +311,7 @@ export function figure(o){
   if (o.style === 'dots'){
     // Плотность общая на всё тело: иначе руки зарастают точками, а торс пустеет —
     // число точек должно идти от ПЛОЩАДИ куска, а не от его длины.
-    const D = o.density || 6800;              // точек на единицу площади (доли роста²)
+    const D = o.density ?? 6800;              // точек на единицу площади (доли роста²)
     const bf = [], bb = [];
     const add = (p, n) => { const q = px(cam.p(p)), fwd = cam.nz(n) > 0;
       (fwd ? bf : bb).push(`<circle cx="${f1(q.sx)}" cy="${f1(q.sy)}" r="${fwd?1.15:0.95}"/>`); };
@@ -304,23 +322,20 @@ export function figure(o){
     for (let k=0, n=Math.round(D*aTorso); k<n; k++){
       const s = torsoPt(TY0 + R()*(TY1-TY0), R()*TAU); add(s.p, s.n); }
     for (const J of Object.values(LIMBS)){
-      const segs = J.length - 1;
-      let A = 0; for (let i=0;i<segs;i++) A += Math.PI*(J[i].r + J[i+1].r)*frame(J[i].p, J[i+1].p).len;
-      for (let k=0, n=Math.round(D*A); k<n; k++){
-        const u = R()*segs, si = Math.min(segs-1, Math.floor(u));
-        const s = limbPt(J, si, u-si, R()*TAU); add(s.p, s.n); }
+      for (let k=0, n=Math.round(D*limbArea(J, J.length-1)); k<n; k++){
+        const q = limbPick(J, R, false), s = limbPt(J, q.si, q.t, R()*TAU); add(s.p, s.n); }
     }
     const aHead = 4*Math.PI*((HEAD.rx*HEAD.ry + HEAD.ry*HEAD.rz + HEAD.rx*HEAD.rz)/3);
     for (let k=0, n=Math.round(D*aHead); k<n; k++){
       const s = headPt(Math.asin(R()*2-1), R()*TAU); add(s.p, s.n); }
-    const aNeck = ellP(NECK.r0, NECK.r0) * (NECK.y1 - NECK.y0);
+    const aNeck = ellP((NECK.r0+NECK.r1)/2, (NECK.r0+NECK.r1)/2) * (NECK.y1 - NECK.y0);
     for (let k=0, n=Math.round(D*aNeck); k<n; k++){
       const s = neckPt(R(), R()*TAU); add(s.p, s.n); }
     bodyDots = { back:bb.join(''), front:bf.join('') };
   }
 
   // ---------- пол ----------
-  const floor = closed(Array.from({length:49}, (_,i) => {
+  const floor = closed(Array.from({length:48}, (_,i) => {
     const th = i/48*TAU; return px(cam.p([Math.cos(th)*.145, 0.004, Math.sin(th)*.145]));
   }));
 
@@ -334,7 +349,7 @@ export function figure(o){
     ? `<g fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"><path d="${arr.map(poly).join('')}"/></g>` : '';
   // цвет и толщина по классу: дальняя сторона — ближняя — кромка
   const COL = [cBack, cFront, cRim], WID = [.8, 1, 1.25];
-  const layer = cls => o.style === 'dots' ? '' :
+  const layer = cls =>
     strokes(mesh[cls], COL[cls], WID[cls]) +
     Object.entries(zmesh).map(([z, bag]) => {
       const zc = o.zoneColors && o.zoneColors[z];

@@ -3,13 +3,46 @@ import { figure, DOT_G } from './gen.mjs';
 import fs from 'fs';
 
 // ---- данные: ОБРАЗЕЦ по бланку DDX/InBody, реальные цифры подставит медкарта ----
+// Первичны ЧИСЛА ТОЧЕК по зонам: одна точка = 20 г, поэтому избыток равен им по
+// определению и разойтись с подписью «610 точек» не может. Жировая масса и процент
+// выводятся из избытка, а не задаются отдельно — иначе на карточке рядом стоят
+// три числа, которые друг из друга не получаются.
 const NORM_PCT = 15;                       // ориентир «нормы» по жиру
-const BEFORE = { label:'ДО', date:'12.03.2026', weight:92.4, fatPct:28.3, fat:26.1, muscle:34.8,
-                 zones:{ torso:7.30, larm:0.70, rarm:0.70, lleg:1.76, rleg:1.74 } };
-const AFTER  = { label:'ПОСЛЕ', date:'01.09.2026', weight:82.0, fatPct:19.6, fat:16.1, muscle:36.2,
-                 zones:{ torso:2.00, larm:0.24, rarm:0.26, lleg:0.66, rleg:0.64 } };
-const sum = z => Object.values(z).reduce((a,b)=>a+b,0);
+const DOTS = {
+  before: { torso:365, larm:35, rarm:35, lleg:88, rleg:87 },   // 610
+  after:  { torso:108, larm:10, rarm:11, lleg:26, rleg:25 },   // 180
+};
+const sum = o => Object.values(o).reduce((a,b)=>a+b,0);
 const ru = (n,d=1) => n.toFixed(d).replace('.', ',');
+const shown = n => +ru(n).replace(',', '.');       // как число видит читатель
+const plural = (n,one,few,many) => { const a = n%100, b = n%10;
+  return (a>=11 && a<=14) ? many : b===1 ? one : (b>=2 && b<=4) ? few : many; };
+
+function rec(label, date, weight, muscle, dots){
+  const zones = Object.fromEntries(Object.entries(dots).map(([k,n]) => [k, n*DOT_G/1000]));
+  const excess = sum(zones), fat = weight*NORM_PCT/100 + excess;
+  return { label, date, weight, muscle, zones, excess, fat, fatPct: fat/weight*100, dots: sum(dots) };
+}
+const BEFORE = rec('ДО',    '12.03.2026', 92.4, 34.8, DOTS.before);
+const AFTER  = rec('ПОСЛЕ', '01.09.2026', 83.4, 35.7, DOTS.after);
+
+// Счётная самопроверка образца — в духе правил проекта: цифры на макете должны
+// сходиться, иначе он врёт убедительнее, чем ошибается.
+const ffm = d => d.weight - d.fat;
+for (const d of [BEFORE, AFTER]){
+  const zl = [d.zones.torso, d.zones.larm + d.zones.rarm, d.zones.lleg + d.zones.rleg];
+  if (Math.abs(d.excess - d.dots*DOT_G/1000) > 1e-9) throw new Error(d.label+': избыток и число точек разошлись');
+  if (Math.abs(shown(zl[0]) + shown(zl[1]) + shown(zl[2]) - shown(d.excess)) > 1e-6)
+    throw new Error(d.label+': строка по зонам не складывается в показанный избыток');
+  if (Math.abs(shown(d.fat) - shown(d.fatPct*d.weight/100)) > 0.05)
+    throw new Error(d.label+': процент жира и килограммы не сходятся');
+  if (d.muscle > ffm(d)) throw new Error(d.label+': мышц больше, чем безжировой массы');
+}
+if (AFTER.muscle - BEFORE.muscle > ffm(AFTER) - ffm(BEFORE) + 1e-9)
+  throw new Error('мышцы прибавили сильнее безжировой массы — так не бывает');
+
+const dmy = s => { const [d,m,y] = s.split('.').map(Number); return Date.UTC(y, m-1, d); };
+const DAYS = Math.round((dmy(AFTER.date) - dmy(BEFORE.date)) / 864e5);
 
 // ---- токены раздела: значения сняты с ui.css и medcard_profile.js --------------
 const T = {
@@ -32,7 +65,6 @@ const fig = (o) => { const f = figure({ width:280, height:520, scale:445, cx:140
 
 // ---------------------------- артборд Main -------------------------------------
 function panel(d, uid, seed){
-  const excess = d.fat - d.weight * NORM_PCT / 100;
   const f = fig({ zones:d.zones, uid, seed, aria:`Фигура «${d.label}»` });
   const cell = (l, v, u, col) => `<div style="min-width:0;">
         <div style="font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;color:${T.tx3};">${l}</div>
@@ -43,18 +75,15 @@ function panel(d, uid, seed){
         <span style="font-size:11px;${MONO}color:${T.tx3};margin-left:auto;">${d.date}</span></div>
       ${f.html}
       <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:10px;">
-        <span style="font-size:26px;font-weight:700;${MONO}color:${T.fat};line-height:1;">${ru(excess)}<span style="font-size:12px;font-weight:400;color:${T.tx3};"> кг</span></span>
+        <span style="font-size:26px;font-weight:700;${MONO}color:${T.fat};line-height:1;">${ru(d.excess)}<span style="font-size:12px;font-weight:400;color:${T.tx3};"> кг</span></span>
         <span style="font-size:11px;color:${T.tx2};">жира сверх нормы</span>
-        <span style="margin-left:auto;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:700;${MONO}background:rgba(251,191,36,.13);color:${T.fat};">${f.dots} точек</span></div>
+        <span style="margin-left:auto;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:700;${MONO}background:rgba(251,191,36,.13);color:${T.fat};">${f.dots} ${plural(f.dots,'точка','точки','точек')}</span></div>
       <div style="margin-top:9px;font-size:11px;${MONO}color:${T.tx3};">Торс ${ru(d.zones.torso)} · руки ${ru(d.zones.larm + d.zones.rarm)} · ноги ${ru(d.zones.lleg + d.zones.rleg)} кг</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;margin-top:14px;padding-top:13px;border-top:1px solid ${T.bd2};">
         ${cell('Вес', ru(d.weight), 'кг')}${cell('Жир', ru(d.fatPct), '%')}
         ${cell('Жировая масса', ru(d.fat), 'кг')}${cell('Мышцы', ru(d.muscle), 'кг', T.ok)}</div></div>`;
 }
 
-const dBefore = BEFORE.fat - BEFORE.weight*NORM_PCT/100;
-const dAfter  = AFTER.fat  - AFTER.weight *NORM_PCT/100;
-const dotsB = Math.round(sum(BEFORE.zones)*1000/DOT_G), dotsA = Math.round(sum(AFTER.zones)*1000/DOT_G);
 
 const delta = (l, v, good) => `<div style="min-width:0;">
     <div style="font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;color:${T.tx3};">${l}</div>
@@ -74,28 +103,27 @@ const MAIN = `<div style="${CARD}max-width:800px;">
     <div style="display:flex;gap:26px;flex-wrap:wrap;margin-top:16px;padding:14px 16px;${PANEL}">
       <div style="min-width:0;">
         <div style="font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;color:${T.tx3};">За период</div>
-        <div style="font-size:17px;font-weight:700;${MONO}color:${T.tx2};margin-top:3px;">173 дня</div></div>
+        <div style="font-size:17px;font-weight:700;${MONO}color:${T.tx2};margin-top:3px;">${DAYS} ${plural(DAYS,'день','дня','дней')}</div></div>
       ${delta('Вес', '−'+ru(BEFORE.weight-AFTER.weight)+' кг', true)}
       ${delta('Жир', '−'+ru(BEFORE.fatPct-AFTER.fatPct)+' п.п.', true)}
-      ${delta('Сверх нормы', '−'+ru(dBefore-dAfter)+' кг', true)}
+      ${delta('Сверх нормы', '−'+ru(BEFORE.excess-AFTER.excess)+' кг', true)}
       ${delta('Мышцы', '+'+ru(AFTER.muscle-BEFORE.muscle)+' кг', true)}
-      ${delta('Точек', '−'+(dotsB-dotsA), true)}</div>
+      ${delta('Точки', '−'+(BEFORE.dots-AFTER.dots), true)}</div>
     <div style="margin-top:14px;font-size:11px;color:${T.tx3};line-height:1.6;">
-      Норма ${NORM_PCT}&nbsp;% — ориентир, прибор её не считает: границы у DDX свои, от пола, возраста и роста.
+      Норма ${NORM_PCT}&nbsp;% — наш ориентир: прибор её не считает, у DDX границы свои и зависят от пола, возраста и роста.
       Толщина облака увеличена, иначе восемь миллиметров подкожного жира дали бы на фигуре два пикселя;
       пропорции между зонами настоящие — масса зоны, делённая на её площадь, как в виджете «Состав по зонам».</div></div>`;
 
 // ---------------------------- артборд Mobile -----------------------------------
 function mpanel(d, uid, seed){
-  const excess = d.fat - d.weight*NORM_PCT/100;
   const f = fig({ zones:d.zones, uid, seed, cssWidth:132, aria:`Фигура «${d.label}»` });
   return `<div style="${PANEL}padding:11px 10px 13px;min-width:0;">
       <div style="display:flex;align-items:baseline;gap:6px;">
         <span style="font-size:9.5px;font-weight:700;letter-spacing:.12em;color:${T.tx2};">${d.label}</span>
         <span style="font-size:10px;${MONO}color:${T.tx3};margin-left:auto;">${d.date}</span></div>
       ${f.html}
-      <div style="margin-top:8px;font-size:22px;font-weight:700;${MONO}color:${T.fat};line-height:1;">${ru(excess)}<span style="font-size:11px;font-weight:400;color:${T.tx3};"> кг</span></div>
-      <div style="margin-top:4px;font-size:10.5px;${MONO}color:${T.fat};opacity:.75;">${f.dots} точек</div>
+      <div style="margin-top:8px;font-size:22px;font-weight:700;${MONO}color:${T.fat};line-height:1;">${ru(d.excess)}<span style="font-size:11px;font-weight:400;color:${T.tx3};"> кг</span></div>
+      <div style="margin-top:4px;font-size:10.5px;${MONO}color:${T.fat};opacity:.75;">${f.dots} ${plural(f.dots,'точка','точки','точек')}</div>
       <div style="margin-top:10px;padding-top:9px;border-top:1px solid ${T.bd2};font-size:11px;${MONO}color:${T.tx2};line-height:1.7;">
         Вес <b style="color:${T.tx};">${ru(d.weight)}</b> кг<br>Жир <b style="color:${T.tx};">${ru(d.fatPct)}</b> %<br>Мышцы <b style="color:${T.ok};">${ru(d.muscle)}</b> кг</div></div>`;
 }
@@ -105,8 +133,8 @@ const MOBILE = `<div style="${CARD}padding:16px;">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">${mpanel(BEFORE,'ma',11)}${mpanel(AFTER,'mb',11)}</div>
     <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;padding:12px 13px;${PANEL}">
       ${delta('Вес','−'+ru(BEFORE.weight-AFTER.weight)+' кг',true)}
-      ${delta('Сверх нормы','−'+ru(dBefore-dAfter)+' кг',true)}
-      ${delta('Точек','−'+(dotsB-dotsA),true)}</div>
+      ${delta('Сверх нормы','−'+ru(BEFORE.excess-AFTER.excess)+' кг',true)}
+      ${delta('Точки','−'+(BEFORE.dots-AFTER.dots),true)}</div>
     <div style="margin-top:12px;font-size:10.5px;color:${T.tx3};line-height:1.55;">Толщина облака увеличена для читаемости, пропорции между зонами настоящие.</div></div>`;
 
 // ---------------------------- артборд Angles -----------------------------------
@@ -125,20 +153,21 @@ const ANGLES = `<div style="${CARD}">
 const ALT_A = `<div style="${CARD}">
     ${head('Вариант A · тело тоже точками')}
     <div style="font-size:12px;color:${T.tx2};line-height:1.55;margin-bottom:14px;">
-      Ближе всего к глобусу: поверхность эталонного тела — редкие серые точки, жир — янтарные.
+      Ближе всего к глобусу: поверхность эталонного тела — редкие холодные точки, жир — янтарные.
       Плюс: один визуальный язык на весь раздел. Минус: контур тела размывается, силуэт «до» и «после» сравнивать труднее.</div>
     <div style="${PANEL}padding:14px;">${fig({ zones:BEFORE.zones, uid:'alta', seed:11, style:'dots', cssWidth:244, aria:'Тело точками' }).html}</div></div>`;
 
-const FATCOL = { low:'#fbbf24', norm:'#4ade80', high:'#f87171' };   // как SEGCOL.fat
+const FATCOL = { norm:T.ok, high:T.dg };   // как SEGCOL.fat в medcard_profile.js
 const ALT_B = `<div style="${CARD}">
     ${head('Вариант B · кольца красит вердикт зоны')}
     <div style="font-size:12px;color:${T.tx2};line-height:1.55;margin-bottom:14px;">
-      Сетка окрашена по вердикту с бланка — тем же правилом, что «Состав по зонам»: норма зелёная, выше нормы красная.
-      Плюс: две карточки сливаются в одну. Минус: цвета спорят с янтарными точками, картинка становится пёстрой.</div>
+      Сетка окрашена по вердикту с бланка — тем же правилом, что и «Состав по зонам»: норма зелёная, выше нормы красная.
+      Плюс: эта карточка и «Состав по зонам» сливаются в одну. Минус виден прямо здесь — зелёная «норма» на руках, а точки на них есть:
+      прибор меряет зону относительно её собственной нормы, точки отложены от общих ${NORM_PCT}&nbsp;%. Две разные нормы в одной картинке.</div>
     <div style="${PANEL}padding:14px;">${fig({ zones:BEFORE.zones, uid:'altb', seed:11, cssWidth:244, aria:'Кольца по вердикту зон',
       zoneColors:{ torso:FATCOL.high, larm:FATCOL.norm, rarm:FATCOL.norm, lleg:FATCOL.high, rleg:FATCOL.high } }).html}</div>
     <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:${T.tx2};">
-      ${[['норма',FATCOL.norm],['выше нормы',FATCOL.high],['ниже нормы',FATCOL.low]].map(([l,c])=>
+      ${[['норма',FATCOL.norm],['выше нормы',FATCOL.high]].map(([l,c])=>
         `<span style="display:inline-flex;align-items:center;gap:6px;"><i style="width:9px;height:9px;border-radius:2px;background:${c};display:inline-block;"></i>${l}</span>`).join('')}</div></div>`;
 
 // ---------------------------------- запись -------------------------------------
@@ -182,14 +211,14 @@ const canvas = {
   artboards: [
     { file:'Main.dc.html',     x:0,    y:0,    w:900, h:1120 },
     { file:'Mobile.dc.html',   x:1010, y:0,    w:390, h:720 },
-    { file:'Angles.dc.html',   x:0,    y:1260, w:940, h:500 },
-    { file:'DotBody.dc.html',  x:0,    y:1880, w:460, h:750 },
-    { file:'ZoneMesh.dc.html', x:560,  y:1880, w:460, h:780 },
+    { file:'Angles.dc.html',   x:0,    y:1260, w:940, h:540 },
+    { file:'DotBody.dc.html',  x:0,    y:1920, w:460, h:750 },
+    { file:'ZoneMesh.dc.html', x:560,  y:1920, w:460, h:800 },
   ],
   annotations: [
-    { id:'brief', x:1010, y:800, w:390,
-      text:'Задача: контур тела в 3D, избыточный жир — точками, «до / после» статикой.\n\nГлавный приём: эталонное тело на обеих картинках ОДНО И ТО ЖЕ — это тело при 15 % жира. Меняется только облако точек, поэтому разницу видно раньше, чем прочитаешь цифры.\n\nОдна точка = 20 г жира сверх нормы. 610 точек против 190 — это и есть 12,2 кг против 3,8 кг.\n\nЦифры — образец с бланка DDX, не реальные замеры.' },
-    { id:'alts', x:1090, y:1880, w:330,
+    { id:'brief', x:1010, y:860, w:390,
+      text:'Задача: контур тела в 3D, избыточный жир — точками, «до / после» статикой.\n\nГлавный приём: эталонное тело на обеих картинках ОДНО И ТО ЖЕ — это тело при 15 % жира. Меняется только облако точек, поэтому разницу видно раньше, чем прочитаешь цифры.\n\nОдна точка = 20 г жира сверх нормы. 610 точек против 180 — это и есть 12,2 кг против 3,6 кг.\n\nЦифры — образец с бланка DDX, не реальные замеры.' },
+    { id:'alts', x:1110, y:1920, w:330,
       text:'Две альтернативы отрисовки. Выбираем одну — остальные уберу, чтобы канва не разрасталась.' },
   ],
   launch: { view:'canvas' },
