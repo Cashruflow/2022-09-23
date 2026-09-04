@@ -122,8 +122,10 @@ const MAIN = `<div style="${CARD}max-width:800px;">
       ${delta('Точки', '−'+(BEFORE.dots-AFTER.dots), true)}</div>
     <div style="margin-top:14px;font-size:11px;color:${T.tx3};line-height:1.6;">
       Руки отведены, как на бланке DDX, — иначе бока и сами руки закрыты корпусом и жир на них показать нечем.
-      Толщина слоя в зоне — её масса, делённая на её площадь, тем же правилом, что ореол в «Составе по зонам»; на животе слой распределён
-      неравномерно: спереди толще всего, по бокам «ушки», спина почти чистая. Слой увеличен, иначе восемь миллиметров дали бы два пикселя.
+      Толщина слоя растёт с массой зоны на её площадь, но по сжатой шкале: при строгой пропорции живот пришлось бы раздуть так,
+      что слой сомкнулся бы с рукой, а манжета на руке всё равно осталась бы тоньше пикселя. Порядок зон сохраняется.
+      На животе слой распределён неравномерно: спереди толще всего, по бокам «ушки», спина почти чистая; в фас выпуклость идёт на зрителя,
+      поэтому в силуэте видна боковая толщина, а «где именно» договаривают подписи зон.
       Норма ${NORM_PCT}&nbsp;% — наш ориентир: прибор её не считает, у DDX границы свои и зависят от пола, возраста и роста.</div></div>`;
 
 // ---------------------------- артборд Mobile -----------------------------------
@@ -206,7 +208,7 @@ if (Math.abs(Object.values(SEGDATA).reduce((a,s)=>a+s.kg,0) - shown(BEFORE.fat))
   throw new Error('зоны текущего виджета не складываются в жировую массу «до»');
 
 const CW = 420, CIN = CW - 40;                       // ширина карточки и её нутро
-const CVIEW = frameFor([{ zones:{} }]);
+const CVIEW = frameFor([{ zones:{} }, { zones:BEFORE.zones }]);
 const lean = figure({ ...BASE, zones:{}, view:CVIEW, uid:'seg' });
 const BW = Math.round(CIN*.52), BH = Math.round(BW * CVIEW[3] / CVIEW[2]);
 
@@ -251,19 +253,33 @@ const CURRENT = `<div style="${CARD}width:${CW}px;">
     <div style="margin-top:12px;font-size:11px;color:${T.tx3};line-height:1.5;">Оценка «норма / выше / ниже» взята с бланка, не пересчитывается.</div></div>`;
 
 const NEWW = (() => {
-  const d = BEFORE, f = fig({ zones:d.zones, uid:'cmp', aria:'Фигура со слоем жира' }, VIEW, Math.round(CIN*.62));
-  return `<div style="${CARD}width:${CW}px;display:flex;flex-direction:column;">
+  const d = BEFORE;
+  const f = figure({ ...BASE, zones:d.zones, view:CVIEW, uid:'cmp', aria:'Фигура со слоем жира' });
+  const lbl = (z, top, right) => { const kg = d.zones[z], n = Math.round(kg*1000/DOT_G);
+    return `<div style="position:absolute;${right?'right':'left'}:0;top:${top}px;width:84px;display:flex;
+        flex-direction:column;gap:2px;align-items:flex-${right?'start':'end'};text-align:${right?'left':'right'};">
+        <div style="font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:${T.tx2};line-height:1.2;">${SEGLBL[z].toUpperCase()}</div>
+        <div style="font-size:15px;font-weight:700;${MONO}color:${T.fat};">${ru(kg)}<span style="font-size:10.5px;font-weight:400;color:${T.tx2};"> кг</span></div>
+        <span style="padding:1px 7px;border-radius:999px;font-size:11px;font-weight:700;${MONO}background:${T.fat}24;color:${T.fat};">${n} ${plural(n,'точка','точки','точек')}</span>
+        <span style="font-size:9px;color:${T.tx3};">сверх нормы</span></div>`;
+  };
+  return `<div style="${CARD}width:${CW}px;">
     <div style="display:flex;align-items:center;gap:9px;font-size:14px;font-weight:700;color:${T.tx};margin-bottom:14px;">
       ${icon(RULER)}Сколько лишнего
       <span style="font-size:10.5px;font-weight:400;color:${T.tx3};margin-left:auto;">${d.date}</span></div>
     <div style="display:flex;gap:7px;">${segChip(false,'Мышцы',ru(d.muscle))}${segChip(true,'Жир',ru(d.fat))}</div>
-    <div style="margin-top:14px;">${f.html}</div>
-    <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:14px;">
-      <span style="font-size:30px;font-weight:700;${MONO}color:${T.fat};line-height:1;">${ru(d.excess)}<span style="font-size:13px;font-weight:400;color:${T.tx3};"> кг</span></span>
+    <div style="position:relative;width:100%;height:${BH+16}px;margin-top:14px;">
+      <div style="position:absolute;left:${Math.round((CIN-BW)/2)}px;top:8px;width:${BW}px;">${f.svg}</div>
+      ${lbl('torso', Math.round(BH*.10), false)}
+      ${lbl('rarm',  Math.round(BH*.38), false)}
+      ${lbl('rleg',  Math.round(BH*.68), false)}
+      ${lbl('larm',  Math.round(BH*.38), true)}
+      ${lbl('lleg',  Math.round(BH*.68), true)}</div>
+    <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:6px;padding-top:12px;border-top:1px solid ${T.bd2};">
+      <span style="font-size:26px;font-weight:700;${MONO}color:${T.fat};line-height:1;">${ru(d.excess)}<span style="font-size:12px;font-weight:400;color:${T.tx3};"> кг</span></span>
       <span style="font-size:11.5px;color:${T.tx2};">сверх нормы ${NORM_PCT}&nbsp;%</span>
       <span style="margin-left:auto;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;${MONO}background:rgba(251,191,36,.13);color:${T.fat};">${d.dots} ${plural(d.dots,'точка','точки','точек')}</span></div>
-    <div style="margin-top:10px;font-size:11px;${MONO}color:${T.tx3};">Торс ${ru(d.zones.torso)} · руки ${ru(d.zones.larm+d.zones.rarm)} · ноги ${ru(d.zones.lleg+d.zones.rleg)} кг</div>
-    <div style="margin-top:12px;padding-top:11px;border-top:1px solid ${T.bd2};font-size:11px;color:${T.tx3};line-height:1.5;">Одна точка = ${DOT_G} г. Слой увеличен для читаемости, пропорции между зонами настоящие.</div></div>`;
+    <div style="margin-top:11px;font-size:11px;color:${T.tx3};line-height:1.5;">Одна точка = ${DOT_G} г. Толщина слоя растёт с массой зоны на её площадь, но по сжатой шкале — иначе манжета на руке была бы тоньше пикселя.</div></div>`;
 })();
 
 const COMPARE = `<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
@@ -321,11 +337,11 @@ for (const gone of ['DotBody.dc.html','ZoneMesh.dc.html'])
 
 const canvas = {
   artboards: [
-    { file:'Main.dc.html',   x:0,    y:0,    w:900, h:820 },
-    { file:'Mobile.dc.html', x:1010, y:0,    w:390, h:730 },
+    { file:'Main.dc.html',   x:0,    y:0,    w:900, h:790 },
+    { file:'Mobile.dc.html', x:1010, y:0,    w:390, h:700 },
     { file:'Angles.dc.html', x:0,    y:960,  w:940, h:520 },
     { file:'Scale.dc.html',  x:0,    y:1620, w:940, h:520 },
-    { file:'Compare.dc.html', x:0,   y:2260, w:960, h:860 },
+    { file:'Compare.dc.html', x:0,   y:2260, w:960, h:730 },
   ],
   annotations: [
     { id:'cmp', x:1020, y:2260, w:340,
