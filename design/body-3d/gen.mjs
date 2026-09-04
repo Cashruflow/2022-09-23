@@ -168,12 +168,15 @@ const K_LAYER = 200;                        // подобран по читае�
 const ZONE_OF = { torso:'torso', larm:'larm', rarm:'rarm', lleg:'lleg', rleg:'rleg' };
 
 const bell = (v,c,w) => Math.exp(-((v-c)*(v-c))/(2*w*w));
-// Профиль по торсу: живот спереди, «ушки» по бокам, спина почти чистая.
+// Живот СВИСАЕТ: вверх к рёбрам сходит плавно, вниз к паху обрывается коротко,
+// самая полная точка ниже пупка. Симметричный колокол давал ровный конус —
+// «пирамиду», а не нависающий живот.
+const sag = y => y > .562 ? bell(y,.562,.070) : bell(y,.562,.040);
 function torsoShape(y, th){
-  const front = Math.pow(Math.max(0, Math.sin(th)), 2.0);
-  const side  = Math.pow(Math.abs(Math.cos(th)), 2.5);
-  return 0.26 + 2.30*bell(y,.590,.070)*(0.55 + 0.45*front)
-             + 1.15*bell(y,.616,.050)*side;
+  const front = Math.pow(Math.max(0, Math.sin(th)), 1.35);   // ровнее по кругу — живот круглый
+  const side  = Math.pow(Math.abs(Math.cos(th)), 2.6);
+  return 0.16 + 2.75*sag(y)*(0.50 + 0.50*front)
+             + 1.00*bell(y,.618,.042)*side;                  // «ушки» выше живота
 }
 const TORSO_MEAN = (() => {                 // нормировка: средняя по площади = 1
   let sum = 0, n = 0;
@@ -373,11 +376,14 @@ export function figure(o){
   // Заливки — от дальнего к ближнему; общий контур — один яркий по всей фигуре;
   // стыки деталей — тихой линией внутри него. Раньше контур торса шёл поверх рук
   // и читался жилеткой.
-  const fills = [[legs[0]], [legs[1]], [arms[0]], [arms[1]], ['torso','head']]
-    .map((names, i) => ({ d: trace(group, names), far: i===0 || i===2 }));
   const bodyPath = trace(group, ALL);
+  // Заливка ОДНА на всю фигуру: раньше корпус шёл градиентом, а ноги отдельным
+  // тоном, и человек разваливался пополам ровно по линии таза. Дальние рука и
+  // нога только притемняются поверх общей заливки.
+  const farParts = [trace(group, [legs[0]]), trace(group, [arms[0]])].join('');
   // Только руки: контуры торса и ног внутри силуэта читались воротником и шортами.
   const seams = [arms[0], arms[1]].map(n => trace(group, [n])).join('');
+  const zonePaths = Object.fromEntries(ALL.map(n => [n, trace(group, [n])]));
 
   // ---- жир точками ----
   // Точка лежит между эталонной поверхностью и поверхностью со слоем жира.
@@ -419,26 +425,29 @@ export function figure(o){
   const V = o.view || [0, 0, W, H];
   const has = total > 0;
 
-  const body = fills.map(L => L.d
-    ? `<path d="${L.d}" fill="${L.far ? cDeep : `url(#g-${uid})`}"/>` : '').join('\n');
-
   const svg = `<svg viewBox="${V.join(' ')}" width="100%" role="img" aria-label="${o.aria||''}" style="display:block;">
 <defs>
-<linearGradient id="g-${uid}" gradientUnits="userSpaceOnUse" x1="${(V[0]+V[2]*0.10).toFixed(1)}" y1="0" x2="${(V[0]+V[2]*0.88).toFixed(1)}" y2="0">
-<stop offset="0" stop-color="${cF0}"/><stop offset=".38" stop-color="${cF1}"/><stop offset="1" stop-color="${cF2}"/></linearGradient>
+<linearGradient id="g-${uid}" gradientUnits="userSpaceOnUse" x1="${(V[0]+V[2]*0.08).toFixed(1)}" y1="${V[1]}" x2="${(V[0]+V[2]*0.92).toFixed(1)}" y2="${(V[1]+V[3]*0.35).toFixed(1)}">
+<stop offset="0" stop-color="${cF0}"/><stop offset=".42" stop-color="${cF1}"/><stop offset="1" stop-color="${cF2}"/></linearGradient>
 <radialGradient id="s-${uid}"><stop offset="0" stop-color="#000" stop-opacity=".6"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
 <filter id="b-${uid}" x="-25%" y="-12%" width="150%" height="124%"><feGaussianBlur stdDeviation="7"/></filter>
+<filter id="o-${uid}" x="-20%" y="-10%" width="140%" height="120%"><feGaussianBlur stdDeviation="3.5"/></filter>
+<radialGradient id="hi-${uid}"><stop offset="0" stop-color="#dff1ff" stop-opacity=".16"/><stop offset="1" stop-color="#dff1ff" stop-opacity="0"/></radialGradient>
+<radialGradient id="lo-${uid}"><stop offset="0" stop-color="#000" stop-opacity=".34"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
 <clipPath id="k-${uid}"><path d="${bodyPath}"/></clipPath>
 </defs>
 <path d="${shadow}" fill="url(#s-${uid})"/>
 ${has ? `<path d="${fatPath}" fill="${cDot}" fill-opacity=".13" filter="url(#b-${uid})"/>` : ''}
 ${has ? `<path d="${fatPath}" fill="${cDot}" fill-opacity=".05" stroke="${cDot}" stroke-width="1.1" stroke-opacity=".45" stroke-linejoin="round"/>` : ''}
 <g fill="${cDot}" fill-opacity=".30">${dotsBack.join('')}</g>
-${body}
-<path d="${seams}" fill="none" stroke="${cLine}" stroke-width=".9" stroke-opacity=".55" stroke-linejoin="round" clip-path="url(#k-${uid})"/>
+<path d="${bodyPath}" fill="url(#g-${uid})"/>
+<path d="${farParts}" fill="#000" fill-opacity=".30" filter="url(#o-${uid})" clip-path="url(#k-${uid})"/>
+<ellipse cx="${(V[0]+V[2]*0.36).toFixed(1)}" cy="${(V[1]+V[3]*0.34).toFixed(1)}" rx="${(V[2]*0.34).toFixed(1)}" ry="${(V[3]*0.30).toFixed(1)}" fill="url(#hi-${uid})" clip-path="url(#k-${uid})"/>
+<ellipse cx="${(V[0]+V[2]*0.94).toFixed(1)}" cy="${(V[1]+V[3]*0.50).toFixed(1)}" rx="${(V[2]*0.26).toFixed(1)}" ry="${(V[3]*0.52).toFixed(1)}" fill="url(#lo-${uid})" clip-path="url(#k-${uid})"/>
+<path d="${seams}" fill="none" stroke="${cLine}" stroke-width=".9" stroke-opacity=".5" stroke-linejoin="round" clip-path="url(#k-${uid})"/>
 <path d="${bodyPath}" fill="none" stroke="${cRim}" stroke-width="6" stroke-opacity=".16" clip-path="url(#k-${uid})"/>
 <path d="${bodyPath}" fill="none" stroke="${cRim}" stroke-width="1.5" stroke-linejoin="round"/>
 <g fill="${cDot}" fill-opacity=".95">${dotsFront.join('')}</g>
 </svg>`;
-  return { svg, dots: total, bbox: bb };
+  return { svg, dots: total, bbox: bb, paths: { body: bodyPath, fat: fatPath, ...zonePaths } };
 }

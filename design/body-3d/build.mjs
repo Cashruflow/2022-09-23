@@ -182,6 +182,104 @@ const SCALE = `<div style="${CARD}">
         <div style="font-size:9.5px;${MONO}color:${T.tx3};text-align:center;margin-bottom:2px;">${Math.round(k*1000/DOT_G)} точек</div>
         ${fig({ zones:scaleZones(k), uid:'sc'+i, aria:`Избыток ${k} кг` }, SVIEW, 136).html}</div>`).join('')}</div></div>`;
 
+
+// ---------------------------- артборд Compare ----------------------------------
+// Слева — текущий виджет «Состав по зонам», воспроизведённый по bodySegments()
+// из medcard_profile.js: те же чипы, та же раскладка подписей, тот же ореол
+// (гауссов размыв альфы + резкий feComponentTransfer + composite out), те же
+// цвета вердикта и та же формула радиуса segGlow. Фотография тела заменена
+// плоским силуэтом — фотографий из /body/*.webp тут нет.
+const SEG_CM = 37.7953, SEG_REFW = 380, SEG_REFCM = .60, SEG_LAYERREF = 9.5/46691;
+const SEGAREA = { torso:46691, larm:13039, rarm:12864, lleg:22637, rleg:22894 };
+const SEGCOL = { low:'#fbbf24', norm:T.ok, high:T.dg };
+const SEGLBL = { larm:'Левая рука', rarm:'Правая рука', torso:'Торс', lleg:'Левая нога', rleg:'Правая нога' };
+const SEGST  = { low:'ниже нормы', norm:'норма', high:'выше нормы' };
+const segGlow = (kg, zone, W) => W * ((SEG_REFCM*((kg/SEGAREA[zone])/SEG_LAYERREF)) * SEG_CM / SEG_REFW);
+
+// Жир по зонам на дату «до». Сумма равна жировой массе из карточки — тот же человек.
+const SEGDATA = {
+  torso:{ kg:14.6, pct:168, st:'high' }, rarm:{ kg:1.5, pct:104, st:'norm' },
+  larm: { kg:1.5,  pct:106, st:'norm' }, rleg:{ kg:4.2, pct:131, st:'high' },
+  lleg: { kg:4.3,  pct:133, st:'high' },
+};
+if (Math.abs(Object.values(SEGDATA).reduce((a,s)=>a+s.kg,0) - shown(BEFORE.fat)) > 0.05)
+  throw new Error('зоны текущего виджета не складываются в жировую массу «до»');
+
+const CW = 420, CIN = CW - 40;                       // ширина карточки и её нутро
+const CVIEW = frameFor([{ zones:{} }]);
+const lean = figure({ ...BASE, zones:{}, view:CVIEW, uid:'seg' });
+const BW = Math.round(CIN*.52), BH = Math.round(BW * CVIEW[3] / CVIEW[2]);
+
+const segLabel = (z, top, right) => { const q = SEGDATA[z], c = SEGCOL[q.st];
+  return `<div style="position:absolute;${right?'right':'left'}:0;top:${top}px;width:84px;display:flex;
+      flex-direction:column;gap:2px;align-items:flex-${right?'start':'end'};text-align:${right?'left':'right'};">
+      <div style="font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:${T.tx2};line-height:1.2;">${SEGLBL[z].toUpperCase()}</div>
+      <div style="font-size:15px;font-weight:700;${MONO}color:${T.tx};">${ru(q.kg)}<span style="font-size:10.5px;font-weight:400;color:${T.tx2};"> кг</span></div>
+      <span style="padding:1px 7px;border-radius:999px;font-size:11px;font-weight:700;${MONO}background:${c}24;color:${c};">${q.pct}%</span>
+      <span style="font-size:9px;color:${c};">${SEGST[q.st]}</span></div>`;
+};
+const segChip = (on, l, v) => `<div style="flex:1;text-align:center;padding:7px 12px;border-radius:20px;font-size:12.5px;${MONO}
+    border:1px solid ${on?T.br:T.bd};background:${on?'rgba(0,160,255,.13)':'#1a1a1a'};color:${on?T.br:T.tx2};">${l} · ${v} кг</div>`;
+
+const CURRENT = `<div style="${CARD}width:${CW}px;">
+    <div style="display:flex;align-items:center;gap:9px;font-size:14px;font-weight:700;color:${T.tx};margin-bottom:14px;">
+      ${icon('M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c0-4.4 3.6-8 8-8s8 3.6 8 8')}Состав по зонам
+      <span style="font-size:10.5px;font-weight:400;color:${T.tx3};margin-left:auto;">${BEFORE.date}</span></div>
+    <div style="display:flex;gap:7px;">${segChip(false,'Мышцы',ru(BEFORE.muscle))}${segChip(true,'Жир',ru(BEFORE.fat))}</div>
+    <div style="position:relative;width:100%;height:${BH+16}px;margin-top:14px;">
+      <div style="position:absolute;left:${Math.round((CIN-BW)/2)}px;top:8px;width:${BW}px;">
+        <svg viewBox="${CVIEW.join(' ')}" width="100%" style="display:block;overflow:visible;">
+          <defs>${['torso','rarm','larm','rleg','lleg'].filter(z=>SEGDATA[z].st!=='low').map(z=>{
+            const R = Math.max(.5, segGlow(SEGDATA[z].kg, z, CIN) * CVIEW[2] / BW);
+            return `<filter id="bsg-${z}" x="-150%" y="-80%" width="400%" height="260%" color-interpolation-filters="sRGB">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="${(R*.652).toFixed(2)}" result="b"/>
+              <feComponentTransfer in="b" result="a"><feFuncA type="linear" slope="8" intercept="0"/></feComponentTransfer>
+              <feComposite in="a" in2="SourceAlpha" operator="out" result="ring"/>
+              <feFlood flood-color="${SEGCOL[SEGDATA[z].st]}" flood-opacity=".5"/>
+              <feComposite in2="ring" operator="in"/></filter>`; }).join('')}</defs>
+          ${['torso','rarm','larm','rleg','lleg'].map(z =>
+            `<path d="${lean.paths[z]}" fill="${SEGCOL[SEGDATA[z].st]}" filter="url(#bsg-${z})"/>`).join('')}
+          <path d="${lean.paths.body}" fill="#39424a"/>
+          <g style="mix-blend-mode:screen;">${['torso','rarm','larm','rleg','lleg'].map(z =>
+            `<path d="${lean.paths[z]}" fill="${SEGCOL[SEGDATA[z].st]}" fill-opacity=".18"/>`).join('')}</g>
+        </svg></div>
+      ${segLabel('torso', Math.round(BH*.10), false)}
+      ${segLabel('rarm',  Math.round(BH*.38), false)}
+      ${segLabel('rleg',  Math.round(BH*.68), false)}
+      ${segLabel('larm',  Math.round(BH*.38), true)}
+      ${segLabel('lleg',  Math.round(BH*.68), true)}</div>
+    <div style="margin-top:12px;font-size:11px;color:${T.tx3};line-height:1.5;">Оценка «норма / выше / ниже» взята с бланка, не пересчитывается.</div></div>`;
+
+const NEWW = (() => {
+  const d = BEFORE, f = fig({ zones:d.zones, uid:'cmp', aria:'Фигура со слоем жира' }, VIEW, Math.round(CIN*.62));
+  return `<div style="${CARD}width:${CW}px;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;gap:9px;font-size:14px;font-weight:700;color:${T.tx};margin-bottom:14px;">
+      ${icon(RULER)}Сколько лишнего
+      <span style="font-size:10.5px;font-weight:400;color:${T.tx3};margin-left:auto;">${d.date}</span></div>
+    <div style="display:flex;gap:7px;">${segChip(false,'Мышцы',ru(d.muscle))}${segChip(true,'Жир',ru(d.fat))}</div>
+    <div style="margin-top:14px;">${f.html}</div>
+    <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:14px;">
+      <span style="font-size:30px;font-weight:700;${MONO}color:${T.fat};line-height:1;">${ru(d.excess)}<span style="font-size:13px;font-weight:400;color:${T.tx3};"> кг</span></span>
+      <span style="font-size:11.5px;color:${T.tx2};">сверх нормы ${NORM_PCT}&nbsp;%</span>
+      <span style="margin-left:auto;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;${MONO}background:rgba(251,191,36,.13);color:${T.fat};">${d.dots} ${plural(d.dots,'точка','точки','точек')}</span></div>
+    <div style="margin-top:10px;font-size:11px;${MONO}color:${T.tx3};">Торс ${ru(d.zones.torso)} · руки ${ru(d.zones.larm+d.zones.rarm)} · ноги ${ru(d.zones.lleg+d.zones.rleg)} кг</div>
+    <div style="margin-top:12px;padding-top:11px;border-top:1px solid ${T.bd2};font-size:11px;color:${T.tx3};line-height:1.5;">Одна точка = ${DOT_G} г. Слой увеличен для читаемости, пропорции между зонами настоящие.</div></div>`;
+})();
+
+const COMPARE = `<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:.12em;color:${T.tx2};margin-bottom:9px;">СЕЙЧАС В МЕДКАРТЕ</div>
+      ${CURRENT}
+      <div style="width:${CW}px;margin-top:10px;font-size:11px;color:${T.tx3};line-height:1.5;">
+        Воспроизведён по коду <span style="${MONO}">bodySegments()</span>: те же чипы, подписи, формула ореола и цвета вердикта.
+        Фотография тела заменена плоским силуэтом — фотографий из <span style="${MONO}">/body/*.webp</span> здесь нет.</div></div>
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:.12em;color:${T.fat};margin-bottom:9px;">ПРЕДЛАГАЕТСЯ</div>
+      ${NEWW}
+      <div style="width:${CW}px;margin-top:10px;font-size:11px;color:${T.tx3};line-height:1.5;">
+        Тот же человек и та же дата. Слева — сколько жира в зоне и вердикт прибора; справа — сколько его лишнего и как он лежит.
+        Виджеты не спорят, а отвечают на разные вопросы.</div></div></div>`;
+
 // ---------------------------------- запись -------------------------------------
 const doc = (body, pad) => `<!doctype html>
 <html>
@@ -212,6 +310,7 @@ const files = {
   'Mobile.dc.html': doc(MOBILE, '14px 14px 22px'),
   'Angles.dc.html': doc(ANGLES, '24px'),
   'Scale.dc.html':  doc(SCALE, '24px'),
+  'Compare.dc.html': doc(COMPARE, '24px'),
 };
 for (const [name, html] of Object.entries(files)){
   fs.writeFileSync(name, html);
@@ -226,8 +325,11 @@ const canvas = {
     { file:'Mobile.dc.html', x:1010, y:0,    w:390, h:730 },
     { file:'Angles.dc.html', x:0,    y:960,  w:940, h:520 },
     { file:'Scale.dc.html',  x:0,    y:1620, w:940, h:520 },
+    { file:'Compare.dc.html', x:0,   y:2260, w:960, h:860 },
   ],
   annotations: [
+    { id:'cmp', x:1020, y:2260, w:340,
+      text:'Сравнение: слева текущий виджет «Состав по зонам», справа новый. Тот же человек, та же дата.\n\nОни не спорят: слева сколько жира в зоне и вердикт прибора, справа — сколько его ЛИШНЕГО и как он лежит.' },
     { id:'brief', x:1010, y:810, w:390,
       text:'Поза как на бланке DDX: руки отведены, поэтому видны и бока, и сами руки — иначе жир на них показать нечем.\n\nЭталонное тело на «до» и «после» ОДНО И ТО ЖЕ — тело при 15 % жира. Янтарный контур снаружи — оно же со слоем жира; между ними точки.\n\nОдна точка = 20 г: 610 точек против 180 — это и есть 12,2 кг против 3,6 кг.\n\nЦифры — образец, не реальные замеры.' },
   ],
