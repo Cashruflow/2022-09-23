@@ -165,11 +165,10 @@ export const PARTS = () => ({
 // её масса, делённая на её площадь, как ореол в виджете «Состав по зонам»
 // (medcard_profile.js, segGlow), по тем же площадям.
 export const SEGAREA = { torso:46691, larm:13039, rarm:12864, lleg:22637, rleg:22894 };
-// Толщина слоя зоны ∝ (масса / площадь)^EXP. Показатель меньше единицы поджимает
-// разброс: при строгой пропорции живот приходится раздувать так, что слой на торсе
-// смыкается с рукой, а манжета на руке всё равно тоньше пикселя. Порядок зон
-// сохраняется, соотношения сжаты — так и сказано в подписи к карточке.
-const K_LAYER = 3.83, EXP = 0.6;            // манжета на руке ≈ 4,5 px при росте 430 px
+// Толщина слоя зоны ∝ масса / площадь — строго, как ореол в «Составе по зонам».
+// Сжимать шкалу больше не нужно: тонкий слой на руке виден не толщиной, а ЦВЕТОМ
+// узла сетки, поэтому пропорции остаются честными.
+const K_LAYER = 98, EXP = 1.0;              // строгая пропорция: масса зоны на её площадь
 const ZONE_OF = { torso:'torso', larm:'larm', rarm:'rarm', lleg:'lleg', rleg:'rleg' };
 
 const bell = (v,c,w) => Math.exp(-((v-c)*(v-c))/(2*w*w));
@@ -187,7 +186,7 @@ const capY = y => y < .620 ? 1 : Math.max(0.14, 1 - (y-.620)/0.13*0.86);
 function torsoShape(y, th){
   const front = Math.pow(Math.max(0, Math.sin(th)), 1.8);    // живот идёт вперёд, а не вширь
   const side  = Math.pow(Math.abs(Math.cos(th)), 2.6);
-  return capY(y) * (0.25 + 2.20*sag(y)*(0.18 + 0.82*front)
+  return capY(y) * (0.25 + 2.20*sag(y)*(0.32 + 0.68*front)
                         + 0.26*bell(y,.600,.036)*side);      // «ушки» чуть выше живота
 }
 const TORSO_MEAN = (() => {                 // нормировка: средняя по площади = 1
@@ -348,7 +347,7 @@ export function figure(o){
 
   // ---- оболочки: эталонное тело и оно же со слоем жира ----
   const NT = 40, group = {}, fgroup = {}, depth = {};
-  const shell = (src, bag) => {
+  const buildShell = (src, bag) => {
     for (const [name, part] of Object.entries(src)){
       const steps = part.kind === 'stack' ? 56 : 44;
       const own = bag[name] = [];
@@ -365,7 +364,7 @@ export function figure(o){
       depth[name] = dz/(steps+1);
     }
   };
-  shell(parts, group); shell(fat, fgroup);
+  buildShell(parts, group); buildShell(fat, fgroup);
 
   const res = 2;                              // ячейка маски — полпикселя холста
   const gw = Math.ceil(W*res)+1, gh = Math.ceil(H*res)+1;
@@ -407,33 +406,48 @@ export function figure(o){
   // Только руки: контуры торса и ног внутри силуэта читались воротником и шортами.
   const seams = [arms[0], arms[1]].map(n => trace(group, [n])).join('');
   const zonePaths = Object.fromEntries(ALL.map(n => [n, trace(group, [n])]));
+  const fzonePaths = Object.fromEntries(ALL.map(n => [n, trace(fgroup, [n])]));
 
-  // ---- жир точками ----
-  // Точка лежит между эталонной поверхностью и поверхностью со слоем жира.
-  // Выборка внутри зоны — пропорционально толщине слоя: гуще там, где толще.
-  const dotsFront = [], dotsBack = [];
+  // ---- поверхность точками ----
+  // Как суша на глобусе: не россыпь, а РЕГУЛЯРНАЯ сетка узлов по поверхности.
+  // Узел лежит на теле со слоем жира, поэтому живот виден выпуклостью; цвет узла
+  // говорит, сколько слоя под ним — от холодного (ничего) до янтарного.
+  const STEP = o.step ?? 0.0205;              // шаг сетки в долях роста
+  const T_REF = o.tRef ?? 0.065;              // толщина, при которой узел полностью янтарный
+  const C0 = [0x7b,0x93,0xa6], C1 = [0xfb,0xbf,0x24];
+  const NB = 6, buckets = Array.from({length:NB*2}, () => []);
+  const hex = u => '#' + [0,1,2].map(i =>
+    Math.round(C0[i] + (C1[i]-C0[i])*u).toString(16).padStart(2,'0')).join('');
   let total = 0;
-  for (const [zone, kg] of Object.entries(zones)){
-    if (!kg) continue;
-    const n = Math.round(kg*1000/DOT_G);
-    total += n;
-    const part = parts[zone], fpart = fat[zone];
-    let tmax = 0;
-    for (let i=0;i<24;i++) for (let j=0;j<24;j++)
-      tmax = Math.max(tmax, fpart.thick((i+.5)/24, (j+.5)/24*TAU));
-    for (let i=0;i<n;i++){
-      let s = R(), th = R()*TAU, t = fpart.thick(s, th);
-      for (let g=0; g<48 && R() >= t/tmax; g++){ s = R(); th = R()*TAU; t = fpart.thick(s, th); }
-      const p = part.at(s, th), nv = normalAt(part, s, th);
-      const d = t * (0.12 + 0.88*Math.pow(R(), 0.55));
-      const q = px(cam.p([p[0]+nv[0]*d, p[1]+nv[1]*d, p[2]+nv[2]*d]));
-      const dep = Math.max(0, Math.min(1, (q.z + 0.25)/0.5));
-      const r = (o.dotR ?? 1.4) * (0.78 + 0.26*dep);
-      grow(q.sx - r, q.sy - r); grow(q.sx + r, q.sy + r);
-      (cam.nz(nv) > 0 ? dotsFront : dotsBack)
-        .push(`<circle cx="${f1(q.sx)}" cy="${f1(q.sy)}" r="${Math.round(r*100)/100}"/>`);
+  for (const [name, part] of Object.entries(parts)){
+    const fpart = fat[name];
+    // длина детали и её обхваты — чтобы шаг был один и тот же везде
+    let len = 0; const N = 40;
+    for (let i=0;i<N;i++) len += Math.hypot(...sub(part.axis((i+1)/N), part.axis(i/N)));
+    if (part.kind === 'stack') len = Math.abs(part.axis(1)[1] - part.axis(0)[1]);
+    const rows = Math.max(3, Math.round(len/STEP));
+    for (let i=0;i<=rows;i++){
+      const sp = i/rows;
+      let circ = 0;
+      for (let j=0;j<24;j++) circ += Math.hypot(...sub(fpart.at(sp, (j+1)/24*TAU), fpart.at(sp, j/24*TAU)));
+      const cols = Math.max(4, Math.round(circ/STEP));
+      for (let j=0;j<cols;j++){
+        const th = (j + (i%2)*0.5)/cols*TAU;   // шахматный сдвиг — сетка не полосит
+        const p = fpart.at(sp, th), nv = normalAt(part, sp, th);
+        const q = px(cam.p(p)), front = cam.nz(nv) > 0;
+        const t = fpart.thick(sp, th);
+        const u = Math.pow(Math.max(0, Math.min(1, t / T_REF)), 0.65);  // тонкий слой тоже подкрашивает
+        const b = Math.min(NB-1, Math.floor(u*NB));
+        buckets[b + (front?0:NB)].push(`<circle cx="${f1(q.sx)}" cy="${f1(q.sy)}" r="${front ? (1.4 + 0.5*u) : 1.05}"/>`);
+        if (front){ grow(q.sx-2, q.sy-2); grow(q.sx+2, q.sy+2); }
+      }
     }
   }
+  for (const [zone, kg] of Object.entries(zones)) total += Math.round((kg||0)*1000/DOT_G);
+  const dotsFront = buckets.slice(0, NB).map((g, b) => g.length
+    ? `<g fill="${hex((b+.5)/NB)}" fill-opacity="${(0.60 + 0.40*(b/(NB-1))).toFixed(2)}">${g.join('')}</g>` : '').join('');
+  const dotsBack = buckets.slice(NB).map((g, b) => g.length
+    ? `<g fill="${hex((b+.5)/NB)}" fill-opacity="${(0.16 + 0.16*(b/(NB-1))).toFixed(2)}">${g.join('')}</g>` : '').join('');
 
   // ---- тень под ногами ----
   const shadow = 'M' + Array.from({length:56}, (_,i) => {
@@ -449,7 +463,8 @@ export function figure(o){
   const has = total > 0;
 
   const near = [zonePaths[arms[1]], zonePaths[legs[1]]].join('');
-  const shade = ALL.map(n => `<path d="${zonePaths[n]}" fill="url(#c-${uid})"/>`).join('');
+  const shade = ALL.map(n => `<path d="${fzonePaths[n]}" fill="url(#c-${uid})"/>`).join('');
+  const shell = has ? fatPath : bodyPath;             // видимое тело — со слоем жира
 
   const svg = `<svg viewBox="${V.join(' ')}" width="100%" role="img" aria-label="${o.aria||''}" style="display:block;">
 <defs>
@@ -461,20 +476,18 @@ export function figure(o){
 <radialGradient id="s-${uid}"><stop offset="0" stop-color="#000" stop-opacity=".6"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
 <filter id="b-${uid}" x="-30%" y="-14%" width="160%" height="128%"><feGaussianBlur stdDeviation="8"/></filter>
 <filter id="o-${uid}" x="-20%" y="-10%" width="140%" height="120%"><feGaussianBlur stdDeviation="3"/></filter>
-<clipPath id="k-${uid}"><path d="${bodyPath}"/></clipPath>
+<clipPath id="k-${uid}"><path d="${shell}"/></clipPath>
 </defs>
 <path d="${shadow}" fill="url(#s-${uid})"/>
 ${has ? `<path d="${fatPath}" fill="${cDot}" fill-opacity=".16" filter="url(#b-${uid})"/>` : ''}
-${has ? `<path d="${ringPath}" fill="${cDot}" fill-opacity=".30" fill-rule="evenodd"/>` : ''}
-${has ? `<path d="${fatPath}" fill="none" stroke="${cDot}" stroke-width="1.1" stroke-opacity=".55" stroke-linejoin="round"/>` : ''}
-<g fill="${cDot}" fill-opacity=".38">${dotsBack.join('')}</g>
-<path d="${bodyPath}" fill="url(#g-${uid})"/>
+<g>${dotsBack}</g>
+<path d="${shell}" fill="url(#g-${uid})" fill-opacity=".9"/>
 <g clip-path="url(#k-${uid})">${shade}</g>
-<path d="${near}" fill="none" stroke="#000" stroke-opacity=".45" stroke-width="6" filter="url(#o-${uid})" clip-path="url(#k-${uid})"/>
-<path d="${seams}" fill="none" stroke="${cLine}" stroke-width=".9" stroke-opacity=".45" stroke-linejoin="round" clip-path="url(#k-${uid})"/>
-<path d="${bodyPath}" fill="none" stroke="${cRim}" stroke-width="5" stroke-opacity=".14" clip-path="url(#k-${uid})"/>
-<path d="${bodyPath}" fill="none" stroke="${cRim}" stroke-width="1.5" stroke-linejoin="round"/>
-<g fill="${cDot}" fill-opacity=".9">${dotsFront.join('')}</g>
+<path d="${near}" fill="none" stroke="#000" stroke-opacity=".4" stroke-width="6" filter="url(#o-${uid})" clip-path="url(#k-${uid})"/>
+${has ? `<path d="${bodyPath}" fill="none" stroke="${cRim}" stroke-width="1" stroke-opacity=".5" stroke-dasharray="5 4" clip-path="url(#k-${uid})"/>` : ''}
+<path d="${shell}" fill="none" stroke="${cRim}" stroke-width="5" stroke-opacity=".14" clip-path="url(#k-${uid})"/>
+<path d="${shell}" fill="none" stroke="${cRim}" stroke-width="1.4" stroke-linejoin="round"/>
+<g>${dotsFront}</g>
 </svg>`;
   return { svg, dots: total, bbox: bb, paths: { body: bodyPath, fat: fatPath, ...zonePaths } };
 }

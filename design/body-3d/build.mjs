@@ -106,10 +106,10 @@ const delta = (l, v, good) => `<div style="min-width:0;">
 const MAIN = `<div style="${CARD}max-width:800px;">
     ${head('Состав тела · до и после', 'поза бланка DDX')}
     <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:12px;color:${T.tx2};line-height:1.5;margin-bottom:16px;">
-      <span style="flex:1;min-width:300px;">Внутри — эталонное тело при ${NORM_PCT}&nbsp;% жира, оно одинаковое. Снаружи, янтарным, — сколько поверх него лежит.</span>
+      <span style="flex:1;min-width:300px;">Узлы сетки лежат на поверхности тела; цвет узла — толщина слоя жира под ним. Пунктир внутри — то же тело при ${NORM_PCT}&nbsp;% жира.</span>
       <span style="display:flex;align-items:center;gap:7px;">
-        <svg width="26" height="10" style="flex-shrink:0;"><circle cx="4" cy="5" r="1.8" fill="${T.fat}"/><circle cx="13" cy="5" r="1.8" fill="${T.fat}"/><circle cx="22" cy="5" r="1.8" fill="${T.fat}"/></svg>
-        одна точка = ${DOT_G} г жира сверх нормы</span></div>
+        <svg width="52" height="10" style="flex-shrink:0;"><circle cx="4" cy="5" r="1.5" fill="#7b93a6"/><circle cx="16" cy="5" r="1.6" fill="#ae9d78"/><circle cx="29" cy="5" r="1.75" fill="#d6ac4c"/><circle cx="44" cy="5" r="1.9" fill="${T.fat}"/></svg>
+        слоя нет → слой толстый</span></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">${panel(BEFORE,'a')}${panel(AFTER,'b')}</div>
     <div style="display:flex;gap:26px;flex-wrap:wrap;margin-top:16px;padding:14px 16px;${PANEL}">
       <div style="min-width:0;">
@@ -121,17 +121,16 @@ const MAIN = `<div style="${CARD}max-width:800px;">
       ${delta('Мышцы', '+'+ru(AFTER.muscle-BEFORE.muscle)+' кг', true)}
       ${delta('Точки', '−'+(BEFORE.dots-AFTER.dots), true)}</div>
     <div style="margin-top:14px;font-size:11px;color:${T.tx3};line-height:1.6;">
-      Руки отведены, как на бланке DDX, — иначе бока и сами руки закрыты корпусом и жир на них показать нечем.
-      Толщина слоя растёт с массой зоны на её площадь, но по сжатой шкале: при строгой пропорции живот пришлось бы раздуть так,
-      что слой сомкнулся бы с рукой, а манжета на руке всё равно осталась бы тоньше пикселя. Порядок зон сохраняется.
-      На животе слой распределён неравномерно: спереди толще всего, по бокам «ушки», спина почти чистая; в фас выпуклость идёт на зрителя,
-      поэтому в силуэте видна боковая толщина, а «где именно» договаривают подписи зон.
+      Модель точечная, как шар в разделе «Жизнь»: узлы стоят регулярной сеткой по поверхности, дальняя сторона тусклее, фигура считается
+      и поворачивается на любой угол. Руки отведены, как на бланке DDX, — иначе бока и сами руки закрыты корпусом.
+      Толщина слоя в зоне — её масса, делённая на её площадь, тем же правилом, что ореол в «Составе по зонам», и по тем же площадям.
+      Внутри торса слой распределён неравномерно: спереди толще всего, по бокам «ушки», спина почти чистая.
       Норма ${NORM_PCT}&nbsp;% — наш ориентир: прибор её не считает, у DDX границы свои и зависят от пола, возраста и роста.</div></div>`;
 
 // ---------------------------- артборд Mobile -----------------------------------
 const MFW = 138, MFH = Math.round(MFW * VIEW[3] / VIEW[2]);
 function mpanel(d, uid){
-  const f = fig({ zones:d.zones, uid, aria:`Фигура «${d.label}»` }, VIEW, MFW);
+  const f = fig({ zones:d.zones, step:0.025, uid, aria:`Фигура «${d.label}»` }, VIEW, MFW);
   return `<div style="${PANEL}padding:11px 9px 13px;min-width:0;">
       <div style="display:flex;align-items:baseline;gap:6px;">
         <span style="font-size:9.5px;font-weight:700;letter-spacing:.12em;color:${T.tx2};">${d.label}</span>
@@ -144,7 +143,7 @@ function mpanel(d, uid){
 }
 const MOBILE = `<div style="${CARD}padding:16px;">
     ${head('Состав тела · до и после')}
-    <div style="font-size:11.5px;color:${T.tx2};line-height:1.5;margin-bottom:12px;">Внутри — эталонное тело при ${NORM_PCT}&nbsp;% жира. Точка = ${DOT_G} г жира сверх него.</div>
+    <div style="font-size:11.5px;color:${T.tx2};line-height:1.5;margin-bottom:12px;">Цвет узла сетки — толщина слоя жира под ним. Пунктир — тело при ${NORM_PCT}&nbsp;% жира.</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">${mpanel(BEFORE,'ma')}${mpanel(AFTER,'mb')}</div>
     <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;padding:12px 13px;${PANEL}">
       ${delta('Вес','−'+ru(BEFORE.weight-AFTER.weight)+' кг',true)}
@@ -160,12 +159,12 @@ const AFW = 158;
 const ANGLES = `<div style="${CARD}">
     ${head('Разворот', 'один и тот же расчёт, разный угол')}
     <div style="font-size:12px;color:${T.tx2};line-height:1.55;margin-bottom:14px;">
-      Фигура считается, а не рисуется картинкой, поэтому её можно повернуть на любой угол — как глобус в разделе «Жизнь».
-      В карточке стоит поза бланка (17°): руки отведены, видны бока. Сбоку виден живот, в профиль — насколько он выступает вперёд.</div>
+      Фигура считается, а не рисуется картинкой, поэтому её можно повернуть на любой угол — ровно как шар в разделе «Жизнь»,
+      где суша тоже выложена точками. В карточке стоит поза бланка (18°): руки отведены, видны бока. Сбоку видно, насколько живот выступает вперёд.</div>
     <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;">
       ${ANG.map((rot,i) => `<div style="${PANEL}padding:10px 8px 12px;min-width:0;">
         <div style="font-size:10px;${MONO}color:${T.tx3};text-align:center;margin-bottom:2px;">${Math.round(rot*180/Math.PI)}°</div>
-        ${fig({ zones:BEFORE.zones, rot, uid:'an'+i, aria:`Поворот ${Math.round(rot*180/Math.PI)}°` }, AVIEW, AFW).html}</div>`).join('')}</div></div>`;
+        ${fig({ zones:BEFORE.zones, rot, step:0.027, uid:'an'+i, aria:`Поворот ${Math.round(rot*180/Math.PI)}°` }, AVIEW, AFW).html}</div>`).join('')}</div></div>`;
 
 // ---------------------------- артборд Scale ------------------------------------
 const STEPS = [0, 3, 6, 9, 12, 15];
@@ -176,13 +175,13 @@ const SVIEW = frameFor(STEPS.map(k => ({ zones:scaleZones(k) })));
 const SCALE = `<div style="${CARD}">
     ${head('Шкала', 'сколько лишнего — столько живота')}
     <div style="font-size:12px;color:${T.tx2};line-height:1.55;margin-bottom:14px;">
-      Высота выпуклости растёт пропорционально избытку, число точек — тоже (одна точка = ${DOT_G} г).
+      Толщина слоя растёт пропорционально избытку, вместе с ней теплеет цвет узлов.
       Проверка, что промежуточные значения выглядят осмысленно, а не только крайние.</div>
     <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;">
       ${STEPS.map((k,i) => `<div style="${PANEL}padding:10px 6px 12px;min-width:0;">
         <div style="font-size:11px;font-weight:700;${MONO}color:${k?T.fat:T.tx3};text-align:center;">${ru(k,0)} кг</div>
         <div style="font-size:9.5px;${MONO}color:${T.tx3};text-align:center;margin-bottom:2px;">${Math.round(k*1000/DOT_G)} точек</div>
-        ${fig({ zones:scaleZones(k), uid:'sc'+i, aria:`Избыток ${k} кг` }, SVIEW, 136).html}</div>`).join('')}</div></div>`;
+        ${fig({ zones:scaleZones(k), step:0.027, uid:'sc'+i, aria:`Избыток ${k} кг` }, SVIEW, 136).html}</div>`).join('')}</div></div>`;
 
 
 // ---------------------------- артборд Compare ----------------------------------
@@ -279,7 +278,7 @@ const NEWW = (() => {
       <span style="font-size:26px;font-weight:700;${MONO}color:${T.fat};line-height:1;">${ru(d.excess)}<span style="font-size:12px;font-weight:400;color:${T.tx3};"> кг</span></span>
       <span style="font-size:11.5px;color:${T.tx2};">сверх нормы ${NORM_PCT}&nbsp;%</span>
       <span style="margin-left:auto;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;${MONO}background:rgba(251,191,36,.13);color:${T.fat};">${d.dots} ${plural(d.dots,'точка','точки','точек')}</span></div>
-    <div style="margin-top:11px;font-size:11px;color:${T.tx3};line-height:1.5;">Одна точка = ${DOT_G} г. Толщина слоя растёт с массой зоны на её площадь, но по сжатой шкале — иначе манжета на руке была бы тоньше пикселя.</div></div>`;
+    <div style="margin-top:11px;font-size:11px;color:${T.tx3};line-height:1.5;">Узлы сетки лежат на поверхности тела со слоем жира; цвет узла — толщина слоя под ним. Одна точка в подписи = ${DOT_G} г.</div></div>`;
 })();
 
 const COMPARE = `<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
