@@ -8,22 +8,33 @@ import fs from 'fs';
 // процент выводятся из избытка — иначе на карточке рядом стоят три числа,
 // которые друг из друга не получаются.
 const NORM_PCT = 15;
+// Числа точек по зонам бланка: одна точка = 20 г, поэтому масса зоны равна им
+// по определению.
+const DOTS = {
+  before: { torso:365, larm:35, rarm:35, lleg:88, rleg:87 },   // 610
+  after:  { torso:108, larm:10, rarm:11, lleg:26, rleg:25 },   // 180
+};
 const ru = (n,d=1) => n.toFixed(d).replace('.', ',');
 const shown = n => +ru(n).replace(',', '.');
 const plural = (n,one,few,many) => { const a = n%100, b = n%10;
   return (a>=11 && a<=14) ? many : b===1 ? one : (b>=2 && b<=4) ? few : many; };
 
 function rec(label, date, weight, muscle, dots){
-  const excess = dots*DOT_G/1000, fat = weight*NORM_PCT/100 + excess;
-  return { label, date, weight, muscle, excess, fat, fatPct: fat/weight*100, dots };
+  const zones = Object.fromEntries(Object.entries(dots).map(([k,n]) => [k, n*DOT_G/1000]));
+  const n = Object.values(dots).reduce((a,b)=>a+b,0);
+  const excess = n*DOT_G/1000, fat = weight*NORM_PCT/100 + excess;
+  return { label, date, weight, muscle, zones, excess, fat, fatPct: fat/weight*100, dots:n };
 }
-const BEFORE = rec('ДО',    '12.03.2026', 92.4, 34.8, 610);
-const AFTER  = rec('ПОСЛЕ', '01.09.2026', 83.4, 35.7, 180);
+const BEFORE = rec('ДО',    '12.03.2026', 92.4, 34.8, DOTS.before);
+const AFTER  = rec('ПОСЛЕ', '01.09.2026', 83.4, 35.7, DOTS.after);
 
 // Счётная самопроверка образца: макет, который врёт убедительнее, чем ошибается,
 // хуже отсутствующего.
 const ffm = d => d.weight - d.fat;
 for (const d of [BEFORE, AFTER]){
+  const z = d.zones, zl = [z.torso, z.larm + z.rarm, z.lleg + z.rleg];
+  if (Math.abs(shown(zl[0]) + shown(zl[1]) + shown(zl[2]) - shown(d.excess)) > 1e-6)
+    throw new Error(d.label+': строка по зонам не складывается в показанный избыток');
   if (Math.abs(shown(d.fat) - shown(d.fatPct*d.weight/100)) > 0.05)
     throw new Error(d.label+': процент жира и килограммы не сходятся');
   if (Math.abs(shown(d.excess) - shown(d.fat - d.weight*NORM_PCT/100)) > 0.05)
@@ -53,7 +64,7 @@ const head = (title, extra='') => `<div style="display:flex;align-items:center;g
 // ---- фигуры -------------------------------------------------------------------
 // Кадр общий на «до» и «после»: разный кадр сделал бы из сравнения обман.
 // Считаем его в два прохода — сначала габариты, потом отрисовка по ним.
-const BASE = { width:280, height:520, scale:430, cx:116, footY:492, seed:11 };
+const BASE = { width:300, height:520, scale:430, cx:150, footY:492, seed:11 };
 function frameFor(list){
   const bb = [1e9, 1e9, -1e9, -1e9];
   for (const o of list){ const b = figure({ ...BASE, ...o, uid:'probe' }).bbox;
@@ -65,16 +76,16 @@ function frameFor(list){
 const fig = (o, view, w) => { const f = figure({ ...BASE, ...o, view });
   return { html:`<div style="width:${w}px;max-width:100%;margin:0 auto;">${f.svg}</div>`, dots:f.dots }; };
 
-const VIEW = frameFor([{ excessKg:BEFORE.excess }, { excessKg:AFTER.excess }]);
-const FW = 118, FH = Math.round(FW * VIEW[3] / VIEW[2]);
+const VIEW = frameFor([{ zones:BEFORE.zones }, { zones:AFTER.zones }]);
+const FW = 190, FH = Math.round(FW * VIEW[3] / VIEW[2]);
 
 // ---------------------------- артборд Main -------------------------------------
 function panel(d, uid){
-  const f = fig({ excessKg:d.excess, uid, aria:`Фигура «${d.label}», вид сбоку` }, VIEW, FW);
+  const f = fig({ zones:d.zones, uid, aria:`Фигура «${d.label}»` }, VIEW, FW);
   const row = (l, v, u, col) => `<div style="display:flex;align-items:baseline;gap:8px;padding:7px 0;border-top:1px solid ${T.bd2};">
         <span style="font-size:11.5px;color:${T.tx2};">${l}</span>
         <b style="margin-left:auto;font-size:14px;${MONO}color:${col||T.tx};">${v}<span style="font-size:10.5px;font-weight:400;color:${T.tx3};"> ${u}</span></b></div>`;
-  return `<div style="${PANEL}padding:14px;display:flex;gap:12px;min-width:0;">
+  return `<div style="${PANEL}padding:14px;min-width:0;"><div style="display:flex;gap:14px;min-width:0;">
       <div style="flex:0 0 ${FW}px;">
         <div style="font-size:10px;font-weight:700;letter-spacing:.12em;color:${T.tx2};text-align:center;margin-bottom:4px;">${d.label}</div>
         ${f.html}</div>
@@ -84,16 +95,18 @@ function panel(d, uid){
           <div style="font-size:30px;font-weight:700;${MONO}color:${T.fat};line-height:1;">${ru(d.excess)}<span style="font-size:13px;font-weight:400;color:${T.tx3};"> кг</span></div>
           <div style="font-size:11.5px;color:${T.tx2};margin-top:5px;">жира сверх нормы</div>
           <div style="display:inline-block;margin-top:9px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;${MONO}background:rgba(251,191,36,.13);color:${T.fat};">${d.dots} ${plural(d.dots,'точка','точки','точек')}</div></div>
-        <div>${row('Вес', ru(d.weight), 'кг')}${row('Жир', ru(d.fatPct), '%')}${row('Жировая масса', ru(d.fat), 'кг')}${row('Мышцы', ru(d.muscle), 'кг', T.ok)}</div></div></div>`;
+        <div>${row('Вес', ru(d.weight), 'кг')}${row('Жир', ru(d.fatPct), '%')}${row('Жировая масса', ru(d.fat), 'кг')}${row('Мышцы', ru(d.muscle), 'кг', T.ok)}</div></div></div>
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid ${T.bd2};font-size:11px;${MONO}color:${T.tx3};">
+        Торс ${ru(d.zones.torso)} · руки ${ru(d.zones.larm+d.zones.rarm)} · ноги ${ru(d.zones.lleg+d.zones.rleg)} кг</div></div>`;
 }
 const delta = (l, v, good) => `<div style="min-width:0;">
     <div style="font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;color:${T.tx3};">${l}</div>
     <div style="font-size:17px;font-weight:700;${MONO}color:${good?T.ok:T.tx};margin-top:3px;">${v}</div></div>`;
 
 const MAIN = `<div style="${CARD}max-width:800px;">
-    ${head('Состав тела · до и после', 'вид сбоку')}
+    ${head('Состав тела · до и после', 'поза бланка DDX')}
     <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:12px;color:${T.tx2};line-height:1.5;margin-bottom:16px;">
-      <span style="flex:1;min-width:300px;">Контур — одно и то же эталонное тело при ${NORM_PCT}&nbsp;% жира. Меняется только живот.</span>
+      <span style="flex:1;min-width:300px;">Внутри — эталонное тело при ${NORM_PCT}&nbsp;% жира, оно одинаковое. Снаружи, янтарным, — сколько поверх него лежит.</span>
       <span style="display:flex;align-items:center;gap:7px;">
         <svg width="26" height="10" style="flex-shrink:0;"><circle cx="4" cy="5" r="1.8" fill="${T.fat}"/><circle cx="13" cy="5" r="1.8" fill="${T.fat}"/><circle cx="22" cy="5" r="1.8" fill="${T.fat}"/></svg>
         одна точка = ${DOT_G} г жира сверх нормы</span></div>
@@ -108,14 +121,15 @@ const MAIN = `<div style="${CARD}max-width:800px;">
       ${delta('Мышцы', '+'+ru(AFTER.muscle-BEFORE.muscle)+' кг', true)}
       ${delta('Точки', '−'+(BEFORE.dots-AFTER.dots), true)}</div>
     <div style="margin-top:14px;font-size:11px;color:${T.tx3};line-height:1.6;">
-      Фигура в профиль, потому что живот виден только сбоку: в фас выпуклость идёт на зрителя и не читается ни при каком размере.
-      Весь избыток сведён в живот — туда, где он заметен; разбивка по рукам и ногам остаётся в карточке «Состав по зонам».
+      Руки отведены, как на бланке DDX, — иначе бока и сами руки закрыты корпусом и жир на них показать нечем.
+      Толщина слоя в зоне — её масса, делённая на её площадь, тем же правилом, что ореол в «Составе по зонам»; на животе слой распределён
+      неравномерно: спереди толще всего, по бокам «ушки», спина почти чистая. Слой увеличен, иначе восемь миллиметров дали бы два пикселя.
       Норма ${NORM_PCT}&nbsp;% — наш ориентир: прибор её не считает, у DDX границы свои и зависят от пола, возраста и роста.</div></div>`;
 
 // ---------------------------- артборд Mobile -----------------------------------
-const MFW = 96, MFH = Math.round(MFW * VIEW[3] / VIEW[2]);
+const MFW = 138, MFH = Math.round(MFW * VIEW[3] / VIEW[2]);
 function mpanel(d, uid){
-  const f = fig({ excessKg:d.excess, uid, aria:`Фигура «${d.label}», вид сбоку` }, VIEW, MFW);
+  const f = fig({ zones:d.zones, uid, aria:`Фигура «${d.label}»` }, VIEW, MFW);
   return `<div style="${PANEL}padding:11px 9px 13px;min-width:0;">
       <div style="display:flex;align-items:baseline;gap:6px;">
         <span style="font-size:9.5px;font-weight:700;letter-spacing:.12em;color:${T.tx2};">${d.label}</span>
@@ -128,7 +142,7 @@ function mpanel(d, uid){
 }
 const MOBILE = `<div style="${CARD}padding:16px;">
     ${head('Состав тела · до и после')}
-    <div style="font-size:11.5px;color:${T.tx2};line-height:1.5;margin-bottom:12px;">Контур один и тот же — тело при ${NORM_PCT}&nbsp;% жира, вид сбоку. Точка = ${DOT_G} г жира сверх нормы.</div>
+    <div style="font-size:11.5px;color:${T.tx2};line-height:1.5;margin-bottom:12px;">Внутри — эталонное тело при ${NORM_PCT}&nbsp;% жира. Точка = ${DOT_G} г жира сверх него.</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">${mpanel(BEFORE,'ma')}${mpanel(AFTER,'mb')}</div>
     <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;padding:12px 13px;${PANEL}">
       ${delta('Вес','−'+ru(BEFORE.weight-AFTER.weight)+' кг',true)}
@@ -138,22 +152,25 @@ const MOBILE = `<div style="${CARD}padding:16px;">
 
 // ---------------------------- артборд Angles -----------------------------------
 // Довод в пользу профиля: в фас живот идёт на зрителя и не виден.
-const ANG = [0.15, 0.55, 0.95, 1.30, 1.57];
-const AVIEW = frameFor(ANG.map(rot => ({ excessKg:BEFORE.excess, rot })));
-const AFW = 130;
+const ANG = [0.00, 0.30, 0.70, 1.10, 1.50];
+const AVIEW = frameFor(ANG.map(rot => ({ zones:BEFORE.zones, rot })));
+const AFW = 158;
 const ANGLES = `<div style="${CARD}">
-    ${head('Почему в профиль', 'один и тот же расчёт, разный угол')}
+    ${head('Разворот', 'один и тот же расчёт, разный угол')}
     <div style="font-size:12px;color:${T.tx2};line-height:1.55;margin-bottom:14px;">
-      Живот выступает ВПЕРЁД. В фас это направление совпадает с направлением взгляда, и выпуклость не видна ни при каком её размере —
-      только точки скапливаются в середине силуэта. Читаться живот начинает примерно с 55°.</div>
+      Фигура считается, а не рисуется картинкой, поэтому её можно повернуть на любой угол — как глобус в разделе «Жизнь».
+      В карточке стоит поза бланка (17°): руки отведены, видны бока. Сбоку виден живот, в профиль — насколько он выступает вперёд.</div>
     <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;">
       ${ANG.map((rot,i) => `<div style="${PANEL}padding:10px 8px 12px;min-width:0;">
         <div style="font-size:10px;${MONO}color:${T.tx3};text-align:center;margin-bottom:2px;">${Math.round(rot*180/Math.PI)}°</div>
-        ${fig({ excessKg:BEFORE.excess, rot, uid:'an'+i, aria:`Поворот ${Math.round(rot*180/Math.PI)}°` }, AVIEW, AFW).html}</div>`).join('')}</div></div>`;
+        ${fig({ zones:BEFORE.zones, rot, uid:'an'+i, aria:`Поворот ${Math.round(rot*180/Math.PI)}°` }, AVIEW, AFW).html}</div>`).join('')}</div></div>`;
 
 // ---------------------------- артборд Scale ------------------------------------
 const STEPS = [0, 3, 6, 9, 12, 15];
-const SVIEW = frameFor(STEPS.map(k => ({ excessKg:k })));
+// раскладка избытка по зонам в тех же долях, что у «до»
+const SHARE = Object.fromEntries(Object.entries(BEFORE.zones).map(([k,v]) => [k, v/BEFORE.excess]));
+const scaleZones = kg => Object.fromEntries(Object.entries(SHARE).map(([k,f]) => [k, kg*f]));
+const SVIEW = frameFor(STEPS.map(k => ({ zones:scaleZones(k) })));
 const SCALE = `<div style="${CARD}">
     ${head('Шкала', 'сколько лишнего — столько живота')}
     <div style="font-size:12px;color:${T.tx2};line-height:1.55;margin-bottom:14px;">
@@ -163,7 +180,7 @@ const SCALE = `<div style="${CARD}">
       ${STEPS.map((k,i) => `<div style="${PANEL}padding:10px 6px 12px;min-width:0;">
         <div style="font-size:11px;font-weight:700;${MONO}color:${k?T.fat:T.tx3};text-align:center;">${ru(k,0)} кг</div>
         <div style="font-size:9.5px;${MONO}color:${T.tx3};text-align:center;margin-bottom:2px;">${Math.round(k*1000/DOT_G)} точек</div>
-        ${fig({ excessKg:k, uid:'sc'+i, aria:`Избыток ${k} кг` }, SVIEW, 112).html}</div>`).join('')}</div></div>`;
+        ${fig({ zones:scaleZones(k), uid:'sc'+i, aria:`Избыток ${k} кг` }, SVIEW, 136).html}</div>`).join('')}</div></div>`;
 
 // ---------------------------------- запись -------------------------------------
 const doc = (body, pad) => `<!doctype html>
@@ -205,14 +222,14 @@ for (const gone of ['DotBody.dc.html','ZoneMesh.dc.html'])
 
 const canvas = {
   artboards: [
-    { file:'Main.dc.html',   x:0,    y:0,    w:900, h:880 },
-    { file:'Mobile.dc.html', x:1010, y:0,    w:390, h:850 },
-    { file:'Angles.dc.html', x:0,    y:1020, w:940, h:670 },
-    { file:'Scale.dc.html',  x:0,    y:1810, w:940, h:690 },
+    { file:'Main.dc.html',   x:0,    y:0,    w:900, h:820 },
+    { file:'Mobile.dc.html', x:1010, y:0,    w:390, h:730 },
+    { file:'Angles.dc.html', x:0,    y:960,  w:940, h:520 },
+    { file:'Scale.dc.html',  x:0,    y:1620, w:940, h:520 },
   ],
   annotations: [
-    { id:'brief', x:1010, y:930, w:390,
-      text:'Живот виден только сбоку — поэтому фигура в профиль. Артборд «Почему в профиль» показывает, что в фас выпуклость не читается ни при каком размере.\n\nЭталонное тело на «до» и «после» ОДНО И ТО ЖЕ — тело при 15 % жира. Меняется только живот.\n\nОдна точка = 20 г жира сверх нормы: 610 точек против 180 — это и есть 12,2 кг против 3,6 кг.\n\nЦифры — образец, не реальные замеры.' },
+    { id:'brief', x:1010, y:810, w:390,
+      text:'Поза как на бланке DDX: руки отведены, поэтому видны и бока, и сами руки — иначе жир на них показать нечем.\n\nЭталонное тело на «до» и «после» ОДНО И ТО ЖЕ — тело при 15 % жира. Янтарный контур снаружи — оно же со слоем жира; между ними точки.\n\nОдна точка = 20 г: 610 точек против 180 — это и есть 12,2 кг против 3,6 кг.\n\nЦифры — образец, не реальные замеры.' },
   ],
   launch: { view:'canvas' },
 };

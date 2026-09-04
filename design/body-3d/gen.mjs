@@ -53,31 +53,31 @@ function spline(keys, t){
 // Показатель > 2 делает сечение скруглённым прямоугольником: грудная клетка и
 // таз у человека именно такие, чистый эллипс даёт бочку.
 const TORSO_KEYS = [
-  [0.470, .094, .062, -.010, 2.5],
-  [0.505, .102, .073, -.024, 2.5],   // ягодицы уходят назад
-  [0.545, .096, .063, -.012, 2.4],
-  [0.582, .088, .056,  .000, 2.3],
-  [0.622, .083, .052,  .004, 2.3],   // талия и поясничный прогиб вперёд
-  [0.665, .088, .057,  .002, 2.4],
-  [0.706, .094, .061, -.002, 2.5],
-  [0.744, .098, .066, -.002, 2.5],   // грудь
-  [0.778, .104, .058, -.008, 2.4],
-  [0.800, .112, .052, -.012, 2.3],
-  [0.816, .112, .046, -.014, 2.2],   // плечевой пояс
-  [0.830, .086, .040, -.016, 2.1],
-  [0.840, .056, .036, -.018, 2.0],   // сход в трапецию, выше видна шея
+  [0.470, .092, .062, -.008, 2.05],
+  [0.505, .104, .070, -.016, 2.05],   // таз, ягодицы назад
+  [0.542, .097, .064, -.010, 2.00],
+  [0.578, .085, .056, -.002, 1.95],
+  [0.612, .078, .050,  .003, 1.95],   // талия
+  [0.652, .085, .056,  .001, 2.00],
+  [0.694, .094, .062, -.002, 2.05],
+  [0.734, .100, .065, -.004, 2.05],   // грудь
+  [0.772, .106, .060, -.008, 2.05],
+  [0.800, .114, .053, -.012, 2.00],
+  [0.818, .116, .046, -.014, 1.95],   // плечевой пояс
+  [0.832, .098, .041, -.016, 1.90],
+  [0.842, .070, .037, -.017, 1.85],
+  [0.850, .048, .034, -.018, 1.80],   // сход в шею
 ];
-// голова с подбородком и скулами — не шар: шар и делал «страшно»
 const HEAD_KEYS = [
-  [0.824, .033, .034, -.016, 2.0],   // шея начинается ниже плеч и видна над ними
-  [0.858, .032, .034, -.014, 2.0],
-  [0.874, .034, .043, -.008, 2.1],   // подбородок
-  [0.892, .040, .052, -.003, 2.2],
-  [0.916, .043, .056,  .000, 2.2],   // скулы: ширина головы 15,5 см, глубина 19,5
-  [0.946, .042, .054, -.002, 2.1],
-  [0.972, .036, .046, -.004, 2.0],
-  [0.990, .024, .030, -.006, 2.0],
-  [1.000, .010, .012, -.006, 2.0],
+  [0.818, .036, .037, -.016, 1.90],   // шея начинается ниже плеч и видна над ними
+  [0.856, .035, .037, -.014, 1.90],
+  [0.872, .040, .046, -.008, 2.00],   // подбородок
+  [0.890, .046, .054, -.003, 2.05],
+  [0.914, .048, .058,  .000, 2.05],   // скулы: ширина головы 15,5 см
+  [0.944, .047, .056, -.002, 2.00],
+  [0.970, .041, .048, -.004, 1.95],
+  [0.990, .028, .033, -.006, 1.90],
+  [1.000, .011, .013, -.006, 1.90],
 ];
 // Нос. Мелочь, но именно он превращает овал в голову и задаёт, куда человек
 // смотрит: без него фигура в профиль читается манекеном.
@@ -85,26 +85,30 @@ const NOSE = (y, th) => 0.015 * Math.exp(-Math.pow((y-0.908)/0.016, 2))
                              * Math.pow(Math.max(0, Math.sin(th)), 8);
 // конечности: опорные точки осевой линии и радиус в каждой
 const arm = s => [
-  [s*.086, .826, -.014, .019],   // верх дельты скруглён и уходит под плечо
-  [s*.096, .800, -.014, .036],   // дельта
-  [s*.108, .724, -.014, .030],   // плечо, обхват 33 см
-  [s*.113, .638, -.012, .026],   // локоть
-  [s*.113, .556, -.006, .024],   // предплечье
-  [s*.110, .470,  .004, .017],   // запястье, обхват 17 см
-  [s*.109, .432,  .010, .016],   // кисть без утолщения — иначе на бедре висит овал
-  [s*.108, .398,  .014, .011],
-  [s*.107, .382,  .016, .005],
+  [s*.088, .830, -.010, .017],
+  [s*.100, .802, -.010, .036],   // дельта
+  [s*.126, .742, -.008, .031],
+  [s*.150, .674, -.006, .027],   // плечо, обхват 33 см
+  [s*.170, .620, -.004, .026],   // локоть
+  [s*.192, .560,  .000, .027],   // предплечье полнее локтя — иначе рука палка
+  [s*.212, .500,  .004, .022],
+  [s*.226, .456,  .008, .016],   // запястье, обхват 17 см
+  [s*.234, .428,  .010, .019],   // кисть
+  [s*.240, .400,  .012, .013],
+  [s*.244, .386,  .013, .006],
 ];
 const leg = s => [
-  [s*.050, .500,  .000, .052],
-  [s*.054, .404,  .002, .049],   // бедро, обхват 56 см
-  [s*.056, .312,  .004, .039],
-  [s*.056, .282,  .002, .036],   // колено
-  [s*.054, .202, -.008, .037],   // икра
-  [s*.050, .124, -.010, .027],
-  [s*.047, .052, -.006, .021],   // щиколотка
-  [s*.047, .020, -.016, .022],   // пятка
-  [s*.047, .010,  .046, .014],   // носок задаёт, куда человек смотрит
+  [s*.054, .500,  .000, .053],
+  [s*.056, .458,  .002, .056],   // верх бедра — самое толстое место ноги
+  [s*.058, .400,  .003, .052],
+  [s*.060, .330,  .004, .042],
+  [s*.062, .284,  .002, .036],   // колено
+  [s*.063, .230, -.004, .039],   // икра
+  [s*.064, .170, -.008, .034],
+  [s*.064, .108, -.010, .025],
+  [s*.064, .052, -.006, .020],   // щиколотка
+  [s*.064, .020, -.018, .021],   // пятка
+  [s*.064, .010,  .046, .014],   // носок
 ];
 
 // ---- поверхность как функция (s, θ) -----------------------------------------
@@ -154,21 +158,58 @@ export const PARTS = () => ({
   rleg: tube(shift(leg(-1), -.020)), lleg: tube(shift(leg(1),  .024)),
 });
 
-// ---- живот ------------------------------------------------------------------
-// Купол на передней стенке торса. По высоте — колокол вокруг пупка, по окружности
-// узкий: бока и поясница остаются чистыми, иначе «жир на боках или на животе»
-// сливается в одно пятно и не читается.
-const BELLY = { y:.580, sy:.052, p:2.6, cm:0.00508, sag:0.20 };   // cm: доля роста на 1 кг
-export const bellyRise = kg => BELLY.cm * kg;
-function bellyAt(y, th, A){
-  const yc = BELLY.y - BELLY.sag * A;                // чем крупнее живот, тем ниже свисает
-  const fy = Math.exp(-Math.pow((y - yc)/BELLY.sy, 2));
-  const c = Math.max(0, Math.sin(th));
-  return A * fy * Math.pow(c, BELLY.p);
+// ---- слой жира --------------------------------------------------------------
+// Жир лежит СЛОЕМ поверх эталонного тела: толще всего на животе, заметно на
+// боках («ушки»), тонкой манжетой на руках и бёдрах. Средняя толщина зоны —
+// её масса, делённая на её площадь, как ореол в виджете «Состав по зонам»
+// (medcard_profile.js, segGlow), по тем же площадям.
+export const SEGAREA = { torso:46691, larm:13039, rarm:12864, lleg:22637, rleg:22894 };
+const K_LAYER = 200;                        // подобран по читаемости на 445 px
+const ZONE_OF = { torso:'torso', larm:'larm', rarm:'rarm', lleg:'lleg', rleg:'rleg' };
+
+const bell = (v,c,w) => Math.exp(-((v-c)*(v-c))/(2*w*w));
+// Профиль по торсу: живот спереди, «ушки» по бокам, спина почти чистая.
+function torsoShape(y, th){
+  const front = Math.pow(Math.max(0, Math.sin(th)), 2.0);
+  const side  = Math.pow(Math.abs(Math.cos(th)), 2.5);
+  return 0.26 + 2.30*bell(y,.590,.070)*(0.55 + 0.45*front)
+             + 1.15*bell(y,.616,.050)*side;
+}
+const TORSO_MEAN = (() => {                 // нормировка: средняя по площади = 1
+  let sum = 0, n = 0;
+  for (let i=0;i<40;i++) for (let j=0;j<40;j++){
+    sum += torsoShape(0.472 + (i+.5)/40*(0.850-0.472), (j+.5)/40*TAU); n++;
+  }
+  return sum/n;
+})();
+// Кисть и стопа не полнеют — манжета сходит на нет к концу конечности.
+const limbTaper = s => Math.min(1, Math.max(0, (0.86 - s) / 0.16));
+
+function makeFat(parts, zones){
+  const t = {};
+  for (const k of Object.keys(ZONE_OF)) t[k] = K_LAYER * ((zones[k] || 0) / SEGAREA[k]);
+  const wrap = (part, name) => ({
+    kind: part.kind, n: part.n,
+    thick(s, th){
+      if (name === 'head') return 0;
+      if (name === 'torso') return t.torso * torsoShape(0.472 + s*(0.850-0.472), th) / TORSO_MEAN;
+      return t[name] * limbTaper(s);
+    },
+    at(s, th){
+      const p = part.at(s, th), d = this.thick(s, th);
+      if (!d) return p;
+      const nv = normalAt(part, s, th);
+      return [p[0]+nv[0]*d, p[1]+nv[1]*d, p[2]+nv[2]*d];
+    },
+    axis: s => part.axis(s),
+  });
+  const out = {};
+  for (const [name, part] of Object.entries(parts)) out[name] = wrap(part, name);
+  return out;
 }
 
 // ============================ камера =========================================
-export const ROT = 1.30, TILT = 0.14;      // ~75°: живот виден только сбоку — как и в жизни
+export const ROT = 0.30, TILT = 0.12;      // ~17°: поза бланка — руки в стороны, видны бока
 
 function camera(rot, tilt){
   const cr = Math.cos(rot), sr = Math.sin(rot), ct = Math.cos(tilt), st = Math.sin(tilt);
@@ -271,10 +312,10 @@ function runs(pts, isClosed){                // разбить контур на
  * Одна фигура.
  *   width,height,scale,cx,footY — холст и посадка фигуры (обязательные)
  *   view       — [x,y,w,h] viewBox: обрезка холста по самой фигуре
- *   excessKg   — жир сверх нормы, кг: задаёт и высоту живота, и число точек
+ *   zones      — жир сверх нормы по зонам бланка, кг: {torso,larm,rarm,lleg,rleg}
  *   seed       — зерно, чтобы точки не «дышали» между сборками
- *   rot, tilt, colors, dotR, rings, uid, aria
- * Возвращает { svg, dots } — dots это фактическое число точек.
+ *   rot, tilt, colors, dotR, uid, aria
+ * Возвращает { svg, dots, bbox }.
  */
 export function figure(o){
   for (const k of ['width','height','scale','cx','footY'])
@@ -283,121 +324,121 @@ export function figure(o){
   const cam = camera(o.rot ?? ROT, o.tilt ?? TILT);
   const R = rng(o.seed ?? 7);
   const parts = PARTS();
-  const kg = o.excessKg || 0, A = bellyRise(kg);
-
+  const zones = o.zones || {};
+  const fat = makeFat(parts, zones);
   const px = q => ({ sx: CX + S*q.x, sy: FY - S*q.y, z: q.z });
-  const RIM = o.rim ?? 0.40;
-  const P = (p, n) => { const q = px(cam.p(p)); const d = cam.nz(n);
-    q.cls = d <= 0 ? 0 : (d < RIM ? 2 : 1); return q; };
 
-  // ---- кольца поверхности: маска силуэта и поперечные сечения ----
-  const NT = 40, group = {}, sections = [];
-  const depth = {};
-  for (const [name, part] of Object.entries(parts)){
-    const steps = part.kind === 'stack' ? 44 : 34;
-    const own = group[name] = [];
-    let dz = 0;
-    const prev = [];
-    for (let i=0;i<=steps;i++){
-      const s = i/steps, ring = [];
-      for (let t=0;t<NT;t++){ const th = t/NT*TAU; ring.push(px(cam.p(part.at(s, th)))); }
-      own.push(ring);
-      if (prev.length) for (let t=0;t<NT;t++)          // перемычки между кольцами
-        own.push([prev[t], ring[t], ring[(t+1)%NT], prev[(t+1)%NT]]);
-      prev.length = 0; prev.push(...ring);
-      dz += cam.p(part.axis(s)).z;
+  // ---- оболочки: эталонное тело и оно же со слоем жира ----
+  const NT = 40, group = {}, fgroup = {}, depth = {};
+  const shell = (src, bag) => {
+    for (const [name, part] of Object.entries(src)){
+      const steps = part.kind === 'stack' ? 56 : 44;
+      const own = bag[name] = [];
+      let dz = 0; const prev = [];
+      for (let i=0;i<=steps;i++){
+        const s = i/steps, ring = [];
+        for (let t=0;t<NT;t++) ring.push(px(cam.p(part.at(s, t/NT*TAU))));
+        own.push(ring);
+        if (prev.length) for (let t=0;t<NT;t++)        // перемычки между кольцами
+          own.push([prev[t], ring[t], ring[(t+1)%NT], prev[(t+1)%NT]]);
+        prev.length = 0; prev.push(...ring);
+        dz += cam.p(part.axis(s)).z;
+      }
+      depth[name] = dz/(steps+1);
     }
-    depth[name] = dz/(steps+1);
-    const nSec = o.rings ?? 0;   // поперечные сечения выключены: в профиль они читались рёбрами
-    for (let i=1;i<=nSec;i++){
-      const s = i/(nSec+1), ring = [];
-      for (let t=0;t<=NT;t++){ const th = t/NT*TAU;
-        ring.push(P(part.at(s, th), normalAt(part, s, th))); }
-      const r = runs(ring, false);
-      sections.push(...r[1], ...r[2]);
-    }
-  }
+  };
+  shell(parts, group); shell(fat, fgroup);
 
   const res = 2;                              // ячейка маски — полпикселя холста
   const gw = Math.ceil(W*res)+1, gh = Math.ceil(H*res)+1;
   const bb = [1e9, 1e9, -1e9, -1e9];
   const grow = (x, y) => { if (x<bb[0]) bb[0]=x; if (y<bb[1]) bb[1]=y;
                            if (x>bb[2]) bb[2]=x; if (y>bb[3]) bb[3]=y; };
-  const trace = names => {
+  const trace = (bag, names) => {
     const mask = new Uint8Array(gw*gh);
-    for (const n of names) for (const p of group[n]) raster(mask, gw, gh, p, res);
+    for (const n of names) for (const p of bag[n]) raster(mask, gw, gh, p, res);
     return march(mask, gw, gh)
-      .map(l => rdp(chaikin(l, 3).map(p => [(p[0]+.5)/res, (p[1]+.5)/res]), 0.28))
+      .map(l => rdp(chaikin(l, 4).map(p => [(p[0]+.5)/res, (p[1]+.5)/res]), 0.22))
       .filter(l => l.length > 6)
       .map(l => { l.forEach(p => grow(p[0], p[1]));
         return 'M' + l.map(p => f1(p[0])+' '+f1(p[1])).join('L') + 'Z'; }).join('');
   };
 
-  // Порядок как у художника, от дальнего к ближнему. Раньше контуры всех
-  // деталей рисовались поверх заливки — дальняя рука просвечивала сквозь
-  // корпус, и фигура превращалась в клубок линий.
+  // Порядок как у художника, от дальнего к ближнему: иначе дальняя рука
+  // просвечивает сквозь корпус и фигура превращается в клубок линий.
+  const ALL = ['torso','head','rarm','larm','rleg','lleg'];
   const legs = ['rleg','lleg'].sort((a,b) => depth[a] - depth[b]);
   const arms = ['rarm','larm'].sort((a,b) => depth[a] - depth[b]);
-  const behind = [
-    { d: trace([legs[0]]), far:true }, { d: trace([legs[1]]), far:false },
-    { d: trace([arms[0]]), far:true },
-  ];
-  const bodyPath = trace(['torso','head', arms[1]]);
-  const armEdge = trace([arms[1]]);
+  const fatPath = trace(fgroup, ALL);
+  // Заливки — от дальнего к ближнему; общий контур — один яркий по всей фигуре;
+  // стыки деталей — тихой линией внутри него. Раньше контур торса шёл поверх рук
+  // и читался жилеткой.
+  const fills = [[legs[0]], [legs[1]], [arms[0]], [arms[1]], ['torso','head']]
+    .map((names, i) => ({ d: trace(group, names), far: i===0 || i===2 }));
+  const bodyPath = trace(group, ALL);
+  // Только руки: контуры торса и ног внутри силуэта читались воротником и шортами.
+  const seams = [arms[0], arms[1]].map(n => trace(group, [n])).join('');
 
-  // ---- живот точками ----
-  // Выборка по высоте купола: гуще там, где живот толще. Точка кладётся между
-  // эталонной поверхностью и куполом, чуть ближе к куполу — так виден его край.
+  // ---- жир точками ----
+  // Точка лежит между эталонной поверхностью и поверхностью со слоем жира.
+  // Выборка внутри зоны — пропорционально толщине слоя: гуще там, где толще.
   const dotsFront = [], dotsBack = [];
-  const n = Math.round(kg*1000/DOT_G);
-  const torso = parts.torso, TY0 = TORSO_KEYS[0][0], TY1 = TORSO_KEYS[TORSO_KEYS.length-1][0];
-  for (let i=0;i<n;i++){
-    let s, th, rise;
-    for (let g=0;g<64;g++){
-      s = R(); th = R()*TAU;
-      rise = bellyAt(TY0 + s*(TY1-TY0), th, A);
-      if (R() < rise/(A || 1) || g === 63) break;
+  let total = 0;
+  for (const [zone, kg] of Object.entries(zones)){
+    if (!kg) continue;
+    const n = Math.round(kg*1000/DOT_G);
+    total += n;
+    const part = parts[zone], fpart = fat[zone];
+    let tmax = 0;
+    for (let i=0;i<24;i++) for (let j=0;j<24;j++)
+      tmax = Math.max(tmax, fpart.thick((i+.5)/24, (j+.5)/24*TAU));
+    for (let i=0;i<n;i++){
+      let s = R(), th = R()*TAU, t = fpart.thick(s, th);
+      for (let g=0; g<48 && R() >= t/tmax; g++){ s = R(); th = R()*TAU; t = fpart.thick(s, th); }
+      const p = part.at(s, th), nv = normalAt(part, s, th);
+      const d = t * (0.12 + 0.88*Math.pow(R(), 0.55));
+      const q = px(cam.p([p[0]+nv[0]*d, p[1]+nv[1]*d, p[2]+nv[2]*d]));
+      const dep = Math.max(0, Math.min(1, (q.z + 0.25)/0.5));
+      const r = (o.dotR ?? 1.55) * (0.78 + 0.26*dep);
+      grow(q.sx - r, q.sy - r); grow(q.sx + r, q.sy + r);
+      (cam.nz(nv) > 0 ? dotsFront : dotsBack)
+        .push(`<circle cx="${f1(q.sx)}" cy="${f1(q.sy)}" r="${Math.round(r*100)/100}"/>`);
     }
-    const p = torso.at(s, th), nv = normalAt(torso, s, th);
-    const d = rise * Math.pow(R(), 0.40);   // гуще у поверхности купола — виден его край
-    const q = px(cam.p([p[0]+nv[0]*d, p[1]+nv[1]*d, p[2]+nv[2]*d]));
-    const dep = Math.max(0, Math.min(1, (q.z + 0.25)/0.5));
-    const r = (o.dotR ?? 1.8) * (0.76 + 0.28*dep);
-    grow(q.sx - r, q.sy - r); grow(q.sx + r, q.sy + r);
-    (cam.nz(nv) > 0 ? dotsFront : dotsBack)
-      .push(`<circle cx="${f1(q.sx)}" cy="${f1(q.sy)}" r="${Math.round(r*100)/100}"/>`);
   }
 
-  // ---- пол ----
-  const floor = 'M' + Array.from({length:48}, (_,i) => {
-    const th = i/48*TAU;
-    return px(cam.p([Math.cos(th)*.145, 0.004, Math.sin(th)*.145]));
+  // ---- тень под ногами ----
+  const shadow = 'M' + Array.from({length:56}, (_,i) => {
+    const th = i/56*TAU;
+    return px(cam.p([Math.cos(th)*.165, 0.002, Math.sin(th)*.165]));
   }).map(q => f1(q.sx)+' '+f1(q.sy)).join('L') + 'Z';
 
   const C = o.colors || {};
-  const cLine = C.line || '#3d5464', cRim = C.rim || '#8fb4c9', cDot = C.dot || '#fbbf24';
-  const cF0 = C.fill0 || '#1e262c', cF1 = C.fill1 || '#0b0e10', cDeep = C.deep || '#0e1316';
+  const cLine = C.line || '#435b6b', cRim = C.rim || '#9dbecf', cDot = C.dot || '#fbbf24';
+  const cF0 = C.fill0 || '#36434d', cF1 = C.fill1 || '#141a1e', cF2 = C.fill2 || '#090c0e', cDeep = C.deep || '#10161a';
   const uid = o.uid || 'b';
   const V = o.view || [0, 0, W, H];
+  const has = total > 0;
 
-  const secPath = sections.length
-    ? `<g fill="none" stroke="${cLine}" stroke-width=".85" stroke-opacity=".5" stroke-linecap="round"><path d="${sections.map(poly).join('')}"/></g>` : '';
-
-  const body = behind.map(L => L.d
-    ? `<path d="${L.d}" fill="${L.far ? cDeep : `url(#g-${uid})`}" stroke="${cLine}" stroke-width="1" stroke-opacity="${L.far ? .7 : 1}" stroke-linejoin="round"/>` : '').join('\n')
-  + `\n<path d="${bodyPath}" fill="url(#g-${uid})"/>`
-  + `\n<clipPath id="c-${uid}"><path d="${bodyPath}"/></clipPath>`
-  + `\n<path d="${armEdge}" fill="none" stroke="${cLine}" stroke-width=".95" stroke-opacity=".55" stroke-linejoin="round" clip-path="url(#c-${uid})"/>`
-  + `\n<path d="${bodyPath}" fill="none" stroke="${cRim}" stroke-width="1.5" stroke-linejoin="round"/>`;
+  const body = fills.map(L => L.d
+    ? `<path d="${L.d}" fill="${L.far ? cDeep : `url(#g-${uid})`}"/>` : '').join('\n');
 
   const svg = `<svg viewBox="${V.join(' ')}" width="100%" role="img" aria-label="${o.aria||''}" style="display:block;">
-<defs><linearGradient id="g-${uid}" gradientUnits="userSpaceOnUse" x1="${(V[0]+V[2]*0.14).toFixed(1)}" y1="0" x2="${(V[0]+V[2]*0.82).toFixed(1)}" y2="0">
-<stop offset="0" stop-color="${cF0}"/><stop offset=".72" stop-color="${cF1}"/><stop offset="1" stop-color="${cF1}"/></linearGradient></defs>
-<path d="${floor}" fill="none" stroke="#1e1e1e" stroke-width="1" stroke-dasharray="3 5"/>
-<g fill="${cDot}" fill-opacity=".22">${dotsBack.join('')}</g>
+<defs>
+<linearGradient id="g-${uid}" gradientUnits="userSpaceOnUse" x1="${(V[0]+V[2]*0.10).toFixed(1)}" y1="0" x2="${(V[0]+V[2]*0.88).toFixed(1)}" y2="0">
+<stop offset="0" stop-color="${cF0}"/><stop offset=".38" stop-color="${cF1}"/><stop offset="1" stop-color="${cF2}"/></linearGradient>
+<radialGradient id="s-${uid}"><stop offset="0" stop-color="#000" stop-opacity=".6"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+<filter id="b-${uid}" x="-25%" y="-12%" width="150%" height="124%"><feGaussianBlur stdDeviation="7"/></filter>
+<clipPath id="k-${uid}"><path d="${bodyPath}"/></clipPath>
+</defs>
+<path d="${shadow}" fill="url(#s-${uid})"/>
+${has ? `<path d="${fatPath}" fill="${cDot}" fill-opacity=".13" filter="url(#b-${uid})"/>` : ''}
+${has ? `<path d="${fatPath}" fill="${cDot}" fill-opacity=".05" stroke="${cDot}" stroke-width="1.1" stroke-opacity=".45" stroke-linejoin="round"/>` : ''}
+<g fill="${cDot}" fill-opacity=".30">${dotsBack.join('')}</g>
 ${body}
-${secPath}
+<path d="${seams}" fill="none" stroke="${cLine}" stroke-width=".9" stroke-opacity=".55" stroke-linejoin="round" clip-path="url(#k-${uid})"/>
+<path d="${bodyPath}" fill="none" stroke="${cRim}" stroke-width="6" stroke-opacity=".16" clip-path="url(#k-${uid})"/>
+<path d="${bodyPath}" fill="none" stroke="${cRim}" stroke-width="1.5" stroke-linejoin="round"/>
 <g fill="${cDot}" fill-opacity=".95">${dotsFront.join('')}</g>
 </svg>`;
-  return { svg, dots: n, bbox: bb };
+  return { svg, dots: total, bbox: bb };
 }
