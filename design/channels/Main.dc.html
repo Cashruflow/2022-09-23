@@ -1,0 +1,328 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; background: #0a0a0a; color: #e8e8e8;
+           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    a { color: #00a0ff; text-decoration: none; } a:hover { color: #31b6ff; }
+
+    /* сводка страницы — плитка .tile, как на /agents */
+    .sum { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .tile { background: #141414; border: 1px solid #232323; border-radius: 12px; padding: 14px 16px;
+            display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .tile-lab { font-size: 11px; color: #6a6a6a; display: flex; align-items: center; gap: 6px; }
+    .tile-num { font-size: 22px; font-weight: 600; line-height: 1; }
+    .tile-sub { font-size: 11px; color: #6a6a6a; line-height: 1.4; }
+    .tile.warn { border-color: #f8717155;
+                 background: linear-gradient(180deg, rgba(248,113,113,.14), rgba(248,113,113,0) 70%), #141414; }
+    .tile.warn .tile-lab, .tile.warn .tile-num { color: #f87171; }
+
+    /* секции и переключатель вида — как на /agents */
+    .sec { font-size: 12px; color: #6a6a6a; letter-spacing: .04em; text-transform: uppercase; }
+    .seg { display: flex; gap: 4px; background: #161616; border: 1px solid #262626; border-radius: 8px; padding: 3px; }
+    .seg-b { display: flex; align-items: center; gap: 6px; padding: 0 12px; min-height: 30px;
+             font-size: 12px; color: #8a8a8a; border-radius: 7px; }
+    .seg-b.on { background: #00a0ff; color: #04121e; font-weight: 600; }
+
+    /* карточка канала */
+    .card { background: #141414; border: 1px solid #262626; border-radius: 12px; padding: 20px;
+            display: flex; gap: 14px; align-items: flex-start; min-width: 0; }
+    .card.err { border-color: #f8717155;
+                background: linear-gradient(180deg, rgba(248,113,113,.14), rgba(248,113,113,0) 60%), #141414; }
+    .card.off { background: #111111; border-style: dashed; border-color: #2a2a2a; }
+    .glyph { width: 40px; height: 40px; flex: 0 0 40px; border-radius: 11px; background: #191919;
+             border: 1px solid #262626; display: flex; align-items: center; justify-content: center;
+             position: relative; color: #e8e8e8; }
+    .card.err .glyph { background: #2a1010; border-color: #f8717144; color: #f87171; }
+    .card.off .glyph { border-style: dashed; color: #6a6a6a; }
+    .dot { position: absolute; right: -3px; top: -3px; width: 10px; height: 10px; border-radius: 50%;
+           border: 2px solid #141414; }
+    .body { flex: 1 1 auto; min-width: 0; }
+    .top { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .name { font-size: 15px; font-weight: 600; }
+    .desc { font-size: 12px; color: #8b8b8b; margin-top: 3px; line-height: 1.4; }
+    .badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+    .b-ok { background: #0b3a24; color: #6ee7b7; }
+    .b-err { background: #3a0d0d; color: #f87171; }
+    .b-draft { background: #3a2f0b; color: #fcd34d; }
+    .acts { display: flex; align-items: center; gap: 2px; margin-left: auto; flex: 0 0 auto; }
+    .ibtn { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; min-height: 30px;
+            border-radius: 4px; color: #8a8a8a; }
+    .ibtn.del { color: #f87171; }
+
+    /* плитка фактов — общий компонент платформы .ui-tiles / .ui-tile */
+    .ui-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+    .ui-tile { background: #191919; border: 1px solid #262626; border-radius: 8px; padding: 9px 10px; min-width: 0; }
+    .ui-tile__lbl { font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: #666666;
+                    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ui-tile__val { margin-top: 2px; font-size: 16px; font-weight: 700; color: #e8e8e8; font-variant-numeric: tabular-nums; }
+    .ui-tile__val.is-off { color: #6a6a6a; font-weight: 500; }
+    .ui-tile__val.is-ok { color: #4ade80; }
+
+    .warnrow { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; font-size: 12px;
+               line-height: 1.45; color: #f87171; }
+    .warnrow.mut { color: #8b8b8b; }
+    .warnrow > svg { flex: 0 0 auto; margin-top: 1px; }
+    .kv { display: inline-flex; align-items: center; gap: 6px; background: #191919; border: 1px solid #262626;
+          border-radius: 16px; padding: 4px 10px; font-size: 11px; color: #8b8b8b; }
+    .kv b { color: #e8e8e8; font-weight: 600; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .uname { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #00a0ff; }
+    .fold { display: flex; align-items: center; gap: 8px; min-height: 44px; border-top: 1px solid #1e1e1e;
+            margin-top: 16px; font-size: 13px; color: #8b8b8b; }
+    .fold svg { color: #ffffff; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; box-sizing: border-box;">
+  <div style="max-width: 1360px; margin: 0 auto; padding: 26px 44px 60px;">
+
+    <!-- ШАПКА ADR-147: заголовок · подзаголовок одной строкой словами · ряд действий -->
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
+      <div style="flex: 1 1 auto; min-width: 0;">
+        <h1 style="margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -.02em; line-height: 1.2;">Каналы</h1>
+        <p style="margin: 4px 0 0; font-size: 15.5px; font-weight: 500; line-height: 1.35; color: #8a8a93; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Четыре канала связи и пять служебных ботов · один канал требует внимания</p>
+      </div>
+      <div style="display: flex; gap: 8px; flex: 0 0 auto;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: 1px solid #262626; border-radius: 8px; color: #8a8a8a;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>
+        </span>
+        <span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: 1px solid #262626; border-radius: 8px; color: #8a8a8a;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
+        </span>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px;">
+      <span style="display: inline-flex; align-items: center; gap: 7px; background: #00a0ff; color: #ffffff; border: 1px solid #00a0ff; border-radius: 8px; padding: 10px 18px; font-size: 13px; font-weight: 500;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Добавить канал</span>
+      <span style="display: inline-flex; align-items: center; gap: 7px; background: transparent; color: #cccccc; border: 1px solid #333333; border-radius: 8px; padding: 10px 18px; font-size: 13px; font-weight: 500;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>К чатам</span>
+    </div>
+
+    <!-- СВОДКА: состояние каналов числом, до чтения карточек -->
+    <div class="sum" style="margin-top: 22px;">
+      <div class="tile">
+        <div class="tile-lab">Каналов</div>
+        <div class="tile-num">4</div>
+        <div class="tile-sub">Telegram · WhatsApp · MAX</div>
+      </div>
+      <div class="tile">
+        <div class="tile-lab">На связи</div>
+        <div class="tile-num" style="color: #4ade80;">2</div>
+        <div class="tile-sub">принимают и отправляют сообщения</div>
+      </div>
+      <div class="tile warn">
+        <div class="tile-lab">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Требуют внимания</div>
+        <div class="tile-num">1</div>
+        <div class="tile-sub">WhatsApp Cloud — токен отозван</div>
+      </div>
+      <div class="tile">
+        <div class="tile-lab">Черновики</div>
+        <div class="tile-num" style="color: #fcd34d;">1</div>
+        <div class="tile-sub">заведены, приёмник ещё не написан</div>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 26px;">
+      <div class="sec">Каналы связи с клиентами</div>
+      <div class="seg">
+        <span class="seg-b on">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Виджет</span>
+        <span class="seg-b">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>Список</span>
+      </div>
+    </div>
+
+    <!-- сетка каналов: две колонки, как реестры платформы (.ui-grid.auto с более широкой колонкой) -->
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; align-items: start; margin-top: 12px;">
+
+      <div class="card">
+        <div class="glyph">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+          <span class="dot" style="background: #4ade80;"></span>
+        </div>
+        <div class="body">
+          <div class="top">
+            <div class="name">Основной Telegram</div>
+            <span class="badge b-ok">На связи</span>
+            <div class="acts">
+              <span class="ibtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+              <span class="ibtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.2A9.1 9.1 0 0 1 12 4c5 0 9 5 9 8a9.7 9.7 0 0 1-2.3 3.4"/><path d="M6.6 6.6C4.3 8.1 3 10.5 3 12c0 3 4 8 9 8 1.7 0 3.2-.5 4.5-1.3"/><path d="m2 2 20 20"/></svg></span>
+              <span class="ibtn del"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/></svg></span>
+            </div>
+          </div>
+          <div class="desc">Telegram Business · @cashruflow</div>
+          <div class="ui-tiles">
+            <div class="ui-tile"><div class="ui-tile__lbl">Окно ответа</div><div class="ui-tile__val">24 <span style="font-size: 12px; font-weight: 500; color: #8b8b8b;">часа</span></div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Написать первым</div><div class="ui-tile__val is-off">Нельзя</div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Диалогов</div><div class="ui-tile__val">42</div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Ключ</div><div class="ui-tile__val is-ok">Задан</div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Последнее сообщение</div><div class="ui-tile__val">12 <span style="font-size: 12px; font-weight: 500; color: #8b8b8b;">мин назад</span></div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Ошибок за сутки</div><div class="ui-tile__val is-off">0</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="glyph">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><path d="M8 16h.01"/><path d="M16 16h.01"/></svg>
+          <span class="dot" style="background: #4ade80;"></span>
+        </div>
+        <div class="body">
+          <div class="top">
+            <div class="name">Бот поддержки</div>
+            <span class="badge b-ok">На связи</span>
+            <div class="acts">
+              <span class="ibtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+              <span class="ibtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.2A9.1 9.1 0 0 1 12 4c5 0 9 5 9 8a9.7 9.7 0 0 1-2.3 3.4"/><path d="M6.6 6.6C4.3 8.1 3 10.5 3 12c0 3 4 8 9 8 1.7 0 3.2-.5 4.5-1.3"/><path d="m2 2 20 20"/></svg></span>
+              <span class="ibtn del"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/></svg></span>
+            </div>
+          </div>
+          <div class="desc">Telegram-бот · <span class="uname">@cfsupportbot</span></div>
+          <div class="ui-tiles">
+            <div class="ui-tile"><div class="ui-tile__lbl">Окно ответа</div><div class="ui-tile__val is-ok">Без окна</div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Написать первым</div><div class="ui-tile__val">После /start</div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Диалогов</div><div class="ui-tile__val">18</div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Ключ</div><div class="ui-tile__val is-ok">Задан</div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Последнее сообщение</div><div class="ui-tile__val">2 <span style="font-size: 12px; font-weight: 500; color: #8b8b8b;">ч назад</span></div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Ошибок за сутки</div><div class="ui-tile__val is-off">0</div></div>
+          </div>
+          <div class="warnrow mut">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <span>Пишет от имени бота, а не от вашего аккаунта.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card err">
+        <div class="glyph">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+          <span class="dot" style="background: #f87171;"></span>
+        </div>
+        <div class="body">
+          <div class="top">
+            <div class="name">WhatsApp Cloud</div>
+            <span class="badge b-err">Ошибка</span>
+            <div class="acts">
+              <span class="ibtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+              <span class="ibtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.2A9.1 9.1 0 0 1 12 4c5 0 9 5 9 8a9.7 9.7 0 0 1-2.3 3.4"/><path d="M6.6 6.6C4.3 8.1 3 10.5 3 12c0 3 4 8 9 8 1.7 0 3.2-.5 4.5-1.3"/><path d="m2 2 20 20"/></svg></span>
+              <span class="ibtn del"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/></svg></span>
+            </div>
+          </div>
+          <div class="desc">WhatsApp Business API · +7 495 000-00-00</div>
+          <div class="warnrow">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            <span><b style="font-weight: 600;">401 Unauthorized</b> — токен отозван в Meta Business Manager. Сообщения не ходят с 3 сентября, 14:20.</span>
+          </div>
+          <div class="ui-tiles">
+            <div class="ui-tile"><div class="ui-tile__lbl">Окно ответа</div><div class="ui-tile__val">24 <span style="font-size: 12px; font-weight: 500; color: #8b8b8b;">часа</span></div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Написать первым</div><div class="ui-tile__val">Шаблоном</div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Диалогов</div><div class="ui-tile__val">7</div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Ключ</div><div class="ui-tile__val" style="color: #f87171;">Отозван</div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Последнее сообщение</div><div class="ui-tile__val">2 <span style="font-size: 12px; font-weight: 500; color: #8b8b8b;">дня назад</span></div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Ошибок за сутки</div><div class="ui-tile__val" style="color: #f87171;">31</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card off">
+        <div class="glyph">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+          <span class="dot" style="background: #fbbf24;"></span>
+        </div>
+        <div class="body">
+          <div class="top">
+            <div class="name" style="color: #9a9a9a;">Личный Telegram Константина</div>
+            <span class="badge b-draft">Черновик</span>
+            <div class="acts">
+              <span class="ibtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+              <span class="ibtn del"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/></svg></span>
+            </div>
+          </div>
+          <div class="desc">Telegram личный (QR) · +7 903 000-00-00</div>
+          <div class="warnrow mut">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <span>Приёмник ещё не написан: канал заведён, сообщения не ходят. Способ подключения неофициальный — возможна блокировка аккаунта.</span>
+          </div>
+          <div class="ui-tiles">
+            <div class="ui-tile"><div class="ui-tile__lbl">Окно ответа</div><div class="ui-tile__val is-ok">Без окна</div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Написать первым</div><div class="ui-tile__val is-ok">Можно</div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Диалогов</div><div class="ui-tile__val is-off">0</div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Ключи API</div><div class="ui-tile__val is-off">Нет</div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Сессия</div><div class="ui-tile__val is-off">Нет входа</div></div>
+            <div class="ui-tile"><div class="ui-tile__lbl">Приёмник</div><div class="ui-tile__val is-off">Не написан</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- СЛУЖЕБНЫЕ БОТЫ: тот же реестр, но вторым планом и только для чтения -->
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 34px;">
+      <div class="sec">Служебные боты платформы · 5</div>
+      <span class="kv">только чтение · .env и pm2</span>
+    </div>
+    <div style="font-size: 12px; color: #8b8b8b; line-height: 1.45; margin-top: 8px; max-width: 760px;">
+      Не каналы клиентов, а боты самой платформы. «Работает» — процесс онлайн и Telegram ответил на getMe.
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; align-items: start; margin-top: 12px;">
+      <div class="card" style="padding: 16px 18px;">
+        <div class="glyph" style="width: 32px; height: 32px; flex: 0 0 32px; border-radius: 9px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><path d="M8 16h.01"/><path d="M16 16h.01"/></svg>
+          <span class="dot" style="background: #4ade80;"></span>
+        </div>
+        <div class="body">
+          <div class="top"><div class="name" style="font-size: 14px;">Медкарта — вход</div><span class="badge b-ok">Работает</span></div>
+          <div class="desc"><span class="uname">@cfmedbot</span></div>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;">
+            <span class="kv">pm2 <b>medbot</b></span>
+            <span class="kv">рестартов <b>2</b></span>
+            <span class="kv">токен <b>…4821</b></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card err" style="padding: 16px 18px;">
+        <div class="glyph" style="width: 32px; height: 32px; flex: 0 0 32px; border-radius: 9px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><path d="M8 16h.01"/><path d="M16 16h.01"/></svg>
+          <span class="dot" style="background: #f87171;"></span>
+        </div>
+        <div class="body">
+          <div class="top"><div class="name" style="font-size: 14px;">Дневник</div><span class="badge b-err">Не работает</span></div>
+          <div class="desc"><span class="uname">@cfdiarybot</span></div>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;">
+            <span class="kv">pm2 <b>diarybot</b> · нет процесса</span>
+            <span class="kv">токен <b>…1190</b></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card off" style="padding: 16px 18px;">
+        <div class="glyph" style="width: 32px; height: 32px; flex: 0 0 32px; border-radius: 9px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4Z"/></svg>
+        </div>
+        <div class="body">
+          <div class="top"><div class="name" style="font-size: 14px; color: #9a9a9a;">MAX</div><span class="badge b-draft">Ботов нет</span></div>
+          <div class="desc">Нужен верифицированный бизнес-аккаунт на business.max.ru</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fold">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+      <span>Что где настраивается: BotFather и код бота</span>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

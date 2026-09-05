@@ -1,0 +1,105 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; background: #0a0a0a; color: #e8e8e8;
+           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    a { color: #00a0ff; text-decoration: none; } a:hover { color: #31b6ff; }
+    .sec { font-size: 12px; color: #6a6a6a; letter-spacing: .04em; text-transform: uppercase; margin: 22px 0 10px; }
+    .item { border-top: 1px solid #1e1e1e; padding: 12px 0; }
+    .item:first-child { border-top: none; padding-top: 0; }
+    .was { font-size: 12px; color: #8b8b8b; line-height: 1.45; }
+    .now { font-size: 13px; color: #e8e8e8; line-height: 1.45; font-weight: 500; margin-top: 4px; }
+    .why { font-size: 11px; color: #6a6a6a; line-height: 1.4; margin-top: 4px; }
+    .tag { display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase;
+           color: #fbbf24; border: 1px solid #6b5312; border-radius: 999px; padding: 1px 6px; margin-left: 6px;
+           vertical-align: middle; }
+  </style>
+</helmet>
+
+<div style="width: 620px; box-sizing: border-box; padding: 26px 24px 40px;">
+  <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -.02em; line-height: 1.2;">Что изменилось</h1>
+  <p style="margin: 6px 0 0; font-size: 13px; color: #8a8a93; line-height: 1.45;">
+    Каждая правка опирается на приём, который уже живёт на других страницах платформы. Сверху — как сейчас, снизу — как предлагается.
+  </p>
+
+  <div class="sec">Шапка</div>
+  <div style="background: #141414; border: 1px solid #262626; border-radius: 12px; padding: 20px;">
+    <div class="item">
+      <div class="was">Было: «AI-Каналы», подзаголовок «(3) Подключённые мессенджеры», под ним абзац справки 11,5 px и только потом кнопки.</div>
+      <div class="now">Стало: «Каналы» — как в меню; счётчик словами одной строкой; кнопки — рядом действий сразу под заголовком.</div>
+      <div class="why">ADR-147: шапка это ровно три строки — заголовок, подзаголовок, ряд действий. Счётчик в подзаголовок, а не в H1.</div>
+    </div>
+    <div class="item">
+      <div class="was">Было: три абзаца справки в потоке страницы (что такое канал, про ботов, про BotFather) — почти экран текста.</div>
+      <div class="now">Стало: одна строка под заголовком секции, инструкция BotFather — в свёрнутую строку с белым шевроном.</div>
+      <div class="why">Правило платформы: подсказка длиннее двух-трёх строк живёт под «Ещё», шеврон — токен --ui-fold-chev.</div>
+    </div>
+  </div>
+
+  <div class="sec">Состояние — до чтения карточек</div>
+  <div style="background: #141414; border: 1px solid #262626; border-radius: 12px; padding: 20px;">
+    <div class="item">
+      <div class="was">Было: чтобы понять, всё ли работает, нужно прочитать все карточки сверху вниз.</div>
+      <div class="now">Стало: ряд плиток — Каналов 4 · На связи 2 · Требуют внимания 1 · Черновики 1; плитка беды красная.</div>
+      <div class="why">Плитка .tile со страницы /agents: там ровно та же задача — сводка процессов над списком.</div>
+    </div>
+    <div class="item">
+      <div class="was">Было: список объявлен как <span style="font-family: ui-monospace, Menlo, monospace;">class="ui-grid"</span> без модификатора <span style="font-family: ui-monospace, Menlo, monospace;">.auto</span> — колонки не заданы, и карточки растягиваются в один столбец на 1272 px.</div>
+      <div class="now">Стало: две колонки, факты внутри карточки — тремя в ряд.</div>
+      <div class="why">В ui.css колонки живёт только у .ui-grid.auto. Это правка одного класса.</div>
+    </div>
+  </div>
+
+  <div class="sec">Карточка канала</div>
+  <div style="background: #141414; border: 1px solid #262626; border-radius: 12px; padding: 20px;">
+    <div class="item">
+      <div class="was">Было: статус нарисован классом <span style="font-family: ui-monospace, Menlo, monospace;">.chip</span>, которого нет ни в ui.css, ни в /theme.css — «На связи» и «Ошибка» выглядят одинаковым серым текстом.</div>
+      <div class="now">Стало: бейдж b-ok / b-err / b-draft плюс цветная точка на значке канала.</div>
+      <div class="why">Бейджи и точка — со страницы /agents, где статусы процессов уже так показаны.</div>
+    </div>
+    <div class="item">
+      <div class="was">Было: последняя ошибка канала печаталась тем же приглушённым 11,5 px, что и справка, — теряется.</div>
+      <div class="now">Стало: карточка получает красную кантовку и свечение --ui-glow-danger, ошибка — строкой со значком и временем.</div>
+      <div class="why">Так же выделены упавшие агенты (.card.err) — цвет опасности на платформе один.</div>
+    </div>
+    <div class="item">
+      <div class="was">Было: факты нарисованы локальным .ch-fact на токенах поля ввода (--ui-inp-bg / --ui-inp-border) — настройка полей двигает внутренности карточки.</div>
+      <div class="now">Стало: общий компонент .ui-tiles / .ui-tile из ui.css.</div>
+      <div class="why">Правило: копию рецепта плитки в &lt;style&gt; страницы не заводить, селектор дописывается в ui.css.</div>
+    </div>
+    <div class="item">
+      <div class="was">Было: три текстовые кнопки «Изменить · Отключить · Удалить», красная «Удалить» с классом .pm-only.</div>
+      <div class="now">Стало: значки .ibtn — карандаш, перечёркнутый глаз, корзина — у названия канала.</div>
+      <div class="why">Канон реестров: иконки правки и удаления идут сразу за номером и названием; красный цвет корзине даёт значок i-del, отдельный класс не нужен.</div>
+    </div>
+    <div class="item">
+      <div class="was">Было: у канала не видно, живой он или просто заведён.</div>
+      <div class="now">Стало: две плитки — «Последнее сообщение» и «Ошибок за сутки».<span class="tag">нужны данные</span></div>
+      <div class="why">Этих полей в /api/channels сегодня нет: значения на макете взяты для примера, потребуется отдача с сервера.</div>
+    </div>
+  </div>
+
+  <div class="sec">Служебные боты</div>
+  <div style="background: #141414; border: 1px solid #262626; border-radius: 12px; padding: 20px;">
+    <div class="item">
+      <div class="was">Было: второй список такими же большими карточками во всю ширину — спорит с каналами за внимание.</div>
+      <div class="now">Стало: подпись секции капсом, чип «только чтение · .env и pm2», компактные карточки в три колонки.</div>
+      <div class="why">Разный вес — разный размер: клиентские каналы главные, служебные боты справочные.</div>
+    </div>
+    <div class="item">
+      <div class="was">Было: вид только карточками.</div>
+      <div class="now">Стало: переключатель «Виджет / Список» — задел на таблицу с колонкой #ID и закреплением колонок.</div>
+      <div class="why">Сегментированный переключатель .seg и правило ADR-138 уже работают на /agents.</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
