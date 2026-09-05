@@ -1,8 +1,0 @@
-{
-  "artboards": [
-    { "file": "Before.dc.html", "x": 0,    "y": 0, "w": 1440, "h": 1800, "title": "До — /channels сегодня", "print": "fixed" },
-    { "file": "Main.dc.html",   "x": 1560, "y": 0, "w": 1440, "h": 1360, "title": "После — /channels", "print": "fixed" },
-    { "file": "Changes.dc.html","x": 3120, "y": 0, "w": 620,  "h": 1960, "title": "Что изменилось", "print": "fixed" }
-  ],
-  "launch": { "view": "canvas" }
-}
