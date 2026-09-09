@@ -13,8 +13,15 @@
     .badge { background: #e05252; color: #fff; font-size: 10px; min-width: 18px; height: 18px;
              border-radius: 9px; display: flex; align-items: center; justify-content: center; padding: 0 5px; }
     .cap { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #555; }
-    .act { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: #8a8a8a; }
-    .act svg { width: 18px; height: 18px; }
+    /* значки в строке логотипа — размером с бургер, 42px */
+    .act { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; color: #8a8a8a; }
+    .act svg { width: 22px; height: 22px; }
+    /* плитки подвала — .ui-tiles платформы: 3 в ряд, зазор 8 */
+    .tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+            min-height: 76px; box-sizing: border-box; padding: 8px 6px; background: #101010;
+            border: 1px solid #1e1e1e; border-radius: 8px; color: #8b8b8b; font-size: 12px;
+            line-height: 1.25; text-align: center; }
+    .tile svg { width: 20px; height: 20px; flex: 0 0 auto; color: #8a8a8a; }
     /* дерево пунктов раскрытой группы — как в мобильном сайдбаре */
     .tree { position: relative; display: flex; flex-direction: column; }
     .tree::before { content: ''; position: absolute; left: 27px; top: 0; bottom: 6px; width: 1px; background: #1c1c1c; }
@@ -128,19 +135,21 @@
       </div>
     </div>
 
-    <!-- подвал: осталось только то, что не стало значком -->
-    <div style="flex: 0 0 auto; padding: 12px 20px calc(12px + 6px); border-top: 1px solid #1a1a1a; display: flex; flex-direction: column; gap: 10px">
-      <div style="display: flex; align-items: center; gap: 7px; font-size: 12px; color: #666">
-        <svg style="width: 14px; height: 14px; flex: 0 0 auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+    <!-- подвал: три плитки в ряд -->
+    <div style="flex: 0 0 auto; padding: 12px 14px 18px; border-top: 1px solid #1a1a1a; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+      <div class="tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
         <span>На главную</span>
       </div>
-      <div style="display: flex; align-items: center; gap: 10px">
-        <span style="font-size: 12px; color: #666">Масштаб</span>
-        <div style="margin-left: auto; display: flex; align-items: center; gap: 6px">
-          <div style="min-width: 34px; height: 30px; display: flex; align-items: center; justify-content: center; border: 1px solid #262626; border-radius: 7px; color: #8b8b8b; font-size: 13px">А</div>
-          <div style="font-size: 12px; color: #666">100%</div>
-          <div style="min-width: 34px; height: 30px; display: flex; align-items: center; justify-content: center; border: 1px solid #262626; border-radius: 7px; color: #8b8b8b; font-size: 15px">А</div>
-        </div>
+      <div class="tile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+        <span>Копия<br>для ИИ</span>
+      </div>
+      <div class="tile" style="display: grid; grid-template-columns: auto auto auto; justify-content: center; align-content: center; gap: 6px">
+        <span style="grid-column: 1 / -1">Масштаб</span>
+        <div style="min-width: 28px; height: 26px; display: flex; align-items: center; justify-content: center; border: 1px solid #262626; border-radius: 7px; color: #8b8b8b; font-size: 12px">А</div>
+        <div style="font-size: 11px; color: #666; align-self: center">100%</div>
+        <div style="min-width: 28px; height: 26px; display: flex; align-items: center; justify-content: center; border: 1px solid #262626; border-radius: 7px; color: #8b8b8b; font-size: 15px">А</div>
       </div>
     </div>
   </div>
