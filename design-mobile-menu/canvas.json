@@ -1,7 +1,8 @@
 {
   "artboards": [
     { "file": "Main.dc.html", "title": "До и после", "x": 0, "y": 0, "w": 960, "h": 1200 },
-    { "file": "After.dc.html", "title": "Стало — 390×844", "x": 1060, "y": 0, "w": 390, "h": 844 }
+    { "file": "After.dc.html", "title": "Стало — 390×844", "x": 1060, "y": 0, "w": 390, "h": 844 },
+    { "file": "Pin.dc.html", "title": "Закрепление строк", "x": 0, "y": 1330, "w": 1360, "h": 1900 }
   ],
   "launch": { "view": "canvas" }
 }

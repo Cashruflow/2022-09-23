@@ -1,0 +1,412 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    a { color: #00a0ff; } a:hover { color: #4dbcff; }
+
+    .frame { box-sizing: border-box; border: 1px solid #262626; border-radius: 18px;
+             background: #0a0a0a; overflow: hidden; display: flex; flex-direction: column; }
+    .sheet { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column;
+             background: #0a0a0a; border-top: 1px solid #1a1a1a; border-radius: 14px 14px 0 0; padding-top: 4px; }
+    .grab { flex: 0 0 auto; width: 38px; height: 4px; border-radius: 2px; background: #2c2c2c; margin: 4px auto 10px; }
+    .cap { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #555; }
+
+    /* строка раздела в раскрытой группе — дерево, как в мобильном сайдбаре */
+    .tree { position: relative; display: flex; flex-direction: column; }
+    .tree::before { content: ''; position: absolute; left: 13px; top: 0; bottom: 6px; width: 1px; background: #1c1c1c; }
+    .row { position: relative; display: flex; align-items: center; gap: 11px; min-height: 44px;
+           padding: 0 8px 0 30px; font-size: 14px; color: #8b8b8b; border-radius: 0 8px 8px 0; }
+    .row::before { content: ''; position: absolute; left: 14px; top: 50%; width: 9px; height: 1px; background: #232323; }
+    .row .ico { width: 18px; height: 18px; flex: 0 0 auto; color: #8a8a8a; }
+    .row .pin { width: 18px; height: 18px; flex: 0 0 auto; margin-left: auto; color: #555; }
+
+    .stepno { width: 22px; height: 22px; border-radius: 11px; border: 1px solid #262626;
+              display: flex; align-items: center; justify-content: center;
+              font-size: 11px; color: #8b8b8b; flex: 0 0 auto; }
+    .note { font-size: 13px; color: #8b8b8b; line-height: 1.5; text-wrap: pretty; }
+  </style>
+</helmet>
+
+<div style="width: 1360px; min-height: 1900px; box-sizing: border-box; background: #0d0d0d; padding: 44px 46px 40px; display: flex; flex-direction: column; gap: 34px; color: #e8e8e8">
+
+  <!-- Шапка -->
+  <div style="display: flex; flex-direction: column; gap: 8px">
+    <div style="display: flex; align-items: baseline; gap: 12px">
+      <div style="font-size: 26px; font-weight: 700; letter-spacing: -.01em">Закрепление строк меню</div>
+      <div style="font-size: 13px; color: #666">два способа · портал и кабинеты клиентов</div>
+    </div>
+    <div class="note" style="font-size: 14px; max-width: 780px">Любую строку меню можно поднять в «Быстрый доступ». Список закреплённого — свой у каждого пользователя, порядок меняется перетаскиванием.</div>
+  </div>
+
+  <!-- Предупреждение про иконку -->
+  <div style="display: flex; align-items: flex-start; gap: 14px; padding: 16px 18px; background: #101010; border: 1px solid rgba(251,191,36,.3); border-radius: 10px">
+    <svg style="width: 18px; height: 18px; flex: 0 0 auto; color: #fbbf24; margin-top: 1px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+    <div class="note" style="max-width: 900px"><b style="color: #e8e8e8">Значок брать не <code style="color: #fbbf24">i-pin</code>.</b> В спрайте <code style="color: #666">/assets/icons.svg</code> под этим именем лежит гео-метка, и она уже занята местом на карте — <code style="color: #666">place-field.js</code>, медкарта, «Жизнь», чаты. Под закрепление нужен новый символ <code style="color: #4ade80">i-pushpin</code> (канцелярская кнопка, Lucide pin). Всё остальное берётся из спрайта как есть: <code style="color: #666">i-edit</code> — режим правки, <code style="color: #666">i-grip-vertical</code> — перетаскивание, <code style="color: #666">i-check</code> — «Готово».</div>
+  </div>
+
+  <!-- ================= ВАРИАНТ А ================= -->
+  <div style="display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <div style="width: 8px; height: 8px; border-radius: 4px; background: #00a0ff"></div>
+      <div class="cap" style="color: #00a0ff">Вариант А · долгое нажатие</div>
+      <div style="font-size: 13px; color: #666">мобилка, без лишних кнопок в шапке</div>
+    </div>
+
+    <div style="display: flex; gap: 44px">
+
+      <!-- A1 -->
+      <div style="display: flex; flex-direction: column; gap: 12px; width: 390px">
+        <div class="frame" style="width: 390px; height: 620px">
+          <div class="sheet">
+            <div class="grab"></div>
+            <div style="padding: 0 14px; display: flex; flex-direction: column">
+              <div class="cap" style="padding: 4px 6px 8px">Быстрый доступ</div>
+              <div style="display: flex; flex-direction: column; background: #101010; border: 1px solid #1e1e1e; border-radius: 10px; overflow: hidden">
+                <div style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 12px; border-bottom: 1px solid #1a1a1a">
+                  <svg style="width: 20px; height: 20px; flex: 0 0 auto; color: #00a0ff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg>
+                  <span style="font-size: 15px; font-weight: 600; color: #e8e8e8">Чаты</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 12px; border-bottom: 1px solid #1a1a1a">
+                  <svg style="width: 20px; height: 20px; flex: 0 0 auto; color: #00a0ff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                  <span style="font-size: 15px; font-weight: 600; color: #e8e8e8">Лиды</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 12px">
+                  <svg style="width: 20px; height: 20px; flex: 0 0 auto; color: #8a8a8a" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
+                  <span style="font-size: 15px; font-weight: 600; color: #e8e8e8">Уведомления</span>
+                </div>
+              </div>
+
+              <div class="cap" style="padding: 18px 6px 8px">Разделы · AI-CRM</div>
+              <div class="tree">
+                <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6V2h-1"/><path d="M9 15a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1"/><path d="M9 21V11a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v10"/></svg><span>CRM — обзор</span></div>
+                <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg><span>Люди</span></div>
+                <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M8 10h.01M16 10h.01"/></svg><span>Компании</span></div>
+                <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg><span>SORIC</span></div>
+                <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1"/><path d="M16 16a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1"/><path d="M21 6a2 2 0 0 0-.586-1.414l-2-2A2 2 0 0 0 17 2h-3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1z"/></svg><span>Документы</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 10px">
+          <div class="stepno">1</div>
+          <div class="note">Обычное меню. Никаких кнопок правки — интерфейс не меняется.</div>
+        </div>
+      </div>
+
+      <!-- A2 -->
+      <div style="display: flex; flex-direction: column; gap: 12px; width: 390px">
+        <div class="frame" style="width: 390px; height: 620px">
+          <div class="sheet">
+            <div class="grab"></div>
+            <div style="padding: 0 14px; display: flex; flex-direction: column">
+              <div class="cap" style="padding: 4px 6px 8px">Быстрый доступ</div>
+              <div style="display: flex; flex-direction: column; background: #101010; border: 1px solid #1e1e1e; border-radius: 10px; overflow: hidden; opacity: .45">
+                <div style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 12px; border-bottom: 1px solid #1a1a1a">
+                  <svg style="width: 20px; height: 20px; flex: 0 0 auto; color: #00a0ff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg>
+                  <span style="font-size: 15px; font-weight: 600; color: #e8e8e8">Чаты</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 12px; border-bottom: 1px solid #1a1a1a">
+                  <svg style="width: 20px; height: 20px; flex: 0 0 auto; color: #00a0ff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                  <span style="font-size: 15px; font-weight: 600; color: #e8e8e8">Лиды</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 12px">
+                  <svg style="width: 20px; height: 20px; flex: 0 0 auto; color: #8a8a8a" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
+                  <span style="font-size: 15px; font-weight: 600; color: #e8e8e8">Уведомления</span>
+                </div>
+              </div>
+
+              <div class="cap" style="padding: 18px 6px 8px; opacity: .45">Разделы · AI-CRM</div>
+              <div class="tree">
+                <div class="row" style="opacity: .45"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6V2h-1"/><path d="M9 15a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1"/><path d="M9 21V11a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v10"/></svg><span>CRM — обзор</span></div>
+                <div class="row" style="opacity: .45"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg><span>Люди</span></div>
+                <div class="row" style="opacity: .45"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M8 10h.01M16 10h.01"/></svg><span>Компании</span></div>
+
+                <!-- удерживаемая строка -->
+                <div style="position: relative; margin: 4px 0">
+                  <div style="position: relative; display: flex; align-items: center; gap: 11px; min-height: 48px; padding: 0 10px 0 30px; margin-left: -2px; background: #161616; border: 1px solid #00a0ff55; border-radius: 10px; box-shadow: 0 8px 22px rgba(0,0,0,.6)">
+                    <svg style="width: 18px; height: 18px; flex: 0 0 auto; color: #e8e8e8; position: absolute; left: 30px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
+                    <span style="font-size: 14px; color: #e8e8e8; padding-left: 29px">SORIC</span>
+                    <div style="margin-left: auto; width: 34px; height: 34px; border-radius: 8px; background: rgba(0,160,255,.14); display: flex; align-items: center; justify-content: center">
+                      <svg style="width: 18px; height: 18px; color: #00a0ff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+                    </div>
+                    <!-- полоса удержания -->
+                    <div style="position: absolute; left: 10px; right: 10px; bottom: 5px; height: 2px; border-radius: 1px; background: #1e1e1e">
+                      <div style="width: 62%; height: 2px; border-radius: 1px; background: #00a0ff; box-shadow: 0 0 6px rgba(0,160,255,.6)"></div>
+                    </div>
+                  </div>
+                  <!-- палец -->
+                  <div style="position: absolute; left: 96px; top: 8px; width: 34px; height: 34px; border-radius: 17px; background: rgba(0,160,255,.16); border: 1px solid rgba(0,160,255,.4)"></div>
+                </div>
+
+                <div class="row" style="opacity: .45"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1"/><path d="M16 16a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1"/><path d="M21 6a2 2 0 0 0-.586-1.414l-2-2A2 2 0 0 0 17 2h-3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1z"/></svg><span>Документы</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 10px">
+          <div class="stepno">2</div>
+          <div class="note">Удержание: строка приподнимается, вокруг гаснет, справа проявляется кнопка-кнопка. Короткий отклик вибрацией.</div>
+        </div>
+      </div>
+
+      <!-- A3 -->
+      <div style="display: flex; flex-direction: column; gap: 12px; width: 390px">
+        <div class="frame" style="width: 390px; height: 620px; position: relative">
+          <div class="sheet">
+            <div class="grab"></div>
+            <div style="padding: 0 14px; display: flex; flex-direction: column">
+              <div class="cap" style="padding: 4px 6px 8px">Быстрый доступ</div>
+              <div style="display: flex; flex-direction: column; background: #101010; border: 1px solid #1e1e1e; border-radius: 10px; overflow: hidden">
+                <div style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 12px; border-bottom: 1px solid #1a1a1a">
+                  <svg style="width: 20px; height: 20px; flex: 0 0 auto; color: #00a0ff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg>
+                  <span style="font-size: 15px; font-weight: 600; color: #e8e8e8">Чаты</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 12px; border-bottom: 1px solid #1a1a1a">
+                  <svg style="width: 20px; height: 20px; flex: 0 0 auto; color: #00a0ff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                  <span style="font-size: 15px; font-weight: 600; color: #e8e8e8">Лиды</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 12px; border-bottom: 1px solid #1a1a1a">
+                  <svg style="width: 20px; height: 20px; flex: 0 0 auto; color: #8a8a8a" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
+                  <span style="font-size: 15px; font-weight: 600; color: #e8e8e8">Уведомления</span>
+                </div>
+                <!-- только что закреплено -->
+                <div style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 12px; background: linear-gradient(90deg, rgba(0,160,255,.14), rgba(0,160,255,.03))">
+                  <svg style="width: 20px; height: 20px; flex: 0 0 auto; color: #00a0ff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
+                  <span style="font-size: 15px; font-weight: 600; color: #e8e8e8">SORIC</span>
+                  <svg style="width: 17px; height: 17px; margin-left: auto; color: #00a0ff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+                </div>
+              </div>
+
+              <div class="cap" style="padding: 18px 6px 8px">Разделы · AI-CRM</div>
+              <div class="tree">
+                <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6V2h-1"/><path d="M9 15a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1"/><path d="M9 21V11a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v10"/></svg><span>CRM — обзор</span></div>
+                <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg><span>Люди</span></div>
+                <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M8 10h.01M16 10h.01"/></svg><span>Компании</span></div>
+                <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1"/><path d="M16 16a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1"/><path d="M21 6a2 2 0 0 0-.586-1.414l-2-2A2 2 0 0 0 17 2h-3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1z"/></svg><span>Документы</span></div>
+              </div>
+            </div>
+          </div>
+          <!-- тост -->
+          <div style="position: absolute; left: 14px; right: 14px; bottom: 14px; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; background: #161616; border: 1px solid #262626; border-radius: 10px; box-shadow: 0 10px 26px rgba(0,0,0,.6)">
+            <svg style="width: 17px; height: 17px; flex: 0 0 auto; color: #4ade80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            <span style="font-size: 13px; color: #e8e8e8">Закреплено в быстром доступе</span>
+            <span style="margin-left: auto; font-size: 13px; color: #00a0ff">Отменить</span>
+          </div>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 10px">
+          <div class="stepno">3</div>
+          <div class="note">Строка уезжает в «Быстрый доступ» последней. Тост <code style="color: #666">uiToast</code> с «Отменить» — на случай промаха.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ВАРИАНТ Б ================= -->
+  <div style="display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <div style="width: 8px; height: 8px; border-radius: 4px; background: #a855f7"></div>
+      <div class="cap" style="color: #a855f7">Вариант Б · режим правки меню</div>
+      <div style="font-size: 13px; color: #666">ПК и мобилка, находится без подсказки</div>
+    </div>
+
+    <div style="display: flex; gap: 44px; align-items: flex-start">
+
+      <!-- Б1 — ПК -->
+      <div style="display: flex; flex-direction: column; gap: 12px; width: 230px">
+        <div class="frame" style="width: 230px; height: 620px; border-radius: 0; border-right: 1px solid #1a1a1a">
+          <div style="flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; padding: 16px 0">
+            <div style="display: flex; align-items: center; gap: 8px; padding: 6px 12px 18px 20px">
+              <div style="font-size: 16px; font-weight: 700">CashFlow</div>
+              <div style="margin-left: auto; width: 30px; height: 30px; border-radius: 7px; background: rgba(168,85,247,.14); border: 1px solid rgba(168,85,247,.35); display: flex; align-items: center; justify-content: center">
+                <svg style="width: 15px; height: 15px; color: #a855f7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+              </div>
+            </div>
+
+            <div style="padding: 0 10px 8px 20px" class="cap">Закреплено</div>
+            <div style="display: flex; flex-direction: column; padding: 0 10px 0 12px; gap: 2px">
+              <div style="display: flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 8px; background: #101010; border: 1px solid #1e1e1e; border-radius: 7px">
+                <svg style="width: 14px; height: 14px; flex: 0 0 auto; color: #3a3a3a" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                <span style="font-size: 13px; color: #e8e8e8">Чаты</span>
+                <svg style="width: 15px; height: 15px; margin-left: auto; color: #00a0ff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 8px; background: #101010; border: 1px solid #1e1e1e; border-radius: 7px">
+                <svg style="width: 14px; height: 14px; flex: 0 0 auto; color: #3a3a3a" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                <span style="font-size: 13px; color: #e8e8e8">Лиды</span>
+                <svg style="width: 15px; height: 15px; margin-left: auto; color: #00a0ff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+              </div>
+            </div>
+
+            <div style="padding: 16px 10px 8px 20px" class="cap">AI-CRM</div>
+            <div style="display: flex; flex-direction: column">
+              <div style="display: flex; align-items: center; gap: 9px; min-height: 34px; padding: 0 10px 0 20px; font-size: 13px; color: #8b8b8b">
+                <svg style="width: 16px; height: 16px; flex: 0 0 auto; color: #8a8a8a" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+                <span>Люди</span>
+                <svg style="width: 15px; height: 15px; margin-left: auto; color: #444" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+              </div>
+              <!-- наведение -->
+              <div style="display: flex; align-items: center; gap: 9px; min-height: 34px; padding: 0 10px 0 20px; font-size: 13px; color: #e8e8e8; background: #141414">
+                <svg style="width: 16px; height: 16px; flex: 0 0 auto; color: #e8e8e8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M8 10h.01M16 10h.01"/></svg>
+                <span>Компании</span>
+                <svg style="width: 15px; height: 15px; margin-left: auto; color: #00a0ff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+              </div>
+              <div style="display: flex; align-items: center; gap: 9px; min-height: 34px; padding: 0 10px 0 20px; font-size: 13px; color: #8b8b8b">
+                <svg style="width: 16px; height: 16px; flex: 0 0 auto; color: #8a8a8a" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
+                <span>SORIC</span>
+                <svg style="width: 15px; height: 15px; margin-left: auto; color: #444" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+              </div>
+              <div style="display: flex; align-items: center; gap: 9px; min-height: 34px; padding: 0 10px 0 20px; font-size: 13px; color: #8b8b8b">
+                <svg style="width: 16px; height: 16px; flex: 0 0 auto; color: #8a8a8a" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1"/><path d="M16 16a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1"/><path d="M21 6a2 2 0 0 0-.586-1.414l-2-2A2 2 0 0 0 17 2h-3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1z"/></svg>
+                <span>Документы</span>
+                <svg style="width: 15px; height: 15px; margin-left: auto; color: #444" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+              </div>
+            </div>
+
+            <div style="margin-top: auto; padding: 12px 12px 0 12px; border-top: 1px solid #1a1a1a">
+              <div style="display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 34px; border-radius: 7px; background: rgba(168,85,247,.14); border: 1px solid rgba(168,85,247,.35); font-size: 13px; color: #e8e8e8">
+                <svg style="width: 15px; height: 15px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                Готово
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 10px">
+          <div class="stepno">ПК</div>
+          <div class="note">Карандаш в шапке сайдбара включает режим. Кнопка у каждой строки, у закреплённых — ручка перетаскивания.</div>
+        </div>
+      </div>
+
+      <!-- Б2 — мобилка, режим выключен -->
+      <div style="display: flex; flex-direction: column; gap: 12px; width: 390px">
+        <div class="frame" style="width: 390px; height: 620px">
+          <div class="sheet">
+            <div class="grab"></div>
+            <div style="display: flex; align-items: center; gap: 8px; padding: 0 14px 0 20px; min-height: 44px">
+              <div style="font-size: 16px; font-weight: 700">CashFlow</div>
+              <div style="margin-left: auto; display: flex; align-items: center; gap: 4px">
+                <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #8a8a8a">
+                  <svg style="width: 18px; height: 18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+                </div>
+                <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #666">
+                  <svg style="width: 18px; height: 18px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </div>
+              </div>
+            </div>
+            <div style="padding: 6px 14px 0">
+              <div style="display: flex; align-items: center; gap: 9px; min-height: 44px; box-sizing: border-box; background: #101010; border: 1px solid #1e1e1e; border-radius: 10px; padding: 0 12px; color: #666; font-size: 15px">
+                <svg style="width: 17px; height: 17px; flex: 0 0 auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+                <span>Поиск по разделам</span>
+              </div>
+            </div>
+            <div style="padding: 0 14px; display: flex; flex-direction: column">
+              <div class="cap" style="padding: 16px 6px 8px">Быстрый доступ</div>
+              <div style="display: flex; flex-direction: column; background: #101010; border: 1px solid #1e1e1e; border-radius: 10px; overflow: hidden">
+                <div style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 12px; border-bottom: 1px solid #1a1a1a">
+                  <svg style="width: 20px; height: 20px; flex: 0 0 auto; color: #00a0ff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg>
+                  <span style="font-size: 15px; font-weight: 600; color: #e8e8e8">Чаты</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 12px">
+                  <svg style="width: 20px; height: 20px; flex: 0 0 auto; color: #00a0ff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                  <span style="font-size: 15px; font-weight: 600; color: #e8e8e8">Лиды</span>
+                </div>
+              </div>
+              <div class="cap" style="padding: 18px 6px 8px">Разделы</div>
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <div style="display: flex; align-items: center; gap: 11px; min-height: 44px; padding: 0 12px; background: #101010; border: 1px solid #1e1e1e; border-radius: 8px">
+                  <div style="width: 6px; height: 6px; border-radius: 3px; background: #262626"></div>
+                  <span style="font-size: 14px; color: #8b8b8b">AI-CRM</span>
+                  <span style="margin-left: auto; font-size: 12px; color: #555">10</span>
+                  <svg style="width: 16px; height: 16px; color: #555" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </div>
+                <div style="display: flex; align-items: center; gap: 11px; min-height: 44px; padding: 0 12px; background: #101010; border: 1px solid #1e1e1e; border-radius: 8px">
+                  <div style="width: 6px; height: 6px; border-radius: 3px; background: #262626"></div>
+                  <span style="font-size: 14px; color: #8b8b8b">SEO</span>
+                  <span style="margin-left: auto; font-size: 12px; color: #555">6</span>
+                  <svg style="width: 16px; height: 16px; color: #555" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 10px">
+          <div class="stepno">1</div>
+          <div class="note">Карандаш стоит рядом с крестиком в шапке шторки — та же кнопка, что на ПК.</div>
+        </div>
+      </div>
+
+      <!-- Б3 — мобилка, режим включён -->
+      <div style="display: flex; flex-direction: column; gap: 12px; width: 390px">
+        <div class="frame" style="width: 390px; height: 620px">
+          <div class="sheet">
+            <div class="grab"></div>
+            <div style="display: flex; align-items: center; gap: 8px; padding: 0 14px 0 20px; min-height: 44px">
+              <div style="font-size: 15px; font-weight: 600; color: #a855f7">Правка меню</div>
+              <div style="margin-left: auto; display: flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 12px; border-radius: 8px; background: rgba(168,85,247,.14); border: 1px solid rgba(168,85,247,.35); font-size: 13px; color: #e8e8e8">
+                <svg style="width: 15px; height: 15px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                Готово
+              </div>
+            </div>
+
+            <div style="padding: 0 14px; display: flex; flex-direction: column">
+              <div class="cap" style="padding: 12px 6px 8px">Закреплено · тяните за ручку</div>
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <div style="display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 12px; background: #101010; border: 1px solid #1e1e1e; border-radius: 10px">
+                  <svg style="width: 16px; height: 16px; flex: 0 0 auto; color: #3a3a3a" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                  <span style="font-size: 15px; color: #e8e8e8">Чаты</span>
+                  <svg style="width: 18px; height: 18px; margin-left: auto; color: #00a0ff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 12px; background: #101010; border: 1px solid #1e1e1e; border-radius: 10px">
+                  <svg style="width: 16px; height: 16px; flex: 0 0 auto; color: #3a3a3a" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                  <span style="font-size: 15px; color: #e8e8e8">Лиды</span>
+                  <svg style="width: 18px; height: 18px; margin-left: auto; color: #00a0ff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+                </div>
+              </div>
+
+              <div class="cap" style="padding: 18px 6px 8px">AI-CRM</div>
+              <div class="tree">
+                <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg><span>Люди</span>
+                  <svg class="pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+                </div>
+                <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M8 10h.01M16 10h.01"/></svg><span>Компании</span>
+                  <svg class="pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+                </div>
+                <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg><span>SORIC</span>
+                  <svg class="pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+                </div>
+                <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1"/><path d="M16 16a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1"/><path d="M21 6a2 2 0 0 0-.586-1.414l-2-2A2 2 0 0 0 17 2h-3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1z"/></svg><span>Документы</span>
+                  <svg class="pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 10px">
+          <div class="stepno">2</div>
+          <div class="note">Режим включён: группы раскрыты, у каждой строки кнопка. Голубая — закреплена, серая — нет. «Готово» выключает.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Что брать в работу -->
+  <div style="display: flex; gap: 18px">
+    <div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 10px; padding: 18px 20px; background: #101010; border: 1px solid #1e1e1e; border-radius: 10px">
+      <div style="font-size: 14px; font-weight: 600">Два варианта не спорят — они складываются</div>
+      <div class="note">Долгое нажатие — быстрый жест для того, кто уже знает. Режим правки — то, что находят без подсказки, и единственный способ на ПК, где долгого нажатия нет. Ставим оба: закрепление одно и то же, различается только вход.</div>
+    </div>
+    <div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 10px; padding: 18px 20px; background: #101010; border: 1px solid #1e1e1e; border-radius: 10px">
+      <div style="font-size: 14px; font-weight: 600">Где хранится</div>
+      <div class="note">Список — свой у каждого пользователя, порядком управляет он же. Ключ <code style="color: #666">cf_pins_v1</code> в localStorage по образцу <code style="color: #666">cf_places_v1</code>; строка меню опознаётся по <code style="color: #666">href</code>. Одно и то же и в портале (<code style="color: #666">sidebar.js</code>), и в кабинете (<code style="color: #666">cab-sidebar.js</code>) — общий модуль, а не две копии.</div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
