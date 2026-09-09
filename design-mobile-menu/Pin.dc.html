@@ -152,7 +152,7 @@
         </div>
         <div style="display: flex; align-items: flex-start; gap: 10px">
           <div class="stepno">2</div>
-          <div class="note">Удержание: строка приподнимается, вокруг гаснет, справа проявляется кнопка-кнопка. Короткий отклик вибрацией.</div>
+          <div class="note">Удержание <b style="color: #e8e8e8">0,6 с</b>: строка приподнимается, вокруг гаснет, справа проявляется кнопка. Короткий отклик вибрацией.</div>
         </div>
       </div>
 
@@ -402,7 +402,7 @@
     </div>
     <div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 10px; padding: 18px 20px; background: #101010; border: 1px solid #1e1e1e; border-radius: 10px">
       <div style="font-size: 14px; font-weight: 600">Где хранится</div>
-      <div class="note">Список — свой у каждого пользователя, порядком управляет он же. Ключ <code style="color: #666">cf_pins_v1</code> в localStorage по образцу <code style="color: #666">cf_places_v1</code>; строка меню опознаётся по <code style="color: #666">href</code>. Одно и то же и в портале (<code style="color: #666">sidebar.js</code>), и в кабинете (<code style="color: #666">cab-sidebar.js</code>) — общий модуль, а не две копии.</div>
+      <div class="note">Локально, ключ <code style="color: #666">cf_pins_v1</code> в localStorage по образцу <code style="color: #666">cf_places_v1</code>; строка меню опознаётся по <code style="color: #666">href</code>. Свой набор на каждом устройстве — так и задумано: на телефоне под рукой одно, на рабочем столе другое. Модуль общий на портал (<code style="color: #666">sidebar.js</code>) и кабинет (<code style="color: #666">cab-sidebar.js</code>), а не две копии.</div>
     </div>
   </div>
 
