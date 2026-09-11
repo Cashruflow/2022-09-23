@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; background: #0a0a0a; color: #e8e8e8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
+    a { color: #00a0ff; text-decoration: none; }
+    a:hover { color: #4dbcff; }
+
+    .rt { padding: 28px 40px 40px; }
+    .hd { font-size: 22px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 4px; }
+    .sub { font-size: 13px; color: #8b8b8b; margin-bottom: 22px; }
+
+    .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+    .col > h3 { font-size: 13px; font-weight: 700; color: #8b8b8b; margin: 0 0 4px;
+      text-transform: uppercase; letter-spacing: .05em; }
+    .col > p { font-size: 12px; color: #666; margin: 0 0 12px; line-height: 1.45; min-height: 34px; }
+
+    .card { background: #141414; border: 1px solid #262626; border-radius: 12px; overflow: hidden; }
+
+    .chips { display: flex; gap: 8px; padding: 12px 14px; flex-wrap: wrap; }
+    .chip { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px;
+      border-radius: 16px; border: 1px solid #262626; background: #1a1a1a; color: #8b8b8b;
+      font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+    .chip.on { background: #00a0ff; border-color: #00a0ff; color: #fff; }
+    .chip .ci { width: 13px; height: 13px; }
+
+    /* ---- скелетоны: только фон поля, без пульсации и бликов ---- */
+    .sk { background: #1a1a1a; border-radius: 6px; }
+    .sk.rnd { border-radius: 50%; }
+    .skrow { display: flex; align-items: center; gap: 12px; padding: 10px 14px; min-height: 56px; }
+    .skmid { flex: 1 1 auto; }
+    .sktiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 0 14px 12px; }
+    .sktile { background: #191919; border: 1px solid #262626; border-radius: 8px; padding: 9px 10px; }
+
+    /* ---- пусто ---- */
+    .empty { padding: 44px 24px 48px; text-align: center; }
+    .empty .eic { width: 52px; height: 52px; margin: 0 auto 14px; border-radius: 50%;
+      background: #1a1a1a; border: 1px solid #262626; display: flex; align-items: center; justify-content: center; color: #4a4a4a; }
+    .empty .eic svg { width: 24px; height: 24px; }
+    .empty b { display: block; font-size: 16px; font-weight: 700; }
+    .empty span { display: block; margin-top: 6px; font-size: 13px; color: #8b8b8b; line-height: 1.5; }
+    .ebtn { display: inline-flex; align-items: center; justify-content: center; margin-top: 16px;
+      min-height: 40px; padding: 0 18px; border-radius: 8px; border: 1px solid #262626;
+      background: #191919; color: #8b8b8b; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .ebtn:hover { border-color: #00a0ff; color: #e8e8e8; }
+    .ebtn.pri { background: #00a0ff; border-color: #00a0ff; color: #fff; }
+
+    .lpager { display: flex; align-items: center; gap: 16px; padding: 12px 14px 18px;
+      color: #8b8b8b; font-size: 12px; font-variant-numeric: tabular-nums; }
+    .lpager b { color: #e8e8e8; }
+  </style>
+</helmet>
+
+<div class="rt">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.34-4.34"/></symbol>
+</defs></svg>
+
+  <h2 class="hd">Операции — состояния</h2>
+  <div class="sub">Три состояния списка. Скелетон повторяет геометрию строки, чтобы после загрузки ничего не прыгало.</div>
+
+  <div class="cols">
+
+    <div class="col">
+      <h3>Загрузка</h3>
+      <p>Плашки на фоне поля #1a1a1a. Без пульсации и бликов — платформа их не использует.</p>
+      <div class="card">
+        <div class="chips">
+          <span class="sk" style="width:104px;height:32px;border-radius:16px"></span>
+          <span class="sk" style="width:126px;height:32px;border-radius:16px"></span>
+          <span class="sk" style="width:112px;height:32px;border-radius:16px"></span>
+        </div>
+        <div class="sktiles">
+          <div class="sktile"><span class="sk" style="display:block;width:70%;height:9px"></span><span class="sk" style="display:block;width:88%;height:15px;margin-top:6px"></span></div>
+          <div class="sktile"><span class="sk" style="display:block;width:56%;height:9px"></span><span class="sk" style="display:block;width:92%;height:15px;margin-top:6px"></span></div>
+          <div class="sktile"><span class="sk" style="display:block;width:78%;height:9px"></span><span class="sk" style="display:block;width:64%;height:15px;margin-top:6px"></span></div>
+        </div>
+        <div style="padding:6px 14px 2px"><span class="sk" style="display:block;width:96px;height:15px"></span></div>
+        <div class="skrow"><span class="sk rnd" style="width:40px;height:40px;flex:0 0 40px"></span><span class="skmid"><span class="sk" style="display:block;width:52%;height:13px"></span><span class="sk" style="display:block;width:32%;height:11px;margin-top:6px"></span></span><span style="text-align:right"><span class="sk" style="display:block;width:78px;height:13px"></span><span class="sk" style="display:block;width:52px;height:11px;margin-top:6px;margin-left:auto"></span></span></div>
+        <div class="skrow"><span class="sk rnd" style="width:40px;height:40px;flex:0 0 40px"></span><span class="skmid"><span class="sk" style="display:block;width:40%;height:13px"></span><span class="sk" style="display:block;width:28%;height:11px;margin-top:6px"></span></span><span style="text-align:right"><span class="sk" style="display:block;width:64px;height:13px"></span><span class="sk" style="display:block;width:52px;height:11px;margin-top:6px;margin-left:auto"></span></span></div>
+        <div class="skrow"><span class="sk rnd" style="width:40px;height:40px;flex:0 0 40px"></span><span class="skmid"><span class="sk" style="display:block;width:60%;height:13px"></span><span class="sk" style="display:block;width:36%;height:11px;margin-top:6px"></span></span><span style="text-align:right"><span class="sk" style="display:block;width:86px;height:13px"></span><span class="sk" style="display:block;width:52px;height:11px;margin-top:6px;margin-left:auto"></span></span></div>
+        <div class="skrow"><span class="sk rnd" style="width:40px;height:40px;flex:0 0 40px"></span><span class="skmid"><span class="sk" style="display:block;width:46%;height:13px"></span><span class="sk" style="display:block;width:30%;height:11px;margin-top:6px"></span></span><span style="text-align:right"><span class="sk" style="display:block;width:70px;height:13px"></span><span class="sk" style="display:block;width:52px;height:11px;margin-top:6px;margin-left:auto"></span></span></div>
+        <div class="lpager"><span class="sk" style="width:96px;height:14px"></span><span class="sk" style="width:140px;height:14px;margin-left:auto"></span></div>
+      </div>
+    </div>
+
+    <div class="col">
+      <h3>Пустой месяц</h3>
+      <p>Месяц выбран, но трат нет. Ведём к соседнему месяцу и к синхронизации — тупика быть не должно.</p>
+      <div class="card">
+        <div class="chips">
+          <span class="chip on">Сентябрь<svg class="ci"><use href="#i-chev"></use></svg></span>
+          <span class="chip">Счета и карты<svg class="ci"><use href="#i-chev"></use></svg></span>
+          <span class="chip">Без переводов</span>
+        </div>
+        <div class="empty">
+          <div class="eic"><svg><use href="#i-calendar"></use></svg></div>
+          <b>В сентябре трат нет</b>
+          <span>Последний импорт личной выписки — 9 июля 2026.<br>Август и сентябрь в базе пустые.</span>
+          <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+            <span class="ebtn pri">Синхронизировать</span>
+            <span class="ebtn">Открыть июль</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <h3>Фильтр без результатов</h3>
+      <p>Данные есть, но отбор пустой. Первым действием — снять чип, который отсёк всё.</p>
+      <div class="card">
+        <div class="chips">
+          <span class="chip on">Сентябрь<svg class="ci"><use href="#i-x"></use></svg></span>
+          <span class="chip on">ГИС ЖКХ<svg class="ci"><use href="#i-x"></use></svg></span>
+          <span class="chip on">Т-Бизнес<svg class="ci"><use href="#i-x"></use></svg></span>
+        </div>
+        <div class="empty">
+          <div class="eic"><svg><use href="#i-search"></use></svg></div>
+          <b>Ничего не нашлось</b>
+          <span>ГИС ЖКХ платят с личных карт.<br>На счёте «Т-Бизнес» таких операций нет.</span>
+          <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+            <span class="ebtn pri">Снять «Т-Бизнес»</span>
+            <span class="ebtn">Сбросить всё</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

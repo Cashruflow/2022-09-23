@@ -1,0 +1,304 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; background: #000; color: #e8e8e8;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
+    a { color: #00a0ff; text-decoration: none; }
+    a:hover { color: #4dbcff; }
+    button { font-family: inherit; }
+
+    /* за шторкой — приглушённая страница, шторка приходит снизу и не доходит до верха */
+    .rt { position: relative; min-height: 1120px; background: #0a0a0a; }
+    .back { height: 54px; background: #0a0a0a; opacity: .5; }
+    .sheet { position: absolute; left: 0; right: 0; top: 54px; bottom: 0; background: #141414;
+      border-top: 1px solid #262626; border-radius: 20px 20px 0 0; }
+    .grab { width: 36px; height: 4px; border-radius: 2px; background: #333; margin: 8px auto 0; }
+
+    .mdh { display: flex; align-items: center; gap: 10px; padding: 10px 14px 6px; }
+    .mdx { border: 0; background: none; color: var(--brand); font-size: 16px; font-weight: 600; cursor: pointer; padding: 0; }
+    .mdt { flex: 1 1 auto; text-align: center; font-size: 16px; font-weight: 700; }
+    .ibtn { width: 38px; height: 38px; border-radius: 8px; border: 1px solid #262626; background: #191919;
+      color: #8b8b8b; display: flex; align-items: center; justify-content: center; }
+    .ic { width: 19px; height: 19px; }
+    .mdb { padding: 0 14px 28px; }
+
+    .chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+    .chips::-webkit-scrollbar { display: none; }
+    .chip { display: inline-flex; align-items: center; gap: 7px; height: 44px; padding: 0 16px;
+      border-radius: 16px; border: 1px solid #262626; background: #1a1a1a; color: #8b8b8b;
+      font-size: 14px; font-weight: 600; white-space: nowrap; flex: 0 0 auto; cursor: pointer; }
+    .chip.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+    .chip .ci { width: 15px; height: 15px; }
+
+    .big { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+    .big .bv { font-size: 34px; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+    .bdg { display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 16px;
+      background: #1a1a1a; border: 1px solid #262626; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .d.up { color: #f87171; }
+    .d.dn { color: #4ade80; }
+    .cap { font-size: 15px; color: #8b8b8b; margin-top: 2px; }
+    .cap2 { font-size: 12px; color: #666; margin-top: 3px; }
+
+    .sum3 { display: flex; background: #191919; border: 1px solid #262626; border-radius: 12px;
+      overflow: hidden; margin: 14px 0 4px; }
+    .sum3 > div { flex: 1; min-width: 0; padding: 12px 6px; text-align: center; }
+    .sum3 > div + div { border-left: 1px solid #262626; }
+    .sum3 b { display: block; font-size: 17px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+    .sum3 span { display: block; margin-top: 6px; font-size: 11px; color: #8b8b8b; line-height: 1.3; }
+
+    .ch { margin-top: 14px; }
+    .chp { position: relative; height: 170px; padding-right: 54px; }
+    .gl { position: absolute; left: 0; right: 54px; height: 0; border-top: 1px solid #1e1e1e; }
+    .gl b { position: absolute; right: -50px; top: -8px; font-size: 11.5px; color: #666; font-weight: 400; font-variant-numeric: tabular-nums; }
+    .avg { position: absolute; left: 0; right: 54px; height: 0; border-top: 1px dotted var(--brand); }
+    .avg b { position: absolute; right: -50px; top: -9px; font-size: 12px; color: var(--brand); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .bars { position: absolute; left: 0; right: 54px; top: 0; bottom: 0; display: flex; align-items: flex-end; gap: 4px; }
+    .col { flex: 1; height: 100%; display: flex; align-items: flex-end; justify-content: center; cursor: pointer; border: 0; background: none; padding: 0; }
+    .bar { display: block; width: 100%; min-height: 2px; border-radius: 3px 3px 0 0; background: #3a3a3a; }
+    .bar.on { background: var(--brand); }
+    .bar.zero { background: #242424; }
+    .bar.fut { background: #1c1c1c; }
+    .bar.nod { background: none; border: 1px dashed #3a3a3a; border-radius: 3px; }
+    .xs { display: flex; gap: 4px; padding-right: 54px; margin-top: 8px; }
+    .xs span { flex: 1; text-align: center; font-size: 10.5px; color: #666; }
+    .xs span.on { color: var(--brand); font-weight: 700; }
+    .note { font-size: 11.5px; color: #666; margin-top: 10px; line-height: 1.45; }
+
+    .ctl { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
+    .sgb { display: flex; gap: 4px; padding: 4px; border-radius: 8px; background: #0a0a0a; border: 1px solid #262626; flex: 1 1 auto; }
+    .sgb button { flex: 1; min-height: 44px; border: 0; background: none; cursor: pointer; border-radius: 5px; font-size: 14px; font-weight: 600; color: #8b8b8b; }
+    .sgb button.on { background: #191919; color: #e8e8e8; }
+    .vz { display: flex; gap: 4px; padding: 4px; border-radius: 8px; background: #0a0a0a; border: 1px solid #262626; }
+    .vz button { width: 48px; height: 44px; border: 0; background: none; border-radius: 5px; color: #8b8b8b; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .vz button.on { background: #191919; color: #e8e8e8; }
+
+    .mlist { margin-top: 14px; border-top: 1px solid #262626; }
+    .day { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 16px 0 6px; }
+    .day .dd { font-size: 17px; font-weight: 700; }
+    .day .dd i { font-style: normal; font-weight: 400; font-size: 13px; color: #666; margin-left: 8px; }
+    .day .dt { font-size: 13px; color: #666; font-variant-numeric: tabular-nums; }
+    .op { display: flex; align-items: center; gap: 12px; padding: 6px 0; min-height: 64px; }
+    .opi { flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      color: #06b6d4; background: rgba(6,182,212,.12); }
+    .opi .ic { width: 22px; height: 22px; }
+    .opm { flex: 1 1 auto; min-width: 0; }
+    .opn { display: block; font-size: 15px; font-weight: 600; }
+    .opc { display: block; margin-top: 1px; font-size: 13px; color: #8b8b8b; }
+    .opr { flex: 0 0 auto; text-align: right; }
+    .opa { display: block; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .opb { display: block; margin-top: 1px; font-size: 12px; color: #666; }
+
+    .acts { display: flex; gap: 8px; margin-top: 16px; }
+    .act { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px;
+      border-radius: 8px; border: 1px solid #262626; background: #191919; color: #8b8b8b;
+      font-size: 13px; font-weight: 600; cursor: pointer; }
+    .act .ic { width: 16px; height: 16px; }
+  </style>
+</helmet>
+
+<div class="rt" style="--brand: {{accent}}">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.34-4.34"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id="i-pie" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></symbol>
+<symbol id="i-eyeoff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.73 5.08a10.7 10.7 0 0 1 11.2 6.57 1 1 0 0 1 0 .7 10.7 10.7 0 0 1-1.44 2.49"/><path d="M14.08 14.16a3 3 0 0 1-4.24-4.24"/><path d="M17.48 17.5a10.75 10.75 0 0 1-15.42-5.15 1 1 0 0 1 0-.7 10.75 10.75 0 0 1 4.45-5.14"/><path d="m2 2 20 20"/></symbol>
+<symbol id="i-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.17 6.81a1 1 0 0 0-3.98-3.99L3.84 16.17a2 2 0 0 0-.5.83l-1.32 4.35a.5.5 0 0 0 .62.62l4.35-1.32a2 2 0 0 0 .83-.5z"/><path d="m15 5 4 4"/></symbol>
+</defs></svg>
+
+  <div class="back"></div>
+  <div class="sheet">
+    <div class="grab"></div>
+    <div class="mdh">
+      <button class="mdx">Закрыть</button>
+      <div class="mdt">Операции</div>
+      <div class="ibtn"><svg class="ic"><use href="#i-search"></use></svg></div>
+    </div>
+    <div class="mdb">
+
+      <div class="chips">
+        <div class="chip on">{{monthName}}<svg class="ci"><use href="#i-x"></use></svg></div>
+        <div class="chip on">ГИС ЖКХ<svg class="ci"><use href="#i-x"></use></svg></div>
+        <div class="chip">Счета и карты<svg class="ci"><use href="#i-chev"></use></svg></div>
+      </div>
+
+      <div class="big">
+        <div class="bv">{{sum}}</div>
+        <div class="bdg"><span class="{{deltaCls}}">{{delta}}</span></div>
+      </div>
+      <div class="cap">Траты</div>
+      <div class="cap2">{{deltaNote}}</div>
+
+      <div class="sum3">
+        <div><b>10</b><span>платежей<br>за год</span></div>
+        <div><b>27 306 ₽</b><span>всего<br>за 2026</span></div>
+        <div><b>2 731 ₽</b><span>средний<br>платёж</span></div>
+      </div>
+
+      <div class="ch">
+        <div class="chp">
+          <div class="gl" style="bottom:100%"><b>13 000</b></div>
+          <div class="gl" style="bottom:50%"><b>6 500</b></div>
+          <div class="gl" style="bottom:0"><b>0</b></div>
+          <div class="avg" style="bottom:26.3%"><b>3 413</b></div>
+          <div class="bars">
+            <sc-for list="{{bars}}" as="b" hint-placeholder-count="12">
+              <button class="col" onClick="{{b.pick}}"><span class="bar {{b.cls}}" style="height: {{b.h}}"></span></button>
+            </sc-for>
+          </div>
+        </div>
+        <div class="xs">
+          <sc-for list="{{bars}}" as="b" hint-placeholder-count="12">
+            <span class="{{b.lcls}}">{{b.label}}</span>
+          </sc-for>
+        </div>
+        <div class="note">Пунктир — среднее по месяцам с данными: 3 413 ₽. Август отмечен пустой рамкой: это пробел, а не ноль — последний импорт личной выписки 9 июля 2026.</div>
+      </div>
+
+      <div class="ctl">
+        <div class="sgb">
+          <button class="{{sw}}" onClick="{{setWeek}}">Нед</button>
+          <button class="{{sm}}" onClick="{{setMonth}}">Мес</button>
+          <button class="{{sy}}" onClick="{{setYear}}">Год</button>
+        </div>
+        <div class="vz">
+          <button><svg class="ic"><use href="#i-pie"></use></svg></button>
+          <button class="on"><svg class="ic"><use href="#i-chart"></use></svg></button>
+        </div>
+      </div>
+
+      <div class="mlist">
+        <sc-for list="{{days}}" as="day" hint-placeholder-count="1">
+          <div>
+            <div class="day">
+              <div class="dd">{{day.name}}<i>{{day.date}}</i></div>
+              <div class="dt">{{day.total}}</div>
+            </div>
+            <sc-for list="{{day.ops}}" as="op" hint-placeholder-count="3">
+              <div class="op">
+                <span class="opi"><svg class="ic"><use href="#i-building"></use></svg></span>
+                <span class="opm">
+                  <span class="opn">ГИС ЖКХ</span>
+                  <span class="opc">ЖКХ</span>
+                </span>
+                <span class="opr">
+                  <span class="opa">{{op.amount}}</span>
+                  <span class="opb">Т-Банк</span>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+
+      <div class="acts">
+        <div class="act"><svg class="ic"><use href="#i-eyeoff"></use></svg>Не учитывать</div>
+        <div class="act"><svg class="ic"><use href="#i-pencil"></use></svg>Категория</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{
+  "accent": {"editor": "color", "default": "#00a0ff", "options": ["#00a0ff", "#4ade80", "#a855f7", "#f97316"], "section": "Тема"},
+  "$preview": {"width": 390, "height": 1120}
+}'>
+class Component extends DCLogic {
+
+  round(n) {
+    var neg = n < 0, a = Math.round(Math.abs(n));
+    return (neg ? '−' : '') + String(a).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽';
+  }
+  money(n) {
+    var neg = n < 0, a = Math.abs(n);
+    var whole = Math.floor(a + 1e-9), cents = Math.round((a - whole) * 100);
+    var s = String(whole).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    if (cents) s += ',' + (cents < 10 ? '0' + cents : cents);
+    return (neg ? '−' : '') + s + ' ₽';
+  }
+
+  months() {
+    return [
+      { k: 'Янв', full: 'Январь', sum: 1370.90, ops: [{ dt: '16 января', a: -1370.90 }] },
+      { k: 'Фев', full: 'Февраль', sum: 12083.39, ops: [
+        { dt: '27 февраля', a: -5412.80 }, { dt: '12 февраля', a: -4883.71 }, { dt: '5 февраля', a: -1786.88 }] },
+      { k: 'Мар', full: 'Март', sum: 4313.83, ops: [{ dt: '11 марта', a: -4313.83 }] },
+      { k: 'Апр', full: 'Апрель', sum: 0, ops: [] },
+      { k: 'Май', full: 'Май', sum: 5459.95, ops: [{ dt: '6 мая', a: -5459.95 }] },
+      { k: 'Июн', full: 'Июнь', sum: 0, ops: [] },
+      { k: 'Июл', full: 'Июль', sum: 1403.85, ops: [{ dt: '9 июля', a: -1403.85 }] },
+      { k: 'Авг', full: 'Август', sum: null, ops: [] },
+      { k: 'Сен', full: 'Сентябрь', sum: 2673.72, ops: [
+        { dt: 'Сегодня', a: -1172.76 }, { dt: 'Сегодня', a: -1131.60 }, { dt: 'Сегодня', a: -369.36 }] },
+      { k: 'Окт', full: 'Октябрь', sum: null, future: true, ops: [] },
+      { k: 'Ноя', full: 'Ноябрь', sum: null, future: true, ops: [] },
+      { k: 'Дек', full: 'Декабрь', sum: null, future: true, ops: [] }
+    ];
+  }
+
+  renderVals() {
+    var self = this, TOP = 13000;
+    var M = this.months();
+    var sel = this.state.month == null ? 8 : this.state.month;
+    var cur = M[sel];
+    var scale = this.state.scale || 'Год';
+
+    var prev = null, gap = [];
+    for (var i = sel - 1; i >= 0; i--) {
+      if (M[i].sum === null) { gap.push(M[i].full.toLowerCase()); continue; }
+      prev = M[i]; break;
+    }
+    var diff = prev ? (cur.sum || 0) - prev.sum : null;
+    var dat = { 'Январь': 'январю', 'Февраль': 'февралю', 'Март': 'марту', 'Апрель': 'апрелю', 'Май': 'маю',
+      'Июнь': 'июню', 'Июль': 'июлю', 'Август': 'августу', 'Сентябрь': 'сентябрю' };
+
+    var bars = M.map(function (m, i) {
+      var cls, h = '2px';
+      if (m.future) cls = 'fut';
+      else if (m.sum === null) { cls = 'nod'; h = '16px'; }
+      else if (m.sum === 0) cls = 'zero';
+      else { cls = i === sel ? 'on' : ''; h = (m.sum / TOP * 100) + '%'; }
+      return { label: m.k, cls: cls, h: h, lcls: i === sel ? 'on' : '',
+        pick: function () { self.setState({ month: i }); } };
+    });
+
+    var byDay = [], seen = {};
+    cur.ops.forEach(function (o) {
+      if (!seen[o.dt]) { seen[o.dt] = { name: o.dt, date: o.dt === 'Сегодня' ? '10 сентября' : '', ops: [], s: 0 }; byDay.push(seen[o.dt]); }
+      seen[o.dt].s += o.a;
+      seen[o.dt].ops.push({ amount: self.money(o.a) });
+    });
+    byDay.forEach(function (d) { d.total = self.round(d.s); });
+
+    return {
+      accent: this.props.accent ?? '#00a0ff',
+      monthName: cur.full,
+      sum: cur.sum === null ? 'нет данных' : this.round(cur.sum),
+      delta: diff === null ? '—' : (diff > 0 ? '↑ ' : '↓ ') + this.round(Math.abs(diff)),
+      deltaCls: diff === null ? '' : (diff > 0 ? 'd up' : 'd dn'),
+      deltaNote: prev ? 'к ' + dat[prev.full] + (gap.length ? ' · в ' + gap.reverse().join(' и ') + ' выписки нет' : '') : 'сравнивать не с чем',
+      bars: bars, days: byDay,
+      sw: scale === 'Нед' ? 'on' : '', sm: scale === 'Мес' ? 'on' : '', sy: scale === 'Год' ? 'on' : '',
+      setWeek: function () { self.setState({ scale: 'Нед' }); },
+      setMonth: function () { self.setState({ scale: 'Мес' }); },
+      setYear: function () { self.setState({ scale: 'Год' }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

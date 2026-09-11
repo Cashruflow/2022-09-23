@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    /* Снимок нынешнего /cash, вкладка «Список». Значения сняты с
+       /home/cashruflow/web/public/cash.html — фон #0f0f0f, контейнер 900px,
+       таблица 13px, .stat / .cat / .amt-neg как есть. */
+    body { margin: 0; background: #0f0f0f; color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px; -webkit-font-smoothing: antialiased; }
+    a { color: #666; text-decoration: none; font-size: 13px; }
+    a:hover { color: #00a0ff; }
+
+    header { padding: 16px 24px; display: flex; justify-content: space-between;
+      align-items: center; flex-wrap: wrap; gap: 10px; }
+    header h1 { font-size: 32px; font-weight: 800; margin: 0; }
+    .hbtn { border-radius: 9px; padding: 9px 16px; font-size: 13px; font-weight: 500; cursor: pointer;
+      background: #1f1f1f; border: 1px solid #2f2f2f; color: #fff; }
+    .hbtn.pri { background: #00a0ff; border-color: #00a0ff; color: #fff; }
+
+    .pagenav { display: flex; gap: 8px; padding: 10px 24px; background: #0a0a0a;
+      border-bottom: 1px solid #1a1a1a; flex-wrap: wrap; }
+    .pagenav a { display: inline-flex; align-items: center; gap: 6px; background: #1a1a1a;
+      border: 1px solid #2a2a2a; color: #888; padding: 7px 14px; border-radius: 8px;
+      font-size: 13px; white-space: nowrap; }
+    .pagenav a.active { background: #00a0ff22; border-color: #00a0ff; color: #00a0ff; }
+
+    .container { padding: 24px; max-width: 900px; margin: 0 auto; }
+    .toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+    .mp-btn { display: flex; align-items: center; gap: 8px; background: #161616; border: 1px solid #2a2a2a;
+      border-radius: 10px; padding: 9px 14px; color: #fff; font-size: 14px; font-weight: 500; }
+    .tb { border-radius: 6px; padding: 8px 14px; font-size: 14px; cursor: pointer;
+      background: #1a1a1a; color: #888; border: 1px solid #333; }
+    .tb.on { background: #00a0ff; color: #fff; border-color: #00a0ff; }
+    .div { width: 1px; height: 24px; background: #2a2a2a; margin: 0 4px; }
+    .q { flex: 1; min-width: 200px; background: #1a1a1a; border: 1px solid #333; border-radius: 6px;
+      color: #666; padding: 8px 12px; font-size: 13px; }
+
+    .summary { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stat { background: #161616; border: 1px solid #262626; border-radius: 8px; padding: 10px 16px; min-width: 110px; }
+    .stat .val { font-size: 20px; font-weight: 700; display: block; }
+    .stat .lbl { font-size: 12px; color: #888; }
+    .stat.neg .val { color: #f87171; }
+    .stat.pos .val { color: #4ade80; }
+
+    .tabs { display: flex; gap: 6px; margin: 16px 0 12px; }
+    .ctab { padding: 8px 16px; border-radius: 8px; background: #161616; border: 1px solid #262626; color: #888; font-size: 13px; }
+    .ctab.active { border-color: #00a0ff; color: #00a0ff; background: #00a0ff11; }
+
+    table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+    th { text-align: left; padding: 10px 8px; color: #888; font-weight: 500;
+      border-bottom: 1px solid #262626; white-space: nowrap; }
+    td { padding: 10px 8px; border-bottom: 1px solid #1a1a1a; vertical-align: top; color: #ddd; }
+    .cat { display: inline-block; background: #1a1a1a; border: 1px solid #333; color: #00a0ff;
+      font-size: 11px; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+    .amt-neg { color: #f87171; font-weight: 600; }
+    .num { text-align: right; white-space: nowrap; }
+    .mut { color: #666; }
+
+    h3.yh { margin: 28px 0 12px; font-size: 15px; color: #888; font-weight: 600; }
+    .yr { background: #161616; border: 1px solid #262626; border-radius: 10px; margin-bottom: 8px; }
+    .yr-h { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; }
+    .yr-h b { font-size: 15px; }
+  </style>
+</helmet>
+
+<header>
+  <h1>Финансы</h1>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span style="font-size:12px;color:#888">Синхронизировано 3 мин назад</span>
+    <span class="hbtn">Загрузить</span>
+    <span class="hbtn pri">Синхронизировать</span>
+  </div>
+</header>
+
+<div class="pagenav">
+  <a>Бэклог</a><a>Проекты</a><a>БЗ</a><a>CRM</a><a>Поля CRM</a><a class="active">Финансы</a><a>Вебхуки</a>
+</div>
+
+<div class="container">
+
+  <div class="toolbar">
+    <span class="mp-btn">Сентябрь 2026 ▾</span>
+    <span class="tb on">Все</span>
+    <span class="tb">Факт (банк)</span>
+    <span class="tb">План</span>
+    <span class="div"></span>
+    <span class="tb on">Все счета</span>
+    <span class="tb">Т-Бизнес (ИП)</span>
+    <span class="tb">Т-Банк (физ)</span>
+    <span class="q">Компания, ИНН, комментарий…</span>
+  </div>
+
+  <div class="summary">
+    <div class="stat neg"><span class="val">−112 836 ₽</span><span class="lbl">Расходы</span></div>
+    <div class="stat pos"><span class="val">136 873 ₽</span><span class="lbl">Доходы</span></div>
+    <div class="stat"><span class="val">24 037 ₽</span><span class="lbl">Итого</span></div>
+    <div class="stat"><span class="val">1 240</span><span class="lbl">Операций</span></div>
+  </div>
+
+  <div class="tabs">
+    <span class="ctab">Календарь</span>
+    <span class="ctab active">Список</span>
+  </div>
+
+  <table>
+    <thead><tr><th>Дата</th><th>Тип</th><th>Категория</th><th>Комментарий</th><th class="num" style="min-width:120px">Сумма</th><th>Счёт</th></tr></thead>
+    <tbody>
+      <tr><td>10.09.2026</td><td class="mut">факт</td><td><span class="cat">ЖКХ</span></td><td>Оплата ЖКУ (ГИС ЖКХ)</td><td class="num amt-neg">−1 172,76</td><td class="mut">Т-Банк</td></tr>
+      <tr><td>10.09.2026</td><td class="mut">факт</td><td><span class="cat">ЖКХ</span></td><td>ГИС ЖКХ</td><td class="num amt-neg">−1 131,60</td><td class="mut">Т-Банк</td></tr>
+      <tr><td>10.09.2026</td><td class="mut">факт</td><td><span class="cat">ЖКХ</span></td><td>Оплата ЖКУ (ГИС ЖКХ)</td><td class="num amt-neg">−369,36</td><td class="mut">Т-Банк</td></tr>
+      <tr><td>10.09.2026</td><td class="mut">факт</td><td><span class="cat">Супермаркеты</span></td><td>Серебряные ключи</td><td class="num amt-neg">−33,00</td><td class="mut">Т-Банк</td></tr>
+      <tr><td>10.09.2026</td><td class="mut">факт</td><td><span class="cat">Транспорт</span></td><td>Яндекс Go</td><td class="num amt-neg">−418,00</td><td class="mut">Т-Банк</td></tr>
+      <tr><td>10.09.2026</td><td class="mut">факт</td><td><span class="cat">Супермаркеты</span></td><td>Вкусвилл</td><td class="num amt-neg">−1 247,28</td><td class="mut">Т-Банк</td></tr>
+      <tr><td>10.09.2026</td><td class="mut">факт</td><td><span class="cat">Хостинг и домены</span></td><td>ООО «Таймвэб» · ИНН 7842354535</td><td class="num amt-neg">−2 450,00</td><td class="mut">Т-Бизнес</td></tr>
+      <tr><td>09.09.2026</td><td class="mut">факт</td><td><span class="cat">Супермаркеты</span></td><td>Серебряные ключи</td><td class="num amt-neg">−33,00</td><td class="mut">Т-Банк</td></tr>
+      <tr><td>09.09.2026</td><td class="mut">факт</td><td><span class="cat">Супермаркеты</span></td><td>Пятёрочка</td><td class="num amt-neg">−862,40</td><td class="mut">Т-Банк</td></tr>
+      <tr><td>09.09.2026</td><td class="mut">факт</td><td><span class="cat">Подписки</span></td><td>Яндекс Плюс</td><td class="num amt-neg">−399,00</td><td class="mut">Т-Банк</td></tr>
+      <tr><td>09.09.2026</td><td class="mut">факт</td><td><span class="cat">Здоровье</span></td><td>Аптека Ригла</td><td class="num amt-neg">−1 284,50</td><td class="mut">Т-Банк</td></tr>
+      <tr><td>09.09.2026</td><td class="mut">факт</td><td><span class="cat">Техника</span></td><td>ООО «Ситилинк» · ИНН 7718668887</td><td class="num amt-neg">−7 990,00</td><td class="mut">Т-Бизнес</td></tr>
+      <tr><td>08.09.2026</td><td class="mut">факт</td><td><span class="cat">Супермаркеты</span></td><td>Серебряные ключи</td><td class="num amt-neg">−33,00</td><td class="mut">Т-Банк</td></tr>
+      <tr><td>08.09.2026</td><td class="mut">факт</td><td><span class="cat">Транспорт</span></td><td>Яндекс Go</td><td class="num amt-neg">−356,00</td><td class="mut">Т-Банк</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="yh">Итоги по годам</h3>
+  <div class="yr"><div class="yr-h"><b>2026</b><span class="mut">−1 284 590 ₽ · 1 240 операций</span></div></div>
+  <div class="yr"><div class="yr-h"><b>2025</b><span class="mut">−1 188 172 ₽ · 1 604 операции</span></div></div>
+
+</div>
+</x-dc>
+</body>
+</html>
