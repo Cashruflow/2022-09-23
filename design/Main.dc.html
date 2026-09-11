@@ -1,0 +1,310 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; background: #0f0f0f;
+           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+           color: #fff; -webkit-font-smoothing: antialiased; }
+    a { color: #6ab0f5; text-decoration: none; }
+    a:hover { color: #8cc4ff; text-decoration: underline; }
+    svg { fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+</helmet>
+
+<div style="width: 393px; background: #0f0f0f; padding-bottom: 40px">
+
+  <!-- ===== ШАПКА (.ph, ADR-147) ===== -->
+  <div style="padding: 26px 14px 0">
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px">
+      <div style="flex: 1 1 auto; min-width: 0">
+        <h1 style="margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; color: #fff">Продления</h1>
+        <div style="margin: 4px 0 0; font-size: 15.5px; font-weight: 500; line-height: 1.35; color: #8a8a93; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">12 сервисов · 207 480 ₽ в год</div>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px">
+        <div style="display: flex; gap: 8px">
+          <button style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; color: #ddd; cursor: pointer">
+            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/></svg>
+          </button>
+          <button style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; color: #ddd; cursor: pointer">
+            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ряд действий страницы (.ph-tools) -->
+    <div style="display: flex; gap: 8px; margin-top: 18px">
+      <button style="flex: 1 1 auto; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 7px; background: #00a0ff; color: #04121e; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer">
+        <svg width="17" height="17" viewBox="0 0 24 24" style="stroke-width: 2.25"><path d="M12 5v14M5 12h14"/></svg>
+        Добавить сервис
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== СВОДКА ===== -->
+  <div style="padding: 18px 14px 0">
+
+    <!-- ближайшее продление: одна карточка вместо четырёх -->
+    <div style="background: #141414; border: 1px solid #262626; border-radius: 14px; padding: 14px 14px 13px">
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px">
+        <div style="min-width: 0">
+          <div style="font-size: 10px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700">Ближайшее продление</div>
+          <div style="display: flex; align-items: baseline; gap: 9px; margin-top: 9px">
+            <div style="font-size: 24px; font-weight: 700; line-height: 1; color: #fff; letter-spacing: -0.01em">07.09.2026</div>
+            <div style="font-size: 13px; font-weight: 600; color: #ff5c5c">просрочено</div>
+          </div>
+          <div style="font-size: 12.5px; color: #8b8b8b; margin-top: 7px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">SSL cashruflow.ru · Рег.ру</div>
+        </div>
+        <div style="flex: 0 0 auto; display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 20px; background: rgba(255,92,92,0.12); border: 1px solid rgba(255,92,92,0.28); color: #ff5c5c; font-size: 12px; font-weight: 600; white-space: nowrap">
+          <svg width="13" height="13" viewBox="0 0 24 24"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4"/><path d="M12 17.5h.01"/></svg>
+          4 дн.
+        </div>
+      </div>
+    </div>
+
+    <!-- три числа в один ряд, без карточной обвязки -->
+    <div style="display: flex; margin-top: 10px; background: #141414; border: 1px solid #262626; border-radius: 14px; overflow: hidden">
+      <div style="flex: 1 1 0; min-width: 0; padding: 13px 11px">
+        <div style="font-size: 10px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700">30 дней</div>
+        <div style="font-size: 16px; font-weight: 700; margin-top: 7px; color: #fff; white-space: nowrap">5 <span style="font-size: 12px; font-weight: 500; color: #8b8b8b">шт</span></div>
+        <div style="font-size: 11px; color: #8b8b8b; margin-top: 3px; white-space: nowrap">16 080 ₽</div>
+      </div>
+      <div style="width: 1px; background: #262626; flex: 0 0 1px"></div>
+      <div style="flex: 1 1 0; min-width: 0; padding: 13px 11px">
+        <div style="font-size: 10px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700">В месяц</div>
+        <div style="font-size: 16px; font-weight: 700; margin-top: 7px; color: #fff; white-space: nowrap">17 290 ₽</div>
+        <div style="font-size: 11px; color: #8b8b8b; margin-top: 3px; white-space: nowrap">в пересчёте</div>
+      </div>
+      <div style="width: 1px; background: #262626; flex: 0 0 1px"></div>
+      <div style="flex: 1 1 0; min-width: 0; padding: 13px 11px">
+        <div style="font-size: 10px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700">В год</div>
+        <div style="font-size: 16px; font-weight: 700; margin-top: 7px; color: #fff; white-space: nowrap">207 480 ₽</div>
+        <div style="font-size: 11px; color: #4caf7d; margin-top: 3px; white-space: nowrap">−12 400 ₽</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ФИЛЬТРЫ ===== -->
+  <div style="padding: 16px 14px 0">
+    <!-- вкладки сегментом: тач-таргет 44px -->
+    <div style="display: flex; gap: 6px">
+      <button style="flex: 1 1 0; min-height: 44px; background: rgba(0,160,255,0.09); border: 1px solid rgba(0,160,255,0.4); border-radius: 10px; color: #fff; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer">Все</button>
+      <button style="flex: 1 1 0; min-height: 44px; background: #161616; border: 1px solid #262626; border-radius: 10px; color: #bbb; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer">Личные</button>
+      <button style="flex: 1 1 0; min-height: 44px; background: #161616; border: 1px solid #262626; border-radius: 10px; color: #bbb; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer">Проектные</button>
+    </div>
+
+    <!-- поиск во всю ширину (registry-mobile.css) -->
+    <div style="display: flex; align-items: center; gap: 9px; min-height: 44px; margin-top: 8px; padding: 0 12px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px">
+      <svg width="16" height="16" viewBox="0 0 24 24" style="color: #6a6a6a; flex: 0 0 16px"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
+      <span style="font-size: 14px; color: #6a6a6a">Поиск по сервисам и поставщикам</span>
+    </div>
+  </div>
+
+  <!-- ===== СПИСОК КАРТОЧЕК (.rcard, ADR-063) ===== -->
+  <div style="display: flex; flex-direction: column; gap: 10px; padding: 14px 14px 0">
+
+    <!-- карточка 1 -->
+    <div style="background: #141414; border: 1px solid #262626; border-radius: 14px; padding: 13px 13px 11px">
+      <div style="display: flex; align-items: flex-start; gap: 11px">
+        <div style="width: 38px; height: 38px; flex: 0 0 38px; border-radius: 8px; background: rgba(0,160,255,0.13); color: #00a0ff; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">Р</div>
+        <div style="flex: 1; min-width: 0; padding-top: 1px">
+          <div style="font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: #e8e8e8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">SSL cashruflow.ru</div>
+          <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px; min-width: 0">
+            <span style="font-size: 11.5px; color: #6a6a6a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Рег.ру</span>
+            <span style="display: inline-block; font-size: 10.5px; padding: 2px 8px; border-radius: 20px; border: 1px solid #2a2a2a; color: #aaa; white-space: nowrap">Домен</span>
+          </div>
+        </div>
+        <div style="flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; gap: 7px">
+          <span style="font-size: 12px; font-weight: 600; color: #fbbf24; white-space: nowrap">#7</span>
+          <span style="padding: 3px 9px; border-radius: 20px; background: rgba(255,92,92,0.12); border: 1px solid rgba(255,92,92,0.28); color: #ff5c5c; font-size: 11.5px; font-weight: 600; white-space: nowrap">−4 дн.</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; margin-top: 9px">
+        <div style="display: flex; align-items: center; gap: 9px; min-height: 34px">
+          <svg width="15" height="15" viewBox="0 0 24 24" style="flex: 0 0 15px; color: #6a6a6a"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3 10h18"/></svg>
+          <span style="font-size: 12px; color: #6a6a6a; flex: 0 0 auto">Оплачено до</span>
+          <span style="flex: 1; min-width: 0; text-align: right; font-size: 13px; color: #ff5c5c; font-weight: 600; white-space: nowrap">07.09.2026</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px; min-height: 34px; border-top: 1px solid #262626">
+          <svg width="15" height="15" viewBox="0 0 24 24" style="flex: 0 0 15px; color: #6a6a6a"><path d="M3 7.5a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg>
+          <span style="font-size: 12px; color: #6a6a6a; flex: 0 0 auto">Проект</span>
+          <span style="flex: 1; min-width: 0; text-align: right; font-size: 13px; color: #8b8b8b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">личное</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px; min-height: 34px; border-top: 1px solid #262626">
+          <svg width="15" height="15" viewBox="0 0 24 24" style="flex: 0 0 15px; color: #6a6a6a"><path d="M19 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6"/><path d="M17.5 13h.01"/></svg>
+          <span style="font-size: 12px; color: #6a6a6a; flex: 0 0 auto">Сумма</span>
+          <span style="flex: 1; min-width: 0; text-align: right; font-size: 13px; color: #e8e8e8; font-weight: 600; white-space: nowrap">690 ₽ <span style="color: #6a6a6a; font-weight: 400">/ год · 58 ₽ в мес</span></span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px; margin-top: 11px">
+        <button style="flex: 1 1 0; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 7px; background: #1a1a1a; color: #ddd; border: 1px solid #2a2a2a; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer">
+          <svg width="15" height="15" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/></svg>
+          Продлил
+        </button>
+        <button style="flex: 0 0 44px; width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; background: #1a1a1a; color: #8b8b8b; border: 1px solid #2a2a2a; border-radius: 10px; cursor: pointer">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.4 3.6a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </button>
+        <button style="flex: 0 0 44px; width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; background: #1a1a1a; color: #8b8b8b; border: 1px solid #2a2a2a; border-radius: 10px; cursor: pointer">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M3.5 6h17M8.5 6V4h7v2M18.5 6l-1 14h-11l-1-14"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- карточка 2 -->
+    <div style="background: #141414; border: 1px solid #262626; border-radius: 14px; padding: 13px 13px 11px">
+      <div style="display: flex; align-items: flex-start; gap: 11px">
+        <div style="width: 38px; height: 38px; flex: 0 0 38px; border-radius: 8px; background: rgba(0,160,255,0.13); color: #00a0ff; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">A</div>
+        <div style="flex: 1; min-width: 0; padding-top: 1px">
+          <div style="font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: #e8e8e8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Anthropic API</div>
+          <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px; min-width: 0">
+            <span style="font-size: 11.5px; color: #6a6a6a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Anthropic</span>
+            <span style="display: inline-block; font-size: 10.5px; padding: 2px 8px; border-radius: 20px; border: 1px solid #2a2a2a; color: #aaa; white-space: nowrap">Подписка</span>
+            <span style="display: inline-block; font-size: 10.5px; padding: 2px 8px; border-radius: 20px; border: 1px solid #2a2a2a; color: #aaa; white-space: nowrap">авто</span>
+          </div>
+        </div>
+        <div style="flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; gap: 7px">
+          <span style="font-size: 12px; font-weight: 600; color: #fbbf24; white-space: nowrap">#3</span>
+          <span style="padding: 3px 9px; border-radius: 20px; background: rgba(255,92,92,0.12); border: 1px solid rgba(255,92,92,0.28); color: #ff5c5c; font-size: 11.5px; font-weight: 600; white-space: nowrap">1 день</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; margin-top: 9px">
+        <div style="display: flex; align-items: center; gap: 9px; min-height: 34px">
+          <svg width="15" height="15" viewBox="0 0 24 24" style="flex: 0 0 15px; color: #6a6a6a"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3 10h18"/></svg>
+          <span style="font-size: 12px; color: #6a6a6a; flex: 0 0 auto">Оплачено до</span>
+          <span style="flex: 1; min-width: 0; text-align: right; font-size: 13px; color: #ff5c5c; font-weight: 600; white-space: nowrap">12.09.2026</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px; min-height: 34px; border-top: 1px solid #262626">
+          <svg width="15" height="15" viewBox="0 0 24 24" style="flex: 0 0 15px; color: #6a6a6a"><path d="M3 7.5a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg>
+          <span style="font-size: 12px; color: #6a6a6a; flex: 0 0 auto">Проект</span>
+          <span style="flex: 1; min-width: 0; text-align: right; font-size: 13px; color: #8b8b8b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">личное</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px; min-height: 34px; border-top: 1px solid #262626">
+          <svg width="15" height="15" viewBox="0 0 24 24" style="flex: 0 0 15px; color: #6a6a6a"><path d="M19 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6"/><path d="M17.5 13h.01"/></svg>
+          <span style="font-size: 12px; color: #6a6a6a; flex: 0 0 auto">Сумма</span>
+          <span style="flex: 1; min-width: 0; text-align: right; font-size: 13px; color: #e8e8e8; font-weight: 600; white-space: nowrap">8 400 ₽ <span style="color: #6a6a6a; font-weight: 400">/ мес</span></span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px; margin-top: 11px">
+        <button style="flex: 1 1 0; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 7px; background: #1a1a1a; color: #ddd; border: 1px solid #2a2a2a; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer">
+          <svg width="15" height="15" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/></svg>
+          Продлил
+        </button>
+        <button style="flex: 0 0 44px; width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; background: #1a1a1a; color: #8b8b8b; border: 1px solid #2a2a2a; border-radius: 10px; cursor: pointer">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.4 3.6a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </button>
+        <button style="flex: 0 0 44px; width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; background: #1a1a1a; color: #8b8b8b; border: 1px solid #2a2a2a; border-radius: 10px; cursor: pointer">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M3.5 6h17M8.5 6V4h7v2M18.5 6l-1 14h-11l-1-14"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- карточка 3 -->
+    <div style="background: #141414; border: 1px solid #262626; border-radius: 14px; padding: 13px 13px 11px">
+      <div style="display: flex; align-items: flex-start; gap: 11px">
+        <div style="width: 38px; height: 38px; flex: 0 0 38px; border-radius: 8px; background: rgba(0,160,255,0.13); color: #00a0ff; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">R</div>
+        <div style="flex: 1; min-width: 0; padding-top: 1px">
+          <div style="font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: #e8e8e8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Сервер cashruflow</div>
+          <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px; min-width: 0">
+            <span style="font-size: 11.5px; color: #6a6a6a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">RUVDS</span>
+            <span style="display: inline-block; font-size: 10.5px; padding: 2px 8px; border-radius: 20px; border: 1px solid #2a2a2a; color: #aaa; white-space: nowrap">Хостинг</span>
+          </div>
+        </div>
+        <div style="flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; gap: 7px">
+          <span style="font-size: 12px; font-weight: 600; color: #fbbf24; white-space: nowrap">#1</span>
+          <span style="padding: 3px 9px; border-radius: 20px; background: rgba(255,92,92,0.12); border: 1px solid rgba(255,92,92,0.28); color: #ff5c5c; font-size: 11.5px; font-weight: 600; white-space: nowrap">3 дня</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; margin-top: 9px">
+        <div style="display: flex; align-items: center; gap: 9px; min-height: 34px">
+          <svg width="15" height="15" viewBox="0 0 24 24" style="flex: 0 0 15px; color: #6a6a6a"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3 10h18"/></svg>
+          <span style="font-size: 12px; color: #6a6a6a; flex: 0 0 auto">Оплачено до</span>
+          <span style="flex: 1; min-width: 0; text-align: right; font-size: 13px; color: #ff5c5c; font-weight: 600; white-space: nowrap">14.09.2026</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px; min-height: 34px; border-top: 1px solid #262626">
+          <svg width="15" height="15" viewBox="0 0 24 24" style="flex: 0 0 15px; color: #6a6a6a"><path d="M3 7.5a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg>
+          <span style="font-size: 12px; color: #6a6a6a; flex: 0 0 auto">Проект</span>
+          <span style="flex: 1; min-width: 0; text-align: right; font-size: 13px; color: #8b8b8b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">личное</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px; min-height: 34px; border-top: 1px solid #262626">
+          <svg width="15" height="15" viewBox="0 0 24 24" style="flex: 0 0 15px; color: #6a6a6a"><path d="M19 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6"/><path d="M17.5 13h.01"/></svg>
+          <span style="font-size: 12px; color: #6a6a6a; flex: 0 0 auto">Сумма</span>
+          <span style="flex: 1; min-width: 0; text-align: right; font-size: 13px; color: #e8e8e8; font-weight: 600; white-space: nowrap"><span style="color: #6a6a6a; text-decoration: line-through; font-size: 12px; font-weight: 400">1 490 ₽</span> 1 200 ₽ <span style="color: #6a6a6a; font-weight: 400">/ мес</span></span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px; margin-top: 11px">
+        <button style="flex: 1 1 0; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 7px; background: #1a1a1a; color: #ddd; border: 1px solid #2a2a2a; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer">
+          <svg width="15" height="15" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/></svg>
+          Продлил
+        </button>
+        <button style="flex: 0 0 44px; width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; background: #1a1a1a; color: #8b8b8b; border: 1px solid #2a2a2a; border-radius: 10px; cursor: pointer">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.4 3.6a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </button>
+        <button style="flex: 0 0 44px; width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; background: #1a1a1a; color: #8b8b8b; border: 1px solid #2a2a2a; border-radius: 10px; cursor: pointer">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M3.5 6h17M8.5 6V4h7v2M18.5 6l-1 14h-11l-1-14"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- карточка 4 -->
+    <div style="background: #141414; border: 1px solid #262626; border-radius: 14px; padding: 13px 13px 11px">
+      <div style="display: flex; align-items: flex-start; gap: 11px">
+        <div style="width: 38px; height: 38px; flex: 0 0 38px; border-radius: 8px; background: rgba(0,160,255,0.13); color: #00a0ff; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">G</div>
+        <div style="flex: 1; min-width: 0; padding-top: 1px">
+          <div style="font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: #e8e8e8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Тариф MAX</div>
+          <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px; min-width: 0">
+            <span style="font-size: 11.5px; color: #6a6a6a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Green API</span>
+            <span style="display: inline-block; font-size: 10.5px; padding: 2px 8px; border-radius: 20px; border: 1px solid #2a2a2a; color: #aaa; white-space: nowrap">Подписка</span>
+          </div>
+        </div>
+        <div style="flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; gap: 7px">
+          <span style="font-size: 12px; font-weight: 600; color: #fbbf24; white-space: nowrap">#9</span>
+          <span style="padding: 3px 9px; border-radius: 20px; background: rgba(224,184,60,0.12); border: 1px solid rgba(224,184,60,0.28); color: #e0b83c; font-size: 11.5px; font-weight: 600; white-space: nowrap">17 дн.</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; margin-top: 9px">
+        <div style="display: flex; align-items: center; gap: 9px; min-height: 34px">
+          <svg width="15" height="15" viewBox="0 0 24 24" style="flex: 0 0 15px; color: #6a6a6a"><rect x="3" y="4.5" width="18" height="17" rx="2.5"/><path d="M16 2.5v4M8 2.5v4M3 10h18"/></svg>
+          <span style="font-size: 12px; color: #6a6a6a; flex: 0 0 auto">Оплачено до</span>
+          <span style="flex: 1; min-width: 0; text-align: right; font-size: 13px; color: #e8e8e8; font-weight: 600; white-space: nowrap">28.09.2026</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px; min-height: 34px; border-top: 1px solid #262626">
+          <svg width="15" height="15" viewBox="0 0 24 24" style="flex: 0 0 15px; color: #6a6a6a"><path d="M3 7.5a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg>
+          <span style="font-size: 12px; color: #6a6a6a; flex: 0 0 auto">Проект</span>
+          <span style="flex: 1; min-width: 0; text-align: right; font-size: 13px; color: #8b8b8b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">DDX Fitness</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px; min-height: 34px; border-top: 1px solid #262626">
+          <svg width="15" height="15" viewBox="0 0 24 24" style="flex: 0 0 15px; color: #6a6a6a"><path d="M19 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6"/><path d="M17.5 13h.01"/></svg>
+          <span style="font-size: 12px; color: #6a6a6a; flex: 0 0 auto">Сумма</span>
+          <span style="flex: 1; min-width: 0; text-align: right; font-size: 13px; color: #e8e8e8; font-weight: 600; white-space: nowrap">4 900 ₽ <span style="color: #6a6a6a; font-weight: 400">/ мес</span></span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px; margin-top: 11px">
+        <button style="flex: 1 1 0; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 7px; background: #1a1a1a; color: #ddd; border: 1px solid #2a2a2a; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer">
+          <svg width="15" height="15" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/></svg>
+          Продлил
+        </button>
+        <button style="flex: 0 0 44px; width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; background: #1a1a1a; color: #8b8b8b; border: 1px solid #2a2a2a; border-radius: 10px; cursor: pointer">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.4 3.6a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </button>
+        <button style="flex: 0 0 44px; width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; background: #1a1a1a; color: #8b8b8b; border: 1px solid #2a2a2a; border-radius: 10px; cursor: pointer">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M3.5 6h17M8.5 6V4h7v2M18.5 6l-1 14h-11l-1-14"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- «показать отменённые» — редкая настройка уезжает под список -->
+    <div style="display: flex; align-items: center; justify-content: center; min-height: 44px; margin-top: 4px">
+      <span style="font-size: 13px; color: #6ab0f5">Показать отменённые (3)</span>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
