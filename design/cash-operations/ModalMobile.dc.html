@@ -72,6 +72,14 @@
     .xs span.on { color: var(--brand); font-weight: 700; }
     .note { font-size: 11.5px; color: #666; margin-top: 10px; line-height: 1.45; }
 
+    .pie { display: flex; align-items: center; gap: 14px; min-height: 170px; margin-top: 14px; }
+    .lg { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+    .lgr { display: flex; align-items: center; gap: 7px; font-size: 12px; }
+    .lgr i { flex: 0 0 9px; width: 9px; height: 9px; border-radius: 3px; }
+    .lgr .nm { flex: 1 1 auto; min-width: 0; color: #8b8b8b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lgr .vl { font-variant-numeric: tabular-nums; font-weight: 600; }
+    .lgr .pc { flex: 0 0 36px; text-align: right; color: #666; font-variant-numeric: tabular-nums; }
+
     .ctl { display: flex; align-items: center; gap: 8px; margin-top: 14px; }
     .sgb { display: flex; gap: 4px; padding: 4px; border-radius: 8px; background: #0a0a0a; border: 1px solid #262626; flex: 1 1 auto; }
     .sgb button { flex: 1; min-height: 44px; border: 0; background: none; cursor: pointer; border-radius: 5px; font-size: 14px; font-weight: 600; color: #8b8b8b; }
@@ -146,25 +154,53 @@
         <div><b>2 731 ₽</b><span>средний<br>платёж</span></div>
       </div>
 
-      <div class="ch">
-        <div class="chp">
-          <div class="gl" style="bottom:100%"><b>13 000</b></div>
-          <div class="gl" style="bottom:50%"><b>6 500</b></div>
-          <div class="gl" style="bottom:0"><b>0</b></div>
-          <div class="avg" style="bottom:26.3%"><b>3 413</b></div>
-          <div class="bars">
+      <sc-if value="{{isBars}}" hint-placeholder-val="{{true}}">
+        <div class="ch">
+          <div class="chp">
+            <div class="gl" style="bottom:100%"><b>{{gMax}}</b></div>
+            <div class="gl" style="bottom:50%"><b>{{gMid}}</b></div>
+            <div class="gl" style="bottom:0"><b>0</b></div>
+            <div class="avg" style="bottom: {{avgPos}}"><b>{{avgLabel}}</b></div>
+            <div class="bars">
+              <sc-for list="{{bars}}" as="b" hint-placeholder-count="12">
+                <button class="col" onClick="{{b.pick}}"><span class="bar {{b.cls}}" style="height: {{b.h}}"></span></button>
+              </sc-for>
+            </div>
+          </div>
+          <div class="xs">
             <sc-for list="{{bars}}" as="b" hint-placeholder-count="12">
-              <button class="col" onClick="{{b.pick}}"><span class="bar {{b.cls}}" style="height: {{b.h}}"></span></button>
+              <span class="{{b.lcls}}">{{b.label}}</span>
+            </sc-for>
+          </div>
+          <div class="note">{{chartNote}}</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{isPie}}" hint-placeholder-val="{{true}}">
+        <div class="pie">
+          <svg width="132" height="132" viewBox="0 0 132 132">
+            <g transform="rotate(-90 66 66)">
+              <sc-for list="{{slices}}" as="s" hint-placeholder-count="6">
+                <circle cx="66" cy="66" r="44" fill="none" stroke-width="20"
+                  stroke="{{s.color}}" stroke-dasharray="{{s.dash}}" stroke-dashoffset="{{s.offset}}"></circle>
+              </sc-for>
+            </g>
+            <text x="66" y="63" text-anchor="middle" fill="#e8e8e8" font-size="14" font-weight="700" font-family="-apple-system, sans-serif">27 306 ₽</text>
+            <text x="66" y="79" text-anchor="middle" fill="#666" font-size="10" font-family="-apple-system, sans-serif">за 2026</text>
+          </svg>
+          <div class="lg">
+            <sc-for list="{{slices}}" as="s" hint-placeholder-count="6">
+              <div class="lgr">
+                <i style="background: {{s.color}}"></i>
+                <span class="nm">{{s.name}}</span>
+                <span class="vl">{{s.value}}</span>
+                <span class="pc">{{s.pct}}</span>
+              </div>
             </sc-for>
           </div>
         </div>
-        <div class="xs">
-          <sc-for list="{{bars}}" as="b" hint-placeholder-count="12">
-            <span class="{{b.lcls}}">{{b.label}}</span>
-          </sc-for>
-        </div>
-        <div class="note">Пунктир — среднее по месяцам с данными: 3 413 ₽. Август отмечен пустой рамкой: это пробел, а не ноль — последний импорт личной выписки 9 июля 2026.</div>
-      </div>
+        <div class="note">Доли месяцев в годовой сумме: у ГИС ЖКХ одна категория и один счёт, разбивка по ним выродилась бы в один сектор.</div>
+      </sc-if>
 
       <div class="ctl">
         <div class="sgb">
@@ -173,8 +209,8 @@
           <button class="{{sy}}" onClick="{{setYear}}">Год</button>
         </div>
         <div class="vz">
-          <button><svg class="ic"><use href="#i-pie"></use></svg></button>
-          <button class="on"><svg class="ic"><use href="#i-chart"></use></svg></button>
+          <button class="{{vp}}" onClick="{{setPie}}"><svg class="ic"><use href="#i-pie"></use></svg></button>
+          <button class="{{vb}}" onClick="{{setBars}}"><svg class="ic"><use href="#i-chart"></use></svg></button>
         </div>
       </div>
 
@@ -219,10 +255,7 @@
 }'>
 class Component extends DCLogic {
 
-  round(n) {
-    var neg = n < 0, a = Math.round(Math.abs(n));
-    return (neg ? '−' : '') + String(a).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽';
-  }
+  // Копейки печатаем только когда они не нулевые (правило брифа).
   money(n) {
     var neg = n < 0, a = Math.abs(n);
     var whole = Math.floor(a + 1e-9), cents = Math.round((a - whole) * 100);
@@ -230,51 +263,148 @@ class Component extends DCLogic {
     if (cents) s += ',' + (cents < 10 ? '0' + cents : cents);
     return (neg ? '−' : '') + s + ' ₽';
   }
+  round(n) {
+    var neg = n < 0, a = Math.round(Math.abs(n));
+    return (neg ? '−' : '') + String(a).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽';
+  }
+  bare(n) { return this.round(n).replace(' ₽', ''); }
 
+  // Дательный для «к июлю» и предложный для «в августе выписки нет».
+  dat() {
+    return { 'Январь': 'январю', 'Февраль': 'февралю', 'Март': 'марту', 'Апрель': 'апрелю',
+      'Май': 'маю', 'Июнь': 'июню', 'Июль': 'июлю', 'Август': 'августу', 'Сентябрь': 'сентябрю',
+      'Октябрь': 'октябрю', 'Ноябрь': 'ноябрю', 'Декабрь': 'декабрю' };
+  }
+  pre() {
+    return { 'Январь': 'январе', 'Февраль': 'феврале', 'Март': 'марте', 'Апрель': 'апреле',
+      'Май': 'мае', 'Июнь': 'июне', 'Июль': 'июле', 'Август': 'августе', 'Сентябрь': 'сентябре',
+      'Октябрь': 'октябре', 'Ноябрь': 'ноябре', 'Декабрь': 'декабре' };
+  }
+
+  // ГИС ЖКХ за 2026: данные из брифа.
+  // sum: null — выписки за месяц НЕТ (не ноль). Отличать обязательно: на нуле
+  // строится дельта и среднее, на пробеле — не строится ничего.
   months() {
     return [
-      { k: 'Янв', full: 'Январь', sum: 1370.90, ops: [{ dt: '16 января', a: -1370.90 }] },
+      { k: 'Янв', full: 'Январь', sum: 1370.90, ops: [{ dt: '16 января', d: 16, a: -1370.90 }] },
       { k: 'Фев', full: 'Февраль', sum: 12083.39, ops: [
-        { dt: '27 февраля', a: -5412.80 }, { dt: '12 февраля', a: -4883.71 }, { dt: '5 февраля', a: -1786.88 }] },
-      { k: 'Мар', full: 'Март', sum: 4313.83, ops: [{ dt: '11 марта', a: -4313.83 }] },
+        { dt: '27 февраля', d: 27, a: -5412.80 },
+        { dt: '12 февраля', d: 12, a: -4883.71 },
+        { dt: '5 февраля',  d: 5,  a: -1786.88 }] },
+      { k: 'Мар', full: 'Март', sum: 4313.83, ops: [{ dt: '11 марта', d: 11, a: -4313.83 }] },
       { k: 'Апр', full: 'Апрель', sum: 0, ops: [] },
-      { k: 'Май', full: 'Май', sum: 5459.95, ops: [{ dt: '6 мая', a: -5459.95 }] },
+      { k: 'Май', full: 'Май', sum: 5459.95, ops: [{ dt: '6 мая', d: 6, a: -5459.95 }] },
       { k: 'Июн', full: 'Июнь', sum: 0, ops: [] },
-      { k: 'Июл', full: 'Июль', sum: 1403.85, ops: [{ dt: '9 июля', a: -1403.85 }] },
+      { k: 'Июл', full: 'Июль', sum: 1403.85, ops: [{ dt: '9 июля', d: 9, a: -1403.85 }] },
       { k: 'Авг', full: 'Август', sum: null, ops: [] },
       { k: 'Сен', full: 'Сентябрь', sum: 2673.72, ops: [
-        { dt: 'Сегодня', a: -1172.76 }, { dt: 'Сегодня', a: -1131.60 }, { dt: 'Сегодня', a: -369.36 }] },
+        { dt: 'Сегодня', d: 10, a: -1172.76 },
+        { dt: 'Сегодня', d: 10, a: -1131.60 },
+        { dt: 'Сегодня', d: 10, a: -369.36 }] },
       { k: 'Окт', full: 'Октябрь', sum: null, future: true, ops: [] },
       { k: 'Ноя', full: 'Ноябрь', sum: null, future: true, ops: [] },
       { k: 'Дек', full: 'Декабрь', sum: null, future: true, ops: [] }
     ];
   }
 
+  // Шкала: максимум округляем вверх до «круглого» шага — 12 083 → 13 000.
+  // Шаг в десять раз мельче порядка числа: половина порядка давала 15 000.
+  nice(max) {
+    if (!(max > 0)) return 1;
+    var mag = Math.pow(10, Math.floor(Math.log(max) / Math.LN10));
+    var step = mag / 10 || 1;
+    return Math.ceil(max / step) * step;
+  }
+
+  // Столбики под выбранный масштаб: Год — двенадцать месяцев (клик выбирает
+  // месяц), Мес — дни выбранного месяца, Нед — последние семь дней. В дневных
+  // масштабах столбик не выбирают: день фильтром не становится.
+  scaleBars(months, sel, scale) {
+    var self = this, DI = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    var TM = 8, TD = 10;                     // сегодня — 10 сентября
+
+    if (scale === 'Год') {
+      var known = months.filter(function (m) { return m.sum !== null; });
+      var total = known.reduce(function (s, m) { return s + m.sum; }, 0);
+      var top = self.nice(Math.max.apply(null, known.map(function (m) { return m.sum; }).concat([1])));
+      return {
+        top: top, avg: known.length ? total / known.length : 0, day: false,
+        bars: months.map(function (m, i) {
+          var cls, h = '2px';
+          if (m.future) cls = 'fut';
+          else if (m.sum === null) { cls = 'nod'; h = '16px'; }
+          else if (m.sum === 0) cls = 'zero';
+          else { cls = i === sel ? 'on' : ''; h = (m.sum / top * 100) + '%'; }
+          return { label: m.k, cls: cls, h: h, lcls: i === sel ? 'on' : '',
+            pick: function () { self.setState({ month: i }); } };
+        })
+      };
+    }
+
+    var cur = months[sel], n = DI[sel];
+    var last = (sel === TM ? TD : n);
+    var from = scale === 'Нед' ? Math.max(1, last - 6) : 1;
+    var to = scale === 'Нед' ? last : n;
+
+    var byDay = {};
+    (cur.ops || []).forEach(function (o) { byDay[o.d] = (byDay[o.d] || 0) + Math.abs(o.a); });
+
+    var sum = 0, days = 0, peak = 0, d, v;
+    for (d = from; d <= to; d++) {
+      v = byDay[d] || 0;
+      if (v > peak) peak = v;
+      if (d <= last && cur.sum !== null) { sum += v; days++; }
+    }
+    var dtop = self.nice(peak || 1), bars = [];
+    for (d = from; d <= to; d++) {
+      v = byDay[d] || 0;
+      var cls2, h2 = '2px';
+      if (cur.sum === null) { cls2 = 'nod'; h2 = '10px'; }
+      else if (d > last) cls2 = 'fut';
+      else if (!v) cls2 = 'zero';
+      else { cls2 = 'on'; h2 = (v / dtop * 100) + '%'; }
+      bars.push({ label: (scale === 'Нед' || d === 1 || d % 5 === 0) ? String(d) : '',
+        cls: cls2, h: h2, lcls: v ? 'on' : '', pick: function () {} });
+    }
+    return { top: dtop, avg: days ? sum / days : 0, day: true, bars: bars };
+  }
+
   renderVals() {
-    var self = this, TOP = 13000;
+    var self = this;
     var M = this.months();
-    var sel = this.state.month == null ? 8 : this.state.month;
+    var sel = this.state.month == null ? 8 : this.state.month;   // сентябрь
     var cur = M[sel];
     var scale = this.state.scale || 'Год';
+    var viz = this.state.viz || 'bars';
+    var DAT = this.dat(), PRE = this.pre();
 
+    var known = M.filter(function (m) { return m.sum !== null; });
+    var yTotal = known.reduce(function (s, m) { return s + m.sum; }, 0);
+
+    // Дельта — к ближайшему предыдущему месяцу С ДАННЫМИ. У месяца без выписки
+    // дельты нет вовсе: вычитать из пробела нельзя, иначе «нет данных» получает
+    // бодрое «↓ 1 404 ₽».
     var prev = null, gap = [];
     for (var i = sel - 1; i >= 0; i--) {
-      if (M[i].sum === null) { gap.push(M[i].full.toLowerCase()); continue; }
+      if (M[i].sum === null) { gap.push(PRE[M[i].full]); continue; }
       prev = M[i]; break;
     }
-    var diff = prev ? (cur.sum || 0) - prev.sum : null;
-    var dat = { 'Январь': 'январю', 'Февраль': 'февралю', 'Март': 'марту', 'Апрель': 'апрелю', 'Май': 'маю',
-      'Июнь': 'июню', 'Июль': 'июлю', 'Август': 'августу', 'Сентябрь': 'сентябрю' };
+    var diff = (prev && cur.sum !== null) ? cur.sum - prev.sum : null;
 
-    var bars = M.map(function (m, i) {
-      var cls, h = '2px';
-      if (m.future) cls = 'fut';
-      else if (m.sum === null) { cls = 'nod'; h = '16px'; }
-      else if (m.sum === 0) cls = 'zero';
-      else { cls = i === sel ? 'on' : ''; h = (m.sum / TOP * 100) + '%'; }
-      return { label: m.k, cls: cls, h: h, lcls: i === sel ? 'on' : '',
-        pick: function () { self.setState({ month: i }); } };
-    });
+    var sb = this.scaleBars(M, sel, scale);
+
+    var acc = this.props.accent || '#00a0ff';
+    var pal = ['#06b6d4', '#a855f7', '#f97316', '#fbbf24', '#4ade80', '#8b8b8b'];
+    var R = 44, CIRC = 2 * Math.PI * R, run = 0;
+    var slices = known.filter(function (m) { return m.sum > 0; })
+      .sort(function (a, b) { return b.sum - a.sum; })
+      .map(function (m, i) {
+        var len = m.sum / yTotal * CIRC, off = -run;
+        run += len;
+        return { name: m.full, color: m.k === cur.k ? acc : pal[i % pal.length],
+          value: self.round(m.sum), pct: Math.round(m.sum / yTotal * 100) + '%',
+          dash: len.toFixed(2) + ' ' + CIRC.toFixed(2), offset: off.toFixed(2) };
+      });
 
     var byDay = [], seen = {};
     cur.ops.forEach(function (o) {
@@ -282,20 +412,32 @@ class Component extends DCLogic {
       seen[o.dt].s += o.a;
       seen[o.dt].ops.push({ amount: self.money(o.a) });
     });
-    byDay.forEach(function (d) { d.total = self.round(d.s); });
+    byDay.forEach(function (g) { g.total = self.round(g.s); });
 
     return {
-      accent: this.props.accent ?? '#00a0ff',
+      accent: acc,
       monthName: cur.full,
       sum: cur.sum === null ? 'нет данных' : this.round(cur.sum),
       delta: diff === null ? '—' : (diff > 0 ? '↑ ' : '↓ ') + this.round(Math.abs(diff)),
       deltaCls: diff === null ? '' : (diff > 0 ? 'd up' : 'd dn'),
-      deltaNote: prev ? 'к ' + dat[prev.full] + (gap.length ? ' · в ' + gap.reverse().join(' и ') + ' выписки нет' : '') : 'сравнивать не с чем',
-      bars: bars, days: byDay,
+      deltaNote: cur.sum === null
+        ? 'выписки за этот месяц нет'
+        : (prev ? 'к ' + DAT[prev.full] + (gap.length ? ' · в ' + gap.reverse().join(' и ') + ' выписки нет' : '')
+                : 'сравнивать не с чем'),
+      gMax: this.bare(sb.top), gMid: this.bare(sb.top / 2),
+      avgPos: Math.min(100, sb.avg / sb.top * 100) + '%', avgLabel: this.bare(sb.avg),
+      bars: sb.bars, days: byDay, slices: slices,
+      chartNote: sb.day
+        ? 'Пунктир — средний расход в день: ' + this.round(sb.avg) + '. Засечки — дни без трат, светлые — ещё не наступили.'
+        : 'Пунктир — среднее по месяцам с данными: ' + this.round(sb.avg) + '. Август отмечен пустой рамкой: это пробел, а не ноль — последний импорт личной выписки 9 июля 2026.',
+      isBars: viz === 'bars', isPie: viz === 'pie',
       sw: scale === 'Нед' ? 'on' : '', sm: scale === 'Мес' ? 'on' : '', sy: scale === 'Год' ? 'on' : '',
-      setWeek: function () { self.setState({ scale: 'Нед' }); },
-      setMonth: function () { self.setState({ scale: 'Мес' }); },
-      setYear: function () { self.setState({ scale: 'Год' }); }
+      vp: viz === 'pie' ? 'on' : '', vb: viz === 'bars' ? 'on' : '',
+      setWeek: function () { self.setState({ scale: 'Нед', viz: 'bars' }); },
+      setMonth: function () { self.setState({ scale: 'Мес', viz: 'bars' }); },
+      setYear: function () { self.setState({ scale: 'Год' }); },
+      setPie: function () { self.setState({ viz: 'pie', scale: 'Год' }); },
+      setBars: function () { self.setState({ viz: 'bars' }); }
     };
   }
 }
