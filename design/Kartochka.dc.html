@@ -17,29 +17,25 @@
   </style>
 </helmet>
 
-<div style="width: 393px; height: 844px; background: #0f0f0f; overflow: hidden; position: relative">
+<div style="width: 393px; background: #0f0f0f; position: relative">
 
   <!-- страница под шторкой -->
-  <div style="padding: 26px 14px 0; filter: saturate(0.6)">
+  <div style="padding: 26px 14px 0; height: 140px; box-sizing: border-box">
     <h1 style="margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; color: #fff">Продления</h1>
     <div style="margin: 4px 0 0; font-size: 15.5px; font-weight: 500; color: #8a8a93">12 сервисов · 207 480 ₽ в год</div>
-    <div style="background: #141414; border: 1px solid #262626; border-radius: 14px; padding: 14px; margin-top: 20px">
-      <div style="font-size: 10px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700">Ближайшее продление</div>
-      <div style="font-size: 24px; font-weight: 700; margin-top: 9px">07.09.2026</div>
-    </div>
   </div>
 
   <!-- затемнение (.mask) -->
-  <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.6)"></div>
+  <div style="position: absolute; top: 0; left: 0; right: 0; height: 140px; background: rgba(0,0,0,0.6)"></div>
 
-  <!-- нижняя шторка: та же геометрия, что у модалки задачи (ADR-064) -->
-  <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 780px; background: #141414; border: 1px solid #262626; border-bottom: none; border-radius: 22px 22px 0 0; padding: 8px 14px 0; display: flex; flex-direction: column; overflow: hidden">
+  <!-- нижняя шторка: геометрия модалки задачи (ADR-064) и карточки кабинета (ADR-067) -->
+  <div style="background: #141414; border: 1px solid #262626; border-bottom: none; border-radius: 22px 22px 0 0; padding: 8px 14px 0">
 
     <!-- ручка шторки -->
-    <div style="width: 38px; height: 4px; border-radius: 2px; background: #262626; margin: 0 auto 12px; flex: 0 0 auto"></div>
+    <div style="width: 38px; height: 4px; border-radius: 2px; background: #262626; margin: 0 auto 12px"></div>
 
     <!-- заголовок карточки -->
-    <div style="display: flex; align-items: flex-start; gap: 11px; padding-bottom: 14px; border-bottom: 1px solid #262626; flex: 0 0 auto">
+    <div style="display: flex; align-items: flex-start; gap: 11px; padding-bottom: 14px; border-bottom: 1px solid #262626">
       <div style="width: 38px; height: 38px; flex: 0 0 38px; border-radius: 8px; background: rgba(0,160,255,0.13); color: #00a0ff; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center">R</div>
       <div style="flex: 1; min-width: 0">
         <div style="font-size: 17px; font-weight: 700; letter-spacing: -0.01em; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Сервер cashruflow</div>
@@ -54,18 +50,71 @@
       </button>
     </div>
 
-    <!-- поля: подпись НАД значением, один столбец, 44px контролы -->
-    <div style="flex: 1 1 auto; overflow: hidden; padding-top: 14px; display: flex; flex-direction: column; gap: 12px">
+    <!-- ПОЛЯ — все 16, в том же порядке, что в .frm модалки -->
+    <div style="padding-top: 14px; display: flex; flex-direction: column; gap: 12px">
 
+      <!-- 1 -->
       <div style="display: flex; flex-direction: column; gap: 6px">
-        <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Название</label>
+        <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Название *</label>
         <div style="min-height: 44px; display: flex; align-items: center; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 0 12px; font-size: 14px; color: #fff">Сервер cashruflow</div>
       </div>
 
+      <!-- 2 -->
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Категория</label>
+        <div style="min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 0 12px; font-size: 14px; color: #fff">
+          Хостинг
+          <svg width="15" height="15" viewBox="0 0 24 24" style="color: #6a6a6a; flex: 0 0 15px"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- 3 -->
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Проект <span style="text-transform: none; letter-spacing: 0; color: #666; font-weight: 400">— пусто = личное</span></label>
+        <div style="min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 0 12px; font-size: 14px; color: #8b8b8b">
+          — личное —
+          <svg width="15" height="15" viewBox="0 0 24 24" style="color: #6a6a6a; flex: 0 0 15px"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- 4 -->
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Доступ <span style="text-transform: none; letter-spacing: 0; color: #666; font-weight: 400">— из сейфа проекта</span></label>
+        <div style="min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 0 12px; font-size: 14px; color: #fff">
+          <span style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">RUVDS · личное</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" style="color: #6a6a6a; flex: 0 0 15px"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- 5 — список из /refs → «Вендоры (поставщики)», ADR-191 -->
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Поставщик</label>
+        <div style="min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 0 12px; font-size: 14px; color: #fff">
+          <span style="display: flex; align-items: center; gap: 9px; min-width: 0">
+            <span style="width: 18px; height: 18px; flex: 0 0 18px; border-radius: 4px; background: rgba(0,160,255,0.13); color: #00a0ff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center">R</span>
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">RUVDS</span>
+          </span>
+          <svg width="15" height="15" viewBox="0 0 24 24" style="color: #6a6a6a; flex: 0 0 15px"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+
+      <!-- 6 -->
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Аккаунт <span style="text-transform: none; letter-spacing: 0; color: #666; font-weight: 400">— идёт в счёт и УПД</span></label>
+        <div style="min-height: 44px; display: flex; align-items: center; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 0 12px; font-size: 14px; color: #fff">cashruflow-prod</div>
+      </div>
+
+      <!-- 7 -->
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Ссылка на личный кабинет</label>
+        <div style="min-height: 44px; display: flex; align-items: center; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 0 12px; font-size: 14px; color: #6ab0f5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">https://ruvds.com/my</div>
+      </div>
+
+      <!-- 8 + 10 -->
       <div style="display: flex; gap: 10px">
         <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 6px">
-          <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Сумма за период</label>
-          <div style="min-height: 44px; display: flex; align-items: center; background: #1a1a1a; border: 1px solid rgba(0,160,255,0.4); border-radius: 10px; padding: 0 12px; font-size: 14px; color: #fff">1 200 ₽</div>
+          <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Сумма за период, ₽</label>
+          <div style="min-height: 44px; display: flex; align-items: center; background: #1a1a1a; border: 1px solid rgba(0,160,255,0.4); border-radius: 10px; padding: 0 12px; font-size: 14px; color: #fff">1 200</div>
         </div>
         <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 6px">
           <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Период</label>
@@ -76,12 +125,14 @@
         </div>
       </div>
 
+      <!-- 9 -->
       <div style="display: flex; flex-direction: column; gap: 6px">
-        <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Цена без скидки</label>
-        <div style="min-height: 44px; display: flex; align-items: center; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 0 12px; font-size: 14px; color: #fff">1 490 ₽</div>
+        <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Цена без скидки, ₽ <span style="text-transform: none; letter-spacing: 0; color: #666; font-weight: 400">— пусто, если скидки нет</span></label>
+        <div style="min-height: 44px; display: flex; align-items: center; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 0 12px; font-size: 14px; color: #fff">1 490</div>
         <div style="font-size: 11.5px; color: #8b8b8b; padding-left: 2px">скидка <b style="color: #4caf7d">290 ₽</b> · 19% · 3 480 ₽ в год</div>
       </div>
 
+      <!-- 11 + 12 -->
       <div style="display: flex; gap: 10px">
         <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 6px">
           <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Оплачено до</label>
@@ -99,14 +150,22 @@
         </div>
       </div>
 
+      <!-- 13 -->
       <div style="display: flex; flex-direction: column; gap: 6px">
-        <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Проект</label>
-        <div style="min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 0 12px; font-size: 14px; color: #8b8b8b">
-          — личное —
+        <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Статья расхода <span style="text-transform: none; letter-spacing: 0; color: #666; font-weight: 400">— для /cash</span></label>
+        <div style="min-height: 44px; display: flex; align-items: center; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 0 12px; font-size: 14px; color: #fff">Хостинг и домены</div>
+      </div>
+
+      <!-- 14 -->
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Ответственный <span style="text-transform: none; letter-spacing: 0; color: #666; font-weight: 400">— ему уходят уведомления</span></label>
+        <div style="min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 0 12px; font-size: 14px; color: #fff">
+          Константин (я)
           <svg width="15" height="15" viewBox="0 0 24 24" style="color: #6a6a6a; flex: 0 0 15px"><path d="m6 9 6 6 6-6"/></svg>
         </div>
       </div>
 
+      <!-- 15 -->
       <div style="display: flex; align-items: center; gap: 11px; min-height: 44px">
         <span style="width: 20px; height: 20px; flex: 0 0 20px; border-radius: 5px; background: #00a0ff; display: flex; align-items: center; justify-content: center; color: #04121e">
           <svg width="13" height="13" viewBox="0 0 24 24" style="stroke-width: 3"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
@@ -114,15 +173,16 @@
         <span style="font-size: 14px; color: #ddd">Списывается автоматически</span>
       </div>
 
+      <!-- 16 -->
       <div style="display: flex; flex-direction: column; gap: 6px">
-        <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Поставщик</label>
-        <div style="min-height: 44px; display: flex; align-items: center; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 0 12px; font-size: 14px; color: #fff">RUVDS</div>
+        <label style="font-size: 11px; color: #8b8b8b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600">Комментарий</label>
+        <div style="min-height: 72px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 12px; font-size: 14px; color: #8b8b8b; line-height: 1.45">Тариф с годовой предоплатой, продлевать до 14 числа</div>
       </div>
 
     </div>
 
-    <!-- футер шторки закреплён -->
-    <div style="flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 12px 0 24px; border-top: 1px solid #262626; background: #141414">
+    <!-- футер: на телефоне закреплён внизу экрана, поля не уезжают под кнопки -->
+    <div style="display: flex; align-items: center; gap: 8px; margin-top: 16px; padding: 12px 0 24px; border-top: 1px solid #262626">
       <button style="flex: 1 1 0; min-height: 44px; background: #00a0ff; color: #04121e; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer">Сохранить</button>
       <button style="flex: 0 0 auto; min-height: 44px; padding: 0 16px; background: #1a1a1a; color: #ddd; border: 1px solid #2a2a2a; border-radius: 10px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer">Отмена</button>
       <button style="flex: 0 0 44px; width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; background: #1a1a1a; color: #ff7b7b; border: 1px solid #2a2a2a; border-radius: 10px; cursor: pointer">
