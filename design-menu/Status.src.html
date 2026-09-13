@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+@@STYLE@@
+  <style>
+    .two { flex:1 1 auto; display:flex; gap:24px; padding:14px 18px 0; align-items:flex-start; }
+    .win { width:262px; flex:0 0 262px; height:364px; position:relative; background:#0a0a0a;
+      border:1px solid #1f1f1f; border-radius:10px; display:flex; flex-direction:column; padding:12px 0 0; }
+    .stm { position:absolute; left:10px; bottom:62px; width:206px; z-index:6;
+      background:#141414; border:1px solid #2a2a2a; border-radius:10px; padding:5px;
+      box-shadow:0 20px 46px rgba(0,0,0,.7); }
+    .stm .t { font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:#555; padding:7px 8px 6px; }
+    .si { display:flex; align-items:center; gap:10px; padding:8px; border-radius:7px; font-size:12.5px; color:#c8c8c8; }
+    .si.on { background:rgba(0,160,255,.1); color:#00a0ff; }
+    .si i { width:9px; height:9px; border-radius:50%; flex:0 0 auto; }
+    .si .ck { margin-left:auto; color:#00a0ff; }
+    .ava-w { position:relative; }
+    .pres { position:absolute; right:-2px; bottom:-2px; width:12px; height:12px; border-radius:50%;
+      border:2px solid #0a0a0a; box-shadow:0 0 0 2px rgba(0,160,255,.45); }
+    .card { width:246px; flex:0 0 246px; background:#141414; border:1px solid #262626; border-radius:11px; padding:12px; box-sizing:border-box; }
+    .card + .card { margin-top:12px; }
+    .card .h { font-size:11px; color:#6f6f6f; margin-bottom:9px; }
+    .cl { display:flex; align-items:center; gap:10px; }
+    .cl .nm { font-size:13px; font-weight:600; color:#e8e8e8; line-height:1.3; }
+    .cl .st { font-size:11.5px; line-height:1.35; margin-top:2px; }
+    .kv { display:flex; gap:8px; font-size:11.5px; line-height:1.5; color:#8b8b8b; margin-top:10px; }
+    .kv b { color:#00a0ff; font-weight:600; flex:0 0 auto; }
+  </style>
+</helmet>
+<div class="art">
+
+  <div class="cap">
+    <div class="tag">Из кода · 05-status-selector.js</div>
+    <h2>Статус на аватаре</h2>
+    <p>В референсе точка присутствия сама и есть кнопка: клик по ней открывает статусы, и в рельсе всегда открыто только одно выпадающее меню. Для нас это главное, что просится за три точки, — потому что от статуса зависит поддержка.</p>
+  </div>
+
+  <div class="two">
+
+    <div>
+      <div class="win">
+        <div class="grp" style="padding:0 16px 8px;">Меню</div>
+        <div class="row">@@ICO:notify@@<span class="lbl">Уведомления</span><span class="badge">3</span></div>
+        <div class="row act">@@ICO:tasks@@<span class="lbl">Бэклог</span></div>
+        <div class="row">@@ICO:buoy@@<span class="lbl">Поддержка</span></div>
+
+        <div class="stm">
+          <div class="t">Я сейчас</div>
+          <div class="si on"><i style="background:#4ade80;"></i>На связи<span class="ck">@@ICO:check:ico@@</span></div>
+          <div class="si"><i style="background:#fbbf24;"></i>Отошёл</div>
+          <div class="si"><i style="background:#f87171;"></i>Занят — до 18:00</div>
+          <div class="si"><i style="background:#4d4d4d;"></i>Не в сети</div>
+        </div>
+
+        <div class="me" style="margin-top:auto;">
+          <span class="ava-w"><span class="ava">КШ</span><span class="pres" style="background:#4ade80;"></span></span>
+          <span style="min-width:0;">
+            <span class="nm" style="display:block;">Константин</span>
+            <span class="sub" style="display:block;">На связи</span>
+          </span>
+          <span class="ibtn" style="margin-left:auto;">@@ICO:dots@@</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#5f5f5f;text-align:center;margin-top:9px;">Кликается точка, а не строка: ⋮ остаётся под настройки.</div>
+    </div>
+
+    <div style="flex:1 1 auto;min-width:0;">
+      <div class="card">
+        <div class="h">Что видит клиент в «Поддержке»</div>
+        <div class="cl">
+          <span class="ava-w"><span class="ava" style="background:#12241a;border-color:#1f3a29;color:#4ade80;">КШ</span><span class="pres" style="background:#4ade80;box-shadow:none;"></span></span>
+          <span><span class="nm" style="display:block;">Константин</span>
+            <span class="st" style="display:block;color:#4ade80;">На связи — обычно отвечаю за час</span></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="h">Он же, когда занят</div>
+        <div class="cl">
+          <span class="ava-w"><span class="ava" style="background:#2a1717;border-color:#3d2020;color:#f87171;">КШ</span><span class="pres" style="background:#f87171;box-shadow:none;"></span></span>
+          <span><span class="nm" style="display:block;">Константин</span>
+            <span class="st" style="display:block;color:#f87171;">Занят до 18:00 — обращение дойдёт, ответ вечером</span></span>
+        </div>
+      </div>
+
+      <div class="kv"><b>→</b><span>Одно меню за раз: статус закрывает профиль и переключатель пространства.</span></div>
+      <div class="kv"><b>→</b><span>Зелёная точка у версии («Диагностика каналов») — это про сервер; человеческий статус живёт на аватаре, их не путать.</span></div>
+    </div>
+
+  </div>
+
+  <div class="notes">
+    <div class="plus"><b>+</b><span>Честное ожидание вместо молчания: клиент видит, ответят ли сейчас, ещё до отправки.</span></div>
+    <div class="minus"><b>?</b><span>Статус ставится руками или сам — из расписания и последней активности.</span></div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

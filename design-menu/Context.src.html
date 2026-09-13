@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+@@STYLE@@
+  <style>
+    .cm { position:absolute; left:196px; top:132px; width:226px; z-index:6;
+      background:#141414; border:1px solid #2a2a2a; border-radius:10px; padding:5px;
+      box-shadow:0 20px 46px rgba(0,0,0,.7); }
+    .ci { display:flex; align-items:center; gap:10px; padding:8px; border-radius:7px; font-size:12.5px; color:#c8c8c8; }
+    .ci .ico { width:16px; height:16px; }
+    .ci .r { margin-left:auto; font-size:11px; color:#4d4d4d; }
+    .ci.hi { background:rgba(0,160,255,.1); color:#00a0ff; }
+    .ci.dg { color:#f87171; } .ci.dg .ico { color:#f87171; }
+    .csep { height:1px; background:#232323; margin:5px 8px; }
+    .sw { display:flex; align-items:center; gap:7px; padding:8px 8px 9px; }
+    .sw i { width:15px; height:15px; border-radius:4px; flex:0 0 auto; display:block; }
+    .sw i.on { box-shadow:0 0 0 2px #141414, 0 0 0 3.5px #00a0ff; }
+    .sw i.no { background:#101010; border:1px solid #2e2e2e; position:relative; }
+    .cur { position:absolute; left:186px; top:128px; width:13px; height:18px; z-index:7; }
+    .kv { display:flex; gap:8px; font-size:11.5px; line-height:1.5; color:#8b8b8b; }
+    .kv b { color:#00a0ff; font-weight:600; flex:0 0 auto; }
+    .side { position:absolute; right:14px; top:14px; width:180px; display:flex; flex-direction:column; gap:9px; }
+  </style>
+</helmet>
+<div class="art">
+
+  <div class="cap">
+    <div class="tag">Из кода · 04-context-menu.js</div>
+    <h2>Правый клик по разделу</h2>
+    <p>В референсе раздел настраивается не отдельным режимом правки, а своим меню по правой кнопке — с рядом цветов прямо внутри. У нас это заменило бы карандаш в строке логотипа.</p>
+  </div>
+
+  <div class="mock">
+    <div class="sb">
+      <div class="brand" style="padding:0 10px 12px;">
+        <span style="width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:#101010;border:1px solid #1e1e1e;flex:0 0 auto;">@@LOGO@@</span>
+        <span class="nm">AI-платформа</span>
+        <span class="ibtn" style="margin-left:auto;">@@ICO:updown@@</span>
+      </div>
+      <div class="srch">@@ICO:search@@<span>Поиск…</span><span class="kbd">⌘K</span></div>
+      <div class="nav">
+        <div class="row">@@ICO:notify@@<span class="lbl">Уведомления</span><span class="badge">3</span></div>
+        <div class="row">@@ICO:week@@<span class="lbl">Неделя</span></div>
+        <div class="row" style="background:#141414;color:#e8e8e8;">@@ICO:tasks@@<span class="lbl">Бэклог</span></div>
+        <div class="row">@@ICO:bug@@<span class="lbl">Ошибки</span><span class="badge">2</span></div>
+        <div class="sep"></div>
+        <div class="row"><span style="width:10px;height:10px;border-radius:3px;background:#a855f7;flex:0 0 auto;"></span><span class="lbl">AI-CRM</span></div>
+        <div class="row"><span style="width:10px;height:10px;border-radius:3px;background:#06b6d4;flex:0 0 auto;"></span><span class="lbl">SEO</span></div>
+        <div class="row"><span style="width:10px;height:10px;border-radius:3px;background:#4ade80;flex:0 0 auto;"></span><span class="lbl">Финансы</span></div>
+      </div>
+      <div class="foot">
+        <div class="row">@@ICO:settings@@<span class="lbl">Настройки</span></div>
+        <div class="row">@@ICO:buoy@@<span class="lbl">Поддержка</span></div>
+      </div>
+    </div>
+
+    <div class="page"></div>
+
+    <div class="cm">
+      <div class="ci hi">@@ICO:pin@@Закрепить в избранном</div>
+      <div class="ci">@@ICO:edit@@Переименовать</div>
+      <div class="sw">
+        <i style="background:#00a0ff;" class="on"></i>
+        <i style="background:#a855f7;"></i>
+        <i style="background:#06b6d4;"></i>
+        <i style="background:#4ade80;"></i>
+        <i style="background:#fbbf24;"></i>
+        <i style="background:#f87171;"></i>
+        <i class="no"></i>
+      </div>
+      <div class="csep"></div>
+      <div class="ci">@@ICO:open@@Открыть в новой вкладке</div>
+      <div class="ci">@@ICO:link@@Копировать ссылку<span class="r">⌘⇧C</span></div>
+      <div class="csep"></div>
+      <div class="ci dg">@@ICO:hide@@Убрать из меню</div>
+    </div>
+
+    <svg class="cur" viewBox="0 0 13 18" fill="#e8e8e8" stroke="#0a0a0a" stroke-width="1.2" aria-hidden="true">
+      <path d="M1 1 1 15 4.6 11.6 7 17 9.6 15.8 7.2 10.6 12 10.4Z"/>
+    </svg>
+
+    <div class="side">
+      <div class="kv"><b>→</b><span>Цвет выбирается тут же, рядом стоят все шесть — не уходя в настройки.</span></div>
+      <div class="kv"><b>→</b><span>Меню разворачивается из точки клика и само отодвигается от края экрана.</span></div>
+      <div class="kv"><b>→</b><span>Пункты появляются по очереди — задержка считается от номера строки.</span></div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div class="plus"><b>+</b><span>Закрепление перестаёт быть отдельным режимом: menu-pins.js можно звать отсюда.</span></div>
+    <div class="minus"><b>?</b><span>На телефоне правого клика нет — там долгое нажатие или ⋮ в строке.</span></div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
