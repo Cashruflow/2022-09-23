@@ -53,10 +53,10 @@
     .notes { flex:0 0 auto; padding:12px 18px 14px; display:flex; flex-direction:column; gap:6px; }
     .notes div { font-size:11.5px; line-height:1.45; color:#7d7d7d; display:flex; gap:7px; }
     .notes b { flex:0 0 auto; font-weight:700; }
-    .plus b { color:#4ade80; } .minus b { color:#f87171; }
+    .plus b { color:#4ade80; } .minus b { color:#f87171; } .ask b { color:#7d7d7d; }
   </style>
   <style>
-    .pop { position:absolute; left:250px; top:62px; width:238px; z-index:5;
+    .pop { position:absolute; left:250px; top:62px; width:238px; box-sizing:border-box; z-index:5;
       background:#141414; border:1px solid #262626; border-radius:10px; padding:6px;
       box-shadow:0 18px 40px rgba(0,0,0,.65); }
     .pop .ttl { font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:#555; padding:7px 8px 6px; }
@@ -74,7 +74,7 @@
   <div class="cap">
     <div class="tag">Вариант Б</div>
     <h2>Избранное и каталог</h2>
-    <p>В меню — только то, чем пользуешься каждый день. Остальные 50 разделов живут в каталоге за одной строкой и в поиске.</p>
+    <p>В меню — только то, чем пользуетесь каждый день. Остальные 51 живут в каталоге за одной строкой и в поиске.</p>
   </div>
 
   <div class="mock">
@@ -86,10 +86,10 @@
         <span class="ibtn" style="margin-left:auto;"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></span>
       </div>
 
-      <div class="srch"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg><span>Поиск…</span><span class="kbd">⌘K</span></div>
+      <div class="srch"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg><span>Поиск по порталу…</span><span class="kbd">⌘K</span></div>
 
       <div class="nav">
-        <div class="grp"><span>Закреплённое</span><span style="color:#444;font-size:10px;">правка</span></div>
+        <div class="grp"><span>Быстрый доступ</span><span style="color:#5f5f5f;font-size:10px;">Изменить</span></div>
         <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg><span class="lbl">Уведомления</span><span class="badge">3</span></div>
         <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><rect x="3" y="4" width="6" height="6" rx="1"/></svg><span class="lbl">Неделя</span></div>
         <div class="row act"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span class="lbl">Бэклог</span><span class="grip">⣿</span></div>
@@ -110,7 +110,7 @@
 
       <div class="foot">
         <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg><span class="lbl">Настройки</span></div>
-        <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/><circle cx="12" cy="12" r="4"/></svg><span class="lbl">Поддержка</span><span class="badge" style="background:#1e1e1e;color:#8b8b8b;">5</span></div>
+        <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/><circle cx="12" cy="12" r="4"/></svg><span class="lbl">Поддержка</span></div>
         <div class="me">
           <span class="ava">КШ</span>
           <span style="min-width:0;">
@@ -137,15 +137,16 @@
       <div class="it"><span class="dot" style="background:#06b6d4;"></span>SEO<span class="n">7</span></div>
       <div class="it"><span class="dot" style="background:#4ade80;"></span>Финансы<span class="n">4</span></div>
       <div class="it"><span class="dot" style="background:#fbbf24;"></span>Личное<span class="n">4</span></div>
-      <div class="it"><span class="dot" style="background:#f87171;"></span>Медкарта<span class="n">6</span></div>
-      <div class="it"><span class="dot" style="background:#f97316;"></span>Интеграции<span class="n">12</span></div>
+      <div class="it"><span class="dot" style="background:#f97316;"></span>Медкарта<span class="n">6</span></div>
+      <div class="it"><span class="dot" style="background:#6f6f6f;"></span>Справочники<span class="n">3</span></div>
+      <div class="it"><span class="dot" style="background:#6f6f6f;"></span>Интеграции<span class="n">12</span></div>
       <div style="height:1px;background:#232323;margin:6px 8px;"></div>
-      <div class="it" style="color:#6f6f6f;">Наведите раздел — список справа</div>
+      <div class="it" style="color:#6f6f6f;">Наведите на раздел — список справа</div>
     </div>
   </div>
 
   <div class="notes">
-    <div class="plus"><b>+</b><span>Меню перестаёт расти: новых страниц уже 58, а список остаётся в один экран.</span></div>
+    <div class="plus"><b>+</b><span>Меню перестаёт расти: страниц уже 58 и будет больше, а список остаётся в один экран.</span></div>
     <div class="plus"><b>+</b><span>Опирается на то, что уже работает, — «Быстрый доступ» и поиск по меню.</span></div>
     <div class="minus"><b>−</b><span>Один раз надо разложить закреплённое, иначе меню пустое.</span></div>
   </div>

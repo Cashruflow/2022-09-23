@@ -44,5 +44,5 @@
     .notes { flex:0 0 auto; padding:12px 18px 14px; display:flex; flex-direction:column; gap:6px; }
     .notes div { font-size:11.5px; line-height:1.45; color:#7d7d7d; display:flex; gap:7px; }
     .notes b { flex:0 0 auto; font-weight:700; }
-    .plus b { color:#4ade80; } .minus b { color:#f87171; }
+    .plus b { color:#4ade80; } .minus b { color:#f87171; } .ask b { color:#7d7d7d; }
   </style>

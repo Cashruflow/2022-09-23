@@ -12,9 +12,8 @@
     /* «Сейчас» — точная раскладка sidebar.js: направляющая линия группы и засечка у пункта */
     .tree { position:relative; }
     .tree::before { content:''; position:absolute; left:27px; top:0; bottom:6px; width:1px; background:#1c1c1c; }
-    .tree .row { margin:0 10px 0 0; padding:8px 14px 8px 44px; border-radius:0 8px 8px 0; }
+    .tree .row { position:relative; margin:0 10px 0 0; padding:8px 14px 8px 44px; border-radius:0 8px 8px 0; }
     .tree .row::before { content:''; position:absolute; left:28px; top:50%; width:9px; height:1px; background:#232323; }
-    .tree .row { position:relative; }
     .tree .row.act::before { background:#00a0ff; width:12px; }
     .tiles { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; padding:12px 14px; }
     .tile { min-height:76px; box-sizing:border-box; padding:8px 6px; background:#101010; border:1px solid #1e1e1e;
@@ -48,7 +47,7 @@
         </span>
       </div>
 
-      <div class="srch">@@ICO:search@@<span>Поиск по меню…</span></div>
+      <div class="srch">@@ICO:search@@<span>Поиск по порталу…</span></div>
 
       <div class="nav">
         <div class="grp"><span>Быстрый доступ</span><span style="color:#444;">⌄</span></div>
@@ -82,8 +81,8 @@
 
       <div class="foot" style="padding:0;">
         <div class="tiles">
-          <div class="tile">@@ICO:home:x@@<span>На главную</span></div>
-          <div class="tile">@@ICO:copy:x@@<span>Копия для ИИ</span></div>
+          <div class="tile">@@ICO:home:ico@@<span>На главную</span></div>
+          <div class="tile">@@ICO:copy:ico@@<span>Копия для ИИ</span></div>
           <div class="tile" style="gap:4px;"><span style="font-size:12px;">Масштаб</span>
             <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:#666;">А− 100% А+</span></div>
         </div>

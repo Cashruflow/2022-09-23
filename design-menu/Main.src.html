@@ -9,7 +9,7 @@
 <helmet>
 @@STYLE@@
   <style>
-    .pop { position:absolute; left:250px; top:62px; width:238px; z-index:5;
+    .pop { position:absolute; left:250px; top:62px; width:238px; box-sizing:border-box; z-index:5;
       background:#141414; border:1px solid #262626; border-radius:10px; padding:6px;
       box-shadow:0 18px 40px rgba(0,0,0,.65); }
     .pop .ttl { font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:#555; padding:7px 8px 6px; }
@@ -27,7 +27,7 @@
   <div class="cap">
     <div class="tag">Вариант Б</div>
     <h2>Избранное и каталог</h2>
-    <p>В меню — только то, чем пользуешься каждый день. Остальные 50 разделов живут в каталоге за одной строкой и в поиске.</p>
+    <p>В меню — только то, чем пользуетесь каждый день. Остальные 51 живут в каталоге за одной строкой и в поиске.</p>
   </div>
 
   <div class="mock">
@@ -39,10 +39,10 @@
         <span class="ibtn" style="margin-left:auto;">@@ICO:updown@@</span>
       </div>
 
-      <div class="srch">@@ICO:search@@<span>Поиск…</span><span class="kbd">⌘K</span></div>
+      <div class="srch">@@ICO:search@@<span>Поиск по порталу…</span><span class="kbd">⌘K</span></div>
 
       <div class="nav">
-        <div class="grp"><span>Закреплённое</span><span style="color:#444;font-size:10px;">правка</span></div>
+        <div class="grp"><span>Быстрый доступ</span><span style="color:#5f5f5f;font-size:10px;">Изменить</span></div>
         <div class="row">@@ICO:notify@@<span class="lbl">Уведомления</span><span class="badge">3</span></div>
         <div class="row">@@ICO:week@@<span class="lbl">Неделя</span></div>
         <div class="row act">@@ICO:tasks@@<span class="lbl">Бэклог</span><span class="grip">⣿</span></div>
@@ -63,7 +63,7 @@
 
       <div class="foot">
         <div class="row">@@ICO:settings@@<span class="lbl">Настройки</span></div>
-        <div class="row">@@ICO:buoy@@<span class="lbl">Поддержка</span><span class="badge" style="background:#1e1e1e;color:#8b8b8b;">5</span></div>
+        <div class="row">@@ICO:buoy@@<span class="lbl">Поддержка</span></div>
         <div class="me">
           <span class="ava">КШ</span>
           <span style="min-width:0;">
@@ -90,15 +90,16 @@
       <div class="it"><span class="dot" style="background:#06b6d4;"></span>SEO<span class="n">7</span></div>
       <div class="it"><span class="dot" style="background:#4ade80;"></span>Финансы<span class="n">4</span></div>
       <div class="it"><span class="dot" style="background:#fbbf24;"></span>Личное<span class="n">4</span></div>
-      <div class="it"><span class="dot" style="background:#f87171;"></span>Медкарта<span class="n">6</span></div>
-      <div class="it"><span class="dot" style="background:#f97316;"></span>Интеграции<span class="n">12</span></div>
+      <div class="it"><span class="dot" style="background:#f97316;"></span>Медкарта<span class="n">6</span></div>
+      <div class="it"><span class="dot" style="background:#6f6f6f;"></span>Справочники<span class="n">3</span></div>
+      <div class="it"><span class="dot" style="background:#6f6f6f;"></span>Интеграции<span class="n">12</span></div>
       <div style="height:1px;background:#232323;margin:6px 8px;"></div>
-      <div class="it" style="color:#6f6f6f;">Наведите раздел — список справа</div>
+      <div class="it" style="color:#6f6f6f;">Наведите на раздел — список справа</div>
     </div>
   </div>
 
   <div class="notes">
-    <div class="plus"><b>+</b><span>Меню перестаёт расти: новых страниц уже 58, а список остаётся в один экран.</span></div>
+    <div class="plus"><b>+</b><span>Меню перестаёт расти: страниц уже 58 и будет больше, а список остаётся в один экран.</span></div>
     <div class="plus"><b>+</b><span>Опирается на то, что уже работает, — «Быстрый доступ» и поиск по меню.</span></div>
     <div class="minus"><b>−</b><span>Один раз надо разложить закреплённое, иначе меню пустое.</span></div>
   </div>

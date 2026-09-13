@@ -15,11 +15,11 @@
     .rbtn.on { background:rgba(0,160,255,.12); color:#00a0ff; }
     .rbtn.on::before { content:''; position:absolute; left:-9px; top:9px; bottom:9px; width:3px; border-radius:0 3px 3px 0; background:#00a0ff; }
     .rbtn .ico { width:19px; height:19px; color:currentColor; }
-    .rdot { width:7px; height:7px; border-radius:2px; }
     .pan { width:214px; flex:0 0 214px; background:#0a0a0a; border-right:1px solid #1a1a1a;
       display:flex; flex-direction:column; padding:14px 0 0; }
     .ptl { padding:0 14px 12px; font-size:13px; font-weight:700; color:#e8e8e8; display:flex; align-items:center; gap:8px; }
     .pan .row { margin:0 8px; }
+    .pfoot { font-size:11.5px; color:#5a5a5a; padding:2px 12px; margin:0 8px; }
   </style>
 </helmet>
 <div class="art">
@@ -51,7 +51,7 @@
 
     <div class="pan">
       <div class="ptl">Работа <span style="margin-left:auto;color:#4d4d4d;font-weight:400;font-size:11px;">10</span></div>
-      <div class="srch" style="margin:0 8px 10px;">@@ICO:search@@<span>Поиск…</span></div>
+      <div class="srch" style="margin:0 8px 10px;">@@ICO:search@@<span>Поиск в разделе…</span></div>
       <div class="nav">
         <div class="row">@@ICO:notify@@<span class="lbl">Уведомления</span><span class="badge">3</span></div>
         <div class="row">@@ICO:week@@<span class="lbl">Неделя</span></div>
@@ -65,7 +65,7 @@
         <div class="row">@@ICO:message@@<span class="lbl">Бриф</span></div>
       </div>
       <div class="foot" style="border-top:1px solid #1a1a1a;padding:8px 0;">
-        <div class="mini" style="font-size:11.5px;color:#5a5a5a;padding:2px 12px;margin:0 8px;">Раздел выбирается слева</div>
+        <div class="pfoot">Раздел выбирается слева</div>
       </div>
     </div>
 
@@ -80,7 +80,7 @@
   <div class="notes">
     <div class="plus"><b>+</b><span>Прокрутки нет никогда: в самой большой группе 12 пунктов.</span></div>
     <div class="plus"><b>+</b><span>Рельс уже написан — sb-resize.js умеет схлопывать сайдбар в колонку значков.</span></div>
-    <div class="minus"><b>−</b><span>Восемь значков надо выучить; на телефоне рельс придётся разворачивать.</span></div>
+    <div class="minus"><b>−</b><span>Восемь значков придётся запомнить; на телефоне рельс разворачивается в список.</span></div>
   </div>
 
 </div>

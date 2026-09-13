@@ -53,7 +53,7 @@
     .notes { flex:0 0 auto; padding:12px 18px 14px; display:flex; flex-direction:column; gap:6px; }
     .notes div { font-size:11.5px; line-height:1.45; color:#7d7d7d; display:flex; gap:7px; }
     .notes b { flex:0 0 auto; font-weight:700; }
-    .plus b { color:#4ade80; } .minus b { color:#f87171; }
+    .plus b { color:#4ade80; } .minus b { color:#f87171; } .ask b { color:#7d7d7d; }
   </style>
   <style>
     .rail { width:56px; flex:0 0 56px; background:#070707; border-right:1px solid #1a1a1a;
@@ -62,11 +62,11 @@
     .rbtn.on { background:rgba(0,160,255,.12); color:#00a0ff; }
     .rbtn.on::before { content:''; position:absolute; left:-9px; top:9px; bottom:9px; width:3px; border-radius:0 3px 3px 0; background:#00a0ff; }
     .rbtn .ico { width:19px; height:19px; color:currentColor; }
-    .rdot { width:7px; height:7px; border-radius:2px; }
     .pan { width:214px; flex:0 0 214px; background:#0a0a0a; border-right:1px solid #1a1a1a;
       display:flex; flex-direction:column; padding:14px 0 0; }
     .ptl { padding:0 14px 12px; font-size:13px; font-weight:700; color:#e8e8e8; display:flex; align-items:center; gap:8px; }
     .pan .row { margin:0 8px; }
+    .pfoot { font-size:11.5px; color:#5a5a5a; padding:2px 12px; margin:0 8px; }
   </style>
 </helmet>
 <div class="art">
@@ -98,7 +98,7 @@
 
     <div class="pan">
       <div class="ptl">Работа <span style="margin-left:auto;color:#4d4d4d;font-weight:400;font-size:11px;">10</span></div>
-      <div class="srch" style="margin:0 8px 10px;"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg><span>Поиск…</span></div>
+      <div class="srch" style="margin:0 8px 10px;"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg><span>Поиск в разделе…</span></div>
       <div class="nav">
         <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg><span class="lbl">Уведомления</span><span class="badge">3</span></div>
         <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><rect x="3" y="4" width="6" height="6" rx="1"/></svg><span class="lbl">Неделя</span></div>
@@ -112,7 +112,7 @@
         <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg><span class="lbl">Бриф</span></div>
       </div>
       <div class="foot" style="border-top:1px solid #1a1a1a;padding:8px 0;">
-        <div class="mini" style="font-size:11.5px;color:#5a5a5a;padding:2px 12px;margin:0 8px;">Раздел выбирается слева</div>
+        <div class="pfoot">Раздел выбирается слева</div>
       </div>
     </div>
 
@@ -127,7 +127,7 @@
   <div class="notes">
     <div class="plus"><b>+</b><span>Прокрутки нет никогда: в самой большой группе 12 пунктов.</span></div>
     <div class="plus"><b>+</b><span>Рельс уже написан — sb-resize.js умеет схлопывать сайдбар в колонку значков.</span></div>
-    <div class="minus"><b>−</b><span>Восемь значков надо выучить; на телефоне рельс придётся разворачивать.</span></div>
+    <div class="minus"><b>−</b><span>Восемь значков придётся запомнить; на телефоне рельс разворачивается в список.</span></div>
   </div>
 
 </div>

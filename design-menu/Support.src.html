@@ -9,7 +9,8 @@
 <helmet>
 @@STYLE@@
   <style>
-    .cards { flex:1 1 auto; display:flex; gap:24px; padding:16px 18px 0; align-items:flex-start; }
+    .cards { flex:1 1 auto; min-height:0; overflow:hidden; display:flex; gap:24px;
+      padding:16px 18px 18px; align-items:flex-start; }
     .card { width:350px; flex:0 0 350px; background:#141414; border:1px solid #262626; border-radius:12px;
       padding:14px; box-shadow:0 18px 40px rgba(0,0,0,.5); box-sizing:border-box; }
     .card h4 { margin:0; font-size:15px; font-weight:700; color:#e8e8e8; }
@@ -37,6 +38,7 @@
       background:rgba(251,191,36,.07); border:1px solid rgba(251,191,36,.25); border-radius:8px;
       font-size:11.5px; color:#c9a94a; line-height:1.45; }
     .warn .ico { width:16px; height:16px; color:#fbbf24; margin-top:1px; }
+    .quota.hot { color:#c9a94a; } .quota.hot .ico { color:#c9a94a; }
   </style>
 </helmet>
 <div class="art">
@@ -53,12 +55,12 @@
       <div style="display:flex;align-items:flex-start;">
         <div style="min-width:0;">
           <h4>Поддержка</h4>
-          <div class="sub">Отвечаю сам, без робота и тикет-системы.</div>
+          <div class="sub">Пишете лично мне, а не в общую очередь.</div>
         </div>
         <span class="ibtn" style="margin-left:auto;">@@ICO:close@@</span>
       </div>
 
-      <div class="quota">@@ICO:clock:ico@@<span>Осталось 4 обращения на сегодня</span>
+      <div class="quota">@@ICO:clock:ico@@<span>Осталось 4 из 5 обращений на сегодня</span>
         <span class="pips"><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip off"></span></span>
       </div>
 
@@ -66,7 +68,7 @@
         <div class="opt on">
           @@ICO:message@@
           <span style="min-width:0;"><span class="nm" style="display:block;">Написать Константину</span>
-            <span class="ds" style="display:block;">Личный чат — отвечаю в рабочее время</span></span>
+            <span class="ds" style="display:block;">Новый разговор — одно обращение из пяти</span></span>
           <span class="badge">1</span>
         </div>
         <div class="opt">
@@ -101,7 +103,7 @@
         <span class="ibtn" style="margin-left:auto;">@@ICO:close@@</span>
       </div>
 
-      <div class="quota" style="color:#c9a94a;">@@ICO:clock:ico@@<span>0 из 5 — счётчик обнулится в полночь</span>
+      <div class="quota hot">@@ICO:clock:ico@@<span>Все 5 обращений за сегодня использованы</span>
         <span class="pips"><span class="pip off"></span><span class="pip off"></span><span class="pip off"></span><span class="pip off"></span><span class="pip off"></span></span>
       </div>
 
@@ -118,13 +120,13 @@
         </div>
       </div>
 
-      <div class="warn">@@ICO:alert:ico@@<span>Пять обращений в сутки — чтобы разбор не превращался в ленту. Срочное — в переписке, она не считается.</span></div>
+      <div class="warn">@@ICO:clock:ico@@<span>Счётчик обнулится в полночь. Пять в сутки — чтобы разбор не превращался в ленту.</span></div>
 
       <div style="margin-top:8px;">
         <div class="opt on">
           @@ICO:message@@
           <span style="min-width:0;"><span class="nm" style="display:block;">Открыть переписку</span>
-            <span class="ds" style="display:block;">Продолжить начатый разговор — без лимита</span></span>
+            <span class="ds" style="display:block;">Продолжение начатого не считается новым обращением</span></span>
           <span class="go">@@ICO:right:ico@@</span>
         </div>
       </div>
@@ -135,8 +137,8 @@
   </div>
 
   <div class="notes">
-    <div class="minus"><b>?</b><span>Жалоба и доработка — два входа или один с переключателем? В медкарте их два («Обратная связь» и «Пожелание»).</span></div>
-    <div class="minus"><b>?</b><span>Считать лимит по отправленным обращениям или по открытым — и что показывать клиенту, когда он упёрся.</span></div>
+    <div class="ask"><b>?</b><span>Жалоба и доработка — два входа или один с переключателем? В медкарте их два («Обратная связь» и «Пожелание»).</span></div>
+    <div class="ask"><b>?</b><span>Считать лимит по отправленным обращениям или по открытым — и что показывать клиенту, когда он упёрся.</span></div>
   </div>
 
 </div>

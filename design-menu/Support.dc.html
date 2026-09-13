@@ -53,10 +53,11 @@
     .notes { flex:0 0 auto; padding:12px 18px 14px; display:flex; flex-direction:column; gap:6px; }
     .notes div { font-size:11.5px; line-height:1.45; color:#7d7d7d; display:flex; gap:7px; }
     .notes b { flex:0 0 auto; font-weight:700; }
-    .plus b { color:#4ade80; } .minus b { color:#f87171; }
+    .plus b { color:#4ade80; } .minus b { color:#f87171; } .ask b { color:#7d7d7d; }
   </style>
   <style>
-    .cards { flex:1 1 auto; display:flex; gap:24px; padding:16px 18px 0; align-items:flex-start; }
+    .cards { flex:1 1 auto; min-height:0; overflow:hidden; display:flex; gap:24px;
+      padding:16px 18px 18px; align-items:flex-start; }
     .card { width:350px; flex:0 0 350px; background:#141414; border:1px solid #262626; border-radius:12px;
       padding:14px; box-shadow:0 18px 40px rgba(0,0,0,.5); box-sizing:border-box; }
     .card h4 { margin:0; font-size:15px; font-weight:700; color:#e8e8e8; }
@@ -84,6 +85,7 @@
       background:rgba(251,191,36,.07); border:1px solid rgba(251,191,36,.25); border-radius:8px;
       font-size:11.5px; color:#c9a94a; line-height:1.45; }
     .warn .ico { width:16px; height:16px; color:#fbbf24; margin-top:1px; }
+    .quota.hot { color:#c9a94a; } .quota.hot .ico { color:#c9a94a; }
   </style>
 </helmet>
 <div class="art">
@@ -100,12 +102,12 @@
       <div style="display:flex;align-items:flex-start;">
         <div style="min-width:0;">
           <h4>Поддержка</h4>
-          <div class="sub">Отвечаю сам, без робота и тикет-системы.</div>
+          <div class="sub">Пишете лично мне, а не в общую очередь.</div>
         </div>
         <span class="ibtn" style="margin-left:auto;"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span>
       </div>
 
-      <div class="quota"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Осталось 4 обращения на сегодня</span>
+      <div class="quota"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Осталось 4 из 5 обращений на сегодня</span>
         <span class="pips"><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip"></span><span class="pip off"></span></span>
       </div>
 
@@ -113,7 +115,7 @@
         <div class="opt on">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg>
           <span style="min-width:0;"><span class="nm" style="display:block;">Написать Константину</span>
-            <span class="ds" style="display:block;">Личный чат — отвечаю в рабочее время</span></span>
+            <span class="ds" style="display:block;">Новый разговор — одно обращение из пяти</span></span>
           <span class="badge">1</span>
         </div>
         <div class="opt">
@@ -148,7 +150,7 @@
         <span class="ibtn" style="margin-left:auto;"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span>
       </div>
 
-      <div class="quota" style="color:#c9a94a;"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>0 из 5 — счётчик обнулится в полночь</span>
+      <div class="quota hot"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Все 5 обращений за сегодня использованы</span>
         <span class="pips"><span class="pip off"></span><span class="pip off"></span><span class="pip off"></span><span class="pip off"></span><span class="pip off"></span></span>
       </div>
 
@@ -165,13 +167,13 @@
         </div>
       </div>
 
-      <div class="warn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg><span>Пять обращений в сутки — чтобы разбор не превращался в ленту. Срочное — в переписке, она не считается.</span></div>
+      <div class="warn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Счётчик обнулится в полночь. Пять в сутки — чтобы разбор не превращался в ленту.</span></div>
 
       <div style="margin-top:8px;">
         <div class="opt on">
           <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"/></svg>
           <span style="min-width:0;"><span class="nm" style="display:block;">Открыть переписку</span>
-            <span class="ds" style="display:block;">Продолжить начатый разговор — без лимита</span></span>
+            <span class="ds" style="display:block;">Продолжение начатого не считается новым обращением</span></span>
           <span class="go"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span>
         </div>
       </div>
@@ -182,8 +184,8 @@
   </div>
 
   <div class="notes">
-    <div class="minus"><b>?</b><span>Жалоба и доработка — два входа или один с переключателем? В медкарте их два («Обратная связь» и «Пожелание»).</span></div>
-    <div class="minus"><b>?</b><span>Считать лимит по отправленным обращениям или по открытым — и что показывать клиенту, когда он упёрся.</span></div>
+    <div class="ask"><b>?</b><span>Жалоба и доработка — два входа или один с переключателем? В медкарте их два («Обратная связь» и «Пожелание»).</span></div>
+    <div class="ask"><b>?</b><span>Считать лимит по отправленным обращениям или по открытым — и что показывать клиенту, когда он упёрся.</span></div>
   </div>
 
 </div>

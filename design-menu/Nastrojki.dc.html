@@ -1,0 +1,171 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin:0; background:#0a0a0a; color:#e8e8e8;
+      font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing:antialiased; }
+    a { color:#00a0ff; text-decoration:none; } a:hover { color:#4cc0ff; }
+    .art { display:flex; flex-direction:column; height:100%; box-sizing:border-box; }
+    .cap { padding:18px 18px 13px; }
+    .cap .tag { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:#00a0ff; font-weight:600; }
+    .cap h2 { margin:5px 0 0; font-size:17px; font-weight:700; letter-spacing:-.01em; color:#e8e8e8; }
+    .cap p { margin:7px 0 0; font-size:12.5px; line-height:1.5; color:#8b8b8b; }
+    .mock { flex:1 1 auto; min-height:0; display:flex; position:relative;
+      border-top:1px solid #1a1a1a; border-bottom:1px solid #1a1a1a; background:#0a0a0a; overflow:hidden; }
+    .sb { width:230px; flex:0 0 230px; background:#0a0a0a; border-right:1px solid #1a1a1a;
+      display:flex; flex-direction:column; padding:14px 0 0; min-height:0; }
+    .logo { width:22px; height:22px; flex:0 0 auto; }
+    .brand { display:flex; align-items:center; gap:8px; padding:0 14px 12px; }
+    .brand .nm { font-size:14px; font-weight:700; color:#e8e8e8; }
+    .brand .v { font-size:11px; color:#555; font-weight:400; }
+    .ibtn { width:26px; height:26px; border-radius:7px; display:flex; align-items:center; justify-content:center; color:#8a8a8a; flex:0 0 auto; }
+    .srch { margin:0 14px 10px; display:flex; align-items:center; gap:8px;
+      background:#101010; border:1px solid #1e1e1e; border-radius:8px; padding:8px 10px; color:#666; font-size:13px; }
+    .nav { flex:1 1 auto; min-height:0; overflow:hidden; position:relative; }
+    .grp { padding:13px 20px 6px; font-size:10px; letter-spacing:.08em; color:#555; text-transform:uppercase;
+      display:flex; align-items:center; justify-content:space-between; }
+    .row { display:flex; align-items:center; gap:11px; padding:8px 12px; font-size:14px; color:#aaa;
+      margin:0 10px; border-radius:8px; }
+    .row.act { color:#00a0ff; font-weight:600; background:linear-gradient(90deg, rgba(0,160,255,.14), rgba(0,160,255,.03)); }
+    .row .lbl { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .ico { width:18px; height:18px; flex:0 0 auto; color:#8a8a8a; }
+    .row.act .ico { color:#00a0ff; }
+    .badge { margin-left:auto; flex:0 0 auto; background:#e05252; color:#fff; font-size:10px; font-weight:600;
+      min-width:18px; height:18px; border-radius:9px; display:flex; align-items:center; justify-content:center; padding:0 5px; }
+    .kbd { margin-left:auto; font-size:11px; color:#4d4d4d; letter-spacing:.04em; }
+    .sep { height:1px; background:#1a1a1a; margin:10px 20px; }
+    .foot { flex:0 0 auto; border-top:1px solid #1a1a1a; padding:8px 0 0; background:#0a0a0a; }
+    .me { display:flex; align-items:center; gap:10px; padding:9px 12px; margin:6px 10px 10px; border-radius:8px; background:#101010; border:1px solid #1a1a1a; }
+    .ava { width:28px; height:28px; border-radius:50%; flex:0 0 auto; background:#16222b; border:1px solid #24333d;
+      display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#00a0ff; }
+    .me .nm { font-size:12.5px; font-weight:600; color:#e8e8e8; line-height:1.25; }
+    .me .sub { font-size:10.5px; color:#666; line-height:1.3; }
+    .page { flex:1 1 auto; min-width:0; background:#0c0c0c; padding:18px 16px; }
+    .page h3 { margin:0 0 4px; font-size:15px; font-weight:700; color:#2e2e2e; }
+    .page .skel { height:10px; border-radius:5px; background:#141414; margin-top:10px; }
+    .notes { flex:0 0 auto; padding:12px 18px 14px; display:flex; flex-direction:column; gap:6px; }
+    .notes div { font-size:11.5px; line-height:1.45; color:#7d7d7d; display:flex; gap:7px; }
+    .notes b { flex:0 0 auto; font-weight:700; }
+    .plus b { color:#4ade80; } .minus b { color:#f87171; } .ask b { color:#7d7d7d; }
+  </style>
+  <style>
+    .two { flex:1 1 auto; display:flex; gap:28px; padding:14px 18px 0; align-items:flex-start; min-height:0; }
+    .scr { width:430px; flex:0 0 430px; height:610px; border:1px solid #1f1f1f; border-radius:12px;
+      background:#0c0c0c; overflow:hidden; display:flex; flex-direction:column; }
+    .hd { display:flex; align-items:center; padding:14px 16px; border-bottom:1px solid #171717; }
+    .hd .t { font-size:15px; font-weight:700; margin:0 auto; }
+    .body { flex:1 1 auto; overflow:hidden; padding:6px 0 0; }
+    .sec { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:#555; padding:16px 18px 4px; }
+    .li { display:flex; align-items:center; gap:12px; padding:12px 18px; font-size:15px; color:#e8e8e8; min-height:48px; box-sizing:border-box; }
+    .li .v { margin-left:auto; font-size:12.5px; color:#6f6f6f; }
+    .li .go { color:#3d3d3d; width:16px; height:16px; flex:0 0 auto; }
+    .li .v + .go { margin-left:10px; }
+    .hr2 { height:1px; background:#191919; margin:12px 18px; }
+    .btn { display:flex; align-items:center; justify-content:center; margin:12px 18px 0; padding:13px;
+      border:1px solid #2c2c2c; border-radius:10px; color:#00a0ff; font-size:12.5px; font-weight:700; letter-spacing:.06em; }
+    .legal { display:flex; flex-wrap:wrap; gap:8px 16px; padding:14px 18px 16px; }
+    .legal span { font-size:10.5px; letter-spacing:.06em; color:#00a0ff; font-weight:600; }
+    .legal span.v { color:#4d4d4d; }
+    .phone { width:264px; flex:0 0 264px; height:610px; border:1px solid #1f1f1f; border-radius:22px;
+      background:#0c0c0c; overflow:hidden; display:flex; flex-direction:column; }
+    .phone .li { font-size:16px; min-height:54px; padding:14px 18px; }
+    .phone .sec { padding:18px 18px 4px; }
+    .lab { font-size:11px; color:#5f5f5f; text-align:center; margin-top:9px; }
+  </style>
+</helmet>
+<div class="art">
+
+  <div class="cap">
+    <div class="tag">Референс Duolingo · экран настроек</div>
+    <h2>Настройки</h2>
+    <p>Сейчас на /set шестнадцать разделов одним списком, одиннадцать из них — про оформление. Здесь они сложены в три группы: строки без иконок, значения справа, действия — контурными кнопками, правовое внизу.</p>
+  </div>
+
+  <div class="two">
+
+    <div>
+      <div class="scr">
+        <div class="hd"><span class="ibtn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span><span class="t">Настройки</span><span style="width:26px;"></span></div>
+        <div class="body">
+          <div class="sec">Оформление</div>
+          <div class="li">Тема и цвета<span class="v">тёмная</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
+          <div class="li">Карточки, кнопки, поля<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
+          <div class="li">Иконки и бейджи<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
+          <div class="li">Меню и нижний док<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
+
+          <div class="hr2"></div>
+          <div class="sec">Аккаунт</div>
+          <div class="li">Профиль и вход<span class="v">2FA включена</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
+          <div class="li">Уведомления и пуши<span class="v">вкл</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
+          <div class="li">Время и регион<span class="v">Москва, UTC+3</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
+          <div class="li">Моя компания<span class="v">реквизиты</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
+
+          <div class="hr2"></div>
+          <div class="sec">Поддержка</div>
+          <div class="li">База знаний<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
+          <div class="li">Написать в поддержку<span class="v">4 из 5 сегодня</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
+          <div class="li">Что нового<span class="v">1.94</span><svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
+
+          <div class="btn">ВЫЙТИ</div>
+          <div class="legal"><span>ПОЛИТИКА ДАННЫХ</span><span>СТРУКТУРА</span><span class="v">ВЕРСИЯ 1.94</span></div>
+        </div>
+      </div>
+      <div class="lab">Правая панель /set или отдельный экран — раскладка одна.</div>
+    </div>
+
+    <div>
+      <div class="phone">
+        <div class="hd"><span class="ibtn"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></span><span class="t">Настройки</span><span style="width:26px;"></span></div>
+        <div class="body">
+          <div class="sec">Оформление</div>
+          <div class="li">Тема и цвета<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
+          <div class="li">Карточки и кнопки<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
+          <div class="li">Иконки и бейджи<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
+          <div class="hr2"></div>
+          <div class="sec">Аккаунт</div>
+          <div class="li">Профиль и вход<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
+          <div class="li">Уведомления<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
+          <div class="li">Время и регион<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
+          <div class="hr2"></div>
+          <div class="sec">Поддержка</div>
+          <div class="li">Написать в поддержку<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
+          <div class="btn">ВЫЙТИ</div>
+        </div>
+      </div>
+      <div class="lab">На телефоне строка 54 px — попадаешь пальцем.</div>
+    </div>
+
+    <div style="flex:1 1 auto;min-width:170px;display:flex;flex-direction:column;gap:10px;padding-top:2px;">
+      <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#555;">Что куда переехало</div>
+      <div style="font-size:11.5px;line-height:1.55;color:#8b8b8b;">
+        <b style="color:#c8c8c8;font-weight:600;">Оформление</b> — Дизайн, Тема, Карточки и сетка, Кнопки, Поля, Чекбоксы, Иконки, Бейджи, Чипы, Чипы счёта, Меню снизу. Одиннадцать строк стали четырьмя.
+      </div>
+      <div style="font-size:11.5px;line-height:1.55;color:#8b8b8b;">
+        <b style="color:#c8c8c8;font-weight:600;">Аккаунт</b> — Безопасность, Время и регион, Моя компания; «Аккаунт» из списка стал кнопкой «Выйти».
+      </div>
+      <div style="font-size:11.5px;line-height:1.55;color:#8b8b8b;">
+        <b style="color:#c8c8c8;font-weight:600;">Поддержка</b> — новая группа. Та же, что строкой в сайдбаре: один вход, два места.
+      </div>
+      <div style="font-size:11.5px;line-height:1.55;color:#8b8b8b;margin-top:2px;">
+        Строки <b style="color:#c8c8c8;font-weight:600;">без иконок</b> — так список читается спокойнее: шестнадцать разноцветных значков сейчас спорят между собой. Подписи-пояснения тоже убраны: значение справа говорит больше.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="notes">
+    <div class="ask"><b>?</b><span>«Поиск раздела» на /set остаётся или его заменяет группировка?</span></div>
+    <div class="ask"><b>?</b><span>Клиенту в кабинете видны только «Оформление» и «Аккаунт» — проверить, что группы не пустеют.</span></div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

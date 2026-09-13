@@ -9,7 +9,8 @@
 <helmet>
 @@STYLE@@
   <style>
-    .cols { flex:1 1 auto; display:flex; gap:22px; padding:16px 18px 0; align-items:flex-start; }
+    .cols { flex:1 1 auto; min-height:0; overflow:hidden; display:flex; gap:22px;
+      padding:16px 18px 18px; align-items:flex-start; }
     .col { width:290px; flex:0 0 290px; }
     .col .hd { font-size:12.5px; font-weight:700; color:#e8e8e8; margin-bottom:3px; }
     .col .hs { font-size:11.5px; color:#7d7d7d; line-height:1.45; min-height:34px; }
@@ -20,7 +21,8 @@
     .who .em { font-size:11px; color:#666; line-height:1.3; }
     .mrow { display:flex; align-items:center; gap:11px; padding:8px 8px; border-radius:7px; font-size:13px; color:#c8c8c8; }
     .mrow .ico { width:17px; height:17px; }
-    .mrow .r { margin-left:auto; font-size:11px; color:#4d4d4d; }
+    .mrow .r { margin-left:auto; font-size:11px; color:#4d4d4d; display:flex; align-items:center; }
+    .mrow .r .ico { width:14px; height:14px; color:#4d4d4d; }
     .mrow.dg { color:#f87171; } .mrow.dg .ico { color:#f87171; }
     .msep { height:1px; background:#232323; margin:6px 8px; }
     .seg { display:flex; gap:4px; margin-left:auto; background:#0d0d0d; border:1px solid #232323; border-radius:7px; padding:2px; }
@@ -45,11 +47,11 @@
 
     <div class="col">
       <div class="hd">1 · Минимум</div>
-      <div class="hs">Только то, что нельзя не иметь. Всё настроечное остаётся на /set.</div>
+      <div class="hs">Только то, что нельзя не иметь. Остальное — в «Настройках платформы».</div>
       <div class="menu">
         <div class="who">
           <span class="ava">КШ</span>
-          <span><span class="nm" style="display:block;">Константин</span><span class="em" style="display:block;">cashruflow@gmail.com</span></span>
+          <span><span class="nm" style="display:block;">Константин</span><span class="em" style="display:block;">k@cashruflow.ru</span></span>
         </div>
         <div class="msep"></div>
         <div class="mrow">@@ICO:user@@Профиль и вход</div>
@@ -66,13 +68,13 @@
       <div class="menu" style="border-color:#2c3a44;">
         <div class="who">
           <span class="ava">КШ</span>
-          <span><span class="nm" style="display:block;">Константин</span><span class="em" style="display:block;">cashruflow@gmail.com</span></span>
+          <span><span class="nm" style="display:block;">Константин</span><span class="em" style="display:block;">k@cashruflow.ru</span></span>
         </div>
         <div class="msep"></div>
         <div class="mrow">@@ICO:shield@@Профиль и вход<span class="r">2FA</span></div>
         <div class="mrow">@@ICO:settings@@Настройки платформы</div>
         <div class="mrow">@@ICO:sun@@Тема
-          <span class="seg"><span>@@ICO:sun:ico@@Св</span><span class="on">@@ICO:moon:ico@@Тём</span></span>
+          <span class="seg"><span>@@ICO:sun:ico@@Светлая</span><span class="on">@@ICO:moon:ico@@Тёмная</span></span>
         </div>
         <div class="mrow">@@ICO:layers@@Масштаб<span class="scale">А− <b>100%</b> А+</span></div>
         <div class="mrow">@@ICO:copy@@Копия для ИИ<span class="r">⌘⇧C</span></div>
@@ -88,8 +90,8 @@
       <div class="menu">
         <div class="who">
           <span class="ava">КШ</span>
-          <span><span class="nm" style="display:block;">Константин</span><span class="em" style="display:block;">cashruflow@gmail.com</span></span>
-          <span class="r" style="margin-left:auto;font-size:9.5px;color:#00a0ff;border:1px solid rgba(0,160,255,.3);border-radius:20px;padding:2px 7px;">владелец</span>
+          <span><span class="nm" style="display:block;">Константин</span><span class="em" style="display:block;">k@cashruflow.ru</span></span>
+          <span class="rec" style="margin-left:auto;">владелец</span>
         </div>
         <div class="msep"></div>
         <div class="mrow">@@ICO:shield@@Профиль и вход<span class="r">2FA</span></div>
@@ -107,8 +109,8 @@
   </div>
 
   <div class="notes">
-    <div class="minus"><b>?</b><span>Строка профиля показывает почту или роль? У клиента в кабинете почта лишняя, у вас — наоборот.</span></div>
-    <div class="minus"><b>?</b><span>Если подвал переезжает в это меню, «На главную» становится логотипом сверху — или исчезает совсем.</span></div>
+    <div class="ask"><b>?</b><span>Строка профиля показывает почту или роль? У клиента в кабинете почта лишняя, у вас — наоборот.</span></div>
+    <div class="ask"><b>?</b><span>Если подвал переезжает в это меню, «На главную» становится логотипом сверху — или исчезает совсем.</span></div>
   </div>
 
 </div>
