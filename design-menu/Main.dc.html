@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin:0; background:#0a0a0a; color:#e8e8e8;
+      font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing:antialiased; }
+    a { color:#00a0ff; text-decoration:none; } a:hover { color:#4cc0ff; }
+    .art { display:flex; flex-direction:column; height:100%; box-sizing:border-box; }
+    .cap { padding:18px 18px 13px; }
+    .cap .tag { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:#00a0ff; font-weight:600; }
+    .cap h2 { margin:5px 0 0; font-size:17px; font-weight:700; letter-spacing:-.01em; color:#e8e8e8; }
+    .cap p { margin:7px 0 0; font-size:12.5px; line-height:1.5; color:#8b8b8b; }
+    .mock { flex:1 1 auto; min-height:0; display:flex; position:relative;
+      border-top:1px solid #1a1a1a; border-bottom:1px solid #1a1a1a; background:#0a0a0a; overflow:hidden; }
+    .sb { width:230px; flex:0 0 230px; background:#0a0a0a; border-right:1px solid #1a1a1a;
+      display:flex; flex-direction:column; padding:14px 0 0; min-height:0; }
+    .logo { width:22px; height:22px; flex:0 0 auto; }
+    .brand { display:flex; align-items:center; gap:8px; padding:0 14px 12px; }
+    .brand .nm { font-size:14px; font-weight:700; color:#e8e8e8; }
+    .brand .v { font-size:11px; color:#555; font-weight:400; }
+    .ibtn { width:26px; height:26px; border-radius:7px; display:flex; align-items:center; justify-content:center; color:#8a8a8a; flex:0 0 auto; }
+    .srch { margin:0 14px 10px; display:flex; align-items:center; gap:8px;
+      background:#101010; border:1px solid #1e1e1e; border-radius:8px; padding:8px 10px; color:#666; font-size:13px; }
+    .nav { flex:1 1 auto; min-height:0; overflow:hidden; position:relative; }
+    .grp { padding:13px 20px 6px; font-size:10px; letter-spacing:.08em; color:#555; text-transform:uppercase;
+      display:flex; align-items:center; justify-content:space-between; }
+    .row { display:flex; align-items:center; gap:11px; padding:8px 12px; font-size:14px; color:#aaa;
+      margin:0 10px; border-radius:8px; }
+    .row.act { color:#00a0ff; font-weight:600; background:linear-gradient(90deg, rgba(0,160,255,.14), rgba(0,160,255,.03)); }
+    .row .lbl { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .ico { width:18px; height:18px; flex:0 0 auto; color:#8a8a8a; }
+    .row.act .ico { color:#00a0ff; }
+    .badge { margin-left:auto; flex:0 0 auto; background:#e05252; color:#fff; font-size:10px; font-weight:600;
+      min-width:18px; height:18px; border-radius:9px; display:flex; align-items:center; justify-content:center; padding:0 5px; }
+    .kbd { margin-left:auto; font-size:11px; color:#4d4d4d; letter-spacing:.04em; }
+    .sep { height:1px; background:#1a1a1a; margin:10px 20px; }
+    .foot { flex:0 0 auto; border-top:1px solid #1a1a1a; padding:8px 0 0; background:#0a0a0a; }
+    .me { display:flex; align-items:center; gap:10px; padding:9px 12px; margin:6px 10px 10px; border-radius:8px; background:#101010; border:1px solid #1a1a1a; }
+    .ava { width:28px; height:28px; border-radius:50%; flex:0 0 auto; background:#16222b; border:1px solid #24333d;
+      display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#00a0ff; }
+    .me .nm { font-size:12.5px; font-weight:600; color:#e8e8e8; line-height:1.25; }
+    .me .sub { font-size:10.5px; color:#666; line-height:1.3; }
+    .page { flex:1 1 auto; min-width:0; background:#0c0c0c; padding:18px 16px; }
+    .page h3 { margin:0 0 4px; font-size:15px; font-weight:700; color:#2e2e2e; }
+    .page .skel { height:10px; border-radius:5px; background:#141414; margin-top:10px; }
+    .notes { flex:0 0 auto; padding:12px 18px 14px; display:flex; flex-direction:column; gap:6px; }
+    .notes div { font-size:11.5px; line-height:1.45; color:#7d7d7d; display:flex; gap:7px; }
+    .notes b { flex:0 0 auto; font-weight:700; }
+    .plus b { color:#4ade80; } .minus b { color:#f87171; }
+  </style>
+  <style>
+    .pop { position:absolute; left:250px; top:62px; width:238px; z-index:5;
+      background:#141414; border:1px solid #262626; border-radius:10px; padding:6px;
+      box-shadow:0 18px 40px rgba(0,0,0,.65); }
+    .pop .ttl { font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:#555; padding:7px 8px 6px; }
+    .pop .it { display:flex; align-items:center; gap:9px; padding:7px 8px; border-radius:7px; font-size:12.5px; color:#c8c8c8; }
+    .pop .it.on { background:rgba(0,160,255,.1); color:#00a0ff; }
+    .pop .n { margin-left:auto; font-size:11px; color:#4d4d4d; }
+    .dot { width:10px; height:10px; border-radius:3px; flex:0 0 auto; }
+    .grip { margin-left:auto; color:#2e2e2e; font-size:13px; letter-spacing:-1px; }
+    .mini { font-size:12.5px; color:#6f6f6f; padding:6px 12px; margin:0 10px; border-radius:8px; display:flex; align-items:center; gap:11px; }
+    .mini .ico { width:15px; height:15px; color:#4d4d4d; }
+  </style>
+</helmet>
+<div class="art">
+
+  <div class="cap">
+    <div class="tag">Вариант Б</div>
+    <h2>Избранное и каталог</h2>
+    <p>В меню — только то, чем пользуешься каждый день. Остальные 50 разделов живут в каталоге за одной строкой и в поиске.</p>
+  </div>
+
+  <div class="mock">
+    <div class="sb">
+
+      <div class="brand" style="padding:0 10px 12px;">
+        <span style="width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:#101010;border:1px solid #1e1e1e;flex:0 0 auto;"><svg class="logo" viewBox="0 0 395 383" fill="none" aria-hidden="true"><path d="M175.494 213.4C175.494 213.4 254.794 164.3 285.894 92.2L306.594 103.2C307.494 103.8 308.694 103.3 308.894 102.2C310.594 93 317.494 54.6 314.594 26.2C314.494 25.2 313.294 24.6 312.394 25.2C290.494 42.7 273.694 58.7 251.294 71C250.394 71.5 250.394 72.9 251.294 73.4L271.994 84.9C271.994 84.9 238.294 152.5 134.994 174.3L127.194 175.8V150.3C127.194 148.8 125.994 147.6 124.494 147.6H94.9938C93.4938 147.6 92.2937 148.8 92.2937 150.3V182.7C82.6937 184.9 74.2938 187.1 65.8938 190C63.5938 190.8 60.3937 191.9 56.8937 193.2V171.9C56.8937 170.4 55.5938 169.1 54.0938 169.1H24.7938C23.2938 169.1 21.9938 170.4 21.9938 171.9V210.2C11.9938 217.1 5.69375 223.9 0.39375 230.3C-0.70625 231.6 0.693753 233.4 2.19375 232.7C20.7938 223.9 76.0938 198.6 175.494 213.4Z" fill="#00A0FF"/><path d="M390.994 167.6C390.694 166.2 388.594 166.1 387.694 167.3C375.594 183.4 346.394 245.3 267.994 244C243.494 243.6 214.494 233.8 184.194 228.5C136.194 220.1 42.1938 218.6 8.39377 243.8C6.99377 244.9 8.69378 247.2 10.2938 246.6C26.0938 241.1 71.6938 226.6 135.594 250.6C202.294 275.6 218.594 294.4 255.294 306C274.294 312 345.894 326.7 380.194 262.2C390.694 242.6 399.894 213.7 390.994 167.6Z" fill="#00A0FF"/><path d="M340.994 318.4C296.494 331.3 264.294 342.6 192.094 294.8C164.494 276.6 122.494 256 100.794 251.6C98.9938 251.2 97.9938 253.8 99.5938 254.6C126.994 267.3 154.894 293.5 169.094 307.4C170.994 309.1 177.694 315.2 179.594 316.9C189.694 326.7 230.194 361.6 269.794 361.6C306.094 361.6 337.194 330.4 342.894 321.5C343.694 320.1 342.594 317.9 340.994 318.4Z" fill="#00A0FF"/><path d="M235.894 374.2C224.994 370.2 197.194 358.9 176.994 340.3C155.694 320.7 124.694 287.4 105.194 272.3C69.7938 244.8 30.8938 255.5 17.9938 261.3C16.4938 262 16.6938 264.1 18.2938 264.6C66.8938 279.4 101.594 315.4 117.094 336.3C125.194 347.2 131.594 358.4 142.394 366.9C150.094 372.9 161.594 377.4 170.994 379.7C198.094 386.4 224.994 380.4 235.694 377.4C237.294 376.8 237.294 374.7 235.894 374.2Z" fill="#00A0FF"/><path d="M96.6938 335.4C85.2938 322.7 67.8938 301.2 30.4938 286.2C28.7938 285.5 26.9938 287.3 27.7938 289C33.0938 300.2 54.0937 345 114.894 364.1C116.294 364.6 117.594 363 116.694 361.7C112.794 355.9 104.694 344.3 96.6938 335.4Z" fill="#00A0FF"/><path d="M328.794 116.7C324.694 116.7 321.294 120.1 321.294 124.3V217.5C323.294 216.4 325.394 215.3 327.294 214.1C338.694 207.1 346.694 199.1 351.894 193V124.3C351.894 120.1 348.494 116.7 344.394 116.7H328.794Z" fill="#00A0FF"/><path d="M282.894 147.8C278.794 147.8 275.394 151.2 275.394 155.4V229.4C278.894 229.3 282.294 229 285.594 228.5C292.694 227.6 299.494 226 305.994 223.9V155.4C305.994 151.2 302.594 147.8 298.494 147.8H282.894Z" fill="#00A0FF"/><path d="M236.994 182.3C232.894 182.3 229.494 185.7 229.494 189.9V223.9C239.994 226.7 250.294 228.5 260.094 229.2V190C260.094 185.8 256.694 182.4 252.594 182.4H236.994V182.3Z" fill="#00A0FF"/><path d="M107.194 27.4H128.394C130.094 27.4 131.494 26 131.494 24.3V3.10001C131.494 1.40001 130.094 0 128.394 0H107.194C105.494 0 104.094 1.40001 104.094 3.10001V24.3C104.094 26 105.494 27.4 107.194 27.4Z" fill="#00A0FF"/><path d="M105.194 79.5H119.094C120.494 79.5 121.694 78.3 121.694 76.9V63C121.694 61.6 120.494 60.4 119.094 60.4H105.194C103.794 60.4 102.594 61.6 102.594 63V76.9C102.594 78.3 103.794 79.5 105.194 79.5Z" fill="#00A0FF"/><path d="M137.994 126.5H166.294C167.694 126.5 168.794 125.4 168.794 124V95.7C168.794 94.3 167.694 93.2 166.294 93.2H137.994C136.594 93.2 135.494 94.3 135.494 95.7V124C135.394 125.4 136.594 126.5 137.994 126.5Z" fill="#00A0FF"/><path d="M8.79375 135.6H24.3937C25.3937 135.6 26.2937 134.8 26.2937 133.7V118.1C26.2937 117.1 25.4937 116.2 24.3937 116.2H8.79375C7.79375 116.2 6.89374 117 6.89374 118.1V133.7C6.89374 134.8 7.79375 135.6 8.79375 135.6Z" fill="#00A0FF"/><path d="M41.4938 75.4H60.7938C62.3938 75.4 63.5938 74.1 63.5938 72.6V53.3C63.5938 51.7 62.2938 50.5 60.7938 50.5H41.4938C39.8938 50.5 38.6938 51.8 38.6938 53.3V72.6C38.5938 74.1 39.8938 75.4 41.4938 75.4Z" fill="#00A0FF"/><path d="M62.1937 111.1V130.6C62.1937 131.9 63.1937 132.9 64.4937 132.9H83.9937C85.2937 132.9 86.2937 131.9 86.2937 130.6V111.1C86.2937 109.8 85.2937 108.8 83.9937 108.8H64.4937C63.1937 108.8 62.1937 109.8 62.1937 111.1Z" fill="#00A0FF"/></svg></span>
+        <span class="nm">AI-платформа</span>
+        <span class="ibtn" style="margin-left:auto;"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg></span>
+      </div>
+
+      <div class="srch"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg><span>Поиск…</span><span class="kbd">⌘K</span></div>
+
+      <div class="nav">
+        <div class="grp"><span>Закреплённое</span><span style="color:#444;font-size:10px;">правка</span></div>
+        <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg><span class="lbl">Уведомления</span><span class="badge">3</span></div>
+        <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><rect x="3" y="4" width="6" height="6" rx="1"/></svg><span class="lbl">Неделя</span></div>
+        <div class="row act"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span class="lbl">Бэклог</span><span class="grip">⣿</span></div>
+        <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20v-9"/><path d="M14 7a4 4 0 0 1 4 4v3a6 6 0 0 1-12 0v-3a4 4 0 0 1 4-4z"/><path d="M14.12 3.88 16 2"/><path d="M21 21a4 4 0 0 0-3.81-4"/><path d="M21 5a4 4 0 0 1-3.55 3.97"/><path d="M22 13h-4"/><path d="M3 21a4 4 0 0 1 3.81-4"/><path d="M3 5a4 4 0 0 0 3.55 3.97"/><path d="M6 13H2"/><path d="m8 2 1.88 1.88"/><path d="M9 7.13V6a3 3 0 1 1 6 0v1.13"/></svg><span class="lbl">Ошибки</span><span class="badge">2</span></div>
+        <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6V2h-1"/><path d="M9 15a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1"/><path d="M9 21V11a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v10"/></svg><span class="lbl">Лиды</span></div>
+        <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg><span class="lbl">Финансы</span></div>
+        <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/><path d="M3.22 13H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/></svg><span class="lbl">Медкарта</span></div>
+
+        <div class="sep"></div>
+
+        <div class="row" style="color:#c8c8c8;"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg><span class="lbl">Все разделы</span><span class="kbd">58</span></div>
+
+        <div class="grp" style="padding-top:14px;"><span>Недавнее</span></div>
+        <div class="mini"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A4 4 0 0 1 2 17c.01-.7.2-1.4.57-2"/><path d="m6 17 3.13-5.78c.53-.97.1-2.18-.5-3.1a4 4 0 1 1 6.89-4.06"/><path d="m12 6 3.13 5.73C15.66 12.7 16.9 13 18 13a4 4 0 0 1 0 8"/></svg><span>Вебхуки</span></div>
+        <div class="mini"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Пациенты</span></div>
+        <div class="mini"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg><span>Сайты</span></div>
+      </div>
+
+      <div class="foot">
+        <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg><span class="lbl">Настройки</span></div>
+        <div class="row"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/><circle cx="12" cy="12" r="4"/></svg><span class="lbl">Поддержка</span><span class="badge" style="background:#1e1e1e;color:#8b8b8b;">5</span></div>
+        <div class="me">
+          <span class="ava">КШ</span>
+          <span style="min-width:0;">
+            <span class="nm" style="display:block;">Константин</span>
+            <span class="sub" style="display:block;">Владелец платформы</span>
+          </span>
+          <span class="ibtn" style="margin-left:auto;background:rgba(0,160,255,.1);color:#00a0ff;"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="page">
+      <h3>Бэклог</h3>
+      <div class="skel" style="width:70%;"></div>
+      <div class="skel"></div>
+      <div class="skel" style="width:85%;"></div>
+    </div>
+
+    <div class="pop">
+      <div class="ttl">Все разделы</div>
+      <div class="it on"><span class="dot" style="background:#00a0ff;"></span>Работа<span class="n">10</span></div>
+      <div class="it"><span class="dot" style="background:#a855f7;"></span>AI-CRM<span class="n">12</span></div>
+      <div class="it"><span class="dot" style="background:#06b6d4;"></span>SEO<span class="n">7</span></div>
+      <div class="it"><span class="dot" style="background:#4ade80;"></span>Финансы<span class="n">4</span></div>
+      <div class="it"><span class="dot" style="background:#fbbf24;"></span>Личное<span class="n">4</span></div>
+      <div class="it"><span class="dot" style="background:#f87171;"></span>Медкарта<span class="n">6</span></div>
+      <div class="it"><span class="dot" style="background:#f97316;"></span>Интеграции<span class="n">12</span></div>
+      <div style="height:1px;background:#232323;margin:6px 8px;"></div>
+      <div class="it" style="color:#6f6f6f;">Наведите раздел — список справа</div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div class="plus"><b>+</b><span>Меню перестаёт расти: новых страниц уже 58, а список остаётся в один экран.</span></div>
+    <div class="plus"><b>+</b><span>Опирается на то, что уже работает, — «Быстрый доступ» и поиск по меню.</span></div>
+    <div class="minus"><b>−</b><span>Один раз надо разложить закреплённое, иначе меню пустое.</span></div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

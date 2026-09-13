@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+@@STYLE@@
+  <style>
+    /* «Сейчас» — точная раскладка sidebar.js: направляющая линия группы и засечка у пункта */
+    .tree { position:relative; }
+    .tree::before { content:''; position:absolute; left:27px; top:0; bottom:6px; width:1px; background:#1c1c1c; }
+    .tree .row { margin:0 10px 0 0; padding:8px 14px 8px 44px; border-radius:0 8px 8px 0; }
+    .tree .row::before { content:''; position:absolute; left:28px; top:50%; width:9px; height:1px; background:#232323; }
+    .tree .row { position:relative; }
+    .tree .row.act::before { background:#00a0ff; width:12px; }
+    .tiles { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; padding:12px 14px; }
+    .tile { min-height:76px; box-sizing:border-box; padding:8px 6px; background:#101010; border:1px solid #1e1e1e;
+      border-radius:8px; color:#8b8b8b; font-size:12px; line-height:1.25; text-align:center;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; }
+    .tile svg { width:20px; height:20px; color:#8a8a8a; }
+    .fade { position:absolute; left:0; right:0; bottom:0; height:56px;
+      background:linear-gradient(180deg, rgba(10,10,10,0), #0a0a0a 78%); pointer-events:none; }
+  </style>
+</helmet>
+<div class="art">
+
+  <div class="cap">
+    <div class="tag" style="color:#8b8b8b;">Как сегодня</div>
+    <h2>Сейчас</h2>
+    <p>8 групп, 58 пунктов одним списком. Поиск и «Быстрый доступ» есть, а профиля, поддержки и выхода в меню нет.</p>
+  </div>
+
+  <div class="mock">
+    <div class="sb">
+
+      <div class="brand">
+        @@LOGO@@
+        <span class="nm">AI-платформа</span>
+        <span class="v">1.94</span>
+        <span style="width:8px;height:8px;border-radius:50%;background:#2ecc71;box-shadow:0 0 5px #2ecc7166;flex:0 0 auto;"></span>
+        <span style="margin-left:auto;display:flex;gap:2px;">
+          <span class="ibtn">@@ICO:pin@@</span>
+          <span class="ibtn">@@ICO:sun@@</span>
+          <span class="ibtn">@@ICO:settings@@</span>
+        </span>
+      </div>
+
+      <div class="srch">@@ICO:search@@<span>Поиск по меню…</span></div>
+
+      <div class="nav">
+        <div class="grp"><span>Быстрый доступ</span><span style="color:#444;">⌄</span></div>
+        <div class="tree">
+          <div class="row">@@ICO:tasks@@<span class="lbl">Бэклог</span></div>
+          <div class="row">@@ICO:medcard@@<span class="lbl">Медкарта</span></div>
+        </div>
+
+        <div class="grp"><span>Работа</span><span style="color:#444;">⌄</span></div>
+        <div class="tree">
+          <div class="row">@@ICO:notify@@<span class="lbl">Уведомления</span><span class="badge">3</span></div>
+          <div class="row">@@ICO:week@@<span class="lbl">Неделя</span></div>
+          <div class="row act">@@ICO:tasks@@<span class="lbl">Бэклог</span></div>
+          <div class="row">@@ICO:bug@@<span class="lbl">Ошибки</span></div>
+          <div class="row">@@ICO:ticket@@<span class="lbl">Тикеты</span></div>
+          <div class="row">@@ICO:projects@@<span class="lbl">Проекты</span></div>
+          <div class="row">@@ICO:clients@@<span class="lbl">Клиенты</span></div>
+          <div class="row">@@ICO:access@@<span class="lbl">Доступы</span></div>
+          <div class="row">@@ICO:brain@@<span class="lbl">БЗ</span></div>
+          <div class="row">@@ICO:message@@<span class="lbl">Бриф</span></div>
+        </div>
+
+        <div class="grp"><span>AI-CRM</span><span style="color:#444;">⌄</span></div>
+        <div class="tree">
+          <div class="row">@@ICO:podium@@<span class="lbl">CRM — обзор</span></div>
+          <div class="row">@@ICO:clients@@<span class="lbl">Люди</span></div>
+          <div class="row">@@ICO:projects@@<span class="lbl">Компании</span></div>
+        </div>
+        <div class="fade"></div>
+      </div>
+
+      <div class="foot" style="padding:0;">
+        <div class="tiles">
+          <div class="tile">@@ICO:home:x@@<span>На главную</span></div>
+          <div class="tile">@@ICO:copy:x@@<span>Копия для ИИ</span></div>
+          <div class="tile" style="gap:4px;"><span style="font-size:12px;">Масштаб</span>
+            <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:#666;">А− 100% А+</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="page">
+      <h3>Бэклог</h3>
+      <div class="skel" style="width:70%;"></div>
+      <div class="skel"></div>
+      <div class="skel" style="width:85%;"></div>
+      <div class="skel" style="width:40%;"></div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div class="minus"><b>−</b><span>До «Интеграций» — три прокрутки, группы приходится складывать руками.</span></div>
+    <div class="minus"><b>−</b><span>Не видно, кто вошёл; выхода и поддержки в меню нет вообще.</span></div>
+    <div class="minus"><b>−</b><span>Подвал съедает 100 px под три плитки, которые нажимают редко.</span></div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
