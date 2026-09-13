@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+@@STYLE@@
+  <style>
+    .rail { width:56px; flex:0 0 56px; background:#070707; border-right:1px solid #1a1a1a;
+      display:flex; flex-direction:column; align-items:center; padding:14px 0 10px; gap:4px; }
+    .rbtn { width:38px; height:38px; border-radius:9px; display:flex; align-items:center; justify-content:center; color:#7a7a7a; position:relative; }
+    .rbtn.on { background:rgba(0,160,255,.12); color:#00a0ff; }
+    .rbtn.on::before { content:''; position:absolute; left:-9px; top:9px; bottom:9px; width:3px; border-radius:0 3px 3px 0; background:#00a0ff; }
+    .rbtn .ico { width:19px; height:19px; color:currentColor; }
+    .rdot { width:7px; height:7px; border-radius:2px; }
+    .pan { width:214px; flex:0 0 214px; background:#0a0a0a; border-right:1px solid #1a1a1a;
+      display:flex; flex-direction:column; padding:14px 0 0; }
+    .ptl { padding:0 14px 12px; font-size:13px; font-weight:700; color:#e8e8e8; display:flex; align-items:center; gap:8px; }
+    .pan .row { margin:0 8px; }
+  </style>
+</helmet>
+<div class="art">
+
+  <div class="cap">
+    <div class="tag">Вариант В</div>
+    <h2>Рельс и панель</h2>
+    <p>Слева колонка из восьми разделов, справа — пункты только выбранного. Список всегда короткий, но ничего не прячется в подменю.</p>
+  </div>
+
+  <div class="mock">
+
+    <div class="rail">
+      <span style="width:26px;height:26px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">@@LOGO@@</span>
+      <span class="rbtn on">@@ICO:tasks@@</span>
+      <span class="rbtn">@@ICO:podium@@</span>
+      <span class="rbtn">@@ICO:sites@@</span>
+      <span class="rbtn">@@ICO:fields@@</span>
+      <span class="rbtn">@@ICO:cash@@</span>
+      <span class="rbtn">@@ICO:diary@@</span>
+      <span class="rbtn">@@ICO:medcard@@</span>
+      <span class="rbtn">@@ICO:webhooks@@</span>
+      <span style="margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <span class="rbtn">@@ICO:settings@@</span>
+        <span class="rbtn">@@ICO:buoy@@</span>
+        <span class="ava" style="width:30px;height:30px;margin-top:4px;">КШ</span>
+      </span>
+    </div>
+
+    <div class="pan">
+      <div class="ptl">Работа <span style="margin-left:auto;color:#4d4d4d;font-weight:400;font-size:11px;">10</span></div>
+      <div class="srch" style="margin:0 8px 10px;">@@ICO:search@@<span>Поиск…</span></div>
+      <div class="nav">
+        <div class="row">@@ICO:notify@@<span class="lbl">Уведомления</span><span class="badge">3</span></div>
+        <div class="row">@@ICO:week@@<span class="lbl">Неделя</span></div>
+        <div class="row act">@@ICO:tasks@@<span class="lbl">Бэклог</span></div>
+        <div class="row">@@ICO:bug@@<span class="lbl">Ошибки</span><span class="badge">2</span></div>
+        <div class="row">@@ICO:ticket@@<span class="lbl">Тикеты</span></div>
+        <div class="row">@@ICO:projects@@<span class="lbl">Проекты</span></div>
+        <div class="row">@@ICO:clients@@<span class="lbl">Клиенты</span></div>
+        <div class="row">@@ICO:access@@<span class="lbl">Доступы</span></div>
+        <div class="row">@@ICO:brain@@<span class="lbl">База знаний</span></div>
+        <div class="row">@@ICO:message@@<span class="lbl">Бриф</span></div>
+      </div>
+      <div class="foot" style="border-top:1px solid #1a1a1a;padding:8px 0;">
+        <div class="mini" style="font-size:11.5px;color:#5a5a5a;padding:2px 12px;margin:0 8px;">Раздел выбирается слева</div>
+      </div>
+    </div>
+
+    <div class="page">
+      <h3>Бэклог</h3>
+      <div class="skel" style="width:70%;"></div>
+      <div class="skel"></div>
+      <div class="skel" style="width:85%;"></div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div class="plus"><b>+</b><span>Прокрутки нет никогда: в самой большой группе 12 пунктов.</span></div>
+    <div class="plus"><b>+</b><span>Рельс уже написан — sb-resize.js умеет схлопывать сайдбар в колонку значков.</span></div>
+    <div class="minus"><b>−</b><span>Восемь значков надо выучить; на телефоне рельс придётся разворачивать.</span></div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
