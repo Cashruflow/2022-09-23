@@ -1,0 +1,724 @@
+<title>Раздел «Секс» на телефоне</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+/* ================================================================
+   Макет «до / после» — вкладка «Секс» медкарты на экране 375px.
+   Палитра и шрифт взяты у самой платформы (ui.css + medcard_theme.css),
+   ничего своего не придумано: тёмные экраны телефонов — это продукт,
+   светлеет только обвязка страницы.
+   ================================================================ */
+:root{
+  /* обвязка — светлая тема по умолчанию */
+  --pg:#f6f5f8; --pg-2:#ffffff; --pg-line:#e4e1ea;
+  --pg-tx:#181722; --pg-tx-2:#5c586b; --pg-tx-3:#8b8798;
+  --accent:#7c3aed; --bad:#d92d20; --good:#0f9d58;
+  /* экран телефона — всегда тёмный, это токены платформы */
+  --ui-bg:#0a0a0a; --ui-surface:#141414; --ui-surface-3:#111;
+  --ui-line:#262626; --ui-line-2:#1e1e1e; --ui-line-3:#333;
+  --ui-tx:#e8e8e8; --ui-tx-2:#8b8b8b; --ui-tx-3:#6a6a6a;
+  --ui-brand:#00a0ff; --ui-purple:#a855f7; --ui-danger:#f87171;
+  --ui-male:#0a84ff; --ui-female:#f472b6;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --pg:#0e0d12; --pg-2:#17161d; --pg-line:#2a2833;
+    --pg-tx:#ece9f2; --pg-tx-2:#a29db2; --pg-tx-3:#6f6a80;
+    --accent:#a78bfa; --bad:#f87171; --good:#4ade80;
+  }
+}
+:root[data-theme="dark"]{
+  --pg:#0e0d12; --pg-2:#17161d; --pg-line:#2a2833;
+  --pg-tx:#ece9f2; --pg-tx-2:#a29db2; --pg-tx-3:#6f6a80;
+  --accent:#a78bfa; --bad:#f87171; --good:#4ade80;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--pg); color:var(--pg-tx);
+  font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-size:15px; line-height:1.5;
+}
+.wrap{max-width:1120px; margin:0 auto; padding:36px 20px 72px}
+@media (max-width:520px){ .wrap{padding:24px 16px 56px} }
+
+/* ---------- шапка страницы ---------- */
+.eyebrow{
+  font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--accent); margin:0 0 10px;
+}
+h1{
+  font-size:clamp(26px,5vw,38px); line-height:1.12; font-weight:800;
+  letter-spacing:-.02em; margin:0 0 12px; text-wrap:balance;
+}
+.lead{max-width:62ch; color:var(--pg-tx-2); font-size:16px; margin:0}
+.meta{
+  display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:18px;
+  font-size:12.5px; color:var(--pg-tx-3); font-variant-numeric:tabular-nums;
+}
+.meta b{color:var(--pg-tx-2); font-weight:600}
+
+hr.sep{border:0; border-top:1px solid var(--pg-line); margin:34px 0}
+
+/* ---------- рама телефона ---------- */
+.frames{display:flex; flex-wrap:wrap; gap:28px; align-items:flex-start}
+.frame{flex:0 0 auto; max-width:100%}
+.frame-hd{display:flex; align-items:center; gap:10px; margin-bottom:12px}
+.tag{
+  font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+  padding:4px 10px; border-radius:999px; border:1px solid currentColor;
+}
+.tag.is-bad{color:var(--bad)}
+.tag.is-good{color:var(--good)}
+.frame-hd .cap{font-size:13px; color:var(--pg-tx-2)}
+
+.phone{
+  width:375px; max-width:100%;
+  border:1px solid var(--pg-line); border-radius:26px; padding:9px;
+  background:var(--pg-2);
+}
+.screen{
+  width:100%; height:640px; overflow:hidden; position:relative;
+  border-radius:18px; background:var(--ui-bg); color:var(--ui-tx);
+  font-size:14px; line-height:1.45;
+}
+.screen .scroll{height:100%; overflow-y:auto; overflow-x:hidden; scrollbar-width:thin}
+/* .ui-page: боковые поля 14px — как на платформе */
+.page{padding:14px 14px 40px}
+
+/* линейка ширины под экраном */
+.ruler{
+  display:flex; justify-content:space-between; font-size:11px;
+  color:var(--pg-tx-3); margin-top:8px; font-variant-numeric:tabular-nums;
+}
+
+/* ---------- платформенные примитивы (копия вида, не копия кода) ---------- */
+.card{
+  background:var(--ui-surface); border:1px solid var(--ui-line);
+  border-radius:12px; padding:16px;
+}
+.card + .card{margin-top:14px}
+.sub{background:var(--ui-surface-3); border:1px solid var(--ui-line-2); border-radius:8px}
+
+.btn,.tbtn{
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  font:inherit; font-size:13px; font-weight:600; padding:10px 18px;
+  border-radius:8px; border:1px solid transparent; cursor:default; white-space:nowrap;
+}
+.btn{background:var(--ui-brand); color:#04121d; border-color:var(--ui-brand)}
+.tbtn{background:transparent; color:var(--ui-tx-2); border-color:var(--ui-line-3)}
+.ibtn{
+  display:inline-flex; align-items:center; justify-content:center;
+  background:none; border:0; color:var(--ui-tx-3); cursor:default; padding:0;
+}
+.ico{width:15px; height:15px; flex-shrink:0; stroke:currentColor; fill:none;
+     stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+
+.sec-head{display:flex; align-items:center; gap:12px; min-width:0}
+.sec-badge{
+  width:42px; height:42px; border-radius:11px; flex-shrink:0;
+  background:rgba(168,85,247,.12); border:1px solid rgba(168,85,247,.22);
+  color:var(--ui-purple); display:flex; align-items:center; justify-content:center;
+}
+.sec-badge .ico{width:20px; height:20px}
+.sec-title{font-size:17px; font-weight:700; letter-spacing:-.01em}
+.sec-date{font-size:12.5px; color:var(--ui-tx-2); margin-top:2px}
+
+.tiles{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
+.tile{padding:13px 14px; background:var(--ui-surface-3); border:1px solid var(--ui-line-2); border-radius:8px}
+.tile.is-accent{border-color:rgba(168,85,247,.28)}
+.tile .k{font-size:10.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--ui-tx-3)}
+.tile.is-accent .k{color:var(--ui-purple)}
+.tile .v{display:flex; align-items:baseline; gap:6px; margin-top:7px}
+.tile .v b{font-size:24px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums}
+.tile .v span{font-size:11.5px; color:var(--ui-tx-3)}
+.tile .s{font-size:11.5px; color:var(--ui-tx-3); margin-top:7px}
+
+.count-line{
+  display:flex; gap:9px; align-items:flex-start; flex-wrap:wrap;
+  margin-top:12px; padding:10px 12px; font-size:11.5px; line-height:1.5;
+  color:var(--ui-tx-2); background:var(--ui-surface-3);
+  border:1px solid var(--ui-line-2); border-radius:8px;
+}
+.ai-badge{
+  font-size:9.5px; font-weight:800; letter-spacing:.08em; padding:3px 6px;
+  border-radius:5px; color:var(--ui-brand); background:rgba(0,160,255,.12);
+  border:1px solid rgba(0,160,255,.3);
+}
+
+.cal-hd{display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; margin-bottom:12px}
+.cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:5px}
+.cal-wd{font-size:10.5px; color:var(--ui-tx-3); text-align:center; margin-bottom:5px}
+.cal-d{
+  min-height:44px; padding:8px 0 6px; text-align:center; border-radius:8px;
+  background:var(--ui-surface-3); border:1px solid var(--ui-line-2);
+  color:var(--ui-tx-2); font-size:13px; font-variant-numeric:tabular-nums;
+}
+.cal-d.is-sel{background:rgba(0,160,255,.14); border-color:var(--ui-brand); color:var(--ui-tx); font-weight:600}
+.cal-dots{display:flex; gap:3px; justify-content:center; height:4px; margin-top:4px}
+.cal-dots i{width:4px; height:4px; border-radius:50%; background:var(--ui-purple); display:block}
+
+.feed-hd{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px}
+.feed-hd .t{font-size:14px; font-weight:700; letter-spacing:-.01em}
+.feed-hd .n{font-size:11.5px; color:var(--ui-tx-3); font-variant-numeric:tabular-nums}
+
+.chip{
+  display:inline-flex; align-items:center; gap:5px; padding:4px 9px; border-radius:6px;
+  background:var(--ui-surface-3); border:1px solid var(--ui-line-2);
+  font-size:11.5px; color:var(--ui-tx-2); font-variant-numeric:tabular-nums;
+}
+.chip.is-place{background:rgba(168,85,247,.10); border-color:rgba(168,85,247,.25)}
+.drop{width:12px; height:12px; vertical-align:-2px}
+.drop.m{fill:var(--ui-male); stroke:var(--ui-male)}
+.drop.f{fill:var(--ui-female); stroke:var(--ui-female)}
+
+.pf-row{display:flex; align-items:center; gap:6px; min-width:0; font-size:11.5px; color:var(--ui-tx-3)}
+.pf-row > .ico{width:13px; height:13px; color:var(--ui-purple)}
+.pf-row > span{flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+
+.note{font-size:12.5px; color:var(--ui-tx-2); line-height:1.5; overflow-wrap:anywhere}
+
+/* ---------- ДО: как оно свёрстано сейчас ---------- */
+.b-actions{display:flex; flex-wrap:wrap; gap:8px; margin-left:auto}
+.b-actions .btn,.b-actions .tbtn{min-height:44px}
+.b-top{display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:16px}
+.b-tabs{display:flex; flex-wrap:wrap; gap:6px; margin:16px 0}
+.b-tabs .btn,.b-tabs .tbtn{min-height:44px}
+/* грид календарь+записи: minmax(360px,1fr) в 347px доступных */
+.b-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:14px}
+.b-rec{padding:13px 14px; margin-bottom:8px; background:var(--ui-surface-3);
+       border:1px solid var(--ui-line-2); border-radius:8px}
+.b-rec-in{display:flex; justify-content:space-between; gap:10px}
+.b-rec-l{min-width:0}
+.b-rec-t{font-size:14px; font-weight:600; letter-spacing:-.01em}
+.b-rec-meta{margin-top:7px; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.b-rec-act{display:flex; gap:6px; flex-shrink:0}
+.b-rec-act .ibtn .ico{width:14px; height:14px}
+.b-clip{position:absolute; top:0; right:0; bottom:0; width:13px;
+        background:repeating-linear-gradient(135deg,rgba(217,45,32,.42) 0 4px,transparent 4px 8px);
+        border-left:1px dashed rgba(217,45,32,.85); pointer-events:none}
+
+/* ---------- ПОСЛЕ: как должно быть ---------- */
+.a-top{display:flex; align-items:flex-start; gap:12px; margin-bottom:14px}
+.a-seg{display:flex; gap:6px; margin-bottom:8px}
+.a-seg > *{flex:1 1 0; min-width:0; min-height:44px}
+.a-row{display:flex; gap:8px}
+.a-row > .tbtn{flex:0 0 auto; min-height:44px}
+.a-row > .btn{flex:1 1 0; min-width:0; min-height:44px}
+.a-tabs{display:flex; gap:6px; margin:14px 0}
+.a-tabs > *{flex:1 1 0; min-width:0; min-height:44px}
+
+.sx-card{padding:12px 12px 13px; margin-bottom:8px; background:var(--ui-surface-3);
+         border:1px solid var(--ui-line-2); border-radius:8px;
+         display:flex; flex-direction:column; gap:9px}
+.sx-card-hd{display:flex; align-items:center; gap:8px; min-width:0}
+.sx-card-hd .t{flex:1 1 auto; min-width:0; font-size:14.5px; font-weight:600; letter-spacing:-.01em;
+               overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.sx-card-hd .acts{display:flex; gap:2px; flex:0 0 auto; margin-right:-8px}
+.sx-card-hd .ibtn{min-width:44px; min-height:44px; margin:-12px 0}
+.sx-card-hd .ibtn .ico{width:17px; height:17px}
+.sx-card-hd .ibtn.is-del{color:var(--ui-danger)}
+.sx-meta{display:flex; flex-wrap:wrap; gap:6px}
+.chip.is-fin{gap:3px; background:rgba(10,132,255,.08); border-color:rgba(10,132,255,.22)}
+
+.btn-wide{display:flex; align-items:center; justify-content:center; gap:7px; width:100%;
+          min-height:44px; font-size:13px; font-weight:600; border-radius:8px;
+          border:1px solid var(--ui-line-3); color:var(--ui-tx-2); background:transparent; margin-top:6px}
+
+/* ---------- выноски ---------- */
+.pin{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:19px; height:19px; border-radius:50%; flex-shrink:0;
+  background:var(--bad); color:#fff; font-size:11px; font-weight:800; line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.pin.is-good{background:var(--good)}
+.pin-abs{position:absolute; z-index:3; box-shadow:0 0 0 2.5px var(--ui-bg)}
+
+/* ---------- разбор ---------- */
+h2{font-size:20px; font-weight:700; letter-spacing:-.01em; margin:0 0 6px}
+.h2-sub{color:var(--pg-tx-2); font-size:14px; margin:0 0 18px}
+.findings{display:grid; gap:1px; background:var(--pg-line); border:1px solid var(--pg-line); border-radius:12px; overflow:hidden}
+.find{display:grid; grid-template-columns:28px 1fr; gap:12px; padding:16px 18px; background:var(--pg-2); align-items:start}
+.find .b{font-weight:700; font-size:14.5px; margin:0 0 4px}
+.find p{margin:0; font-size:13.5px; color:var(--pg-tx-2)}
+.find p + p{margin-top:7px}
+.find code, code.inl{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px;
+  background:color-mix(in srgb, var(--accent) 12%, transparent);
+  color:var(--pg-tx); padding:1px 5px; border-radius:4px;
+}
+.fix{display:block; margin-top:7px; font-size:13px; color:var(--pg-tx)}
+.fix b{color:var(--good); font-weight:700}
+
+.files{margin-top:26px; border:1px solid var(--pg-line); border-radius:12px; overflow:hidden}
+.files table{width:100%; border-collapse:collapse; font-size:13px}
+.files th{
+  text-align:left; padding:11px 16px; background:var(--pg-2);
+  font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--pg-tx-3);
+  border-bottom:1px solid var(--pg-line); font-weight:700;
+}
+.files td{padding:12px 16px; border-bottom:1px solid var(--pg-line); background:var(--pg-2); vertical-align:top}
+.files tr:last-child td{border-bottom:0}
+.files td:first-child{font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; white-space:nowrap; color:var(--accent)}
+.files-scroll{overflow-x:auto}
+
+.rules{margin-top:26px; padding:18px 20px; border-radius:12px;
+       border:1px solid var(--pg-line); background:var(--pg-2)}
+.rules h3{margin:0 0 10px; font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--pg-tx-3)}
+.rules ul{margin:0; padding-left:19px; font-size:13.5px; color:var(--pg-tx-2)}
+.rules li + li{margin-top:7px}
+.rules b{color:var(--pg-tx)}
+</style>
+
+<div class="wrap">
+
+  <p class="eyebrow">Медкарта · вкладка «Секс» · экран 375&nbsp;px</p>
+  <h1>Раздел «Секс» на телефоне</h1>
+  <p class="lead">Шесть мест, где значки и кнопки рвут раскладку списка записей, и как выглядит
+  то же самое после правки. Палитра, шрифт и роли кнопок — платформенные, ничего нового не заводится.</p>
+  <div class="meta">
+    <span>Экран <b>375 × 640</b></span>
+    <span>Доступная ширина <b>347 px</b> (поля <code class="inl">--ui-page-pad-m</code> 14&nbsp;px)</span>
+    <span>Зона тапа <b>44 px</b> (<code class="inl">--ui-tap</code>)</span>
+  </div>
+
+  <hr class="sep">
+
+  <div class="frames">
+
+    <!-- ======================= ДО ======================= -->
+    <div class="frame">
+      <div class="frame-hd">
+        <span class="tag is-bad">До</span>
+        <span class="cap">как выглядит сейчас</span>
+      </div>
+      <div class="phone">
+        <div class="screen">
+          <div class="b-clip"></div>
+          <div class="scroll">
+            <div class="page">
+
+              <!-- шапка раздела -->
+              <div class="card" style="position:relative">
+                <span class="pin pin-abs" style="right:8px; top:74px">1</span>
+                <div class="b-top">
+                  <div class="sec-head">
+                    <div class="sec-badge">
+                      <svg class="ico" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                    </div>
+                    <div style="min-width:0">
+                      <div class="sec-title">Половая активность</div>
+                      <div class="sec-date">суббота, 13 сентября · день цикла <b>19</b></div>
+                    </div>
+                  </div>
+                  <div class="b-actions">
+                    <button class="btn" type="button">
+                      <svg class="ico" viewBox="0 0 24 24"><path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2zM7 11V7a5 5 0 0 1 10 0v4"/></svg>Приватно</button>
+                    <button class="tbtn" type="button">
+                      <svg class="ico" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>Открыто</button>
+                    <button class="tbtn" type="button">Позы</button>
+                    <button class="btn" type="button">
+                      <svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>Запись активности</button>
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:8px; margin-bottom:14px">
+                  <button class="tbtn" type="button" style="padding:6px 12px; font-size:15px">‹</button>
+                  <button class="tbtn" type="button" style="padding:6px 12px">Сегодня</button>
+                  <button class="tbtn" type="button" style="padding:6px 12px; font-size:15px">›</button>
+                </div>
+
+                <div class="tiles">
+                  <div class="tile"><div class="k">За сентябрь</div><div class="v"><b>14</b><span>записей</span></div><div class="s">Август — 21</div></div>
+                  <div class="tile"><div class="k">Своё среднее</div><div class="v"><b>17,3</b><span>в месяц</span></div><div class="s">за 6 мес</div></div>
+                  <div class="tile"><div class="k">Ср. длительность</div><div class="v"><b>38</b><span>мин</span></div><div class="s">за выбранный день</div></div>
+                  <div class="tile is-accent"><div class="k">Выбранный день</div><div class="v"><b>2</b><span>записи</span></div><div class="s">75 мин</div></div>
+                </div>
+
+                <div class="count-line">
+                  <span class="ai-badge">СЧЁТ</span>
+                  <span style="min-width:0">Август: <b style="color:var(--ui-tx)">21</b> · своё среднее за 6 мес: <b style="color:var(--ui-tx)">17,3</b> · для 35–39 лет ≈ 6,2 <span style="color:var(--ui-tx-3)">(GSS 2017)</span></span>
+                </div>
+              </div>
+
+              <!-- вкладки -->
+              <div class="b-tabs" style="position:relative">
+                <span class="pin pin-abs" style="left:-6px; top:-8px">2</span>
+                <button class="btn" type="button">
+                  <svg class="ico" viewBox="0 0 24 24"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>Записи</button>
+                <button class="tbtn" type="button">
+                  <svg class="ico" viewBox="0 0 24 24"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>Сводка</button>
+              </div>
+
+              <!-- грид календарь + записи -->
+              <div class="b-grid" style="position:relative">
+                <span class="pin pin-abs" style="right:2px; top:-9px">3</span>
+
+                <div class="card">
+                  <div class="cal-hd">
+                    <svg class="ico" viewBox="0 0 24 24"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
+                    сентябрь 2026
+                    <button class="tbtn" type="button" style="padding:4px 10px; margin-left:4px">‹</button>
+                    <button class="tbtn" type="button" style="padding:4px 10px">›</button>
+                  </div>
+                  <div class="cal-grid cal-wd-row" style="margin-bottom:0">
+                    <div class="cal-wd">пн</div><div class="cal-wd">вт</div><div class="cal-wd">ср</div>
+                    <div class="cal-wd">чт</div><div class="cal-wd">пт</div><div class="cal-wd">сб</div><div class="cal-wd">вс</div>
+                  </div>
+                  <div class="cal-grid">
+                    <div class="cal-d">7<div class="cal-dots"><i></i></div></div>
+                    <div class="cal-d">8<div class="cal-dots"></div></div>
+                    <div class="cal-d">9<div class="cal-dots"><i></i><i></i></div></div>
+                    <div class="cal-d">10<div class="cal-dots"></div></div>
+                    <div class="cal-d">11<div class="cal-dots"><i></i></div></div>
+                    <div class="cal-d">12<div class="cal-dots"><i></i></div></div>
+                    <div class="cal-d is-sel">13<div class="cal-dots"><i style="background:#e8e8e8"></i><i style="background:#e8e8e8"></i></div></div>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div class="feed-hd">
+                    <div class="t">Записи <span style="color:var(--ui-line-3)">·</span> 13 сентября</div>
+                    <div class="n">2 записи · 75 мин</div>
+                  </div>
+
+                  <div class="b-rec" style="position:relative">
+                    <span class="pin pin-abs" style="right:34px; top:-9px">4</span>
+                    <span class="pin pin-abs" style="left:-9px; top:44px">5</span>
+                    <div class="b-rec-in">
+                      <div class="b-rec-l">
+                        <div class="b-rec-t">Наездница, догги</div>
+                        <div class="b-rec-meta">
+                          <span class="chip">22:40</span>
+                          <span class="chip">45 мин</span>
+                          <span class="chip is-place">Кровать</span>
+                          <span style="display:inline-flex; gap:2px">
+                            <svg class="drop m" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
+                            <svg class="drop f" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
+                            <svg class="drop f" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
+                          </span>
+                        </div>
+                        <div class="pf-row" style="margin-top:8px">
+                          <svg class="ico" viewBox="0 0 24 24"><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+                          <span>Самара, Ново-Садовая 106к3</span>
+                        </div>
+                        <div class="note" style="margin-top:8px">Долго, без спешки. Свеча на подоконнике, окно открыто.</div>
+                      </div>
+                      <div class="b-rec-act">
+                        <button class="ibtn" type="button"><svg class="ico" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+                        <button class="ibtn" type="button" style="color:var(--ui-danger)"><svg class="ico" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="b-rec">
+                    <div class="b-rec-in">
+                      <div class="b-rec-l">
+                        <div class="b-rec-t">Ложка</div>
+                        <div class="b-rec-meta">
+                          <span class="chip">07:15</span>
+                          <span class="chip">30 мин</span>
+                          <span class="chip is-place">Душ</span>
+                          <span style="display:inline-flex; gap:2px">
+                            <svg class="drop m" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
+                          </span>
+                        </div>
+                      </div>
+                      <div class="b-rec-act">
+                        <button class="ibtn" type="button"><svg class="ico" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+                        <button class="ibtn" type="button" style="color:var(--ui-danger)"><svg class="ico" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button class="tbtn" type="button" style="width:100%; margin-top:8px; min-height:44px">
+                    <svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>Добавить запись</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ruler"><span>0</span><span style="color:var(--bad)">содержимое 360 px → 13 px за кромкой</span><span>375</span></div>
+    </div>
+
+    <!-- ======================= ПОСЛЕ ======================= -->
+    <div class="frame">
+      <div class="frame-hd">
+        <span class="tag is-good">После</span>
+        <span class="cap">то же самое, ничего не отрезано</span>
+      </div>
+      <div class="phone">
+        <div class="screen">
+          <div class="scroll">
+            <div class="page">
+
+              <!-- шапка -->
+              <div class="card">
+                <div class="a-top">
+                  <div class="sec-badge">
+                    <svg class="ico" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                  </div>
+                  <div style="min-width:0; flex:1 1 auto">
+                    <div class="sec-title">Половая активность</div>
+                    <div class="sec-date">суббота, 13 сентября · день цикла <b>19</b></div>
+                  </div>
+                </div>
+
+                <div class="a-seg" style="position:relative">
+                  <span class="pin pin-abs is-good" style="right:-7px; top:-9px">1</span>
+                  <button class="btn" type="button">
+                    <svg class="ico" viewBox="0 0 24 24"><path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2zM7 11V7a5 5 0 0 1 10 0v4"/></svg>Приватно</button>
+                  <button class="tbtn" type="button">
+                    <svg class="ico" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>Открыто</button>
+                </div>
+                <div class="a-row">
+                  <button class="tbtn" type="button">Позы</button>
+                  <button class="btn" type="button">
+                    <svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>Запись активности</button>
+                </div>
+
+                <div style="display:flex; gap:6px; margin:12px 0 14px">
+                  <button class="tbtn" type="button" style="flex:0 0 44px; min-height:40px; padding:0; font-size:15px">‹</button>
+                  <button class="tbtn" type="button" style="flex:1 1 0; min-height:40px; padding:0">Сегодня</button>
+                  <button class="tbtn" type="button" style="flex:0 0 44px; min-height:40px; padding:0; font-size:15px">›</button>
+                </div>
+
+                <div class="tiles">
+                  <div class="tile"><div class="k">За сентябрь</div><div class="v"><b>14</b><span>записей</span></div><div class="s">Август — 21</div></div>
+                  <div class="tile"><div class="k">Своё среднее</div><div class="v"><b>17,3</b><span>в месяц</span></div><div class="s">за 6 мес</div></div>
+                  <div class="tile"><div class="k">Ср. длительность</div><div class="v"><b>38</b><span>мин</span></div><div class="s">за выбранный день</div></div>
+                  <div class="tile is-accent"><div class="k">Выбранный день</div><div class="v"><b>2</b><span>записи</span></div><div class="s">75 мин</div></div>
+                </div>
+
+                <div class="count-line">
+                  <span class="ai-badge">СЧЁТ</span>
+                  <span style="min-width:0">Август: <b style="color:var(--ui-tx)">21</b> · своё среднее за 6 мес: <b style="color:var(--ui-tx)">17,3</b> · для 35–39 лет ≈ 6,2 <span style="color:var(--ui-tx-3)">(GSS 2017)</span></span>
+                </div>
+              </div>
+
+              <div class="a-tabs" style="position:relative">
+                <span class="pin pin-abs is-good" style="left:-7px; top:-9px">2</span>
+                <button class="btn" type="button">
+                  <svg class="ico" viewBox="0 0 24 24"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>Записи</button>
+                <button class="tbtn" type="button">
+                  <svg class="ico" viewBox="0 0 24 24"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>Сводка</button>
+              </div>
+
+              <!-- записи первыми, календарь под ними -->
+              <div class="card" style="position:relative">
+                <span class="pin pin-abs is-good" style="right:2px; top:-9px">3</span>
+                <div class="feed-hd">
+                  <div class="t">Записи <span style="color:var(--ui-line-3)">·</span> 13 сентября</div>
+                  <div class="n">2 · 75 мин</div>
+                </div>
+
+                <div class="sx-card" style="position:relative">
+                  <span class="pin pin-abs is-good" style="right:36px; top:-9px">4</span>
+                  <span class="pin pin-abs is-good" style="left:-9px; top:48px">5</span>
+                  <div class="sx-card-hd">
+                    <div class="t">Наездница, догги</div>
+                    <div class="acts">
+                      <button class="ibtn" type="button"><svg class="ico" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+                      <button class="ibtn is-del" type="button"><svg class="ico" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+                    </div>
+                  </div>
+                  <div class="sx-meta">
+                    <span class="chip">22:40</span>
+                    <span class="chip">45 мин</span>
+                    <span class="chip is-place">Кровать</span>
+                    <span class="chip is-fin">
+                      <svg class="drop m" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>1
+                      <svg class="drop f" viewBox="0 0 24 24" style="margin-left:4px"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>2
+                    </span>
+                  </div>
+                  <div class="pf-row">
+                    <svg class="ico" viewBox="0 0 24 24"><path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+                    <span>Самара, Ново-Садовая 106к3</span>
+                  </div>
+                  <div class="note">Долго, без спешки. Свеча на подоконнике, окно открыто.</div>
+                </div>
+
+                <div class="sx-card">
+                  <div class="sx-card-hd">
+                    <div class="t">Ложка</div>
+                    <div class="acts">
+                      <button class="ibtn" type="button"><svg class="ico" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+                      <button class="ibtn is-del" type="button"><svg class="ico" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+                    </div>
+                  </div>
+                  <div class="sx-meta">
+                    <span class="chip">07:15</span>
+                    <span class="chip">30 мин</span>
+                    <span class="chip is-place">Душ</span>
+                    <span class="chip is-fin">
+                      <svg class="drop m" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>1
+                    </span>
+                  </div>
+                </div>
+
+                <button class="btn-wide" type="button">
+                  <svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg>Добавить запись</button>
+              </div>
+
+              <div class="card" style="position:relative">
+                <span class="pin pin-abs is-good" style="left:-9px; top:14px">6</span>
+                <div class="cal-hd">
+                  <svg class="ico" viewBox="0 0 24 24"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>
+                  сентябрь 2026
+                  <button class="tbtn" type="button" style="padding:4px 10px; margin-left:auto">‹</button>
+                  <button class="tbtn" type="button" style="padding:4px 10px">›</button>
+                </div>
+                <div class="cal-grid" style="margin-bottom:0">
+                  <div class="cal-wd">пн</div><div class="cal-wd">вт</div><div class="cal-wd">ср</div>
+                  <div class="cal-wd">чт</div><div class="cal-wd">пт</div><div class="cal-wd">сб</div><div class="cal-wd">вс</div>
+                </div>
+                <div class="cal-grid">
+                  <div class="cal-d">7<div class="cal-dots"><i></i></div></div>
+                  <div class="cal-d">8<div class="cal-dots"></div></div>
+                  <div class="cal-d">9<div class="cal-dots"><i></i><i></i></div></div>
+                  <div class="cal-d">10<div class="cal-dots"></div></div>
+                  <div class="cal-d">11<div class="cal-dots"><i></i></div></div>
+                  <div class="cal-d">12<div class="cal-dots"><i></i></div></div>
+                  <div class="cal-d is-sel">13<div class="cal-dots"><i style="background:#e8e8e8"></i><i style="background:#e8e8e8"></i></div></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ruler"><span>0</span><span style="color:var(--good)">содержимое 347 px — в кромку</span><span>375</span></div>
+    </div>
+  </div>
+
+  <hr class="sep">
+
+  <h2>Что именно ломается</h2>
+  <p class="h2-sub">Номера совпадают с метками на экранах. Красные — «до», зелёные — что встало на их место.</p>
+
+  <div class="findings">
+
+    <div class="find">
+      <span class="pin">1</span>
+      <div>
+        <p class="b">Четыре кнопки со значками в один ряд с заголовком</p>
+        <p><code>privSwitch()</code> + «Позы» + «Запись активности» лежат в общем <code>.ui-actions</code>
+        справа от названия раздела. В 347&nbsp;px они переносятся в три строки по 44&nbsp;px: под шапку
+        уходит треть экрана, а значок «+» на переносе остаётся один в строке.</p>
+        <span class="fix"><b>Стало:</b> «Приватно / Открыто» — сегмент 50 / 50 во всю ширину (пара кнопок
+        с ролями <code>.btn</code>&nbsp;/&nbsp;<code>.tbtn</code>, как требует правило скрытия приватных данных),
+        второй строкой «Позы» по содержимому и «Запись активности» на остаток. Две строки вместо трёх,
+        главное действие — самое широкое.</span>
+      </div>
+    </div>
+
+    <div class="find">
+      <span class="pin">2</span>
+      <div>
+        <p class="b">«Записи / Сводка» — ещё один рваный ряд</p>
+        <p>Те же две кнопки со значками переносятся как придётся: на части ширин «Сводка» падает
+        на вторую строку и читается как отдельная кнопка, а не как вторая половина переключателя.</p>
+        <span class="fix"><b>Стало:</b> <code>flex:1 1 0</code> на обе — переключатель всегда одной строкой,
+        обе половины одинаковой ширины. Странице разрешено задавать кнопке только долю ширины, вид остаётся из <code>/set#btns</code>.</span>
+      </div>
+    </div>
+
+    <div class="find">
+      <span class="pin">3</span>
+      <div>
+        <p class="b">Грид «календарь + записи» шире экрана</p>
+        <p><code>repeat(auto-fit, minmax(360px, 1fr))</code> — колонка не умеет быть уже 360&nbsp;px,
+        а под содержимое остаётся 347. Полоса в 13&nbsp;px уезжает за кромку: <code>overflow-x:hidden</code>
+        на <code>body</code> прячет прокрутку, но правый край карточек всё равно срезан.
+        Это ровно тот случай, под который в <code>medcard_mobile.css</code> уже лежат правила
+        для <code>minmax(440px</code> и <code>minmax(240px</code> — для «Секса» его просто не написали.</p>
+        <span class="fix"><b>Стало:</b> одна колонка <code>minmax(0,1fr)</code> и <code>min-width:0</code>
+        на потомков <code>#secSex</code>. Заодно записи поднимаются над календарём (<code>order</code>):
+        на телефон заходят посмотреть и добавить запись, а не листать месяц.</span>
+      </div>
+    </div>
+
+    <div class="find">
+      <span class="pin">4</span>
+      <div>
+        <p class="b">Карандаш и корзина — 14&nbsp;px и без зоны тапа</p>
+        <p>Правило <code>#secSex .btn, #secSex .tbtn {min-height:44px}</code> роль <code>.ibtn</code> не покрывает,
+        а размер значка задан инлайном 14&nbsp;px. Два значка стоят вплотную: промахнуться корзиной
+        мимо карандаша — вопрос времени.</p>
+        <span class="fix"><b>Стало:</b> <code>min-width / min-height: var(--ui-tap,44px)</code> — только эта
+        геометрия иконочной кнопке и разрешена (<code>width/height</code> роль объявляет через <code>!important</code>),
+        значок 17&nbsp;px, отрицательные поля держат высоту строки прежней.</span>
+      </div>
+    </div>
+
+    <div class="find">
+      <span class="pin">5</span>
+      <div>
+        <p class="b">Текст записи зажат между значками</p>
+        <p>Поза, чипы, адрес и заметка лежат в левой колонке той же flex-строки, где справа стоят кнопки.
+        Адресу остаётся ~150&nbsp;px, он режется многоточием; капли финиша при переносе отрываются от чипов
+        и висят отдельной строкой. Это прямое нарушение платформенного правила
+        «значки действий и поле длинного текста — не в одну строку».</p>
+        <span class="fix"><b>Стало:</b> карточка — колонка. Первой строкой название и кнопки, дальше
+        во всю ширину: чипы, место, заметка. Капли финиша собраны в один чип «♂&nbsp;1 · ♀&nbsp;2» — теперь это
+        значение, а не россыпь значков.</span>
+      </div>
+    </div>
+
+    <div class="find">
+      <span class="pin is-good">6</span>
+      <div>
+        <p class="b">Календарь остаётся как есть</p>
+        <p>Ячейки уже доведены до 44&nbsp;px, точки считают записи. Меняется только порядок — карточка
+        уезжает под список записей, и стрелки месяца разводятся по краям строки вместо слипшейся пары.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="files-scroll">
+    <div class="files">
+      <table>
+        <thead><tr><th>Файл</th><th>Правка</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>medcard_mobile.css</td>
+            <td>Раздел 8 растёт с «модалки записи» до всего <code>#secSex</code>: одна колонка вместо
+            <code>minmax(360px</code>, <code>min-width:0</code> потомкам, зона тапа <code>.ibtn</code>,
+            доли ширины кнопкам шапки и вкладок, <code>order</code> списку и календарю.</td>
+          </tr>
+          <tr>
+            <td>sex.js</td>
+            <td>Карточка записи <code>widget()</code> пересобрана в колонку с классами-хуками
+            <code>.sx-card / .sx-card-hd / .sx-meta</code>, капли финиша — в чип, рядам кнопок
+            добавлены хуки <code>.sx-act / .sx-seg / .sx-days / .sx-tabs</code>.</td>
+          </tr>
+          <tr>
+            <td>medcard.html</td>
+            <td><code>?v=</code> у обоих файлов — иначе после выкатки до пяти минут отдаётся старая копия.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="rules">
+    <h3>Чем это ограничено</h3>
+    <ul>
+      <li><b>Кнопкам не пишется ни строчки своего CSS</b> — только доля ширины и зона тапа
+      через <code>min-*</code>. Вид приезжает из <code>/set#btns</code>, список ролей — <code>/refs#btns</code>.</li>
+      <li><b>Палитра раздела не трогается.</b> Литералы цвета в константе <code>C</code> остаются как есть:
+      ровно такая же константа лежит в <code>cycle_v2.js</code>, и перевод на токены по одному файлу
+      развёл бы «Цикл» и «Секс» в светлой теме. Это отдельная правка на обе вкладки разом.</li>
+      <li><b>Никаких новых значков.</b> Всё из спрайта <code>/assets/icons.svg</code>; <code>i-pin</code>
+      остаётся гео-меткой.</li>
+      <li><b>Правки только внутри <code>@media (max-width:768px)</code></b> плюс структурная правка карточки,
+      которая одинаково полезна и на ПК. Десктопная раскладка «календарь слева, записи справа» не трогается.</li>
+      <li><b>Компонент «Сводка» (<code>.stats-*</code>) не трогается вовсе</b> — он общий у дневника,
+      «Жизни» и «Секса» и живёт в <code>ui.css</code>.</li>
+    </ul>
+  </div>
+
+</div>
