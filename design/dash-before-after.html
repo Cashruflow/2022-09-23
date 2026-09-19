@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Главная /app — до и после</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0a0a0a;color:#e8e8e8;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;padding:32px 20px 60px}
+h1.pg{font-size:26px;font-weight:700;letter-spacing:-.5px;margin:0 0 6px}
+p.pg{font-size:13px;color:#9a9a9a;margin:0 0 28px;max-width:760px;line-height:1.5}
+.screens{display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start}
+.screen{flex:0 0 auto}
+.screen > h2{font-size:13px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#8b8b8b;margin:0 0 10px}
+.screen > h2 > b{color:#e8e8e8}
+.frame{width:393px;border:1px solid #232323;border-radius:22px;overflow:hidden;background:#000}
+a{color:#00a0ff}
+a:hover{color:#4cbcff}
+.card{background:#141414;border:1px solid #232323;border-radius:14px;padding:14px;box-sizing:border-box}
+.lbl{font-size:10px;color:#8b8b8b;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin:0 0 8px}
+.big{font-size:26px;font-weight:700;line-height:1.1;margin:0}
+.k{font-size:22px;font-weight:700;line-height:1.1;margin:0}
+.sub{font-size:11px;color:#9a9a9a;margin:5px 0 0;line-height:1.35}
+.ttl{font-size:13px;font-weight:600;margin:0 0 12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bar{background:rgba(255,255,255,.08);border-radius:6px;height:6px;overflow:hidden;margin-top:10px}
+.bar > i{display:block;height:100%;border-radius:6px;background:#00a0ff}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:0 0 auto}
+.on{background:#30d158}
+.off{background:#ff453a}
+.pill{display:inline-block;padding:7px 13px;border-radius:10px;font-size:12px;text-decoration:none;border:1px solid #2a2a2a;background:#161616;color:#dcdcdc}
+.pill.pri{background:#00a0ff;border-color:#00a0ff;color:#04121e;font-weight:600}
+.srow{display:flex;align-items:center;gap:9px;padding:7px 0;border-top:1px solid #1c1c1c;font-size:12px}
+.srow:first-child{border-top:none}
+.mut{color:#9a9a9a;font-size:11px}
+.tbtn{background:#161616;border:1px solid #2a2a2a;border-radius:9px;color:#dcdcdc;font-size:11px;padding:5px 10px;font-family:inherit}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:0 0 auto}
+.on{background:#30d158;box-shadow:0 0 8px rgba(48,209,88,.55)}
+.off{background:#ff453a;box-shadow:0 0 8px rgba(255,69,58,.5)}
+.newmark{display:inline-block;font-size:9px;letter-spacing:.6px;text-transform:uppercase;font-weight:700;color:#04121e;background:#00a0ff;border-radius:5px;padding:2px 6px;margin-left:7px;vertical-align:2px}
+</style>
+</head>
+<body>
+<h1 class="pg">Главная /app — до и после</h1>
+<p class="pg">Статичный макет перестройки главной под iPhone (393&nbsp;px). Слева — как сейчас, v2.55.0. Справа — предложение: приветствие с датой, временем и поясом; два сервера точками 50/50; диск и память; рестарты; неделя по задачам и деньгам; календарь на месте; «Конвенции CLAUDE.md» — в самый низ. Цифры в макете — образец, не реальные данные.</p>
+<div class="screens">
+  <div class="screen"><h2>До — <b>как сейчас</b></h2><div class="frame"><div style="width: 393px; height: 2900px; box-sizing: border-box; background: #000; display: flex; flex-direction: column;">
+
+  <!-- Шапка платформы -->
+  <div style="height: 52px; flex: 0 0 auto; display: flex; align-items: center; gap: 12px; padding: 0 16px; border-bottom: 1px solid #1c1c1c; background: #0b0b0b;">
+    <button type="button" class="tbtn" aria-label="Меню" style="padding: 5px 9px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <div style="flex-grow: 1; font-size: 15px; font-weight: 600;">Digital CashFlow <span style="color: #8b8b8b; font-weight: 400;">(3)</span></div>
+    <span class="mut">v2.55.0</span>
+  </div>
+
+  <div style="flex-grow: 1; padding: 14px 16px 24px; display: flex; flex-direction: column; gap: 12px;">
+
+    <!-- 1. Конвенции CLAUDE.md — сейчас стоит ПЕРВОЙ, над приветствием -->
+    <div class="card" style="border-color: rgba(248,113,113,.45);">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+        <b style="font-size: 13px; color: #f87171;">Конвенции CLAUDE.md</b>
+        <span style="font-size: 11px; color: #f87171;">23 973 / 24 000 знаков</span>
+      </div>
+      <div class="bar"><i style="width: 99%; background: #f87171;"></i></div>
+      <p class="sub">Файл целиком доезжает до сессии.</p>
+    </div>
+
+    <!-- 2. Приветствие + три кнопки -->
+    <div style="display: flex; align-items: flex-start; gap: 10px; padding-top: 2px;">
+      <div style="flex-grow: 1; min-width: 0;">
+        <div style="font-size: 21px; font-weight: 600; letter-spacing: -.3px;">Добрый день, Константин</div>
+        <div class="sub" style="margin-top: 3px;">Пятница, 19 сентября</div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 7px;">
+      <a class="pill" href="/structure">Структура</a>
+      <a class="pill" href="/projects">Проекты</a>
+      <a class="pill pri" href="/tasks">Бэклог</a>
+    </div>
+
+    <!-- 3. Плитки времени и денег -->
+    <div class="g2">
+      <div class="card" style="background: linear-gradient(135deg, rgba(0,160,255,.07), rgba(0,160,255,.01)); border-color: rgba(0,160,255,.22);">
+        <p class="lbl">Сегодня</p>
+        <p class="big">4ч 20м <span style="font-size: 12px; color: #9a9a9a; font-weight: 400;">из 8ч</span></p>
+        <div class="bar"><i style="width: 54%;"></i></div>
+        <p class="sub">54% нормы · по задачам 3ч 50м</p>
+      </div>
+      <div class="card">
+        <p class="lbl">Неделя</p>
+        <p class="big">26ч 10м</p>
+        <p class="sub" style="color: #10b981;">↑ 12% к прошлой (23ч 20м)</p>
+      </div>
+      <div class="card">
+        <p class="lbl">Velocity</p>
+        <p class="big">3,7 <span style="font-size: 12px; color: #9a9a9a; font-weight: 400;">ч/день</span></p>
+        <p class="sub" style="color: #f87171;">↓ 4% · за месяц 92ч</p>
+      </div>
+      <div class="card" style="border-color: rgba(248,113,113,.35);">
+        <p class="lbl">Задолженность</p>
+        <p class="big" style="color: #f87171;">84 000 <span style="font-size: 12px; color: #9a9a9a; font-weight: 400;">₽</span></p>
+        <p class="sub">2 спринта не оплачено</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="lbl">Anthropic API</p>
+      <p class="big" style="color: #10b981;">$18.42</p>
+      <p class="sub">≈ 14 дн. при $1.28/день</p>
+      <p class="sub">сверка $24.00 · 16.09.2026 12:10 · потрачено $5.58</p>
+      <div style="display: flex; gap: 6px; margin-top: 10px;">
+        <button type="button" class="tbtn">+ Пополнение</button>
+        <button type="button" class="tbtn">Сверить</button>
+      </div>
+    </div>
+
+    <!-- 4. KPI-плитки -->
+    <div class="g2">
+      <a class="card" href="/tasks" style="text-decoration: none;"><p class="lbl">Просрочено</p><p class="k" style="color: #f87171;">3</p></a>
+      <a class="card" href="/tasks" style="text-decoration: none;"><p class="lbl">В работе</p><p class="k" style="color: #f97316;">2</p></a>
+      <a class="card" href="/tasks" style="text-decoration: none;"><p class="lbl">Бэклог</p><p class="k" style="color: #e8e8e8;">47</p></a>
+      <a class="card" href="/tasks" style="text-decoration: none;"><p class="lbl">Готово за 7д</p><p class="k" style="color: #10b981;">9</p></a>
+      <a class="card" href="/tasks" style="text-decoration: none;"><p class="lbl">Для Claude</p><p class="k" style="color: #a855f7;">12</p></a>
+      <a class="card" href="/tasks" style="text-decoration: none;"><p class="lbl">Для GPT</p><p class="k" style="color: #06b6d4;">4</p></a>
+    </div>
+
+    <!-- 5. Графики -->
+    <div class="card">
+      <p class="ttl">Загрузка за неделю</p>
+      <div style="display: flex; align-items: flex-end; gap: 7px; height: 118px;">
+        <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;"><span class="mut" style="font-size: 9px;">5ч</span><div style="width: 100%; height: 80px; background: rgba(255,255,255,.05); border-radius: 5px; display: flex; align-items: flex-end;"><i style="display: block; width: 100%; height: 62%; background: #00a0ff; border-radius: 5px;"></i></div><span class="mut" style="font-size: 10px;">Сб</span></div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;"><span class="mut" style="font-size: 9px;">2ч</span><div style="width: 100%; height: 80px; background: rgba(255,255,255,.05); border-radius: 5px; display: flex; align-items: flex-end;"><i style="display: block; width: 100%; height: 25%; background: #00a0ff; border-radius: 5px;"></i></div><span class="mut" style="font-size: 10px;">Вс</span></div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;"><span class="mut" style="font-size: 9px;">8ч</span><div style="width: 100%; height: 80px; background: rgba(255,255,255,.05); border-radius: 5px; display: flex; align-items: flex-end;"><i style="display: block; width: 100%; height: 100%; background: #10b981; border-radius: 5px;"></i></div><span class="mut" style="font-size: 10px;">Пн</span></div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;"><span class="mut" style="font-size: 9px;">6ч</span><div style="width: 100%; height: 80px; background: rgba(255,255,255,.05); border-radius: 5px; display: flex; align-items: flex-end;"><i style="display: block; width: 100%; height: 75%; background: #00a0ff; border-radius: 5px;"></i></div><span class="mut" style="font-size: 10px;">Вт</span></div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;"><span class="mut" style="font-size: 9px;">7ч</span><div style="width: 100%; height: 80px; background: rgba(255,255,255,.05); border-radius: 5px; display: flex; align-items: flex-end;"><i style="display: block; width: 100%; height: 88%; background: #00a0ff; border-radius: 5px;"></i></div><span class="mut" style="font-size: 10px;">Ср</span></div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;"><span class="mut" style="font-size: 9px;">4ч</span><div style="width: 100%; height: 80px; background: rgba(255,255,255,.05); border-radius: 5px; display: flex; align-items: flex-end;"><i style="display: block; width: 100%; height: 50%; background: #00a0ff; border-radius: 5px;"></i></div><span class="mut" style="font-size: 10px;">Чт</span></div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;"><span style="font-size: 9px; color: #00a0ff;">4ч</span><div style="width: 100%; height: 80px; background: rgba(255,255,255,.05); border-radius: 5px; display: flex; align-items: flex-end; outline: 1px solid #00a0ff;"><i style="display: block; width: 100%; height: 54%; background: #00a0ff; border-radius: 5px;"></i></div><span style="font-size: 10px; color: #00a0ff; font-weight: 600;">Пт</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="ttl">Проекты за месяц</p>
+      <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;"><span>Платформа</span><span class="mut">38ч</span></div>
+      <div class="bar" style="margin-top: 0;"><i style="width: 100%; background: #00a0ff;"></i></div>
+      <div style="display: flex; justify-content: space-between; font-size: 12px; margin: 10px 0 5px;"><span>Соричи</span><span class="mut">24ч</span></div>
+      <div class="bar" style="margin-top: 0;"><i style="width: 63%; background: #10b981;"></i></div>
+      <div style="display: flex; justify-content: space-between; font-size: 12px; margin: 10px 0 5px;"><span>СЕО-агенты</span><span class="mut">18ч</span></div>
+      <div class="bar" style="margin-top: 0;"><i style="width: 47%; background: #a855f7;"></i></div>
+      <div style="display: flex; justify-content: space-between; font-size: 12px; margin: 10px 0 5px;"><span>Медкарта</span><span class="mut">12ч</span></div>
+      <div class="bar" style="margin-top: 0;"><i style="width: 31%; background: #f97316;"></i></div>
+    </div>
+
+    <div class="card">
+      <p class="ttl">Активность, 16 недель</p>
+      <div style="display: grid; grid-template-columns: repeat(16, 1fr); gap: 3px;">
+        <i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.20)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.55)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(255,255,255,.04)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.75)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.35)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.90)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.45)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(255,255,255,.04)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.60)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.25)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.80)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.50)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(255,255,255,.04)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.65)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.30)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.95)"></i>
+        <i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.40)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.70)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.20)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(255,255,255,.04)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.85)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.50)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.60)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.15)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.75)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(255,255,255,.04)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.55)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.90)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.35)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.45)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.70)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.25)"></i>
+        <i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.65)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(255,255,255,.04)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.80)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.30)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.55)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.95)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.40)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.60)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(255,255,255,.04)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.50)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.85)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.20)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.70)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.45)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.75)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.35)"></i>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-top: 9px;"><span class="mut" style="font-size: 10px;">16 недель назад</span><span class="mut" style="font-size: 10px;">сегодня</span></div>
+    </div>
+
+    <div class="card">
+      <p class="ttl">Таймлайн сегодня</p>
+      <div style="display: flex; align-items: center; gap: 9px; margin-bottom: 7px;">
+        <span style="width: 74px; font-size: 11px; color: #00a0ff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Платформа</span>
+        <div style="flex-grow: 1; height: 20px; background: rgba(255,255,255,.04); border-radius: 6px; position: relative;"><i style="position: absolute; left: 6%; width: 38%; height: 100%; border-radius: 4px; background: #00a0ff;"></i></div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 9px;">
+        <span style="width: 74px; font-size: 11px; color: #10b981; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Соричи</span>
+        <div style="flex-grow: 1; height: 20px; background: rgba(255,255,255,.04); border-radius: 6px; position: relative;"><i style="position: absolute; left: 52%; width: 26%; height: 100%; border-radius: 4px; background: #10b981;"></i></div>
+      </div>
+    </div>
+
+    <!-- 6. Продления -->
+    <div class="card">
+      <p class="ttl">Продления</p>
+      <div class="srow"><span class="dot off"></span><span style="flex-grow: 1;">Sprintbox NL</span><span class="mut">просрочено 2 дн.</span><b style="font-size: 12px;">1 490 ₽</b></div>
+      <div class="srow"><span class="dot" style="background:#ff9f43;"></span><span style="flex-grow: 1;">cashruflow.ru</span><span class="mut">5 дн.</span><b style="font-size: 12px;">890 ₽</b></div>
+      <div class="srow"><span class="dot" style="background:#e0b83c;"></span><span style="flex-grow: 1;">Топвизор</span><span class="mut">21 дн.</span><b style="font-size: 12px;">3 200 ₽</b></div>
+      <div class="srow"><span class="dot on"></span><span style="flex-grow: 1;">RUVDS</span><span class="mut">48 дн.</span><b style="font-size: 12px;">2 400 ₽</b></div>
+    </div>
+
+    <!-- 7. Календарь задач -->
+    <div class="card">
+      <p class="ttl">Календарь задач · сентябрь</p>
+      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; text-align: center;">
+        <span class="mut" style="font-size: 10px;">Пн</span><span class="mut" style="font-size: 10px;">Вт</span><span class="mut" style="font-size: 10px;">Ср</span><span class="mut" style="font-size: 10px;">Чт</span><span class="mut" style="font-size: 10px;">Пт</span><span class="mut" style="font-size: 10px;">Сб</span><span class="mut" style="font-size: 10px;">Вс</span>
+        <span style="font-size:11px;padding:6px 0;color:#5a5a5a;">1</span><span style="font-size:11px;padding:6px 0;color:#5a5a5a;">2</span><span style="font-size:11px;padding:6px 0;color:#5a5a5a;">3</span><span style="font-size:11px;padding:6px 0;color:#5a5a5a;">4</span><span style="font-size:11px;padding:6px 0;color:#5a5a5a;">5</span><span style="font-size:11px;padding:6px 0;color:#5a5a5a;">6</span><span style="font-size:11px;padding:6px 0;color:#5a5a5a;">7</span>
+        <span style="font-size:11px;padding:6px 0;">8</span><span style="font-size:11px;padding:6px 0;">9</span><span style="font-size:11px;padding:6px 0;background:rgba(0,160,255,.14);border-radius:7px;">10</span><span style="font-size:11px;padding:6px 0;">11</span><span style="font-size:11px;padding:6px 0;background:rgba(0,160,255,.14);border-radius:7px;">12</span><span style="font-size:11px;padding:6px 0;">13</span><span style="font-size:11px;padding:6px 0;">14</span>
+        <span style="font-size:11px;padding:6px 0;background:rgba(248,113,113,.16);border-radius:7px;color:#f87171;">15</span><span style="font-size:11px;padding:6px 0;">16</span><span style="font-size:11px;padding:6px 0;background:rgba(0,160,255,.14);border-radius:7px;">17</span><span style="font-size:11px;padding:6px 0;">18</span><span style="font-size:11px;padding:6px 0;background:#00a0ff;border-radius:7px;color:#04121e;font-weight:600;">19</span><span style="font-size:11px;padding:6px 0;">20</span><span style="font-size:11px;padding:6px 0;">21</span>
+        <span style="font-size:11px;padding:6px 0;">22</span><span style="font-size:11px;padding:6px 0;background:rgba(0,160,255,.14);border-radius:7px;">23</span><span style="font-size:11px;padding:6px 0;">24</span><span style="font-size:11px;padding:6px 0;">25</span><span style="font-size:11px;padding:6px 0;background:rgba(0,160,255,.14);border-radius:7px;">26</span><span style="font-size:11px;padding:6px 0;">27</span><span style="font-size:11px;padding:6px 0;">28</span>
+        <span style="font-size:11px;padding:6px 0;">29</span><span style="font-size:11px;padding:6px 0;">30</span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- 8. Сервер -->
+    <div class="card">
+      <div style="display: flex; align-items: baseline; gap: 9px; margin-bottom: 12px;"><span style="font-size: 13px; font-weight: 600;">Сервер</span><span class="mut">cashruflow</span></div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px;">
+        <div style="background: #181818; border: 1px solid #222; border-radius: 10px; padding: 9px 11px;"><div class="mut" style="font-size: 10px;">CPU</div><div style="font-size: 15px; font-weight: 600;">18%</div><div class="bar" style="height: 3px; margin-top: 6px;"><i style="background: #4caf7d; width: 18%;"></i></div></div>
+        <div style="background: #181818; border: 1px solid #222; border-radius: 10px; padding: 9px 11px;"><div class="mut" style="font-size: 10px;">RAM</div><div style="font-size: 15px; font-weight: 600;">1.9G / 4G</div><div class="bar" style="height: 3px; margin-top: 6px;"><i style="background: #4caf7d; width: 48%;"></i></div></div>
+        <div style="background: #181818; border: 1px solid #222; border-radius: 10px; padding: 9px 11px;"><div class="mut" style="font-size: 10px;">Диск</div><div style="font-size: 15px; font-weight: 600;">39G / 80G</div><div class="bar" style="height: 3px; margin-top: 6px;"><i style="background: #4caf7d; width: 49%;"></i></div></div>
+        <div style="background: #181818; border: 1px solid #222; border-radius: 10px; padding: 9px 11px;"><div class="mut" style="font-size: 10px;">Load 1м</div><div style="font-size: 15px; font-weight: 600;">0.42</div></div>
+      </div>
+      <div class="srow"><span class="dot on"></span><span style="flex-grow: 1;">web-interface</span><span class="mut">online</span><span class="mut">&#8635; 3</span><button type="button" class="tbtn">Restart</button></div>
+      <div class="srow"><span class="dot on"></span><span style="flex-grow: 1;">mcp-sse</span><span class="mut">online</span><span class="mut">&#8635; 0</span><button type="button" class="tbtn">Restart</button></div>
+      <div class="srow"><span class="dot on"></span><span style="flex-grow: 1;">tg-bot</span><span class="mut">online</span><span class="mut">&#8635; 1</span><button type="button" class="tbtn">Restart</button></div>
+      <div class="srow"><span class="dot on"></span><span style="flex-grow: 1;">ai-gw (NL)</span><span class="mut">online · 38 мс</span><button type="button" class="tbtn">Restart</button><button type="button" class="tbtn">Ребут</button></div>
+      <div style="margin-top: 10px; padding-top: 9px; border-top: 1px solid #1c1c1c;" class="mut">load 0.42 / 0.51 / 0.48 · uptime 12 дн 4 ч · node v22.7 · MCP online · VPS оплачен до 04.11.2026</div>
+    </div>
+
+    <!-- 9. Аудит безопасности -->
+    <div class="card">
+      <p class="ttl">Аудит безопасности</p>
+      <div style="display: flex; align-items: center; gap: 9px;"><span class="dot on"></span><span style="font-size: 12px;">Открытых находок нет · проверено 19.09.2026</span></div>
+    </div>
+
+    <!-- 10. Нижние плашки -->
+    <div class="g2">
+      <div class="card" style="background: #1c1c1e; border: none;"><div style="font-size: 20px; font-weight: 600;"><span class="dot on" style="margin-right: 6px;"></span>Online</div><div class="mut" style="margin-top: 3px;">MCP Статус</div></div>
+      <div class="card" style="background: #1c1c1e; border: none;"><div style="font-size: 20px; font-weight: 600;">41G</div><div class="mut" style="margin-top: 3px;">Диск (свободно)</div></div>
+      <div class="card" style="background: #1c1c1e; border: none;"><div style="font-size: 20px; font-weight: 600;">2.1G / 4G</div><div class="mut" style="margin-top: 3px;">RAM (свободно)</div></div>
+    </div>
+
+  </div>
+</div></div></div>
+  <div class="screen"><h2>После — <b>предложение</b></h2><div class="frame"><div style="width: 393px; height: 3100px; box-sizing: border-box; background: #000; display: flex; flex-direction: column;">
+
+  <!-- Шапка платформы — без изменений -->
+  <div style="height: 52px; flex: 0 0 auto; display: flex; align-items: center; gap: 12px; padding: 0 16px; border-bottom: 1px solid #1c1c1c; background: #0b0b0b;">
+    <button type="button" class="tbtn" aria-label="Меню" style="padding: 5px 9px;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <div style="flex-grow: 1; font-size: 15px; font-weight: 600;">Digital CashFlow <span style="color: #8b8b8b; font-weight: 400;">(3)</span></div>
+    <span class="mut">v2.55.0</span>
+  </div>
+
+  <div style="flex-grow: 1; padding: 16px 16px 24px; display: flex; flex-direction: column; gap: 12px;">
+
+    <!-- 1. Приветствие, дата и время с поясом. Кнопок «Структура / Проекты / Бэклог» больше нет -->
+    <div>
+      <div style="font-size: 24px; font-weight: 700; letter-spacing: -.5px;">Добрый день, Константин</div>
+      <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 5px; flex-wrap: wrap;">
+        <span style="font-size: 13px; color: #c8c8c8;">Пятница, 19 сентября</span>
+        <span style="font-size: 13px; color: #c8c8c8; font-variant-numeric: tabular-nums;">11:49</span>
+        <span style="font-size: 11px; color: #9a9a9a; border: 1px solid #2a2a2a; border-radius: 6px; padding: 1px 6px;">GMT+4 · Самара</span>
+      </div>
+    </div>
+
+    <!-- 2. Два сервера в один ряд, 50/50 -->
+    <div class="g2">
+      <div class="card" style="padding: 13px;">
+        <div style="display: flex; align-items: center; gap: 8px;"><span class="dot on"></span><span style="font-size: 13px; font-weight: 600;">RU · cashruflow</span></div>
+        <p class="sub" style="margin-top: 7px;">Все процессы online</p>
+        <p class="sub">uptime 12 дн · load 0.42</p>
+      </div>
+      <div class="card" style="padding: 13px;">
+        <div style="display: flex; align-items: center; gap: 8px;"><span class="dot on"></span><span style="font-size: 13px; font-weight: 600;">NL · ai-gw</span></div>
+        <p class="sub" style="margin-top: 7px;">Шлюз отвечает, 38 мс</p>
+        <p class="sub">оплачен до 30.09.2026</p>
+      </div>
+    </div>
+
+    <!-- 3. Диск и память, 50/50 -->
+    <div class="g2">
+      <div class="card" style="padding: 13px;">
+        <p class="lbl">Диск, свободно</p>
+        <p class="big">41 <span style="font-size: 13px; color: #9a9a9a; font-weight: 400;">ГБ</span></p>
+        <div class="bar"><i style="width: 49%; background: #4caf7d;"></i></div>
+        <p class="sub">занято 39 из 80 ГБ</p>
+      </div>
+      <div class="card" style="padding: 13px;">
+        <p class="lbl">Память, свободно</p>
+        <p class="big">2,1 <span style="font-size: 13px; color: #9a9a9a; font-weight: 400;">ГБ</span></p>
+        <div class="bar"><i style="width: 48%; background: #4caf7d;"></i></div>
+        <p class="sub">занято 1,9 из 4 ГБ</p>
+      </div>
+    </div>
+
+    <!-- 4. Рестарты -->
+    <div class="card">
+      <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px;">
+        <span style="font-size: 13px; font-weight: 600;">Рестарты</span>
+        <span class="mut">за сутки 1</span>
+        <span style="flex-grow: 1;"></span>
+        <span class="mut">всего с запуска</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px; background: #181818; border: 1px solid #222; border-radius: 10px; padding: 9px 11px;">
+          <span class="dot on" style="width: 7px; height: 7px;"></span>
+          <span style="flex-grow: 1; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">web-interface</span>
+          <b style="font-size: 13px;">3</b>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; background: #181818; border: 1px solid #222; border-radius: 10px; padding: 9px 11px;">
+          <span class="dot on" style="width: 7px; height: 7px;"></span>
+          <span style="flex-grow: 1; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">mcp-sse</span>
+          <b style="font-size: 13px;">0</b>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; background: #181818; border: 1px solid #222; border-radius: 10px; padding: 9px 11px;">
+          <span class="dot on" style="width: 7px; height: 7px;"></span>
+          <span style="flex-grow: 1; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">tg-bot</span>
+          <b style="font-size: 13px; color: #e0b83c;">1</b>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; background: #181818; border: 1px solid #222; border-radius: 10px; padding: 9px 11px;">
+          <span class="dot on" style="width: 7px; height: 7px;"></span>
+          <span style="flex-grow: 1; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">ai-gw</span>
+          <b style="font-size: 13px;">0</b>
+        </div>
+      </div>
+      <div style="display: flex; gap: 7px; margin-top: 11px;">
+        <button type="button" class="tbtn">Перезапустить…</button>
+        <button type="button" class="tbtn">Журнал</button>
+      </div>
+    </div>
+
+    <!-- 5. Неделя: задачи и финансы, 50/50 -->
+    <div class="g2">
+      <div class="card" style="padding: 13px;">
+        <p class="lbl">Задачи за неделю</p>
+        <p class="big" style="color: #10b981;">9</p>
+        <p class="sub">готово · в работе 2 · просрочено 3</p>
+        <div style="display: flex; gap: 3px; margin-top: 10px; height: 6px;">
+          <i style="display: block; flex-grow: 9; background: #10b981; border-radius: 6px;"></i>
+          <i style="display: block; flex-grow: 2; background: #f97316; border-radius: 6px;"></i>
+          <i style="display: block; flex-grow: 3; background: #f87171; border-radius: 6px;"></i>
+        </div>
+      </div>
+      <div class="card" style="padding: 13px;">
+        <p class="lbl">Финансы за неделю</p>
+        <div style="display: flex; align-items: baseline; gap: 6px;">
+          <span style="font-size: 20px; font-weight: 700; color: #10b981;">+185 000</span>
+          <span class="mut">₽</span>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: 6px; margin-top: 4px;">
+          <span style="font-size: 17px; font-weight: 600; color: #f87171;">−42 300</span>
+          <span class="mut">₽</span>
+        </div>
+        <p class="sub" style="margin-top: 8px;">итого +142 700 ₽</p>
+      </div>
+    </div>
+
+    <!-- 6. Календарь задач — остаётся -->
+    <div class="card">
+      <p class="ttl">Календарь задач · сентябрь</p>
+      <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; text-align: center;">
+        <span class="mut" style="font-size: 10px;">Пн</span><span class="mut" style="font-size: 10px;">Вт</span><span class="mut" style="font-size: 10px;">Ср</span><span class="mut" style="font-size: 10px;">Чт</span><span class="mut" style="font-size: 10px;">Пт</span><span class="mut" style="font-size: 10px;">Сб</span><span class="mut" style="font-size: 10px;">Вс</span>
+        <span style="font-size:11px;padding:6px 0;color:#5a5a5a;">1</span><span style="font-size:11px;padding:6px 0;color:#5a5a5a;">2</span><span style="font-size:11px;padding:6px 0;color:#5a5a5a;">3</span><span style="font-size:11px;padding:6px 0;color:#5a5a5a;">4</span><span style="font-size:11px;padding:6px 0;color:#5a5a5a;">5</span><span style="font-size:11px;padding:6px 0;color:#5a5a5a;">6</span><span style="font-size:11px;padding:6px 0;color:#5a5a5a;">7</span>
+        <span style="font-size:11px;padding:6px 0;">8</span><span style="font-size:11px;padding:6px 0;">9</span><span style="font-size:11px;padding:6px 0;background:rgba(0,160,255,.14);border-radius:7px;">10</span><span style="font-size:11px;padding:6px 0;">11</span><span style="font-size:11px;padding:6px 0;background:rgba(0,160,255,.14);border-radius:7px;">12</span><span style="font-size:11px;padding:6px 0;">13</span><span style="font-size:11px;padding:6px 0;">14</span>
+        <span style="font-size:11px;padding:6px 0;background:rgba(248,113,113,.16);border-radius:7px;color:#f87171;">15</span><span style="font-size:11px;padding:6px 0;">16</span><span style="font-size:11px;padding:6px 0;background:rgba(0,160,255,.14);border-radius:7px;">17</span><span style="font-size:11px;padding:6px 0;">18</span><span style="font-size:11px;padding:6px 0;background:#00a0ff;border-radius:7px;color:#04121e;font-weight:600;">19</span><span style="font-size:11px;padding:6px 0;">20</span><span style="font-size:11px;padding:6px 0;">21</span>
+        <span style="font-size:11px;padding:6px 0;">22</span><span style="font-size:11px;padding:6px 0;background:rgba(0,160,255,.14);border-radius:7px;">23</span><span style="font-size:11px;padding:6px 0;">24</span><span style="font-size:11px;padding:6px 0;">25</span><span style="font-size:11px;padding:6px 0;background:rgba(0,160,255,.14);border-radius:7px;">26</span><span style="font-size:11px;padding:6px 0;">27</span><span style="font-size:11px;padding:6px 0;">28</span>
+        <span style="font-size:11px;padding:6px 0;">29</span><span style="font-size:11px;padding:6px 0;">30</span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- Разделитель -->
+    <div style="display: flex; align-items: center; gap: 10px; margin: 6px 0 2px;">
+      <span style="font-size: 10px; letter-spacing: .8px; text-transform: uppercase; font-weight: 700; color: #8b8b8b;">Дальше — как сейчас</span>
+      <span style="flex-grow: 1; height: 1px; background: #1f1f1f;"></span>
+    </div>
+
+    <!-- 7. Плитки времени и денег -->
+    <div class="g2">
+      <div class="card" style="background: linear-gradient(135deg, rgba(0,160,255,.07), rgba(0,160,255,.01)); border-color: rgba(0,160,255,.22);">
+        <p class="lbl">Сегодня</p>
+        <p class="big">4ч 20м <span style="font-size: 12px; color: #9a9a9a; font-weight: 400;">из 8ч</span></p>
+        <div class="bar"><i style="width: 54%;"></i></div>
+        <p class="sub">54% нормы · по задачам 3ч 50м</p>
+      </div>
+      <div class="card">
+        <p class="lbl">Неделя</p>
+        <p class="big">26ч 10м</p>
+        <p class="sub" style="color: #10b981;">↑ 12% к прошлой (23ч 20м)</p>
+      </div>
+      <div class="card">
+        <p class="lbl">Velocity</p>
+        <p class="big">3,7 <span style="font-size: 12px; color: #9a9a9a; font-weight: 400;">ч/день</span></p>
+        <p class="sub" style="color: #f87171;">↓ 4% · за месяц 92ч</p>
+      </div>
+      <div class="card" style="border-color: rgba(248,113,113,.35);">
+        <p class="lbl">Задолженность</p>
+        <p class="big" style="color: #f87171;">84 000 <span style="font-size: 12px; color: #9a9a9a; font-weight: 400;">₽</span></p>
+        <p class="sub">2 спринта не оплачено</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="lbl">Anthropic API</p>
+      <p class="big" style="color: #10b981;">$18.42</p>
+      <p class="sub">≈ 14 дн. при $1.28/день</p>
+      <div style="display: flex; gap: 6px; margin-top: 10px;">
+        <button type="button" class="tbtn">+ Пополнение</button>
+        <button type="button" class="tbtn">Сверить</button>
+      </div>
+    </div>
+
+    <!-- 8. KPI -->
+    <div class="g2">
+      <a class="card" href="/tasks" style="text-decoration: none;"><p class="lbl">Просрочено</p><p class="k" style="color: #f87171;">3</p></a>
+      <a class="card" href="/tasks" style="text-decoration: none;"><p class="lbl">В работе</p><p class="k" style="color: #f97316;">2</p></a>
+      <a class="card" href="/tasks" style="text-decoration: none;"><p class="lbl">Бэклог</p><p class="k" style="color: #e8e8e8;">47</p></a>
+      <a class="card" href="/tasks" style="text-decoration: none;"><p class="lbl">Готово за 7д</p><p class="k" style="color: #10b981;">9</p></a>
+      <a class="card" href="/tasks" style="text-decoration: none;"><p class="lbl">Для Claude</p><p class="k" style="color: #a855f7;">12</p></a>
+      <a class="card" href="/tasks" style="text-decoration: none;"><p class="lbl">Для GPT</p><p class="k" style="color: #06b6d4;">4</p></a>
+    </div>
+
+    <!-- 9. Графики -->
+    <div class="card">
+      <p class="ttl">Загрузка за неделю</p>
+      <div style="display: flex; align-items: flex-end; gap: 7px; height: 108px;">
+        <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;"><div style="width: 100%; height: 80px; background: rgba(255,255,255,.05); border-radius: 5px; display: flex; align-items: flex-end;"><i style="display: block; width: 100%; height: 62%; background: #00a0ff; border-radius: 5px;"></i></div><span class="mut" style="font-size: 10px;">Сб</span></div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;"><div style="width: 100%; height: 80px; background: rgba(255,255,255,.05); border-radius: 5px; display: flex; align-items: flex-end;"><i style="display: block; width: 100%; height: 25%; background: #00a0ff; border-radius: 5px;"></i></div><span class="mut" style="font-size: 10px;">Вс</span></div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;"><div style="width: 100%; height: 80px; background: rgba(255,255,255,.05); border-radius: 5px; display: flex; align-items: flex-end;"><i style="display: block; width: 100%; height: 100%; background: #10b981; border-radius: 5px;"></i></div><span class="mut" style="font-size: 10px;">Пн</span></div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;"><div style="width: 100%; height: 80px; background: rgba(255,255,255,.05); border-radius: 5px; display: flex; align-items: flex-end;"><i style="display: block; width: 100%; height: 75%; background: #00a0ff; border-radius: 5px;"></i></div><span class="mut" style="font-size: 10px;">Вт</span></div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;"><div style="width: 100%; height: 80px; background: rgba(255,255,255,.05); border-radius: 5px; display: flex; align-items: flex-end;"><i style="display: block; width: 100%; height: 88%; background: #00a0ff; border-radius: 5px;"></i></div><span class="mut" style="font-size: 10px;">Ср</span></div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;"><div style="width: 100%; height: 80px; background: rgba(255,255,255,.05); border-radius: 5px; display: flex; align-items: flex-end;"><i style="display: block; width: 100%; height: 50%; background: #00a0ff; border-radius: 5px;"></i></div><span class="mut" style="font-size: 10px;">Чт</span></div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; gap: 5px;"><div style="width: 100%; height: 80px; background: rgba(255,255,255,.05); border-radius: 5px; display: flex; align-items: flex-end; outline: 1px solid #00a0ff;"><i style="display: block; width: 100%; height: 54%; background: #00a0ff; border-radius: 5px;"></i></div><span style="font-size: 10px; color: #00a0ff; font-weight: 600;">Пт</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="ttl">Проекты за месяц</p>
+      <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px;"><span>Платформа</span><span class="mut">38ч</span></div>
+      <div class="bar" style="margin-top: 0;"><i style="width: 100%; background: #00a0ff;"></i></div>
+      <div style="display: flex; justify-content: space-between; font-size: 12px; margin: 10px 0 5px;"><span>Соричи</span><span class="mut">24ч</span></div>
+      <div class="bar" style="margin-top: 0;"><i style="width: 63%; background: #10b981;"></i></div>
+      <div style="display: flex; justify-content: space-between; font-size: 12px; margin: 10px 0 5px;"><span>СЕО-агенты</span><span class="mut">18ч</span></div>
+      <div class="bar" style="margin-top: 0;"><i style="width: 47%; background: #a855f7;"></i></div>
+    </div>
+
+    <div class="card">
+      <p class="ttl">Активность, 16 недель</p>
+      <div style="display: grid; grid-template-columns: repeat(16, 1fr); gap: 3px;">
+        <i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.20)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.55)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(255,255,255,.04)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.75)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.35)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.90)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.45)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(255,255,255,.04)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.60)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.25)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.80)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.50)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(255,255,255,.04)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.65)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.30)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.95)"></i>
+        <i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.40)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.70)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.20)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(255,255,255,.04)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.85)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.50)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.60)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.15)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.75)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(255,255,255,.04)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.55)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.90)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.35)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.45)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.70)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.25)"></i>
+        <i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.65)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(255,255,255,.04)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.80)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.30)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.55)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.95)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.40)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.60)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(255,255,255,.04)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.50)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.85)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.20)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.70)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.45)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.75)"></i><i style="display:block;aspect-ratio:1;border-radius:2px;background:rgba(0,160,255,.35)"></i>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="ttl">Таймлайн сегодня</p>
+      <div style="display: flex; align-items: center; gap: 9px; margin-bottom: 7px;">
+        <span style="width: 74px; font-size: 11px; color: #00a0ff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Платформа</span>
+        <div style="flex-grow: 1; height: 20px; background: rgba(255,255,255,.04); border-radius: 6px; position: relative;"><i style="position: absolute; left: 6%; width: 38%; height: 100%; border-radius: 4px; background: #00a0ff;"></i></div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 9px;">
+        <span style="width: 74px; font-size: 11px; color: #10b981; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Соричи</span>
+        <div style="flex-grow: 1; height: 20px; background: rgba(255,255,255,.04); border-radius: 6px; position: relative;"><i style="position: absolute; left: 52%; width: 26%; height: 100%; border-radius: 4px; background: #10b981;"></i></div>
+      </div>
+    </div>
+
+    <!-- 10. Продления и аудит -->
+    <div class="card">
+      <p class="ttl">Продления</p>
+      <div class="srow"><span class="dot off" style="width: 7px; height: 7px;"></span><span style="flex-grow: 1;">Sprintbox NL</span><span class="mut">просрочено 2 дн.</span><b style="font-size: 12px;">1 490 ₽</b></div>
+      <div class="srow"><span class="dot" style="width: 7px; height: 7px; background: #ff9f43;"></span><span style="flex-grow: 1;">cashruflow.ru</span><span class="mut">5 дн.</span><b style="font-size: 12px;">890 ₽</b></div>
+      <div class="srow"><span class="dot" style="width: 7px; height: 7px; background: #e0b83c;"></span><span style="flex-grow: 1;">Топвизор</span><span class="mut">21 дн.</span><b style="font-size: 12px;">3 200 ₽</b></div>
+    </div>
+
+    <div class="card">
+      <p class="ttl">Аудит безопасности</p>
+      <div style="display: flex; align-items: center; gap: 9px;"><span class="dot on" style="width: 7px; height: 7px;"></span><span style="font-size: 12px;">Открытых находок нет · проверено 19.09.2026</span></div>
+    </div>
+
+    <!-- 11. Конвенции — в самый низ -->
+    <div class="card" style="border-color: rgba(248,113,113,.45);">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+        <b style="font-size: 13px; color: #f87171;">Конвенции CLAUDE.md</b>
+        <span style="font-size: 11px; color: #f87171;">23 973 / 24 000 знаков</span>
+      </div>
+      <div class="bar"><i style="width: 99%; background: #f87171;"></i></div>
+      <p class="sub">Файл целиком доезжает до сессии.</p>
+    </div>
+
+  </div>
+</div></div></div>
+</div>
+</body>
+</html>
