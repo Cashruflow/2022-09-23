@@ -1,33 +1,46 @@
-# eSIM в «Путешествиях» (/trip/app) — проект
+# «Связь» (SIM / eSIM) в «Путешествиях» (/trip/app) — проект, редакция 2
 
-Статус: ПРЕДЛОЖЕНИЕ. На сервере ничего не менялось (только `read_file`/`search_code`).
-Дата: 28.09.2026. Автор: Claude (по задаче Константина).
+Статус: ПРЕДЛОЖЕНИЕ. На сервере ничего не менялось (только `read_file` / `search_code`).
+Редакция 2 от 28.09.2026 — переработана по ответам Константина. Автор: Claude.
+
+---
+
+## Решения пользователя (28.09.2026)
+
+| # | Вопрос | Решение | Где в проекте |
+|---|---|---|---|
+| 1 | Как учитывать деньги | **Отдельной строкой в `trip_expenses`**: у строки `source='sim'` + `source_id`, у SIM — `expense_id`. Категория «Связь» в `CATS`. Дублей нет, сумма синхронизируется при правке SIM, при удалении SIM строка расхода удаляется | §6 |
+| 2 | Только eSIM? | **И физическая SIM тоже**: переключатель «SIM / eSIM», поле `kind: 'sim' \| 'esim'`. У физической нет LPA / SM-DP+ / QR, зато есть номер телефона (необязательный). Таблица `trip_sims`, вкладка **«Связь»**, бейдж в поездке показывает тип | §2, §5 |
+| 3 | Оплата Trip Coins | **Считается тратой**: 339,80 ₽ идёт в расход, способ оплаты хранится атрибутом `paid_with` | §6.3 |
+| 4 | Чем шифровать код активации | **Отдельным ключом `TRIP_SIM_KEY`** из окружения. Без ключа сервер НЕ падает: запись сохраняется без кода, пользователь видит причину. Ключ в код не генерировать | §4.2 |
+| 5 | Напоминания в Telegram | **Да**: за сутки до окончания, в момент окончания и так же для «активировать до». Флаги отправки против повторов. Встраивание по образцу `pauseTick` из `habits.js` | §7 |
+| — | Декодер QR (ответа не было) | Предложение: `BarcodeDetector` в браузере, **без новой зависимости**. Где его нет (iOS Safari) — просим вставить строку LPA текстом | §5.4 |
+
+Что изменилось относительно редакции 1:
+- таблица `trip_esims` → `trip_sims` с полем `kind`; ручки `/esims` → `/sims`, `/esim-scan` → `/sim-scan`;
+  вкладка «eSIM» → «Связь»;
+- расход больше не производный пункт в `compute()` — это строка `trip_expenses`, привязанная к SIM (§6);
+- шифр — собственный ключ модуля `TRIP_SIM_KEY` вместо ключа сейфа доступов (`encSecret` из `server.js` больше не нужен);
+- добавлены напоминания в Telegram (§7) и распознавание QR в браузере (§5.4);
+- закрыты открытые вопросы 1–6 и 10 редакции 1.
 
 ---
 
 ## 0. Коротко
 
-- Раздел «Путешествия» — это `web/trip.js` (сервер, 4862 строки) + `web/trip_journeys.js` (сборка поездок и расходы)
-  + `web/public/trip.html` (страница, вкладки) + `web/public/trip-journeys.js` (карточки поездок на «Обзоре»).
-  Все таблицы — `trip_*` в `med.sqlite` (`medDb`), API — `/api/profile/:profileId/trip/*` (`me` — своя сессия).
-- **Сущности «поездка» в базе нет.** Поездка собирается на лету (`buildJourneys()` в `trip_journeys.js`) из рейсов и
-  наземных билетов. Поэтому eSIM — это **своя таблица `trip_esims` + своя вкладка «eSIM»** рядом со «Страховками» и
-  «Разрешениями» (тот же образец), а в карточку поездки она попадает при сборке — как страховка и виза.
-- **Распознавание у отеля — только файлы** (`POST …/trip/scan`: 1 файл сырыми байтами или до 5 файлов JSON-ом).
-  Вставки текста у отеля НЕТ — она есть только у рейсов (`POST …/trip/boarding` с `X-Doc-Kind: text`).
-  Предлагаю ручку `POST …/trip/esim-scan`, которая принимает все три входа (файл / несколько файлов / текст) тем же
-  конвейером: `sniffMime` → `logUpload` (file_uploads, kind='trip') → `ask()` (Sonnet 4.6 через `AI_BASE`) →
-  `parseJson` → белый список полей → `logAiCall` + `logGeneration`. Записи ручка НЕ создаёт.
-- **Расходы.** Страховка и разрешение попадают в траты поездки не строкой `trip_expenses`, а как производный
-  пункт в `compute()` (`trip_journeys.js:219–227`). Рекомендую для eSIM то же самое: пункт `kind:'esim'`,
-  категория новая `comm: 'Связь'` в `CATS`. Дублей нет по построению (одна запись eSIM = один пункт), повторный
-  импорт склеивается уникальным индексом по `booking_no`/`iccid`. Вариант «строка в `trip_expenses` + `expense_id`
-  + `source='esim'`», как в задании, расписан в §6.2 — он работает, но вводит второй источник суммы.
-- Код активации (LPA) — шифруется тем же AES-256-GCM, что сейф доступов (`encSecret`/`decSecret`, `server.js:7806`),
-  в списке отдаётся маской, целиком — только отдельной ручкой по кнопке «Показать». PIN брони и контакты
-  (имя/телефон/email) не распознаются и не хранятся — как паспорт и PIN у виз (`PERMIT_PROMPT`).
-- Нужен ADR: **ADR-233** (последний занятый номер в `docs/ADR/` — ADR-232; сверить перед созданием, номера уже
-  дважды сталкивались).
+- Раздел «Путешествия»: сервер `web/trip.js` (схема, распознавание, CRUD) и `web/trip_journeys.js` (сборка поездок и
+  расходы); страница `web/public/trip.html` и `web/public/trip-journeys.js`. Таблицы `trip_*` лежат в `med.sqlite`
+  (`medDb`), API — `/api/profile/:profileId/trip/*` (`me` — своя сессия).
+- Сущности «поездка» в базе нет: её собирает `buildJourneys()`. SIM живёт в своей таблице `trip_sims` и своей вкладке
+  «Связь». В карточку поездки она попадает бейджем, а её стоимость — через строку расхода.
+- Распознавание — `POST …/trip/sim-scan`: один файл, до 5 файлов (JSON) или вставленный текст. Конвейер тот же, что у
+  брони отеля и рейса. Записи ручка не создаёт.
+- Деньги: при сохранении SIM с ценой сервер делает upsert строки `trip_expenses` (`category='comm'`, `source='sim'`,
+  `source_id=<id SIM>`) и пишет `trip_sims.expense_id`. Такая строка правится только из «Связи», в шторке расходов она
+  только для чтения. Удаление SIM удаляет и строку.
+- Напоминания: тик раз в 30 минут в `trip.js`, те же `tgSend` + `patient_telegram_links` + бот `@Ai_dcf_bot`, что у
+  пауз привычек. Четыре флага `*_sent_at`, метка ставится до отправки.
+- ADR: **ADR-233** (последний занятый — ADR-232; сверить перед созданием).
 
 ---
 
@@ -35,248 +48,209 @@
 
 | Что | Где | Заметки |
 |---|---|---|
-| Сервер раздела | `/home/cashruflow/web/trip.js` | `export function mountTrip(app, medDb, deps)` — строка 1712 |
-| Схема (миграции) | `trip.js`, `export function ensureTripTables(medDb)` — строка 919 | идемпотентно на старте, `PRAGMA table_info` + `ALTER TABLE ADD COLUMN` |
-| Монтирование | `/home/cashruflow/web/server.js:15200` | `mountTrip(app, medDb, { profileAuth, pcheck, getPatientAccount, referral, tasksDb: db, logUpload, logAiCall, apiKey, aiBase, whisperKey, openaiBase })` |
-| Обход глобального `express.json` | `server.js:249` `RAW_BODY_RE = /^\/api\/profile\/[^/]+\/trip\/scan$/` | без этого многостраничный JSON >100 КБ режется 413 до роута (ADR-204) |
-| Резолв профиля | `trip.js:1772` `pid(req,res)` | каждая ручка начинается с него |
-| Скан брони отеля | `trip.js:4268` `POST …/trip/scan` | промт `SCAN_PROMPT` (стр. 172), `sniffMime` (80), белый список полей (4349–4368) |
-| Скан рейса + ТЕКСТ | `trip.js:4409` `POST …/trip/boarding`, `DOC_KINDS.text` (460–466), `PASTE_MAX = 20000` | единственное место, где уже есть «вставить текст» |
-| Общий приём одиночного скана | `trip.js:4601` `takeScan(req,res,title,note)` | у наземки, полиса, визы |
-| Скан полиса / визы | `trip.js:4757` `policy-scan`, `4695` `permit-scan` | образец «сканер → форма» |
-| Помощники модели | `trip.js:4174` `ask(content,maxTokens)`, `4192` `parseJson`, `4198` `cost(u)`, `4202` `logGeneration(...)`, `4166` `purgeScansLazy` | модель `SCAN_MODEL = 'claude-sonnet-4-6'` |
-| Числа/даты | `numAmount()` (530, «357,69», «5 906,59», «5,906.59»), `normDate()` (683), `today()` МСК (696), `dnum/dstr`, `localToUtc(iso,hm,tz)` (645), `tzOffsetMin` (636), `COUNTRY_TZ` (873, Египет → `Africa/Cairo`) | |
-| Площадки | `VIA_TABLES` (146), `vendorResolve()` (157), `saveVia(tbl,id,body)` (2181), сид `VENDOR_SEED` уже содержит Trip.com | |
-| Страховки (образец CRUD) | таблица `trip_insurance` (1348), `policyBody()` (3925), ручки 3971–4036 | статус считает сервер |
-| Разрешения | `trip_permits` (1079), ручки 2248–2294 | url чистится в `saveVia` |
-| Чек-лист «Перед путешествием» | `CHECKLIST_SEED` (907) — пункт «SIM или eSIM» в группе «Деньги и связь» | можно отмечать автоматически (открытый вопрос) |
-| Поездки и расходы | `/home/cashruflow/web/trip_journeys.js` | `CATS` (35), `BANK_CAT` (42), `trip_expenses` (58), `compute()` (169), `POST/PATCH/DELETE …/expenses` (299–328) |
-| Страница | `/home/cashruflow/web/public/trip.html` | вкладки `#tripTabs` (383–399), `go(t)` (747), `paintIns` (1695), `paintPermits` (1809), `bindDocScan` (1932), `bindScan` отеля (3083), `scanFiles/pdfPages` (3047–3079), `shrink` (1329), `send` с защитой от двойного тапа (529) |
-| Карточки поездок | `/home/cashruflow/web/public/trip-journeys.js` | `CAT_COLOR` (7) — зашит, категории приходят с сервера (`DATA.cats`) |
-| QR-кодер | `/home/cashruflow/web/public/assets/qrcode-gen.js` (qrcode-generator, MIT), загрузчик `loadQrLib()` в `trip-pass.js:233` — наружу НЕ экспортирован (`window.tripPass = { open, render, UTM, utmContent, refUrl }`, стр. 529) | |
-| QR-декодера | НЕТ на платформе | чтение QR со скрина — открытый вопрос (§9) |
-| Шифрование | `server.js:7802–7823` `ACC_KEY` из `/home/cashruflow/.access_key`, `encSecret(txt)`, `decSecret(blob)` | функции объявлены в server.js, в trip.js не переданы |
-| Спрайт значков | `/assets/icons.svg`, адрес `window.ICONS_URL` (`ICONS_V` в server.js, сейчас `?v=8`) | значка SIM нет (есть `i-phone`, `i-phone-call`, `i-globe`) |
-| ADR раздела | `docs/ADR/ADR-201-trip-module.md`, `ADR-204-…raw-scan-body.md`, `ADR-222-trip-journeys-expenses.md` | |
+| Сервер раздела | `/home/cashruflow/web/trip.js`, `export function mountTrip(app, medDb, deps)` — стр. 1712 | |
+| Схема | `trip.js:919` `export function ensureTripTables(medDb)` | идемпотентно на старте; колонки добавляются через `PRAGMA table_info` + `ALTER TABLE ADD COLUMN` |
+| Монтирование | `/home/cashruflow/web/server.js:15200` | deps: `profileAuth, pcheck, getPatientAccount, referral, tasksDb, logUpload, logAiCall, apiKey, aiBase, whisperKey, openaiBase` |
+| Окружение | `server.js:2-3` `dotenv.config({ path: '/home/cashruflow/mcp-server/.env' })` | `TRIP_SIM_KEY` положить туда же |
+| Обход глобального `express.json` | `server.js:249` `RAW_BODY_RE` (только `/trip/scan`) | без этого несколько скринов режутся 413 (ADR-204) |
+| Профиль | `trip.js:1772` `pid(req,res)` | |
+| Скан брони отеля | `trip.js:4268` `POST …/trip/scan` | только файлы, текста нет |
+| Скан рейса + текст | `trip.js:4409` `POST …/trip/boarding`, `DOC_KINDS.text`, `PASTE_MAX=20000` | единственный текстовый вход сейчас |
+| Общий приём файла | `trip.js:4601` `takeScan()` | |
+| Модель и журналы | `ask` 4174, `parseJson` 4192, `cost` 4198, `logGeneration` 4202, `purgeScansLazy` 4166 | Sonnet 4.6 через `AI_BASE` |
+| Помощники | `numAmount` 530, `normDate` 683, `today()` МСК 696, `addDays` 676, `localToUtc` 645, `COUNTRY_TZ` 873, `vendorResolve` 157, `saveVia` 2181, `VIA_TABLES` 146 | |
+| Образец CRUD | страховки: `trip_insurance` 1348, `policyBody` 3925, ручки 3971–4036 | |
+| Расходы | `/home/cashruflow/web/trip_journeys.js`: `CATS` 35, `BANK_CAT` 42, `ensureJourneyTables` 57 (`trip_expenses`), `compute()` 169, `expenseBody` 286, `POST/PATCH/DELETE …/expenses` 299–328 | колонок `source`/`source_id` нет |
+| Страница | `/home/cashruflow/web/public/trip.html`: вкладки 383–399, `go()` 747, `paintIns` 1695, `bindDocScan` 1932, `bindScan` 3083, `shrink` 1329, `send` 529, `priceField/priceBody/priceFill` 703–745 | |
+| Карточки поездок | `/home/cashruflow/web/public/trip-journeys.js`: `CAT_COLOR` 7, `rowHtml` 62 (кнопки «править/удалить» у `kind==='manual'`), `cardHtml` 84 | |
+| QR-кодер | `/assets/qrcode-gen.js`, загрузчик `loadQrLib()` в `trip-pass.js:233`, наружу не отдан (`window.tripPass` стр. 529) | |
+| Telegram | `/home/cashruflow/lib/tg.mjs` `tgSend(token, chatId, text, opts)` → `null` или строка причины | правило CLAUDE.md: только `tgSend` |
+| Образец напоминаний | `web/habits.js:1754-1796` `pauseTick`: тик 30 мин, тихие часы, метка `pinged_at` до отправки, адресат из `patient_telegram_links` (join `patient_accounts.profile_id`), бот `TELEGRAM_BOT_TOKEN_AI_DCF`, для профиля 1 запасной `TELEGRAM_BOT_TOKEN_CASHRUFLOW` + `TG_CHAT_ID` | та же копия `aiDcfToken()` есть в `pair.js:360` |
+| Привязка Telegram | `web/patient_telegram.js` — таблица `patient_telegram_links` | |
+| Карточки ключей | `web/integrations.js:53` `keyCard(id, group, name, envKey, note)` | можно показать статус `TRIP_SIM_KEY` |
+| Спрайт | `/assets/icons.svg`, адрес `window.ICONS_URL` (`ICONS_V` в server.js, сейчас `?v=8`) | значка SIM нет |
+| Чек-лист | `trip.js:907` `CHECKLIST_SEED` — пункт «SIM или eSIM» | |
 
-Чего нет и что я НЕ выдумываю:
-- «Поездки» как таблицы (`trips`, `trip_id`) — нет. Привязка eSIM к поездке — по датам и стране, как у страховок.
-- Справочника категорий расходов в `/refs` — нет, это константа `CATS` в `trip_journeys.js`.
-- Поля `expense.source` / `trip_expenses.source` — нет (колонки таблицы: id, profile_id, spent_on, category, title,
-  amount, currency, amount_local, currency_local, note, created_at, updated_at).
-- Текстового ввода у отеля — нет.
-- Экспорта `loadQrLib` — нет (нужна одна строка в `trip-pass.js`).
+Чего в коде нет (здесь не выдумано, а предлагается): таблиц поездок и `trip_id`; справочника категорий трат (есть
+константа `CATS`); колонок `trip_expenses.source/source_id`; текстового ввода у отеля; декодера QR; экспорта
+`loadQrLib`; общего модуля «напоминания пациенту» (есть две локальные копии в `habits.js` и `pair.js`).
 
 ---
 
-## 2. Модель данных
+## 2. Модель данных — `trip_sims`
 
 ### 2.1 Поля
 
-Обязательное одно из: `country` / `region` / `product` / `booking_no` / `iccid` (иначе 400 `empty`, как
-«Укажите страховую или номер полиса»). Остальное — необязательно.
+`kind` — `'esim'` (по умолчанию) или `'sim'`. Обязательно одно из: `country`, `region`, `product`, `booking_no`,
+`iccid`, `phone`.
 
-| Колонка | Тип | Пример (Trip.com) | Откуда | Примечание |
-|---|---|---|---|---|
-| `country` | TEXT | Египет | скан/форма | по-русски, `list="places"` как у страховки |
-| `region` | TEXT | — | скан/форма | для региональных планов «Europe 33» |
-| `product` | TEXT | Egypt 5G eSIM \| Dual SIM \| QR code | скан | как в документе |
-| `plan` | TEXT | QR code-3 days-Daily- 2GB | скан | как в документе |
-| `network` | TEXT | 5G | скан | 4G/5G |
-| `plan_kind` | TEXT | daily | вычисляется | `daily` (N ГБ в сутки) / `total` (N ГБ на весь срок) / `unlimited` |
-| `data_mb` | INTEGER | 2048 | нормализация «2GB» | в сутки для daily, всего для total; 1 ГБ = 1024 МБ |
-| `throttle_kbps` | INTEGER | 512 | «после — 512kbps» | скорость после лимита |
-| `days` | INTEGER | 3 | «3 days» | |
-| `day_mode` | TEXT | rolling24 | «сутки = 24 ч от активации» | `rolling24` / `calendar` (календарные сутки по местному) |
-| `sms` / `calls` | INTEGER 0/1 | 0 / 0 | «Не включено: SMS/звонки» | |
-| `dual_sim` | INTEGER 0/1 | 1 | «Dual SIM» | |
-| `operator` | TEXT | — (Vodafone EG / Orange / Etisalat / WE) | скан или руками | сеть в стране часто неизвестна |
-| `operator_src` | TEXT | manual | | `doc` — из документа, `manual` — выбран руками |
-| `apn` | TEXT | — | | необязательно |
-| `roaming` | INTEGER 0/1 | 1 | по умолчанию 1 | «Включить роуминг данных» — почти все туристические eSIM без него не работают |
-| `smdp` | TEXT | smdp.io | разбор LPA | адрес SM-DP+ — не секрет |
-| `code_enc` | TEXT | (шифр) | разбор LPA | matching ID `K2-36Y6K0-7CDVXL`, AES-256-GCM |
-| `code_tail` | TEXT | CDVXL → «DVXL» | | последние 4 знака для маски «···DVXL» |
-| `lpa_oid` | TEXT | — | 4-я часть LPA | редко |
-| `confirm_required` | INTEGER 0/1 | 0 | 5-я часть LPA = «1» | нужен код подтверждения от продавца |
-| `iccid` | TEXT | 8948010010094791430 | скан | 19–20 цифр, начинается с 89, Luhn — предупреждение, не отказ |
-| `balance_url` | TEXT | https://globalesimstore.com/E | скан | только http(s) |
-| `booking_no` | TEXT | 1539367401113525 | скан | ключ склейки повторного импорта |
-| `order_status` | TEXT | Confirmed | скан | статус брони у площадки (не путать со статусом eSIM) |
-| `purchased_on` | TEXT YYYY-MM-DD | | скан/форма | дата покупки — для сверки с выпиской |
-| `activate_by` | TEXT YYYY-MM-DD | 2026-11-26 | «действительно до» | крайний срок активации |
-| `extend_until` | TEXT YYYY-MM-DD HH:MM:SS | 2026-11-27 19:25:38 | «продление до» | |
-| `uses` | INTEGER | 1 | «1 использование» | |
-| `installed_on` | TEXT YYYY-MM-DD | | кнопка «Установил» | профиль добавлен в телефон |
-| `activated_at` | TEXT YYYY-MM-DD HH:MM:SS | | кнопка «Подключилась сейчас» / руками | МЕСТНОЕ время страны в поясе `tz` |
-| `tz` | TEXT (IANA) | Africa/Cairo | `COUNTRY_TZ[country]` или руками | нужен для «+ N×24 ч» |
-| `price` / `price_currency` | REAL / TEXT | 339.80 / RUB | «итого» | та же пара, что у полиса и визы |
-| `price_local` / `price_local_currency` | REAL / TEXT | | вторая валюта, если напечатана | |
-| `price_base` | REAL | 357.69 | «базовая» | в валюте `price_currency` |
-| `discount` | REAL | 17.89 | «скидка 5%» | процент не храним — считается |
-| `paid_with` | TEXT | Trip Coins | «оплачено» | способ оплаты (см. открытый вопрос про баллы) |
-| `booked_via` | TEXT | Trip.com | скан → `vendorResolve` | общий справочник `trip_vendors`, `VIA_TABLES` + `trip_esims` |
-| `note` | TEXT | Отмена невозможна после использования | скан/форма | одна строка условий |
-| `created_at` / `updated_at` | TEXT | | | |
+| Колонка | Тип | Пример | SIM | eSIM | Примечание |
+|---|---|---|:-:|:-:|---|
+| `kind` | TEXT NOT NULL | esim | ✓ | ✓ | переключатель «SIM / eSIM» |
+| `country` / `region` | TEXT | Египет / — | ✓ | ✓ | |
+| `product` / `plan` | TEXT | Egypt 5G eSIM \| Dual SIM / QR code-3 days-Daily-2GB | ✓ | ✓ | как в документе |
+| `network` | TEXT | 5G | ✓ | ✓ | |
+| `plan_kind` | TEXT | daily | ✓ | ✓ | `daily` / `total` / `unlimited` |
+| `data_mb` | INTEGER | 2048 | ✓ | ✓ | 1 ГБ = 1024 МБ |
+| `throttle_kbps` | INTEGER | 512 | ✓ | ✓ | скорость после лимита |
+| `days` | INTEGER | 3 | ✓ | ✓ | |
+| `day_mode` | TEXT | rolling24 | ✓ | ✓ | `rolling24` / `calendar` |
+| `sms` / `calls` / `dual_sim` | INTEGER 0/1 | 0/0/1 | ✓ | ✓ | |
+| `phone` | TEXT | +20 10 1234 5678 | ✓ | ✓ (редко) | номер линии, необязательный; хранится как `+` и цифры |
+| `operator` / `operator_src` | TEXT | Vodafone / manual | ✓ | ✓ | `doc` или `manual` |
+| `apn` | TEXT | internet.vodafone.net | ✓ | ✓ | |
+| `roaming` | INTEGER 0/1 | 1 | 0 по умолч. | 1 по умолч. | «включить роуминг данных» |
+| `smdp` | TEXT | smdp.io | — | ✓ | для `kind='sim'` сервер обнуляет |
+| `code_enc` | TEXT | `v1:iv:tag:ct` | — | ✓ | шифр matching ID ключом `TRIP_SIM_KEY` |
+| `code_tail` | TEXT | DVXL | — | ✓ | для маски «···DVXL» |
+| `lpa_oid` / `confirm_required` | TEXT / INTEGER | — / 0 | — | ✓ | 4-я и 5-я части LPA |
+| `iccid` | TEXT | 8948010010094791430 | ✓ | ✓ | 19–20 цифр, начинается с 89, Luhn — предупреждение |
+| `balance_url` | TEXT | https://globalesimstore.com/E | ✓ | ✓ | только http(s) |
+| `booking_no` / `order_status` | TEXT | 1539367401113525 / Confirmed | ✓ | ✓ | номер — ключ склейки |
+| `purchased_on` | TEXT день | 2026-09-28 | ✓ | ✓ | дата расхода |
+| `activate_by` | TEXT день | 2026-11-26 | ✓ | ✓ | «действительно до» |
+| `extend_until` | TEXT момент | 2026-11-27 19:25:38 | ✓ | ✓ | «продление до» |
+| `uses` | INTEGER | 1 | — | ✓ | |
+| `installed_on` | TEXT день | | ✓ (вставлена) | ✓ (установлена) | |
+| `activated_at` | TEXT момент | | ✓ | ✓ | местное время в `tz` |
+| `tz` | TEXT IANA | Africa/Cairo | ✓ | ✓ | из `COUNTRY_TZ` или руками |
+| `price` / `price_currency` | REAL / TEXT | 339.80 / RUB | ✓ | ✓ | итого; уходит в расход |
+| `price_local` / `price_local_currency` | REAL / TEXT | | ✓ | ✓ | вторая валюта |
+| `price_base` / `discount` | REAL | 357.69 / 17.89 | ✓ | ✓ | |
+| `paid_with` | TEXT | Trip Coins | ✓ | ✓ | атрибут, на расход не влияет (решение 3) |
+| `booked_via` | TEXT | Trip.com | ✓ | ✓ | справочник `trip_vendors` |
+| `note` | TEXT | Отмена невозможна после использования | ✓ | ✓ | |
+| `expense_id` | INTEGER | 57 | ✓ | ✓ | ссылка на `trip_expenses.id` (§6) |
+| `notify_pre_sent_at` | TEXT момент | | ✓ | ✓ | «истекает через сутки» — отправлено (§7) |
+| `notify_end_sent_at` | TEXT момент | | ✓ | ✓ | «истекла» — отправлено |
+| `notify_actby_pre_sent_at` | TEXT момент | | ✓ | ✓ | «завтра последний день активации» — отправлено |
+| `notify_actby_sent_at` | TEXT момент | | ✓ | ✓ | «сегодня последний день активации» — отправлено |
+| `notify_error` | TEXT | | ✓ | ✓ | причина последнего отказа `tgSend` |
+| `created_at` / `updated_at` | TEXT | | | | |
 
-Не храним и не распознаём: PIN брони, имя/телефон/email контакта, номер карты. Модели это запрещено промтом,
-и полей под это нет — вторая линия защиты белым списком, как во всех сканах раздела.
+Не храним и не распознаём: PIN и пароль заказа, имя, телефон и почту **контакта заказа**, номер карты, PIN/PUK
+физической SIM. `phone` — это номер самой купленной линии, а не контакт покупателя; в промте они разведены.
 
-Отклонение от общих правил (`docs/rules/data.md`): рубли в модуле хранятся парой `price` + `price_currency`, а не
-`*_rub` — так устроены все `trip_*` (мультивалютность, ADR-201/222); eSIM держится модуля, а не общего правила.
+### 2.2 Статусы (не хранятся, считает сервер)
 
-### 2.2 Статусы (НЕ хранятся — считает сервер на GET, как `status` у полиса)
+| status | SIM (физическая) | eSIM | Условие |
+|---|---|---|---|
+| `bought` | куплена | куплена | остальное |
+| `installed` | вставлена | установлена | `installed_on` есть, `activated_at` нет |
+| `active` | активна | активна | `activated_at` есть и сейчас < `expires_at` (или срока нет) |
+| `expired` | истекла | истекла | сейчас ≥ `expires_at`; либо не активирована и сегодня > `activate_by` |
 
-| status | Условие | Подпись |
-|---|---|---|
-| `expired` | `activated_at` есть и сейчас ≥ `expires_at`; ИЛИ не активирована и сегодня > `activate_by` | «истекла» / «не активирована до 26.11.2026» |
-| `active` | `activated_at` есть и сейчас < `expires_at` | «активна, осталось 41 ч» |
-| `installed` | `installed_on` есть, `activated_at` нет | «установлена» |
-| `bought` | остальное | «куплена» |
+Окончание: `rolling24` — `activated_at + days × 24 ч` в поясе `tz`; `calendar` — `(день активации + days − 1) 23:59:59`.
+У физической SIM без `days` (обычный контракт) срока нет, статус остаётся `active`.
 
-Окончание:
-- `day_mode='rolling24'`: `expires_at = activated_at + days × 24 ч` (считается в UTC через `localToUtc(…, tz)` и
-  переводится обратно в местное время — перевод часов учтён тем же `Intl`, что у рейсов). Пример: активация
-  `2026-10-02 14:10:00` Каир, 3 дня → `2026-10-05 14:10:00`.
-- `day_mode='calendar'`: `expires_at = (дата активации + days − 1) 23:59:59` местного.
-- Сдвиг сброса лимита («обновление каждые 24 ч») при `rolling24` — `next_reset_at` = ближайшая точка
-  `activated_at + k×24 ч` в будущем; отдаётся в GET для подписи «лимит обновится в 14:10».
-
-### 2.3 SQL — миграция в `ensureTripTables()` (web/trip.js)
-
-Таблица новая, поэтому `CREATE TABLE IF NOT EXISTS` достаточно; все будущие колонки — только через
-`PRAGMA table_info` + `ALTER TABLE ADD COLUMN` (правило CLAUDE.md, ADR-143). Частичные уникальные индексы — ключ
-склейки повторного импорта.
+### 2.3 Миграция `trip_sims` (в `ensureTripTables`, web/trip.js)
 
 ```js
-  // eSIM (28.09.2026, ADR-233). Купленная сим-карта для поездки: тариф, сроки, код установки.
-  // Код активации (matching ID из LPA-строки) — СЕКРЕТ: кто его знает, тот ставит себе чужую
-  // eSIM. Хранится шифром code_enc (тот же AES-256-GCM, что у сейфа доступов, ключ в
-  // /home/cashruflow/.access_key), наружу в списке — только хвост code_tail. PIN брони, имя,
-  // телефон и почта контакта не распознаются и не хранятся — полей под них нет намеренно.
-  // Статус (куплена/установлена/активна/истекла) НЕ хранится: считает GET по датам.
-  medDb.exec(`CREATE TABLE IF NOT EXISTS trip_esims (
+  // «Связь» (28.09.2026, ADR-233): купленные SIM и eSIM. kind — 'esim' | 'sim'. У физической SIM
+  // нет кода активации: smdp/code_* сервер для неё обнуляет. Код активации eSIM — секрет
+  // (кто его знает, ставит себе чужую карту): хранится шифром code_enc ключом TRIP_SIM_KEY, в
+  // списке — только хвост. PIN заказа и контакты покупателя не распознаются и не хранятся.
+  // Статус не хранится — его считает GET по датам. Деньги — строкой trip_expenses (expense_id).
+  medDb.exec(`CREATE TABLE IF NOT EXISTS trip_sims (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     profile_id INTEGER NOT NULL,
-    country TEXT,
-    region TEXT,
-    product TEXT,
-    plan TEXT,
-    network TEXT,
+    kind TEXT NOT NULL DEFAULT 'esim',
+    country TEXT, region TEXT, product TEXT, plan TEXT, network TEXT,
     plan_kind TEXT NOT NULL DEFAULT 'daily',
-    data_mb INTEGER,
-    throttle_kbps INTEGER,
-    days INTEGER,
+    data_mb INTEGER, throttle_kbps INTEGER, days INTEGER,
     day_mode TEXT NOT NULL DEFAULT 'rolling24',
-    sms INTEGER NOT NULL DEFAULT 0,
-    calls INTEGER NOT NULL DEFAULT 0,
-    dual_sim INTEGER NOT NULL DEFAULT 0,
-    operator TEXT,
-    operator_src TEXT,
-    apn TEXT,
+    sms INTEGER NOT NULL DEFAULT 0, calls INTEGER NOT NULL DEFAULT 0, dual_sim INTEGER NOT NULL DEFAULT 0,
+    phone TEXT, operator TEXT, operator_src TEXT, apn TEXT,
     roaming INTEGER NOT NULL DEFAULT 1,
-    smdp TEXT,
-    code_enc TEXT,
-    code_tail TEXT,
-    lpa_oid TEXT,
-    confirm_required INTEGER NOT NULL DEFAULT 0,
-    iccid TEXT,
-    balance_url TEXT,
-    booking_no TEXT,
-    order_status TEXT,
-    purchased_on TEXT,
-    activate_by TEXT,
-    extend_until TEXT,
-    uses INTEGER,
-    installed_on TEXT,
-    activated_at TEXT,
-    tz TEXT,
-    price REAL,
-    price_currency TEXT,
-    price_local REAL,
-    price_local_currency TEXT,
-    price_base REAL,
-    discount REAL,
-    paid_with TEXT,
-    booked_via TEXT,
-    note TEXT,
+    smdp TEXT, code_enc TEXT, code_tail TEXT, lpa_oid TEXT, confirm_required INTEGER NOT NULL DEFAULT 0,
+    iccid TEXT, balance_url TEXT, booking_no TEXT, order_status TEXT,
+    purchased_on TEXT, activate_by TEXT, extend_until TEXT, uses INTEGER,
+    installed_on TEXT, activated_at TEXT, tz TEXT,
+    price REAL, price_currency TEXT, price_local REAL, price_local_currency TEXT,
+    price_base REAL, discount REAL, paid_with TEXT, booked_via TEXT, note TEXT,
+    expense_id INTEGER,
+    notify_pre_sent_at TEXT, notify_end_sent_at TEXT, notify_actby_pre_sent_at TEXT, notify_actby_sent_at TEXT,
+    notify_error TEXT,
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now'))
   )`);
-  medDb.exec(`CREATE INDEX IF NOT EXISTS idx_trip_esims_profile ON trip_esims(profile_id, activated_at)`);
-  // Повторный импорт той же брони не заводит вторую запись: ключ — номер брони, запасной — ICCID.
-  // Индексы частичные: пустые значения (ручной ввод без номера) под уникальность не попадают.
+  medDb.exec(`CREATE INDEX IF NOT EXISTS idx_trip_sims_profile ON trip_sims(profile_id, activated_at)`);
+  // Повторный импорт той же брони второй записи не заводит: ключ — номер заказа, запасной — ICCID.
+  // Индексы частичные: пустые значения (SIM, внесённая руками без номера) под уникальность не попадают.
   try {
-    medDb.exec(`CREATE UNIQUE INDEX IF NOT EXISTS uq_trip_esims_booking ON trip_esims(profile_id, booking_no)
+    medDb.exec(`CREATE UNIQUE INDEX IF NOT EXISTS uq_trip_sims_booking ON trip_sims(profile_id, booking_no)
       WHERE booking_no IS NOT NULL AND booking_no <> ''`);
-    medDb.exec(`CREATE UNIQUE INDEX IF NOT EXISTS uq_trip_esims_iccid ON trip_esims(profile_id, iccid)
+    medDb.exec(`CREATE UNIQUE INDEX IF NOT EXISTS uq_trip_sims_iccid ON trip_sims(profile_id, iccid)
       WHERE iccid IS NOT NULL AND iccid <> ''`);
-  } catch (e) { console.error('trip_esims unique:', e.message); }
+  } catch (e) { console.error('trip_sims unique:', e.message); }
 ```
-
-И одна строка в `VIA_TABLES` (стр. 146), чтобы `saveVia` и «Где покупаю» знали таблицу:
 
 ```diff
 -const VIA_TABLES = ['trip_stays', 'trip_flights', 'trip_rides', 'trip_insurance', 'trip_permits'];
-+const VIA_TABLES = ['trip_stays', 'trip_flights', 'trip_rides', 'trip_insurance', 'trip_permits', 'trip_esims'];
++const VIA_TABLES = ['trip_stays', 'trip_flights', 'trip_rides', 'trip_insurance', 'trip_permits', 'trip_sims'];
 ```
 
-(«Где покупаю» — `GET …/trip/vendor-stats`, стр. 3629: проверить, берёт ли он список таблиц из `VIA_TABLES` или
-свой — я его не читал целиком; если свой, дописать `esims` туда и в `KIND` на странице, `trip.html:782`.)
+Новые колонки в будущем добавлять только через `PRAGMA table_info` + `ALTER TABLE` (правило CLAUDE.md, ADR-143).
+Деньги хранятся парой `price` + `price_currency`, как во всех `trip_*`, а не `*_rub` из общего правила: модуль
+мультивалютный (ADR-201/222).
 
 ---
 
-## 3. Извлечение: промт, нормализация, ручка
+## 3. Извлечение
 
-### 3.1 Промт `ESIM_PROMPT` (рядом с `PERMIT_PROMPT`, trip.js ~456)
+### 3.1 Промт `SIM_PROMPT` (trip.js, рядом с `PERMIT_PROMPT` ~456)
 
 ```js
-// eSIM (28.09.2026, ADR-233). Код активации модель вернуть ОБЯЗАНА — без него карту не
-// поставить; PIN брони, имя, телефон и почта контакта — запрещены (как PIN у виз).
-const ESIM_PROMPT = `Ты извлекаешь данные о купленной eSIM из подтверждения заказа (скриншоты, PDF или текст
-письма). Экранов может быть несколько — это ОДИН заказ, собери одну запись.
+// SIM и eSIM (28.09.2026, ADR-233). Код активации eSIM модель вернуть ОБЯЗАНА — без него карту
+// не поставить. PIN заказа и контакты покупателя — запрещены, как PIN у виз.
+const SIM_PROMPT = `Ты извлекаешь данные о купленной сим-карте для поездки — физической SIM или eSIM — из
+подтверждения заказа (скриншоты, PDF, текст письма) или фото упаковки/карточки SIM. Экранов может быть
+несколько — это ОДИН заказ, собери одну запись.
 Верни ТОЛЬКО JSON, без markdown:
-{"country":"","region":"","product":"","plan":"","network":"","plan_kind":"","data_per_day":"","data_total":"","throttle":"","days":"","day_mode":"","sms":null,"calls":null,"dual_sim":null,"operator":"","apn":"","lpa":"","smdp":"","activation_code":"","iccid":"","balance_url":"","booking_no":"","order_status":"","purchased_on":"","activate_by":"","extend_until":"","uses":"","price":"","price_currency":"","price_base":"","discount":"","price_local":"","price_local_currency":"","paid_with":"","booked_via":"","note":""}
+{"kind":"","country":"","region":"","product":"","plan":"","network":"","plan_kind":"","data_per_day":"","data_total":"","throttle":"","days":"","day_mode":"","sms":null,"calls":null,"dual_sim":null,"phone":"","operator":"","apn":"","lpa":"","smdp":"","activation_code":"","iccid":"","balance_url":"","booking_no":"","order_status":"","purchased_on":"","activate_by":"","extend_until":"","uses":"","price":"","price_currency":"","price_base":"","discount":"","price_local":"","price_local_currency":"","paid_with":"","booked_via":"","note":""}
 Правила:
-- country — страна действия на русском (Египет, Турция). region — если план на несколько стран: «Европа, 33 страны».
-- product — название продукта как написано. plan — название тарифа/пакета как написано.
-- network — поколение сети, если указано: 4G, 5G.
-- plan_kind — "daily", если объём даётся на сутки (Daily, в день, /day); "total" — на весь срок;
-  "unlimited" — безлимит. data_per_day — объём в сутки как написан ("2GB"); data_total — на весь срок.
-- throttle — скорость после исчерпания лимита как написана ("512kbps"). Нет — пустая строка.
-- days — сколько дней действует пакет, число. day_mode — "rolling24", если сутки считаются 24 часа от
-  активации / обновление каждые 24 часа; "calendar", если календарные сутки. Не сказано — пустая строка.
-- sms, calls — true/false, если прямо сказано, включены ли SMS и звонки; не сказано — null.
-- dual_sim — true, если написано Dual SIM. operator — оператор сети в стране, только если он назван.
-- apn — точка доступа APN, если напечатана.
-- lpa — строка активации ЦЕЛИКОМ, как напечатана, начинается с «LPA:1$». smdp — адрес SM-DP+.
-  activation_code — код активации (Activation code / Matching ID). Если в документе только QR-картинка
-  без текста — все три пустые, код с картинки не угадывай.
-- iccid — номер ICCID, 19–20 цифр, только цифры.
-- balance_url — ссылка проверки баланса/трафика, как напечатана.
-- booking_no — номер заказа/бронирования. order_status — статус заказа как написан (Confirmed).
-- purchased_on — дата заказа. activate_by — «действительно до», крайний срок активации.
-  Все даты ГГГГ-ММ-ДД. extend_until — «продление до» с временем: ГГГГ-ММ-ДД ЧЧ:ММ:СС.
-- uses — сколько раз можно использовать, число.
-- price — ИТОГО к оплате, только число как в документе (357,69 → "357.69").
-  price_currency — код валюты: RUB, USD, EUR (₽ = RUB). price_base — цена до скидки. discount — сумма скидки
-  числом, не процент. price_local, price_local_currency — вторая сумма, если напечатаны ДВЕ валюты.
+- kind — "esim", если это eSIM (есть LPA, QR-код для установки, SM-DP+, слово eSIM); "sim" — если это
+  пластиковая SIM-карта (упаковка, карточка с ICCID, «SIM card», «сим-карта» без eSIM). Не ясно — "esim".
+- country — страна действия на русском. region — если план на несколько стран: «Европа, 33 страны».
+- product — название продукта как написано; plan — название тарифа как написано; network — 4G/5G.
+- plan_kind: "daily" — объём на сутки (Daily, в день); "total" — на весь срок; "unlimited" — безлимит.
+  data_per_day / data_total — объём как написан ("2GB").
+- throttle — скорость после исчерпания лимита как написана ("512kbps").
+- days — срок пакета в днях числом. day_mode — "rolling24", если сутки = 24 часа от активации или
+  «обновление каждые 24 часа»; "calendar" — календарные сутки; не сказано — пустая строка.
+- sms, calls — true/false, если прямо сказано; не сказано — null. dual_sim — true, если Dual SIM.
+- phone — номер телефона САМОЙ купленной SIM, если он напечатан на карточке/в заказе как номер линии.
+  Телефон покупателя из контактов заказа сюда НЕ класть.
+- operator — оператор сети в стране, только если назван. apn — APN, если напечатан.
+- lpa — строка активации eSIM ЦЕЛИКОМ, начинается с «LPA:1$». smdp — адрес SM-DP+. activation_code —
+  Activation code / Matching ID. Если код только QR-картинкой без текста — все три пустые, не угадывай.
+  Для физической SIM — всегда пустые.
+- iccid — ICCID, 19–20 цифр, только цифры.
+- balance_url — ссылка проверки баланса как напечатана.
+- booking_no — номер заказа. order_status — статус заказа как написан (Confirmed).
+- purchased_on — дата заказа; activate_by — «действительно до», крайний срок активации; формат ГГГГ-ММ-ДД.
+  extend_until — «продление до» с временем: ГГГГ-ММ-ДД ЧЧ:ММ:СС. uses — число использований.
+- price — ИТОГО к оплате числом как в документе ("339,80" → "339.80"), даже если оплачено баллами.
+  price_currency — код валюты (₽ = RUB). price_base — цена до скидки, discount — сумма скидки числом
+  (не процент). price_local, price_local_currency — вторая сумма, если напечатаны ДВЕ валюты.
 - paid_with — чем оплачено, если сказано: карта, Trip Coins, баллы.
-- booked_via — площадка покупки: Trip.com, Airalo, Holafly, Yesim, «напрямую». Не видно — пустая строка.
+- booked_via — площадка покупки: Trip.com, Airalo, Holafly, Yesim, салон оператора, «напрямую».
 - note — одна короткая строка важных условий: «отмена невозможна после использования».
 - Чего нет — пустая строка. Ничего не выдумывай и не пересчитывай.
-ЗАПРЕЩЕНО возвращать PIN или пароль заказа, имя и фамилию, телефон, электронную почту, номер карты,
-адрес. Они есть в подтверждении — просто игнорируй их, в ответ они не должны попасть ни в одно поле,
-включая note.`;
+ЗАПРЕЩЕНО возвращать PIN или пароль заказа, PIN/PUK сим-карты, имя и фамилию, телефон и почту
+покупателя/контакта, номер банковской карты, адрес. Игнорируй их — ни в одно поле, включая note.`;
 ```
 
-### 3.2 Нормализация (trip.js, рядом с `scanPrice`/`numAmount`)
+### 3.2 Нормализация (trip.js, рядом с `numAmount`)
+
+Правило CLAUDE.md про `str_replace` запрещает пары «доллар + амперсанд/обратная кавычка/апостроф/цифра» в `new_str`.
+Поэтому знак доллара в строках LPA собирается константой `DLR`. В регулярках `\$` стоит перед `(`, `[` или
+буквой — это безопасно.
 
 ```js
-// ---------- eSIM: нормализация (28.09.2026, ADR-233) ----------
-// LPA-строка по GSMA SGP.22: LPA:1$<SM-DP+>$<matching ID>[$<OID>[$<флаг кода подтверждения>]].
-// Возвращает null, если строка не похожа на код активации. Регистр matching ID сохраняем:
-// большинство SM-DP+ регистронезависимы, но не все.
+// ---------- SIM/eSIM: нормализация (28.09.2026, ADR-233) ----------
+const DLR = String.fromCharCode(36);   // знак доллара константой: литерал рядом с кавычкой ломает str_replace (CLAUDE.md)
+// LPA по GSMA SGP.22: LPA:1$<SM-DP+>$<matching ID>[$<OID>[$<флаг кода подтверждения>]].
 export function lpaParse(raw) {
   const s = String(raw == null ? '' : raw).replace(/\s+/g, '').replace(/^lpa:/i, 'LPA:');
   const m = /^LPA:1\$([^$]+)\$([^$]*)(?:\$([^$]*))?(?:\$([01]))?$/.exec(s);
@@ -287,25 +261,23 @@ export function lpaParse(raw) {
   if (code && !/^[A-Za-z0-9._-]{1,255}$/.test(code)) return null;
   return { smdp, code, oid: m[3] || '', confirm: m[4] === '1' };
 }
-// Обратно — каноническая строка для QR. Пустые хвосты не пишем: LPA:1$smdp.io$K2-36Y6K0-7CDVXL.
-export const lpaBuild = p => p && p.smdp
-  ? 'LPA:1$' + p.smdp + '$' + (p.code || '') + (p.oid || p.confirm ? '$' + (p.oid || '') : '') + (p.confirm ? '$1' : '')
-  : '';
-// ICCID: только цифры, 19–20 знаков, начинается с 89 (телеком). Luhn у 19-значных почти всегда
-// сходится, у 20-значных бывает без контрольной цифры — поэтому неверный Luhn это предупреждение
-// (luhn:false в ответе скана), а не отказ.
+export const lpaBuild = p => !p || !p.smdp ? '' : ['LPA:1', p.smdp, p.code || '']
+  .concat(p.oid || p.confirm ? [p.oid || ''] : []).concat(p.confirm ? ['1'] : []).join(DLR);
+// ICCID: цифры, 19–20 знаков, начинается с 89. Luhn — только предупреждение: у 20-значных бывает без контрольной.
 export function iccidNorm(raw) {
   const d = String(raw == null ? '' : raw).replace(/\D/g, '');
   if (d.length < 19 || d.length > 20 || !d.startsWith('89')) return { iccid: '', luhn: null };
   let t = 0;
-  for (let i = 0; i < d.length; i++) {
-    let n = +d[d.length - 1 - i];
-    if (i % 2) { n *= 2; if (n > 9) n -= 9; }
-    t += n;
-  }
+  for (let i = 0; i < d.length; i++) { let n = +d[d.length - 1 - i]; if (i % 2) { n *= 2; if (n > 9) n -= 9; } t += n; }
   return { iccid: d, luhn: t % 10 === 0 };
 }
-// «2GB», «2 ГБ», «512MB», «1.5 GB» → мегабайты (1 ГБ = 1024 МБ). «Unlimited» → null.
+// Номер линии: «+», затем 7–15 цифр (E.164). Без плюса — как есть цифрами; мусор — пусто.
+export function phoneNorm(raw) {
+  const s = String(raw == null ? '' : raw).trim();
+  const d = s.replace(/\D/g, '');
+  if (d.length < 7 || d.length > 15) return '';
+  return (s.startsWith('+') ? '+' : '') + d;
+}
 export function dataMb(raw) {
   const m = /([\d.,]+)\s*(tb|тб|gb|гб|mb|мб)/i.exec(String(raw || ''));
   if (!m) return null;
@@ -314,7 +286,6 @@ export function dataMb(raw) {
   const u = m[2].toLowerCase();
   return Math.round(n * (/t|т/.test(u) ? 1048576 : /g|г/.test(u) ? 1024 : 1));
 }
-// «512kbps», «1 Мбит/с», «384 kbit/s» → кбит/с.
 export function speedKbps(raw) {
   const m = /([\d.,]+)\s*(kbps|kbit|кбит|mbps|mbit|мбит)/i.exec(String(raw || ''));
   if (!m) return null;
@@ -322,7 +293,6 @@ export function speedKbps(raw) {
   if (!isFinite(n) || n <= 0) return null;
   return Math.round(/^m|^м/i.test(m[2]) ? n * 1000 : n);
 }
-// Валюта: символ и слово → код. Незнакомое — первые 3 латинские буквы, как у scanPrice.
 export function curCode(raw) {
   const s = String(raw == null ? '' : raw).trim();
   if (/₽|руб|rub|rur/i.test(s)) return 'RUB';
@@ -330,7 +300,6 @@ export function curCode(raw) {
   if (/€|eur/i.test(s)) return 'EUR';
   return s.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3);
 }
-// Момент «YYYY-MM-DD HH:MM[:SS]» → строго YYYY-MM-DD HH:MM:SS или null.
 function normMoment(raw) {
   const m = /^(\d{4}-\d{2}-\d{2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?$/.exec(String(raw || '').trim());
   if (!m || !normDate(m[1]) || +m[2] > 23 || +m[3] > 59 || +(m[4] || 0) > 59) return null;
@@ -338,77 +307,62 @@ function normMoment(raw) {
 }
 ```
 
-Суммы — через уже существующий `numAmount()` (стр. 530): он правильно разбирает «357,69», «1 357,69» и «5,906.59».
-`scanPrice()` (стр. 151) для eSIM НЕ использовать: у него `replace(',', '.')` без учёта разделителя тысяч.
+Суммы разбирает существующий `numAmount()` («357,69», «1 357,69», «5,906.59»). `scanPrice()` для SIM НЕ
+использовать: его `replace(',', '.')` ломает «5,906.59».
 
-### 3.3 Сроки и статус (trip.js, рядом с `localToUtc`)
+### 3.3 Сроки и статус
 
 ```js
-// Местный момент в поясе → UTC-мс и обратно. Секунды localToUtc не берёт — добавляем сами.
 function momentToUtc(moment, tz) {
   const m = /^(\d{4}-\d{2}-\d{2}) (\d{2}):(\d{2}):(\d{2})$/.exec(String(moment || ''));
   if (!m) return null;
   const base = localToUtc(m[1], m[2] + ':' + m[3], tz);
   return base == null ? null : base + (+m[4]) * 1000;
 }
-function utcToMoment(ms, tz) {
-  // sv-SE даёт «2026-10-05 14:10:00» — ровно формат момента платформы.
-  return new Date(ms).toLocaleString('sv-SE', { timeZone: tz, hourCycle: 'h23' }).replace('T', ' ');
+const utcToMoment = (ms, tz) => new Date(ms).toLocaleString('sv-SE', { timeZone: tz, hourCycle: 'h23' }).replace('T', ' ');
+const simTz = s => s.tz || COUNTRY_TZ[s.country] || 'Europe/Moscow';
+// Когда кончается пакет (UTC-мс) или null, если срока нет / не активирована.
+function simExpiresMs(s) {
+  if (!s.activated_at || !(s.days > 0)) return null;
+  const tz = simTz(s), a = momentToUtc(s.activated_at, tz);
+  if (a == null) return null;
+  return s.day_mode === 'calendar'
+    ? momentToUtc(addDays(s.activated_at.slice(0, 10), s.days - 1) + ' 23:59:59', tz)
+    : a + s.days * 86400e3;
 }
-// Статус и сроки eSIM. Всё считает сервер (как status у полиса), страница только рисует.
-function esimState(e, nowMs = Date.now()) {
-  const tz = e.tz || COUNTRY_TZ[e.country] || 'Europe/Moscow';
-  let expiresMs = null, nextReset = null;
-  if (e.activated_at && e.days > 0) {
-    const a = momentToUtc(e.activated_at, tz);
-    if (a != null) {
-      if (e.day_mode === 'calendar') {
-        const lastDay = addDays(e.activated_at.slice(0, 10), e.days - 1);
-        expiresMs = momentToUtc(lastDay + ' 23:59:59', tz);
-      } else {
-        expiresMs = a + e.days * 86400e3;
-        const k = Math.floor((nowMs - a) / 86400e3) + 1;
-        if (nowMs >= a && nowMs < expiresMs) nextReset = a + k * 86400e3;
-      }
-    }
+export function simState(s, nowMs = Date.now()) {
+  const tz = simTz(s), exp = simExpiresMs(s);
+  let nextReset = null;
+  if (exp != null && s.day_mode !== 'calendar') {
+    const a = momentToUtc(s.activated_at, tz), k = Math.floor((nowMs - a) / 86400e3) + 1, t = a + k * 86400e3;
+    if (nowMs >= a && t < exp) nextReset = t;
   }
-  const status = e.activated_at
-    ? (expiresMs != null && nowMs >= expiresMs ? 'expired' : 'active')
-    : (e.activate_by && today() > e.activate_by ? 'expired'
-      : e.installed_on ? 'installed' : 'bought');
-  return {
-    tz, status,
-    expires_at: expiresMs != null ? utcToMoment(expiresMs, tz) : null,
-    hours_left: status === 'active' && expiresMs != null ? Math.max(0, Math.floor((expiresMs - nowMs) / 3600e3)) : null,
-    next_reset_at: nextReset != null && nextReset < expiresMs ? utcToMoment(nextReset, tz) : null,
-    never_activated: !e.activated_at && status === 'expired'
-  };
+  const status = s.activated_at ? (exp != null && nowMs >= exp ? 'expired' : 'active')
+    : (s.activate_by && today() > s.activate_by ? 'expired' : s.installed_on ? 'installed' : 'bought');
+  return { tz, status,
+    expires_at: exp != null ? utcToMoment(exp, tz) : null,
+    hours_left: status === 'active' && exp != null ? Math.max(0, Math.floor((exp - nowMs) / 3600e3)) : null,
+    next_reset_at: nextReset != null ? utcToMoment(nextReset, tz) : null,
+    never_activated: !s.activated_at && status === 'expired' };
 }
-// Бейдж для карточки поездки и списка: «Египет 2 ГБ/день, 3 дня».
-function esimLabel(e) {
-  const gb = e.data_mb ? (e.data_mb >= 1024 ? +(e.data_mb / 1024).toFixed(1) + ' ГБ' : e.data_mb + ' МБ') : '';
-  const vol = e.plan_kind === 'unlimited' ? 'безлимит' : gb ? gb + (e.plan_kind === 'daily' ? '/день' : '') : '';
-  const d = e.days ? e.days + ' ' + (e.days % 10 === 1 && e.days % 100 !== 11 ? 'день'
-    : [2, 3, 4].includes(e.days % 10) && ![12, 13, 14].includes(e.days % 100) ? 'дня' : 'дней') : '';
-  return [e.country || e.region || 'eSIM', [vol, d].filter(Boolean).join(', ')].filter(Boolean).join(' ');
+const plural = (n, a, b, c) => n % 10 === 1 && n % 100 !== 11 ? a : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? b : c;
+// «Египет 2 ГБ/день, 3 дня» — бейдж и заголовок строки расхода.
+export function simLabel(s) {
+  const gb = s.data_mb ? (s.data_mb >= 1024 ? +(s.data_mb / 1024).toFixed(1) + ' ГБ' : s.data_mb + ' МБ') : '';
+  const vol = s.plan_kind === 'unlimited' ? 'безлимит' : gb ? gb + (s.plan_kind === 'daily' ? '/день' : '') : '';
+  const d = s.days ? s.days + ' ' + plural(s.days, 'день', 'дня', 'дней') : '';
+  return [s.country || s.region || (s.kind === 'sim' ? 'SIM' : 'eSIM'), [vol, d].filter(Boolean).join(', ')].filter(Boolean).join(' ');
 }
+export const SIM_KIND_RU = { sim: 'SIM', esim: 'eSIM' };
 ```
 
-### 3.4 Ручка распознавания `POST …/trip/esim-scan`
+### 3.4 Ручка `POST …/trip/sim-scan`
 
-Три входа одним конвейером (как просили — «тот же механизм, что у отеля»):
-1. `application/octet-stream` + `X-File-Name` — один файл (как `/scan` и `takeScan`);
-2. `application/json` `{files:[{name,data}]}` — до 5 скринов одного заказа (как `/scan`);
-3. `text/plain` + `X-Doc-Kind: text` — вставленное письмо (как `/boarding`), лимит `PASTE_MAX`.
-
-Приём файлов у `/scan` написан прямо в теле ручки (4272–4323). Предлагаю вынести его в помощник
-`takeFiles()` рядом с `takeScan()` и звать из `esim-scan`; перевести на него `/scan` — отдельным коммитом
-после проверки (чтобы не трогать работающий скан брони в той же правке).
+Три входа, как в редакции 1: сырой файл (`X-File-Name`), JSON `{files}` до 5 штук или `text/plain` с `X-Doc-Kind: text`.
+Приём файлов вынесен в помощник `takeFiles()` — это дословная копия логики из `/trip/scan` (стр. 4272–4323).
+`/trip/scan` на него переводится отдельной правкой.
 
 ```js
-  // Приём файлов для скана из нескольких экранов (28.09.2026): одно тело — сырые байты,
-  // несколько — JSON {files:[{name,data(base64)}]}. Вынесено из /trip/scan дословно; /scan
-  // переводится на этот помощник отдельной правкой. null — ответ уже отправлен.
   function takeFiles(req, res, noteOne, noteMany) {
     purgeScansLazy();
     const body = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body || '');
@@ -417,8 +371,7 @@ function esimLabel(e) {
     const files = [];
     if (String(req.headers['content-type'] || '').includes('application/json')) {
       let parsed;
-      try { parsed = JSON.parse(body.toString('utf8')); }
-      catch { res.status(400).json({ ok: false, error: 'не разобрал тело запроса' }); return null; }
+      try { parsed = JSON.parse(body.toString('utf8')); } catch { res.status(400).json({ ok: false, error: 'не разобрал тело запроса' }); return null; }
       const list = Array.isArray(parsed?.files) ? parsed.files.slice(0, MAX_FILES) : [];
       if (!list.length) { res.status(400).json({ ok: false, error: 'нет файлов' }); return null; }
       for (const f of list) {
@@ -456,18 +409,12 @@ function esimLabel(e) {
     return { files, uploadIds, uploadId: uploadIds[0] || null, label: files.map(f => f.name).join(', ').slice(0, 160) };
   }
 
-  // Кто уже занесён с тем же номером брони или ICCID — ключи склейки (уникальные индексы).
-  function esimTwin(profileId, booking_no, iccid) {
-    if (booking_no) {
-      const r = medDb.prepare('SELECT * FROM trip_esims WHERE profile_id=? AND booking_no=?').get(profileId, booking_no);
-      if (r) return r;
-    }
-    if (iccid) return medDb.prepare('SELECT * FROM trip_esims WHERE profile_id=? AND iccid=?').get(profileId, iccid) || null;
-    return null;
+  function simTwin(profileId, booking_no, iccid, exceptId) {
+    const q = (col, v) => v ? medDb.prepare(`SELECT * FROM trip_sims WHERE profile_id=? AND ${col}=? AND id<>?`).get(profileId, v, exceptId || 0) : null;
+    return q('booking_no', booking_no) || q('iccid', iccid) || null;
   }
 
-  // Подтверждение заказа eSIM → поля формы. Записи НЕ создаёт: человек проверяет и сохраняет сам.
-  app.post('/api/profile/:profileId/trip/esim-scan', express.raw({ type: '*/*', limit: MAX_BYTES }), async (req, res) => {
+  app.post('/api/profile/:profileId/trip/sim-scan', express.raw({ type: '*/*', limit: MAX_BYTES }), async (req, res) => {
     const profileId = pid(req, res); if (!profileId) return;
     if (!apiKey) return res.status(500).json({ ok: false, error: 'нет ANTHROPIC_API_KEY' });
     const isText = String(req.headers['x-doc-kind'] || '').toLowerCase() === 'text';
@@ -477,148 +424,197 @@ function esimLabel(e) {
       pasted = buf.toString('utf8').trim().slice(0, PASTE_MAX);
       if (pasted.length < 10) return res.status(400).json({ ok: false, error: 'текста слишком мало — вставьте письмо целиком' });
     } else {
-      got = takeFiles(req, res, 'заказ eSIM → распознавание', 'заказ eSIM');
+      got = takeFiles(req, res, 'заказ SIM/eSIM → распознавание', 'заказ SIM/eSIM');
       if (!got) return;
     }
     const label = isText ? 'вставленный текст' : got.label;
     const started = Date.now();
     let u, raw;
     try {
-      const content = isText ? [{ type: 'text', text: ESIM_PROMPT + '\n\nТЕКСТ:\n' + pasted }]
-        : [...got.files.map(f => f.mime === 'application/pdf'
-            ? { type: 'document', source: { type: 'base64', media_type: f.mime, data: f.buf.toString('base64') } }
-            : { type: 'image', source: { type: 'base64', media_type: f.mime, data: f.buf.toString('base64') } }),
-          { type: 'text', text: ESIM_PROMPT }];
+      const content = isText ? [{ type: 'text', text: SIM_PROMPT + '\n\nТЕКСТ:\n' + pasted }]
+        : [...got.files.map(f => ({ type: f.mime === 'application/pdf' ? 'document' : 'image',
+            source: { type: 'base64', media_type: f.mime, data: f.buf.toString('base64') } })),
+          { type: 'text', text: SIM_PROMPT }];
       u = await ask(content, 1500);
       raw = parseJson(u.text);
     } catch (e) {
       if (got && tasksDb) for (const id of got.uploadIds) {
         try { tasksDb.prepare("UPDATE file_uploads SET status='error', note=? WHERE id=?").run(String(e.message).slice(0, 300), id); } catch {}
       }
-      logAiCall('trip_esim', isText ? null : 'upload', got?.uploadId || null, null, SCAN_MODEL, 0, 0, 0,
+      logAiCall('trip_sim', isText ? null : 'upload', got?.uploadId || null, null, SCAN_MODEL, 0, 0, 0,
         { note: label, durationMs: Date.now() - started, error: e.message });
-      logGeneration('trip_esim', 'Заказ eSIM: ' + label, '', '', null, 'error', e.message);
+      logGeneration('trip_sim', 'Заказ SIM: ' + label, '', '', null, 'error', e.message);
       return res.status(502).json({ ok: false, error: 'распознать не удалось: ' + e.message, upload_ids: got?.uploadIds || [] });
     }
-    // Белый список — вторая линия защиты: PIN, имя, телефон и почта заказа наружу не уйдут.
+    // Белый список — вторая линия защиты: PIN, имя, почта и телефон покупателя наружу не уйдут.
     const S = v => String(v == null ? '' : v).trim().slice(0, TEXT_MAX);
     const B = v => v === true || v === 'true' ? 1 : v === false || v === 'false' ? 0 : '';
-    // LPA: в тексте ищем строку регуляркой САМИ — модель могла ошибиться в символе.
+    const kind = raw?.kind === 'sim' ? 'sim' : 'esim';
     let lpa = null;
-    if (isText) { const m = /LPA:1\$[^\s$]+\$[A-Za-z0-9._-]+(?:\$[^\s$]*)?(?:\$[01])?/i.exec(pasted); if (m) lpa = lpaParse(m[0]); }
-    if (!lpa) lpa = lpaParse(raw?.lpa);
-    if (!lpa && raw?.smdp && raw?.activation_code) lpa = lpaParse('LPA:1$' + raw.smdp + '$' + raw.activation_code);
+    if (kind === 'esim') {
+      // В тексте LPA ловим регуляркой сами: модель может ошибиться в символе кода.
+      if (isText) { const m = /LPA:1\$[^\s$]+\$[A-Za-z0-9._-]+(?:\$[^\s$]*)?(?:\$[01])?/i.exec(pasted); if (m) lpa = lpaParse(m[0]); }
+      if (!lpa) lpa = lpaParse(raw?.lpa);
+      if (!lpa && raw?.smdp && raw?.activation_code) lpa = lpaParse(['LPA:1', raw.smdp, raw.activation_code].join(DLR));
+    }
     const ic = iccidNorm(raw?.iccid);
-    const kind = ['daily', 'total', 'unlimited'].includes(raw?.plan_kind) ? raw.plan_kind : (raw?.data_per_day ? 'daily' : raw?.data_total ? 'total' : '');
+    const pk = ['daily', 'total', 'unlimited'].includes(raw?.plan_kind) ? raw.plan_kind : (raw?.data_per_day ? 'daily' : raw?.data_total ? 'total' : '');
     const money = v => { const n = numAmount(v); return isFinite(n) && n > 0 ? String(Math.round(n * 100) / 100) : ''; };
-    const esim = {
-      country: S(raw?.country).slice(0, COUNTRY_MAX), region: S(raw?.region),
+    const sim = {
+      kind, country: S(raw?.country).slice(0, COUNTRY_MAX), region: S(raw?.region),
       product: S(raw?.product), plan: S(raw?.plan), network: S(raw?.network).toUpperCase().slice(0, 8),
-      plan_kind: kind,
-      data_mb: String(dataMb(kind === 'total' ? raw?.data_total : raw?.data_per_day) || ''),
+      plan_kind: pk, data_mb: String(dataMb(pk === 'total' ? raw?.data_total : raw?.data_per_day) || ''),
       throttle_kbps: String(speedKbps(raw?.throttle) || ''),
       days: String(raw?.days || '').replace(/\D/g, '').slice(0, 3),
       day_mode: ['rolling24', 'calendar'].includes(raw?.day_mode) ? raw.day_mode : '',
       sms: B(raw?.sms), calls: B(raw?.calls), dual_sim: B(raw?.dual_sim),
-      operator: S(raw?.operator).slice(0, 60), apn: S(raw?.apn).replace(/[^\w.\-]/g, '').slice(0, 60),
+      phone: phoneNorm(raw?.phone), operator: S(raw?.operator).slice(0, 60),
+      apn: S(raw?.apn).replace(/[^\w.\-]/g, '').slice(0, 60),
       lpa: lpa ? lpaBuild(lpa) : '', smdp: lpa ? lpa.smdp : '',
       iccid: ic.iccid, iccid_luhn: ic.luhn,
       balance_url: (() => { const x = S(raw?.balance_url); return /^https?:\/\/[\w.-]+\.[a-z]{2,}/i.test(x) ? x.slice(0, 300) : ''; })(),
-      booking_no: S(raw?.booking_no).replace(/[^\w-]/g, '').slice(0, 40),
-      order_status: S(raw?.order_status).slice(0, 30),
+      booking_no: S(raw?.booking_no).replace(/[^\w-]/g, '').slice(0, 40), order_status: S(raw?.order_status).slice(0, 30),
       purchased_on: normDate(raw?.purchased_on) || '', activate_by: normDate(raw?.activate_by) || '',
-      extend_until: normMoment(raw?.extend_until) || '',
-      uses: String(raw?.uses || '').replace(/\D/g, '').slice(0, 3),
+      extend_until: normMoment(raw?.extend_until) || '', uses: String(raw?.uses || '').replace(/\D/g, '').slice(0, 3),
       price: money(raw?.price), price_currency: curCode(raw?.price_currency),
       price_base: money(raw?.price_base), discount: money(raw?.discount),
       price_local: money(raw?.price_local), price_local_currency: curCode(raw?.price_local_currency),
       paid_with: S(raw?.paid_with).slice(0, 40),
-      booked_via: vendorResolve(medDb, S(raw?.booked_via), false) || '',
-      note: S(raw?.note)
+      booked_via: vendorResolve(medDb, S(raw?.booked_via), false) || '', note: S(raw?.note)
     };
-    logAiCall('trip_esim', isText ? null : 'upload', got?.uploadId || null, null, SCAN_MODEL, u.inTok, u.outTok, cost(u),
+    logAiCall('trip_sim', isText ? null : 'upload', got?.uploadId || null, null, SCAN_MODEL, u.inTok, u.outTok, cost(u),
       { note: label, durationMs: Date.now() - started });
-    if (!esim.country && !esim.product && !esim.lpa && !esim.iccid && !esim.booking_no) {
-      logGeneration('trip_esim', 'Заказ eSIM: ' + label, 'ни одного поля не распознано', '', u, 'error', 'в документе нет данных eSIM');
+    if (!sim.country && !sim.product && !sim.lpa && !sim.iccid && !sim.booking_no && !sim.phone) {
+      logGeneration('trip_sim', 'Заказ SIM: ' + label, 'ни одного поля не распознано', '', u, 'error', 'в документе нет данных SIM');
       return res.status(422).json({ ok: false, upload_ids: got?.uploadIds || [],
-        error: isText ? 'в тексте не нашлось данных eSIM — вставьте письмо целиком или заполните поля руками'
-          : 'на снимке не нашлось данных eSIM — снимите заказ целиком или заполните поля руками' });
+        error: isText ? 'в тексте не нашлось данных SIM — вставьте письмо целиком или заполните поля руками'
+          : 'на снимке не нашлось данных SIM — снимите заказ целиком или заполните поля руками' });
     }
-    // Сверка с занесённым ДО сохранения — как у рейсов: человек видит «уже есть», а не узнаёт после.
-    const twin = esimTwin(profileId, esim.booking_no, esim.iccid);
-    if (twin) esim.dup_id = twin.id;
+    const twin = simTwin(profileId, sim.booking_no, sim.iccid);
+    if (twin) sim.dup_id = twin.id;
     const tail = s => s ? '···' + String(s).slice(-4) : '';
-    const genId = logGeneration('trip_esim', 'Заказ eSIM: ' + (esimLabel({ ...esim, data_mb: +esim.data_mb, days: +esim.days }) || label),
-      [esim.country, esim.plan, esim.booked_via].filter(Boolean).join(' · '),
-      // В общий журнал код активации, ICCID и номер заказа — только хвостом.
-      JSON.stringify({ ...esim, lpa: esim.lpa ? 'LPA:1$' + esim.smdp + '$' + tail(lpa.code) : '',
-        iccid: tail(esim.iccid), booking_no: tail(esim.booking_no) }, null, 2), u, 'ok');
-    res.json({ ok: true, esim, upload_ids: got?.uploadIds || [], generation_id: genId });
+    const genId = logGeneration('trip_sim', 'Заказ ' + SIM_KIND_RU[kind] + ': ' + simLabel({ ...sim, data_mb: +sim.data_mb, days: +sim.days }),
+      [sim.country, sim.plan, sim.booked_via].filter(Boolean).join(' · '),
+      // В общий журнал код, ICCID, номер заказа и телефон — только хвостом.
+      JSON.stringify({ ...sim, lpa: lpa ? ['LPA:1', lpa.smdp, tail(lpa.code)].join(DLR) : '',
+        iccid: tail(sim.iccid), booking_no: tail(sim.booking_no), phone: tail(sim.phone) }, null, 2), u, 'ok');
+    res.json({ ok: true, sim, upload_ids: got?.uploadIds || [], generation_id: genId });
   });
 ```
 
-И в `server.js:249` — пропустить новую ручку мимо глобального `express.json` (иначе JSON из 2–5 скринов режется 413
-ещё до роута — ровно грабля из ADR-204):
+`server.js:249`:
 
 ```diff
 -const RAW_BODY_RE = /^\/api\/profile\/[^/]+\/trip\/scan$/;
-+const RAW_BODY_RE = /^\/api\/profile\/[^/]+\/trip\/(scan|esim-scan)$/;
++const RAW_BODY_RE = /^\/api\/profile\/[^/]+\/trip\/(scan|sim-scan)$/;
 ```
 
 ---
 
-## 4. API
+## 4. API и шифрование
 
-Все под `/api/profile/:profileId/trip` (`me` — своя сессия), начало каждой ручки — `pid(req,res)`.
+### 4.1 Ручки (все под `/api/profile/:profileId/trip`, начинаются с `pid()`)
 
 | Метод | Путь | Что делает |
 |---|---|---|
-| GET | `/esims` | список: поля без `code_enc`, + `lpa_masked` («LPA:1$smdp.io$···DVXL»), `has_code`, `iccid_masked`, `label`, `status`, `expires_at`, `hours_left`, `next_reset_at`, `tz`; итоги `active`, `soon` |
-| GET | `/esims/:id/secret` | `{ lpa }` целиком — только по кнопке «Показать»/«QR»; в журналы не пишется; `Cache-Control: no-store` уже ставит общий middleware (`server.js:261`) |
-| POST | `/esims` | создать; если есть близнец по `booking_no`/`iccid` — дозаполнить пустые поля близнеца и вернуть `{merged:true, esim}` (без 409: повторный импорт — нормальный сценарий) |
-| PATCH | `/esims/:id` | правка; то же тело, частично (`undefined` — не трогаем, как `policyBody`) |
-| DELETE | `/esims/:id` | удалить |
-| POST | `/esim-scan` | распознавание (§3.4), записи не создаёт |
+| GET | `/sims` | список без `code_enc`: + `kind_ru`, `label`, `status`, `expires_at`, `hours_left`, `next_reset_at`, `lpa_masked`, `has_code`, `iccid_masked`; итоги `active`, `soon`; `key_ok` — задан ли `TRIP_SIM_KEY` |
+| GET | `/sims/:id/secret` | `{ lpa }` целиком — только для eSIM, по кнопке «Показать»; нет ключа → 503 |
+| POST | `/sims` | создать. Есть близнец по `booking_no`/`iccid` — дозаполнить его пустые поля, вернуть `{merged:true}`. Затем `syncSimExpense()` |
+| PATCH | `/sims/:id` | правка; сбрасывает флаги напоминаний, если поменялись сроки; затем `syncSimExpense()` |
+| DELETE | `/sims/:id` | удалить SIM и её строку расхода (одна транзакция) |
+| POST | `/sim-scan` | распознавание (§3.4), записи не создаёт |
 
-Кнопки «Установил» и «Подключилась сейчас» — это обычный `PATCH` с `installed_on` / `activated_at`
-(момент считает страница в поясе `tz`, сервер проверяет формат) — отдельных ручек не заводим.
+Кнопки «Установил/Вставил» и «Подключилась» — это `PATCH` с `installed_on` / `activated_at`.
+`REF_ACTIVITY` (`trip.js:1730`) дополнить `sims`, если сохранение SIM считается первой записью Trip-реферала
+(вопрос остаётся открытым, §10).
 
-`REF_ACTIVITY` (реф-награда за первую запись, `trip.js:1730`) — дописать `esims`, если eSIM должна считаться
-«первой записью» (открытый вопрос; по смыслу — да).
+### 4.2 Шифр кода активации — `TRIP_SIM_KEY` (решение 4)
 
-### 4.1 Тело и CRUD (trip.js, рядом с ручками страховок ~4037)
-
-Правило CLAUDE.md «INSERT с длинным списком колонок — через объект и `Object.keys`» — соблюдено.
+- Ключ — 32 байта в base64, переменная `TRIP_SIM_KEY` в `/home/cashruflow/mcp-server/.env` (её читает
+  `dotenv.config` в `server.js:3`). Генерирует Константин на сервере сам, например
+  `openssl rand -base64 32`. В код, в репозиторий и в чат ключ не попадает.
+- Модуль читает ключ один раз при монтировании. Ключа нет или он не 32 байта — модуль пишет одну строку
+  `console.error` и работает дальше без шифра (`KEY = null`). Сервер не падает.
+- Без ключа:
+  - `POST`/`PATCH` с `lpa` сохраняют запись **без кода**: `smdp` сохраняется, `code_enc = NULL`. В ответе
+    приходит `code_skipped: true`, страница пишет «Код не сохранён: не настроен ключ шифрования — после
+    настройки вставьте код ещё раз».
+  - Открытым текстом код не пишется НИКОГДА.
+  - `GET /secret` отвечает 503 `no_key`.
+- Шифротекст имеет префикс `v1:` — задел под смену ключа. Если ключ заменили и старые коды не расшифровываются,
+  `GET /secret` отвечает 500 «код не расшифровался — ключ сменился, вставьте код заново». Это не падение.
+- Статус ключа можно показать на странице интеграций: `integrations.js` → `keyCard('trip-sim-key', <группа по
+  соседству>, 'Шифр кодов eSIM', 'TRIP_SIM_KEY', 'задан')`. Показывается только «задан / не задан», значение — нет.
 
 ```js
-  // ---------- eSIM (28.09.2026, ADR-233) ----------
-  // Секрет шифруется функциями из server.js (сейф доступов): своей криптографии в модуле не заводим.
-  const encSecret = deps?.encSecret || null, decSecret = deps?.decSecret || null;
-  const ESIM_TEXT = { country: COUNTRY_MAX, region: TEXT_MAX, product: TEXT_MAX, plan: TEXT_MAX, network: 8,
+  // ---------- SIM: шифр кода активации (28.09.2026, ADR-233) ----------
+  // Свой ключ модуля, а не ключ сейфа доступов: смена или утечка одного не задевает другой.
+  // Нет ключа — модуль работает, коды просто не сохраняются (никогда не пишем открытым текстом).
+  const SIM_KEY = (() => {
+    const raw = String(process.env.TRIP_SIM_KEY || '').trim();
+    if (!raw) { console.error('[trip] TRIP_SIM_KEY не задан — коды активации eSIM сохраняться не будут'); return null; }
+    const k = Buffer.from(raw, 'base64');
+    if (k.length !== 32) { console.error('[trip] TRIP_SIM_KEY: нужно 32 байта в base64, получено ' + k.length); return null; }
+    return k;
+  })();
+  function simSeal(txt) {
+    if (!SIM_KEY || !txt) return null;
+    const iv = crypto.randomBytes(12);
+    const c = crypto.createCipheriv('aes-256-gcm', SIM_KEY, iv);
+    const ct = Buffer.concat([c.update(String(txt), 'utf8'), c.final()]);
+    return ['v1', iv.toString('hex'), c.getAuthTag().toString('hex'), ct.toString('hex')].join(':');
+  }
+  function simOpen(blob) {
+    if (!SIM_KEY || !blob) return null;
+    try {
+      const [v, iv, tag, ct] = String(blob).split(':');
+      if (v !== 'v1') return null;
+      const d = crypto.createDecipheriv('aes-256-gcm', SIM_KEY, Buffer.from(iv, 'hex'));
+      d.setAuthTag(Buffer.from(tag, 'hex'));
+      return Buffer.concat([d.update(Buffer.from(ct, 'hex')), d.final()]).toString('utf8');
+    } catch (e) { return null; }
+  }
+```
+
+`crypto` в `trip.js` уже импортирован (стр. 42).
+
+### 4.3 Тело и CRUD
+
+```js
+  const SIM_TEXT = { country: COUNTRY_MAX, region: TEXT_MAX, product: TEXT_MAX, plan: TEXT_MAX, network: 8,
     operator: 60, apn: 60, order_status: 30, paid_with: 40, note: TEXT_MAX };
-  const ESIM_INT = ['data_mb', 'throttle_kbps', 'days', 'uses'];
-  const ESIM_FLAG = ['sms', 'calls', 'dual_sim', 'roaming'];
-  const ESIM_MONEY = ['price', 'price_local', 'price_base', 'discount'];
-  function esimBody(body, base) {
-    const b = base || {}, out = {};
+  const SIM_INT = ['data_mb', 'throttle_kbps', 'days', 'uses'];
+  const SIM_FLAG = ['sms', 'calls', 'dual_sim', 'roaming'];
+  const SIM_MONEY = ['price', 'price_local', 'price_base', 'discount'];
+  const SIM_LPA_COLS = ['smdp', 'code_enc', 'code_tail', 'lpa_oid', 'confirm_required'];
+  // Поля, от которых зависят напоминания: поменялось любое — флаги отправки сбрасываются.
+  const SIM_WHEN = ['activated_at', 'days', 'day_mode', 'tz', 'activate_by', 'installed_on'];
+  function simBody(body, base) {
+    const b = base || {}, out = {}, warn = [];
     const has = k => body?.[k] !== undefined;
-    for (const [k, max] of Object.entries(ESIM_TEXT)) out[k] = has(k) ? str(body[k], max) : (b[k] ?? null);
-    for (const k of ESIM_INT) {
+    out.kind = has('kind') ? (body.kind === 'sim' ? 'sim' : 'esim') : (b.kind || 'esim');
+    for (const [k, max] of Object.entries(SIM_TEXT)) out[k] = has(k) ? str(body[k], max) : (b[k] ?? null);
+    for (const k of SIM_INT) {
       if (!has(k)) { out[k] = b[k] ?? null; continue; }
       const n = parseInt(String(body[k]).replace(/\D/g, ''), 10);
       out[k] = Number.isFinite(n) && n > 0 ? n : null;
     }
-    for (const k of ESIM_FLAG) out[k] = has(k) ? (body[k] === true || body[k] === 1 || body[k] === '1' ? 1 : 0) : (b[k] ?? (k === 'roaming' ? 1 : 0));
-    for (const k of ESIM_MONEY) {
+    for (const k of SIM_FLAG) out[k] = has(k) ? (body[k] === true || body[k] === 1 || body[k] === '1' ? 1 : 0)
+      : (b[k] ?? (k === 'roaming' ? (out.kind === 'esim' ? 1 : 0) : 0));
+    for (const k of SIM_MONEY) {
       if (!has(k)) { out[k] = b[k] ?? null; continue; }
+      if (String(body[k] ?? '').trim() === '') { out[k] = null; continue; }
       const n = numAmount(body[k]);
-      out[k] = String(body[k] ?? '').trim() === '' ? null : (isFinite(n) && n >= 0 ? Math.round(n * 100) / 100 : NaN);
+      if (!isFinite(n) || n < 0) return { error: { error: 'bad_amount', message: 'Сумма — число' } };
+      out[k] = Math.round(n * 100) / 100;
     }
-    if (ESIM_MONEY.some(k => Number.isNaN(out[k]))) return { error: { error: 'bad_amount', message: 'Сумма — число' } };
     for (const k of ['price_currency', 'price_local_currency']) out[k] = has(k) ? (curCode(body[k]) || null) : (b[k] ?? null);
+    if (out.price != null && !out.price_currency) out.price_currency = 'RUB';
     out.plan_kind = has('plan_kind') ? (['daily', 'total', 'unlimited'].includes(body.plan_kind) ? body.plan_kind : 'daily') : (b.plan_kind || 'daily');
     out.day_mode = has('day_mode') ? (body.day_mode === 'calendar' ? 'calendar' : 'rolling24') : (b.day_mode || 'rolling24');
     out.operator_src = has('operator') ? (out.operator ? (body.operator_src === 'doc' ? 'doc' : 'manual') : null) : (b.operator_src ?? null);
+    out.phone = has('phone') ? (phoneNorm(body.phone) || null) : (b.phone ?? null);
+    if (has('phone') && String(body.phone || '').trim() && !out.phone) return { error: { error: 'bad_phone', message: 'Номер — 7–15 цифр, можно с +' } };
     for (const k of ['purchased_on', 'activate_by', 'installed_on']) {
       if (!has(k)) { out[k] = b[k] ?? null; continue; }
       const v = String(body[k] || '').trim();
@@ -644,511 +640,312 @@ function esimLabel(e) {
       const x = String(body.balance_url || '').trim().slice(0, 300);
       out.balance_url = !x ? null : /^https?:\/\//i.test(x) ? x : (/^[\w.-]+\.[a-z]{2,}([/?#].*)?$/i.test(x) ? 'https://' + x : null);
     } else out.balance_url = b.balance_url ?? null;
-    // Код активации: пришла строка LPA — разбираем и шифруем; пустая строка — стереть; нет ключа — не трогаем.
-    if (has('lpa')) {
+    // Код активации — только у eSIM. Физическая SIM: все LPA-колонки обнуляются.
+    if (out.kind === 'sim') Object.assign(out, { smdp: null, code_enc: null, code_tail: null, lpa_oid: null, confirm_required: 0 });
+    else if (has('lpa')) {
       const s = String(body.lpa || '').trim();
       if (!s) Object.assign(out, { smdp: null, code_enc: null, code_tail: null, lpa_oid: null, confirm_required: 0 });
       else {
         const p = lpaParse(s);
-        if (!p) return { error: { error: 'bad_lpa', message: 'Код активации — строка вида LPA:1$адрес$код' } };
-        if (p.code && !encSecret) return { error: { error: 'no_key', message: 'Нет ключа шифрования — код не сохранён' } };
-        Object.assign(out, { smdp: p.smdp, code_enc: p.code ? encSecret(p.code) : null,
-          code_tail: p.code ? p.code.slice(-4) : null, lpa_oid: p.oid || null, confirm_required: p.confirm ? 1 : 0 });
+        if (!p) return { error: { error: 'bad_lpa', message: 'Код активации — строка вида LPA:1, адрес и код через знак доллара' } };
+        const sealed = p.code ? simSeal(p.code) : null;
+        if (p.code && !sealed) warn.push('code_skipped');   // нет ключа: код не сохраняем, остальное — да
+        Object.assign(out, { smdp: p.smdp, code_enc: sealed, code_tail: sealed ? p.code.slice(-4) : null,
+          lpa_oid: p.oid || null, confirm_required: p.confirm ? 1 : 0 });
       }
-    } else for (const k of ['smdp', 'code_enc', 'code_tail', 'lpa_oid', 'confirm_required']) out[k] = b[k] ?? (k === 'confirm_required' ? 0 : null);
-    if (!out.country && !out.region && !out.product && !out.booking_no && !out.iccid)
-      return { error: { error: 'empty', message: 'Укажите страну, тариф, номер заказа или ICCID' } };
-    return out;
+    } else for (const k of SIM_LPA_COLS) out[k] = b[k] ?? (k === 'confirm_required' ? 0 : null);
+    if (!out.country && !out.region && !out.product && !out.booking_no && !out.iccid && !out.phone)
+      return { error: { error: 'empty', message: 'Укажите страну, тариф, номер заказа, ICCID или номер телефона' } };
+    // Сроки поменялись — напоминания заново (иначе продлённая SIM молчала бы: флаг уже стоит).
+    if (base && SIM_WHEN.some(k => String(out[k] ?? '') !== String(b[k] ?? '')))
+      Object.assign(out, { notify_pre_sent_at: null, notify_end_sent_at: null, notify_actby_pre_sent_at: null, notify_actby_sent_at: null, notify_error: null });
+    return { row: out, warn };
   }
-  const esimView = r => {
+  const simView = r => {
     const { code_enc, ...rest } = r;
     const tail = s => s ? '···' + String(s).slice(-4) : '';
-    return Object.assign(rest, esimState(r), {
-      label: esimLabel(r), has_code: !!code_enc,
-      lpa_masked: r.smdp ? 'LPA:1$' + r.smdp + '$' + tail(r.code_tail) : '',
-      iccid_masked: tail(r.iccid)
-    });
+    return Object.assign(rest, simState(r), {
+      kind_ru: SIM_KIND_RU[r.kind] || 'eSIM', label: simLabel(r), has_code: !!code_enc,
+      lpa_masked: r.kind === 'esim' && r.smdp ? ['LPA:1', r.smdp, tail(r.code_tail)].join(DLR) : '',
+      iccid_masked: tail(r.iccid) });
   };
+  const simGet = id => simView(medDb.prepare('SELECT * FROM trip_sims WHERE id=?').get(id));
 
-  app.get('/api/profile/:profileId/trip/esims', (req, res) => {
+  app.get('/api/profile/:profileId/trip/sims', (req, res) => {
     const profileId = pid(req, res); if (!profileId) return;
     try {
-      const rows = medDb.prepare(`SELECT * FROM trip_esims WHERE profile_id=?
-        ORDER BY COALESCE(activated_at, purchased_on, created_at) DESC, id DESC`).all(profileId).map(esimView);
-      res.json({ ok: true, on: today(), esims: rows,
+      const rows = medDb.prepare(`SELECT * FROM trip_sims WHERE profile_id=?
+        ORDER BY COALESCE(activated_at, purchased_on, created_at) DESC, id DESC`).all(profileId).map(simView);
+      res.json({ ok: true, on: today(), key_ok: !!SIM_KEY, sims: rows,
         active: rows.filter(r => r.status === 'active').length,
-        // «Скоро сгорит»: не активирована, а до крайнего срока активации ≤ 14 дней.
-        soon: rows.filter(r => r.status !== 'expired' && !r.activated_at && r.activate_by
-          && dnum(r.activate_by) - dnum(today()) <= 14).length });
+        soon: rows.filter(r => r.status !== 'expired' && !r.activated_at && r.activate_by && dnum(r.activate_by) - dnum(today()) <= 14).length });
     } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
-  app.get('/api/profile/:profileId/trip/esims/:id/secret', (req, res) => {
+  app.get('/api/profile/:profileId/trip/sims/:id/secret', (req, res) => {
     const profileId = pid(req, res); if (!profileId) return;
-    const r = medDb.prepare('SELECT smdp, code_enc, lpa_oid, confirm_required FROM trip_esims WHERE id=? AND profile_id=?').get(req.params.id, profileId);
-    if (!r) return res.status(404).json({ ok: false, error: 'not_found' });
-    const code = r.code_enc && decSecret ? decSecret(r.code_enc) : '';
-    if (r.code_enc && !code) return res.status(500).json({ ok: false, error: 'код не расшифровался — ключ сменился?' });
+    const r = medDb.prepare(`SELECT kind, smdp, code_enc, lpa_oid, confirm_required FROM trip_sims WHERE id=? AND profile_id=?`).get(req.params.id, profileId);
+    if (!r || r.kind !== 'esim') return res.status(404).json({ ok: false, error: 'not_found' });
+    if (!r.code_enc) return res.status(404).json({ ok: false, error: 'no_code', message: 'Код активации не сохранён' });
+    if (!SIM_KEY) return res.status(503).json({ ok: false, error: 'no_key', message: 'Не настроен ключ шифрования (TRIP_SIM_KEY)' });
+    const code = simOpen(r.code_enc);
+    if (code == null) return res.status(500).json({ ok: false, error: 'decrypt', message: 'Код не расшифровался — ключ сменился, вставьте код заново' });
     res.json({ ok: true, lpa: lpaBuild({ smdp: r.smdp, code, oid: r.lpa_oid, confirm: !!r.confirm_required }) });
   });
 
-  app.post('/api/profile/:profileId/trip/esims', (req, res) => {
+  app.post('/api/profile/:profileId/trip/sims', (req, res) => {
     const profileId = pid(req, res); if (!profileId) return;
     try {
-      const d = esimBody(req.body, null);
+      const d = simBody(req.body, null);
       if (d.error) return res.status(400).json({ ok: false, ...d.error });
-      // Повторный импорт той же брони — дозаполняем занесённую запись, второй не заводим.
-      const twin = esimTwin(profileId, d.booking_no, d.iccid);
-      if (twin) {
-        const fill = Object.fromEntries(Object.entries(d).filter(([k, v]) => v != null && v !== ''
-          && (twin[k] == null || twin[k] === '')));
-        if (Object.keys(fill).length) medDb.prepare(`UPDATE trip_esims SET ${Object.keys(fill).map(k => k + '=?').join(', ')},
-          updated_at=datetime('now') WHERE id=?`).run(...Object.values(fill), twin.id);
-        saveVia('trip_esims', twin.id, req.body);
-        return res.json({ ok: true, merged: true, filled: Object.keys(fill),
-          esim: esimView(medDb.prepare('SELECT * FROM trip_esims WHERE id=?').get(twin.id)) });
-      }
-      const row = { profile_id: profileId, ...d };
-      const cols = Object.keys(row);
-      const r = medDb.prepare(`INSERT INTO trip_esims (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(',')})`)
-        .run(...cols.map(k => row[k]));
-      saveVia('trip_esims', r.lastInsertRowid, req.body);
-      res.json({ ok: true, esim: esimView(medDb.prepare('SELECT * FROM trip_esims WHERE id=?').get(r.lastInsertRowid)) });
+      const twin = simTwin(profileId, d.row.booking_no, d.row.iccid);
+      let id, merged = false, filled = [];
+      medDb.transaction(() => {
+        if (twin) {
+          // Повторный импорт той же брони: дозаполняем пустые поля занесённой записи.
+          const fill = Object.fromEntries(Object.entries(d.row).filter(([k, v]) => v != null && v !== ''
+            && (twin[k] == null || twin[k] === '') && !k.startsWith('notify_')));
+          if (Object.keys(fill).length) medDb.prepare(`UPDATE trip_sims SET ${Object.keys(fill).map(k => k + '=?').join(', ')},
+            updated_at=datetime('now') WHERE id=?`).run(...Object.values(fill), twin.id);
+          id = twin.id; merged = true; filled = Object.keys(fill);
+        } else {
+          const row = { profile_id: profileId, ...d.row };
+          const cols = Object.keys(row);
+          id = medDb.prepare(`INSERT INTO trip_sims (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(',')})`)
+            .run(...cols.map(k => row[k])).lastInsertRowid;
+        }
+        syncSimExpense(profileId, id);
+      })();
+      saveVia('trip_sims', id, req.body);
+      res.json({ ok: true, merged, filled, code_skipped: d.warn.includes('code_skipped'), sim: simGet(id) });
     } catch (e) {
-      // Гонка двух импортов одной брони: второй ловит уникальный индекс — отдаём понятную причину.
-      if (/UNIQUE/.test(e.message)) return res.status(409).json({ ok: false, error: 'dup', message: 'Эта eSIM уже занесена' });
+      if (/UNIQUE/.test(e.message)) return res.status(409).json({ ok: false, error: 'dup', message: 'Эта SIM уже занесена' });
       res.status(500).json({ ok: false, error: e.message });
     }
   });
 
-  app.patch('/api/profile/:profileId/trip/esims/:id', (req, res) => {
+  app.patch('/api/profile/:profileId/trip/sims/:id', (req, res) => {
     const profileId = pid(req, res); if (!profileId) return;
     try {
-      const row = medDb.prepare('SELECT * FROM trip_esims WHERE id=? AND profile_id=?').get(req.params.id, profileId);
-      if (!row) return res.status(404).json({ ok: false, error: 'not_found' });
-      const d = esimBody(req.body, row);
+      const cur = medDb.prepare('SELECT * FROM trip_sims WHERE id=? AND profile_id=?').get(req.params.id, profileId);
+      if (!cur) return res.status(404).json({ ok: false, error: 'not_found' });
+      const d = simBody(req.body, cur);
       if (d.error) return res.status(400).json({ ok: false, ...d.error });
-      const cols = Object.keys(d);
-      medDb.prepare(`UPDATE trip_esims SET ${cols.map(k => k + '=?').join(', ')}, updated_at=datetime('now') WHERE id=?`)
-        .run(...cols.map(k => d[k]), row.id);
-      saveVia('trip_esims', row.id, req.body);
-      res.json({ ok: true, esim: esimView(medDb.prepare('SELECT * FROM trip_esims WHERE id=?').get(row.id)) });
-    } catch (e) {
-      if (/UNIQUE/.test(e.message)) return res.status(409).json({ ok: false, error: 'dup', message: 'Другая eSIM уже с этим номером заказа или ICCID' });
-      res.status(500).json({ ok: false, error: e.message });
-    }
+      if (simTwin(profileId, d.row.booking_no, d.row.iccid, cur.id))
+        return res.status(409).json({ ok: false, error: 'dup', message: 'Другая SIM уже с этим номером заказа или ICCID' });
+      const cols = Object.keys(d.row);
+      medDb.transaction(() => {
+        medDb.prepare(`UPDATE trip_sims SET ${cols.map(k => k + '=?').join(', ')}, updated_at=datetime('now') WHERE id=?`)
+          .run(...cols.map(k => d.row[k]), cur.id);
+        syncSimExpense(profileId, cur.id);
+      })();
+      saveVia('trip_sims', cur.id, req.body);
+      res.json({ ok: true, code_skipped: d.warn.includes('code_skipped'), sim: simGet(cur.id) });
+    } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
-  app.delete('/api/profile/:profileId/trip/esims/:id', (req, res) => {
+  app.delete('/api/profile/:profileId/trip/sims/:id', (req, res) => {
     const profileId = pid(req, res); if (!profileId) return;
-    const r = medDb.prepare('DELETE FROM trip_esims WHERE id=? AND profile_id=?').run(req.params.id, profileId);
-    if (!r.changes) return res.status(404).json({ ok: false, error: 'not_found' });
-    res.json({ ok: true });
+    try {
+      const cur = medDb.prepare('SELECT id FROM trip_sims WHERE id=? AND profile_id=?').get(req.params.id, profileId);
+      if (!cur) return res.status(404).json({ ok: false, error: 'not_found' });
+      medDb.transaction(() => {
+        // Строка расхода живёт ровно столько, сколько SIM: удаляем обе, одной транзакцией.
+        medDb.prepare(`DELETE FROM trip_expenses WHERE profile_id=? AND source='sim' AND source_id=?`).run(profileId, cur.id);
+        medDb.prepare('DELETE FROM trip_sims WHERE id=?').run(cur.id);
+      })();
+      res.json({ ok: true });
+    } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 ```
 
-`saveVia` для `trip_esims` сработает только в части `booked_via` (цены там пишутся для `trip_insurance`/
-`trip_permits`, а у eSIM цена идёт через `esimBody`) — это и нужно.
+`medDb` — better-sqlite3 (везде `prepare().run/get/all`), поэтому `medDb.transaction(fn)()` доступен. Сверить
+перед правкой: `search_code` по `medDb.transaction` в `web/` — ни одного вызова я не искал.
 
-В `server.js:15200` передать шифрование (функции объявлены `function` на стр. 7806/7814 — всплывают, TDZ нет):
-
-```diff
- mountTrip(app, medDb, {
-   profileAuth, pcheck, getPatientAccount: patientAuthApi.getAccount,
-   referral: referralApi,
-   tasksDb: db, logUpload, logAiCall,
-   apiKey: ANTHROPIC_KEY, aiBase: AI_BASE,
-+  encSecret, decSecret,   // код активации eSIM — тем же шифром, что сейф доступов (ADR-233)
-   whisperKey: …,
-   openaiBase: …
- });
-```
+`saveVia('trip_sims', …)` сработает только в части `booked_via` — цена идёт через `simBody`.
 
 ---
 
-## 5. UI: вкладка «eSIM», бейдж, QR
+## 5. UI: вкладка «Связь»
 
-### 5.1 Вкладка (trip.html)
+### 5.1 Название и место
+
+Вкладка называется **«Связь»**. Соседние вкладки — существительные во множественном числе или общие понятия
+(«Отели», «Страховки», «Разрешения», «Полёты»). «Связь» короткая, покрывает оба вида SIM и совпадает с категорией
+расхода, поэтому в интерфейсе одно слово. «SIM/eSIM» со слешем в ряду вкладок читается хуже.
 
 ```diff
      <button type="button" class="ui-tab" data-t="ins">Страховки</button>
-+    <button type="button" class="ui-tab" data-t="esim">eSIM</button>
++    <button type="button" class="ui-tab" data-t="sims">Связь</button>
      <button type="button" class="ui-tab" data-t="permits">Разрешения</button>
 ```
 
 ```diff
-   ({ home: paintHome, plan: paintPlan, flights: paintFlights, rides: paintRides, moves: paintMoves,
 -     stays: paintStays, ins: paintIns, permits: paintPermits, rules: paintRules }[t])();
-+     stays: paintStays, ins: paintIns, esim: paintEsim, permits: paintPermits, rules: paintRules }[t])();
++     stays: paintStays, ins: paintIns, sims: paintSims, permits: paintPermits, rules: paintRules }[t])();
 ```
 
-Ряд `#tripTabs` уже 10 кнопок; проверить на 360px, что `.ui-tabs` скроллится/переносится (правило «в чужой ряд не
-дописывать, не проверив flex-wrap»). Если ряд не переносится — это правка общего `.ui-tabs`, не eSIM.
+Ряд `#tripTabs` станет из 11 кнопок — проверить на 360px (правило «в чужой ряд не дописывать, не проверив
+flex-wrap»).
 
-Форма — тем же приёмом, что `paintIns` (карточка формы сверху, список ниже, `formHead`/`bindRows`/`bindCancel`,
-`EDIT.esim`). Код (вставить после `paintIns`, ~стр. 1800):
+### 5.2 Форма и список
+
+Устроены как `paintIns`: карточка формы сверху, список ниже, `formHead` / `bindRows` / `bindCancel`, `EDIT.sims`.
+Отличия от редакции 1:
+
+- Вверху формы переключатель типа — пара кнопок (`.btn` у активной, `.tbtn` у второй), как предписывает CLAUDE.md для
+  переключателей: **«eSIM» / «SIM»**. Значение кладётся в скрытое `#sm-kind`.
+- При `kind='sim'` блок `#sm-esim` (поле «Код активации», подсказка про QR, чекбокс роуминга по умолчанию) скрыт
+  атрибутом `hidden`, а поле «Номер телефона» показано. При `esim` номер телефона тоже доступен, но свёрнут в
+  «Ещё поля».
+- Кнопка статуса называется по типу: у eSIM «Установил», у SIM «Вставил».
+- Под формой при `key_ok === false` стоит строка «Шифр кодов не настроен — код активации не сохранится». Причина
+  видна до ввода кода, а не после.
+- После сохранения: если в ответе `code_skipped` — `note('Код активации не сохранён: не настроен ключ шифрования…')`
+  красным через `fail`; если `merged` — «Эта SIM уже была — дополнил: …».
+
+Ключевые куски (остальное — как `paintEsim` редакции 1 с заменой `es-` → `sm-`, `/esims` → `/sims`):
 
 ```js
-/* ---------- eSIM (28.09.2026, ADR-233) ----------
-   Купленная сим-карта для поездки. Статус, срок и «осталось» считает сервер. Код активации
-   в списке — маской; целиком приходит отдельным запросом по «Показать» и не кладётся ни в
-   localStorage, ни в DOM закрытой карточки (правило «Скрытие приватных данных» — замок и
-   пара кнопок, не одно blur). */
-const ESIM_ST = { bought: 'куплена', installed: 'установлена', active: 'активна', expired: 'истекла' };
-const ESIM_OPS = ['', 'Vodafone', 'Orange', 'Etisalat', 'WE', 'Turkcell', 'AIS', 'dtac', 'TrueMove H'];   // подсказки; ввод свободный
-let ESIM_OPEN = null;   // id карточки с раскрытым кодом — живёт до перерисовки, не в хранилище
-const esimIco = n => '<svg class="esim-ico" aria-hidden="true"><use href="' + (window.ICONS_URL || '/assets/icons.svg?v=8') + '#' + n + '"></use></svg>';
-function esimStatusLine(e) {
-  if (e.status === 'active') return '<span class="ok">Активна' + (e.hours_left != null ? ', осталось ' + (e.hours_left >= 24 ? days(Math.floor(e.hours_left / 24)) + ' ' + (e.hours_left % 24) + ' ч' : e.hours_left + ' ч') : '')
-    + '</span>' + (e.expires_at ? ' · до ' + RU(e.expires_at.slice(0, 10)) + ' ' + e.expires_at.slice(11, 16) : '')
-    + (e.next_reset_at ? '<br>Лимит обновится ' + e.next_reset_at.slice(11, 16) : '');
-  if (e.status === 'expired') return '<span class="warn">' + (e.never_activated ? 'Не активирована до ' + RU(e.activate_by) : 'Истекла ' + (e.expires_at ? RU(e.expires_at.slice(0, 10)) : '')) + '</span>';
-  return (e.status === 'installed' ? 'Установлена' : 'Куплена') + (e.activate_by ? ' · активировать до ' + RU(e.activate_by) : '');
+/* ---------- Связь: SIM и eSIM (28.09.2026, ADR-233) ----------
+   Статус, срок и «осталось» считает сервер. Код активации — маской; целиком приходит
+   отдельным запросом по «Показать» и никуда не сохраняется (замок + пара кнопок). */
+const SIM_ST = { sim: { bought: 'куплена', installed: 'вставлена', active: 'активна', expired: 'истекла' },
+                 esim: { bought: 'куплена', installed: 'установлена', active: 'активна', expired: 'истекла' } };
+let SIM_OPEN = null;
+const simIco = n => '<svg class="sim-ico" aria-hidden="true"><use href="' + (window.ICONS_URL || '/assets/icons.svg?v=8') + '#' + n + '"></use></svg>';
+function simKindSet(k) {
+  set('sm-kind', k);
+  $('#sm-k-esim').className = k === 'esim' ? 'btn btn-sm' : 'tbtn btn-sm';
+  $('#sm-k-sim').className = k === 'sim' ? 'btn btn-sm' : 'tbtn btn-sm';
+  $('#sm-esim').hidden = k !== 'esim';
+  if (!EDIT.sims) $('#sm-roam').checked = k === 'esim';   // eSIM почти всегда требует роуминга данных
 }
-async function paintEsim() {
-  let d;
-  try { d = await api('/esims'); } catch (e) { return fail(e); }
-  if (EDIT.esim && !d.esims.find(x => x.id === EDIT.esim)) EDIT.esim = null;
-  const rows = d.esims.map(e => `
-    <div class="card${e.id === EDIT.esim ? ' edit' : ''}">
-      <div class="top">
-        <div>
-          <div class="nm">${esimIco('i-sim')} ${esc(e.label)}</div>
-          <div class="meta">${ESIM_ST[e.status]} · ${esimStatusLine(e)}</div>
-          <div class="meta">${[e.product, e.plan].filter(Boolean).map(esc).join(' · ')}${
-            e.throttle_kbps ? '<br>После лимита ' + e.throttle_kbps + ' кбит/с' : ''}${
-            '<br>' + (e.sms ? 'SMS' : 'без SMS') + ' · ' + (e.calls ? 'звонки' : 'без звонков')}${
-            e.operator ? ' · сеть ' + esc(e.operator) : ' · сеть не указана'}${
-            e.apn ? ' · APN ' + esc(e.apn) : ''}${e.roaming ? '<br>Включите «Роуминг данных» для этой линии' : ''}</div>
-          ${e.iccid_masked ? '<div class="meta">ICCID ' + esc(e.iccid_masked) + (e.balance_url
-            ? ' · <a href="' + esc(e.balance_url) + '" target="_blank" rel="noopener" style="color:var(--ui-brand,#00a0ff);">баланс</a>' : '') + '</div>' : ''}
-          ${e.has_code ? `<div class="meta esim-code" data-esim-code="${e.id}">
-            ${esimIco('i-lock')} <span>${esc(e.lpa_masked)}</span>
-            <div class="row2" style="margin:6px 0 0;">
-              <button class="${ESIM_OPEN === e.id ? 'btn' : 'tbtn'} btn-sm" data-esim-show="${e.id}">Показать</button>
-              <button class="${ESIM_OPEN === e.id ? 'tbtn' : 'btn'} btn-sm" data-esim-hide="${e.id}">Скрыть</button>
-            </div></div>` : ''}
-          ${priceLine(e) || e.booked_via ? '<div class="meta">' + [priceLine(e), e.discount ? 'скидка ' + fmtMoney(e.discount, e.price_currency) : '',
-            e.paid_with ? esc(e.paid_with) : '', e.booked_via ? esc(e.booked_via) : '', e.booking_no ? 'заказ ···' + esc(e.booking_no.slice(-4)) : ''].filter(Boolean).join(' · ') + '</div>' : ''}
-          ${e.note ? '<div class="meta">' + esc(e.note) + '</div>' : ''}
-        </div>
-        <div class="acts">
-          ${!e.installed_on && !e.activated_at ? `<span class="act" data-esim-inst="${e.id}">Установил</span>` : ''}
-          ${!e.activated_at ? `<span class="act" data-esim-act="${e.id}" data-tz="${esc(e.tz || '')}">Подключилась</span>` : ''}
-          <span class="act" data-edit="${e.id}">Изменить</span>
-          <span class="act del" data-del="${e.id}">Удалить</span>
-        </div>
-      </div>
-    </div>`).join('');
-  $('#pane').innerHTML = `
-    <div class="card">
-      <div class="row2" style="margin-bottom:10px;align-items:center;flex-wrap:wrap;">
-        <button class="btn ghost" id="es-pick">Скрин или PDF</button>
-        <button class="btn ghost" id="es-pick-txt">Вставить текст</button>
-        <input type="file" id="es-file" accept="image/*,application/pdf" multiple style="display:none;">
-        <div class="hint" id="hint" style="margin:0;flex:1 0 100%;">Подтверждение заказа eSIM (Trip.com, Airalo, Holafly…) — до 5 экранов одного заказа или текст письма. PIN заказа, имя, телефон и почта не распознаются и не хранятся. Код активации хранится зашифрованным.</div>
-      </div>
-      <div id="es-txt" style="display:none;margin:0 0 10px;">
-        <textarea id="es-txta" rows="6" placeholder="Вставьте письмо или текст заказа целиком" style="width:100%;"></textarea>
-        <button class="btn" id="es-txt-go" style="margin-top:6px;">Распознать</button>
-      </div>
-      <div class="fld"><span>Страна</span><input id="es-country" list="places" placeholder="Египет"></div>
-      <div class="fld"><span>Регион</span><input id="es-region" placeholder="если план на несколько стран"></div>
-      <div class="fld"><span>Продукт</span><input id="es-product" placeholder="Egypt 5G eSIM | Dual SIM"></div>
-      <div class="fld"><span>Тариф</span><input id="es-plan" placeholder="3 days · Daily 2GB"></div>
-      <div class="fld"><span>Объём</span><select id="es-kind" data-pick>
-        <option value="daily">в сутки</option><option value="total">на весь срок</option><option value="unlimited">безлимит</option></select></div>
-      <div class="fld"><span>МБ</span><input id="es-mb" type="number" inputmode="numeric" placeholder="2048"></div>
-      <div class="fld"><span>После лимита, кбит/с</span><input id="es-kbps" type="number" inputmode="numeric" placeholder="512"></div>
-      <div class="fld"><span>Дней</span><input id="es-days" type="number" inputmode="numeric" placeholder="3"></div>
-      <div class="fld"><span>Сутки</span><select id="es-daymode" data-pick>
-        <option value="rolling24">24 ч от активации</option><option value="calendar">календарные</option></select></div>
-      <div class="fld"><span>Сеть</span><input id="es-network" placeholder="5G"></div>
-      <div class="fld"><span>Оператор</span><input id="es-operator" list="es-ops" placeholder="не знаю"></div>
-      <datalist id="es-ops">${ESIM_OPS.filter(Boolean).map(o => '<option value="' + esc(o) + '">').join('')}</datalist>
-      <div class="fld"><span>APN</span><input id="es-apn" placeholder="необязательно"></div>
-      <label class="fld"><span>Роуминг данных</span><input type="checkbox" id="es-roam" checked></label>
-      <label class="fld"><span>SMS</span><input type="checkbox" id="es-sms"></label>
-      <label class="fld"><span>Звонки</span><input type="checkbox" id="es-calls"></label>
-      <div class="fld"><span>Код активации</span><input id="es-lpa" autocomplete="off" spellcheck="false" placeholder="LPA:1$smdp.io$…"></div>
-      <div class="fld"><span>ICCID</span><input id="es-iccid" inputmode="numeric" placeholder="89…"></div>
-      <div class="fld"><span>Проверка баланса</span><input id="es-bal" type="url" inputmode="url" placeholder="https://…"></div>
-      <div class="fld"><span>Номер заказа</span><input id="es-booking" placeholder="1539367401113525"></div>
-      ${dateFld('Куплена', 'es-bought', '')}
-      ${dateFld('Активировать до', 'es-by', '')}
-      <div class="fld"><span>Подключилась</span><input id="es-act" placeholder="ГГГГ-ММ-ДД ЧЧ:ММ (местное)"></div>
-      <div class="fld"><span>Пояс</span><input id="es-tz" placeholder="Africa/Cairo"></div>
-      <div class="fpair">
-        ${priceField('Итого', 'es-price', 'es-pcur', '', 'RUB', '339.80')}
-        ${priceField('Вторая валюта', 'es-lprice', 'es-lcur', '', 'USD', '4')}
-      </div>
-      <div class="fld"><span>Скидка</span><input id="es-disc" type="number" inputmode="decimal" placeholder="17.89"></div>
-      <div class="fld"><span>Оплачено</span><input id="es-paid" placeholder="карта / Trip Coins"></div>
-      ${viaFld('es-via', 'Trip.com')}
-      <div class="fld"><span>Заметка</span><input id="es-note" placeholder="отмена невозможна после использования"></div>
-      <input type="hidden" id="es-base">
-      <input type="hidden" id="es-ext">
-      <div class="err" id="err"></div>
-      ${formHead('esim', 'Добавить eSIM')}
-      <div class="hint">Срок считается от момента подключения: 3 дня = 72 часа. Сумма попадёт в траты поездки в категорию «Связь».</div>
-    </div>
-    ${d.esims.length ? '<div class="sub" style="margin:0 0 8px;">eSIM ' + d.esims.length + (d.active ? ' · активных ' + d.active : '') + (d.soon ? ' · пора активировать: ' + d.soon : '') + '</div>' : ''}
-    ${rows || '<div class="empty">eSIM пока нет. Загрузите скрин заказа или вставьте письмо — тариф, сроки и код установки заполнятся сами.</div>'}`;
-  const body = () => ({
-    country: val('es-country'), region: val('es-region'), product: val('es-product'), plan: val('es-plan'),
-    plan_kind: val('es-kind'), data_mb: val('es-mb'), throttle_kbps: val('es-kbps'), days: val('es-days'),
-    day_mode: val('es-daymode'), network: val('es-network'), operator: val('es-operator'), apn: val('es-apn'),
-    roaming: $('#es-roam').checked, sms: $('#es-sms').checked, calls: $('#es-calls').checked,
-    iccid: val('es-iccid'), balance_url: val('es-bal'), booking_no: val('es-booking'),
-    purchased_on: val('es-bought'), activate_by: val('es-by'), activated_at: val('es-act'), tz: val('es-tz'),
-    discount: val('es-disc'), paid_with: val('es-paid'), booked_via: val('es-via'), note: val('es-note'),
-    price_base: val('es-base'), extend_until: val('es-ext'),
-    ...priceBody('es-price', 'es-pcur', 'es-lprice', 'es-lcur'),
-    // Код уходит, ТОЛЬКО если его вписали/распознали: при правке поле пустое, и пустота не должна стирать код.
-    ...(val('es-lpa') ? { lpa: val('es-lpa') } : {})
-  });
-  $('#f-save').onclick = async () => {
-    try {
-      let r;
-      if (EDIT.esim) { r = await send('/esims/' + EDIT.esim, 'PATCH', body()); EDIT.esim = null; }
-      else r = await send('/esims', 'POST', body());
-      if (r && r.merged) note('Эта eSIM уже была — дополнил: ' + (r.filled.length ? r.filled.join(', ') : 'нового нет'), true);
-      paintEsim();
-    } catch (e) { fail(e); }
-  };
-  bindCancel('esim', paintEsim);
-  ['es-bought', 'es-by'].forEach(bindDate);
-  // Установил / подключилась — PATCH одним полем. Момент «сейчас» — в поясе eSIM, не телефона.
-  document.querySelectorAll('[data-esim-inst]').forEach(el => el.onclick = async () => {
-    try { await send('/esims/' + el.dataset.esimInst, 'PATCH', { installed_on: localDay() }); paintEsim(); } catch (e) { fail(e); }
-  });
-  document.querySelectorAll('[data-esim-act]').forEach(el => el.onclick = async () => {
-    const tz = el.dataset.tz || Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const now = new Date().toLocaleString('sv-SE', { timeZone: tz, hourCycle: 'h23' });
-    try { await send('/esims/' + el.dataset.esimAct, 'PATCH', { activated_at: now, tz }); paintEsim(); } catch (e) { fail(e); }
-  });
-  document.querySelectorAll('[data-esim-show]').forEach(el => el.onclick = () => esimReveal(+el.dataset.esimShow));
-  document.querySelectorAll('[data-esim-hide]').forEach(el => el.onclick = () => { ESIM_OPEN = null; paintEsim(); });
-  bindEsimScan();
-  bindRows('/esims', paintEsim, 'esim', () => {
-    const e = d.esims.find(x => x.id === EDIT.esim);
-    if (!e) return;
-    set('es-country', e.country); set('es-region', e.region); set('es-product', e.product); set('es-plan', e.plan);
-    set('es-kind', e.plan_kind); set('es-mb', e.data_mb); set('es-kbps', e.throttle_kbps); set('es-days', e.days);
-    set('es-daymode', e.day_mode); set('es-network', e.network); set('es-operator', e.operator); set('es-apn', e.apn);
-    $('#es-roam').checked = !!e.roaming; $('#es-sms').checked = !!e.sms; $('#es-calls').checked = !!e.calls;
-    set('es-iccid', e.iccid); set('es-bal', e.balance_url); set('es-booking', e.booking_no);
-    set('es-bought', e.purchased_on); set('es-by', e.activate_by); set('es-act', e.activated_at); set('es-tz', e.tz);
-    set('es-disc', e.discount); set('es-paid', e.paid_with); set('es-via', e.booked_via); set('es-note', e.note);
-    set('es-base', e.price_base); set('es-ext', e.extend_until);
-    $('#es-lpa').placeholder = e.has_code ? e.lpa_masked + ' (оставьте пустым — код не изменится)' : 'LPA:1$smdp.io$…';
-    priceFill(e, 'es-price', 'es-pcur', 'es-lprice', 'es-lcur');
-  });
-}
-// Ключ дня — ЛОКАЛЬНЫМИ полями, не toISOString (правило CLAUDE.md).
-const localDay = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
-
-/* Раскрытие кода: запрос /secret, текст + QR в карточке. Ничего не пишется в хранилище;
-   перерисовка вкладки (любая) код снова прячет. */
-async function esimReveal(id) {
-  const box = document.querySelector('[data-esim-code="' + id + '"]');
-  if (!box) return;
-  let d;
-  try { d = await api('/esims/' + id + '/secret'); } catch (e) { return fail(e); }
-  ESIM_OPEN = id;
-  box.querySelector('[data-esim-show]').className = 'btn btn-sm';
-  box.querySelector('[data-esim-hide]').className = 'tbtn btn-sm';
-  box.querySelector('span').textContent = d.lpa;
-  const q = document.createElement('div');
-  q.className = 'esim-qr';
-  q.innerHTML = await esimQrSvg(d.lpa) || '<div class="meta">QR не собрался — установите по коду вручную</div>';
-  const cp = document.createElement('button');
-  cp.className = 'tbtn btn-sm'; cp.textContent = 'Копировать код';
-  cp.onclick = () => copyText(d.lpa);
-  box.append(q, cp);
-}
-/* QR из LPA-строки. Кодер — тот же /assets/qrcode-gen.js, что у посадочного талона
-   (trip-pass.js, loadQrLib). Чёрное на белом ЛИТЕРАЛАМИ, а не токенами темы: сканер камеры
-   в «Настройки → Сотовая связь → Добавить eSIM» инверсию и низкий контраст не читает. */
-async function esimQrSvg(text) {
-  const lib = window.tripPass && window.tripPass.loadQrLib ? await window.tripPass.loadQrLib() : null;
-  if (!lib) return '';
-  const q = lib(0, 'M'); q.addData(text); q.make();
-  const n = q.getModuleCount(), quiet = 3, s = n + quiet * 2;
-  let p = '';
-  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) if (q.isDark(i, j)) p += 'M' + (j + quiet) + ' ' + (i + quiet) + 'h1v1h-1z';
-  return '<svg viewBox="0 0 ' + s + ' ' + s + '" width="220" height="220" shape-rendering="crispEdges" role="img" aria-label="QR-код установки eSIM">'
-    + '<rect width="' + s + '" height="' + s + '" fill="#fff"/><path d="' + p + '" fill="#000"/></svg>';
-}
-
-/* Скан заказа: несколько скринов → JSON одним запросом (как бронь отеля), PDF — как есть
-   (фото из него не нужно, модель читает PDF сама), текст — text/plain с X-Doc-Kind: text
-   (как рейсы). Разбор ответа — один на три входа. */
-function bindEsimScan() {
-  const pick = $('#es-pick'), inp = $('#es-file'), tbtn = $('#es-pick-txt'), tbox = $('#es-txt'), tgo = $('#es-txt-go');
-  if (!pick || !inp) return;
-  const apply = d => {
-    const e = d.esim || {};
-    const put = (id, v) => { if (v !== '' && v != null) set(id, v); };
-    put('es-country', e.country); put('es-region', e.region); put('es-product', e.product); put('es-plan', e.plan);
-    put('es-kind', e.plan_kind); put('es-mb', e.data_mb); put('es-kbps', e.throttle_kbps); put('es-days', e.days);
-    put('es-daymode', e.day_mode); put('es-network', e.network); put('es-operator', e.operator); put('es-apn', e.apn);
-    if (e.sms !== '') $('#es-sms').checked = !!e.sms;
-    if (e.calls !== '') $('#es-calls').checked = !!e.calls;
-    put('es-lpa', e.lpa); put('es-iccid', e.iccid); put('es-bal', e.balance_url); put('es-booking', e.booking_no);
-    put('es-bought', e.purchased_on); put('es-by', e.activate_by);
-    put('es-disc', e.discount); put('es-paid', e.paid_with); put('es-note', e.note);
-    put('es-base', e.price_base); put('es-ext', e.extend_until);
-    put('es-via', vendorCanon(e.booked_via));
-    priceFill(e, 'es-price', 'es-pcur', 'es-lprice', 'es-lcur', true);
-    const warn = [];
-    if (!e.lpa) warn.push('кода активации в тексте нет — если он только QR-картинкой, впишите строку LPA руками');
-    if (e.iccid && e.iccid_luhn === false) warn.push('ICCID не сошёлся по контрольной цифре — сверьте');
-    if (!e.operator) warn.push('оператор сети не указан — выберите, если знаете');
-    note((e.dup_id ? 'Эта eSIM уже занесена — сохранение дополнит её. ' : 'Распознал. ')
-      + (warn.length ? warn.join('; ') + '. ' : '') + 'Проверьте и сохраните.', !warn.length && !e.dup_id);
-  };
-  const run = async (body, headers) => {
-    [pick, tbtn].forEach(b => b && (b.disabled = true));
-    clearErr(); note('Читаю…');
-    try {
-      const r = await fetch(API + '/esim-scan', { method: 'POST', credentials: 'same-origin', headers, body });
-      const d = await r.json().catch(() => ({}));
-      if (!r.ok || d.ok === false) throw new Error(d.message || d.error
-        || (r.status === 413 ? 'файлы слишком тяжёлые для загрузки' : RESTARTING.includes(r.status) ? RESTART_MSG : 'сервер ответил HTTP ' + r.status));
-      apply(d);
-    } catch (e) { note('Не разобрал'); fail(e); }
-    [pick, tbtn].forEach(b => b && (b.disabled = false));
-  };
-  pick.onclick = () => inp.click();
-  inp.onchange = async () => {
-    const picked = Array.from(inp.files || []).slice(0, 5);
-    inp.value = '';
-    if (!picked.length) return;
-    note('Готовлю…');
-    try {
-      const small = [];
-      for (const f of picked) small.push(/\.pdf$/i.test(f.name) || f.type === 'application/pdf' ? { name: f.name, blob: f } : await shrink(f));
-      if (small.length === 1) return run(small[0].blob, { 'Content-Type': 'application/octet-stream', 'X-File-Name': encodeURIComponent(small[0].name) });
-      const files = await Promise.all(small.map(f => new Promise((ok, bad) => {
-        const fr = new FileReader();
-        fr.onload = () => ok({ name: f.name, data: String(fr.result).split(',')[1] });
-        fr.onerror = () => bad(new Error('не прочитался файл ' + f.name));
-        fr.readAsDataURL(f.blob);
-      })));
-      run(JSON.stringify({ files }), { 'Content-Type': 'application/json' });
-    } catch (e) { fail(e); }
-  };
-  if (tbtn && tbox && tgo) {
-    tbtn.onclick = () => { const on = tbox.style.display === 'none'; tbox.style.display = on ? 'block' : 'none'; if (on) $('#es-txta').focus(); };
-    tgo.onclick = () => {
-      const t = val('es-txta').trim();
-      if (t.length < 10) return fail(new Error('вставьте письмо или текст заказа целиком'));
-      run(t, { 'Content-Type': 'text/plain; charset=utf-8', 'X-Doc-Kind': 'text' });
-    };
-  }
-}
+// разметка переключателя в начале формы:
+//   <div class="row2" style="margin:0 0 10px;"><button type="button" id="sm-k-esim">eSIM</button>
+//   <button type="button" id="sm-k-sim">SIM</button><input type="hidden" id="sm-kind" value="esim"></div>
+//   ... <div id="sm-esim"> поле «Код активации» (#sm-lpa) </div>
+//   <div class="fld"><span>Номер телефона</span><input id="sm-phone" inputmode="tel" placeholder="+20 …"></div>
+// в body(): kind: val('sm-kind'), phone: val('sm-phone'), ...(val('sm-kind') === 'esim' && val('sm-lpa') ? { lpa: val('sm-lpa') } : {})
+// в apply(d) скана: simKindSet(d.sim.kind || 'esim'); put('sm-phone', d.sim.phone); ...
+// в fill() правки: simKindSet(e.kind); set('sm-phone', e.phone); ...
+// на сохранение:
+//   const r = EDIT.sims ? await send('/sims/' + EDIT.sims, 'PATCH', body()) : await send('/sims', 'POST', body());
+//   if (r.code_skipped) fail(new Error('Код активации не сохранён: не настроен ключ шифрования. Остальное сохранено.'));
+//   else if (r.merged) note('Эта SIM уже была — дополнил: ' + (r.filled.length ? r.filled.join(', ') : 'нового нет'), true);
 ```
 
-CSS в `<style>` страницы (не в ui.css — компонент раздела):
+Строка списка: `simIco(e.kind === 'sim' ? 'i-sim' : 'i-esim')` + чип типа `e.kind_ru` + `e.label` + статус (§2.2),
+затем номер телефона, ICCID маской, ссылка баланса, код маской с кнопками «Показать / Скрыть» (только eSIM с
+`has_code`), цена (`priceLine`), «оплачено Trip Coins», площадка и строка «В тратах поездки: Связь» — если
+`expense_id` не пуст.
 
-```css
-/* eSIM (ADR-233): значок SIM у названия и QR установки. Цвет QR — литералы (см. esimQrSvg). */
-.esim-ico{width:var(--ui-nav-ico,16px);height:var(--ui-nav-ico,16px);vertical-align:-3px;}
-.esim-code span{font-family:ui-monospace,monospace;overflow-wrap:anywhere;}
-.esim-qr{margin:8px 0;display:inline-block;padding:6px;background:#fff;border-radius:var(--ui-radius,8px);}
-```
+QR (`esimReveal`/`esimQrSvg` редакции 1) — только для `kind==='esim'`. Кодер берётся из `window.tripPass.loadQrLib`
+(в `trip-pass.js` добавить `loadQrLib` в экспорт стр. 529 и поднять `?v=` у подключения на `trip.html`).
 
-Проверить до выката: использует ли страница `data-pick` + `/pick.js` (правило «новый select — подключи
-/pick.js и поставь data-pick»); если `/pick.js` на `trip.html` не подключён — либо подключить, либо (как
-существующий `#pm-kind`) оставить обычный `select` без `data-pick` — решить по факту.
+### 5.3 Значки и бейдж в поездке
 
-`trip-pass.js`: открыть загрузчик QR наружу, поднять `?v=` на `trip.html` (`/trip-pass.js?v=5` → `?v=6`):
-
-```diff
--  window.tripPass = { open, render, UTM, utmContent, refUrl };
-+  window.tripPass = { open, render, UTM, utmContent, refUrl, loadQrLib };   // loadQrLib — ещё и QR установки eSIM (ADR-233)
-```
-
-### 5.2 Значок `i-sim` в спрайт
-
-Эмодзи 📶 запрещены (CLAUDE.md) — значок из спрайта. Нужного нет → добавить в `/assets/icons.svg` (Lucide
-«card-sim», 24×24) и поднять `ICONS_V` в `server.js` (адрес спрайта `window.ICONS_URL` один на платформу;
-фолбэк `?v=8` в модулях и `habits-sw.js` SHELL — поднять там же, где его поднимали в прошлый раз):
+Эмодзи запрещены, поэтому нужны два символа в спрайте `/assets/icons.svg` (24×24, стиль Lucide) и `ICONS_V` +1 в
+`server.js`:
 
 ```xml
 <symbol id="i-sim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.172 2a2 2 0 0 1 1.414.586l3.828 3.828A2 2 0 0 1 20 7.828V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><rect x="8" y="10" width="8" height="8" rx="1"/><path d="M8 14h8"/><path d="M12 10v8"/></symbol>
+<symbol id="i-esim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.172 2a2 2 0 0 1 1.414.586l3.828 3.828A2 2 0 0 1 20 7.828V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M8.5 14.5a5 5 0 0 1 7 0"/><path d="M10.5 16.5a2 2 0 0 1 3 0"/><path d="M12 18.5h.01"/></symbol>
 ```
 
-### 5.3 Бейдж в карточке поездки (`trip_journeys.js` + `trip-journeys.js`)
-
-Сервер — в `compute()` рядом со страховками (`trip_journeys.js:219`):
-
-```js
-    const esims = medDb.prepare('SELECT * FROM trip_esims WHERE profile_id=?').all(profileId);
-    const esimUsed = new Set();
-    ...
-      // eSIM (28.09.2026, ADR-233): в поездку, если страна совпала с одной из точек маршрута и
-      // дата (подключение → установка → покупка) в окне [начало − 30 дней, конец]. Покупают заранее,
-      // поэтому окно назад шире, чем у своих расходов. Одна eSIM — в одну поездку.
-      const legCountries = new Set(J.legs.flatMap(L => [L.to.country, L.from.country]).filter(Boolean).map(norm));
-      const eDate = e => (e.activated_at || '').slice(0, 10) || e.installed_on || e.purchased_on || (e.created_at || '').slice(0, 10);
-      const esimIn = [];
-      for (const e of esims) {
-        const d = eDate(e);
-        if (esimUsed.has(e.id) || !isDate(d) || d > J.end || dnum(J.start) - dnum(d) > 30) continue;
-        if (e.country && !legCountries.has(norm(e.country))) continue;
-        esimUsed.add(e.id);
-        esimIn.push(e);
-        items.push(item({ kind: 'esim', id: e.id, cat: 'comm',
-          title: 'eSIM · ' + [e.country || e.region, e.plan].filter(Boolean).join(' · '),
-          amount: e.price, currency: e.price_currency, amount_local: e.price_local, currency_local: e.price_local_currency },
-          e.purchased_on || d, 60, 1));
-      }
-      return { J, items, esimIn };
-```
-
-и в итоговом объекте поездки (`trip_journeys.js:268`) — краткая сводка для бейджа (статус и срок считает тот же
-`esimState()`; его надо экспортировать из `trip.js` вместе с `esimLabel` и передать в `mountTripJourneys` через
-`deps`, чтобы не держать второй копии логики сроков):
-
-```js
-        esims: esimIn.map(e => { const s = esimState(e); return { id: e.id, label: esimLabel(e), status: s.status,
-          expires_at: s.expires_at, activate_by: e.activate_by }; }),
-```
+Бейдж в карточке поездки (`trip_journeys.js` → `compute()`; `trip-journeys.js` → `cardHtml()`). Подбор SIM к
+поездке: страна SIM совпадает со страной одной из точек маршрута, а дата (подключение → установка → покупка)
+попадает в окно `[начало − 30 дней, конец]`. Одна SIM — в одну поездку. Функции `simState`, `simLabel` и `SIM_KIND_RU`
+приходят через deps, второй копии логики сроков нет:
 
 ```diff
-   // Поездки целиком + расходы по ним (21.09.2026) — сборка и ручки в trip_journeys.js.
 -  mountTripJourneys(app, medDb, { pid, airport, tasksDb });
-+  mountTripJourneys(app, medDb, { pid, airport, tasksDb, esimState, esimLabel });
++  mountTripJourneys(app, medDb, { pid, airport, tasksDb, simState, simLabel, simKindRu: SIM_KIND_RU });
 ```
-
-(`esimState`/`esimLabel` — функции модуля `trip.js`, объявлены `function` — доступны по имени.)
-
-Страница — в `cardHtml()` (`trip-journeys.js:84`), строкой под датами:
 
 ```js
-    const ESIM_RU = { bought: 'куплена', installed: 'установлена', active: 'активна', expired: 'истекла' };
-    const esimLine = (j.esims || []).map(e => '<span class="jr-chip jr-esim"><svg aria-hidden="true"><use href="'
-      + (window.ICONS_URL || '/assets/icons.svg?v=8') + '#i-sim"></use></svg> eSIM: ' + esc(e.label) + ' · ' + ESIM_RU[e.status]
-      + (e.status === 'active' && e.expires_at ? ' до ' + e.expires_at.slice(8, 10) + '.' + e.expires_at.slice(5, 7) + ' ' + e.expires_at.slice(11, 16)
-        : e.status === 'bought' && e.activate_by ? ' · активировать до ' + RU(e.activate_by) : '') + '</span>').join('');
-    ...
-      + (esimLine ? '<div class="jr-sub" style="margin-top:6px;">' + esimLine + '</div>' : '')
+      // в объект поездки (trip_journeys.js ~268): бейджи SIM
+      sims: simIn.map(s => { const st = simState(s); return { id: s.id, kind: s.kind, kind_ru: simKindRu[s.kind],
+        label: simLabel(s), status: st.status, expires_at: st.expires_at, activate_by: s.activate_by }; }),
 ```
 
-CSS (в `jr-css`): `#jr .jr-esim svg{width:12px;height:12px;vertical-align:-2px;}`. Тап по бейджу → `go('esim')`
-(`window.go` доступен со страницы) — по желанию.
+```js
+    // trip-journeys.js, cardHtml: «[значок] eSIM: Египет 2 ГБ/день, 3 дня · активна до 05.10 14:10»
+    const SIM_RU = { bought: 'куплена', installed: 'установлена', active: 'активна', expired: 'истекла' };
+    const simLine = (j.sims || []).map(s => '<span class="jr-chip jr-sim"><svg aria-hidden="true"><use href="'
+      + (window.ICONS_URL || '/assets/icons.svg?v=8') + '#' + (s.kind === 'sim' ? 'i-sim' : 'i-esim') + '"></use></svg> '
+      + esc(s.kind_ru) + ': ' + esc(s.label) + ' · ' + (s.kind === 'sim' && s.status === 'installed' ? 'вставлена' : SIM_RU[s.status])
+      + (s.status === 'active' && s.expires_at ? ' до ' + s.expires_at.slice(8, 10) + '.' + s.expires_at.slice(5, 7) + ' ' + s.expires_at.slice(11, 16)
+        : s.status === 'bought' && s.activate_by ? ' · активировать до ' + RU(s.activate_by) : '') + '</span>').join('');
+```
 
-Итог в карточке: «[SIM] eSIM: Египет 2 ГБ/день, 3 дня · активна до 05.10 14:10».
+### 5.4 QR со скрина — `BarcodeDetector` без новой зависимости
+
+Если в заказе код только QR-картинкой, модель его не прочтёт. Поэтому **до** отправки на сервер страница пробует
+прочитать QR сама:
+
+```js
+/* QR со скрина (28.09.2026, ADR-233): BarcodeDetector есть в Chrome/Edge на Android и ПК, в
+   Safari (iOS/macOS) и Firefox его нет. Новых библиотек не тянем: нет детектора — просим
+   вставить строку LPA текстом (она почти всегда есть в письме рядом с QR). */
+async function simQrFromFiles(files) {
+  if (!('BarcodeDetector' in window)) return { lpa: '', why: 'no_api' };
+  try {
+    const fmts = await BarcodeDetector.getSupportedFormats();
+    if (!fmts.includes('qr_code')) return { lpa: '', why: 'no_api' };
+    const det = new BarcodeDetector({ formats: ['qr_code'] });
+    for (const f of files) {
+      if (!/^image\//.test(f.type)) continue;          // PDF не читаем: картинки из него нет
+      const bmp = await createImageBitmap(f);
+      const codes = await det.detect(bmp);
+      bmp.close && bmp.close();
+      const hit = codes.map(c => String(c.rawValue || '').trim()).find(v => /^LPA:1\$/i.test(v));
+      if (hit) return { lpa: hit, why: '' };
+    }
+    return { lpa: '', why: 'not_found' };
+  } catch (e) { return { lpa: '', why: 'error' }; }
+}
+```
+
+В `bindSimScan`, до `run(...)`:
+
+```js
+    const qr = await simQrFromFiles(picked);
+    if (qr.lpa) { simKindSet('esim'); set('sm-lpa', qr.lpa); }
+    // после ответа сервера: put('sm-lpa', d.sim.lpa) не затирает найденный QR-ом код — put пишет только непустое.
+    // Подсказка, если кода нет ни в тексте, ни в QR:
+    //   why === 'no_api'   → «Этот браузер не читает QR со скрина — вставьте строку LPA:1… из письма в поле „Код активации“»
+    //   why === 'not_found'→ «QR на скринах не нашёл — вставьте строку LPA:1… текстом»
+```
+
+Код из QR не уходит на сервер отдельным запросом. Он попадает в поле формы и сохраняется обычным `POST /sims`
+(там шифруется). Картинка при этом уходит на распознавание как раньше — за тарифом и сроками.
 
 ---
 
-## 6. Связь с расходами
+## 6. Расходы: строка `trip_expenses`, привязанная к SIM (решение 1)
 
-### 6.1 Рекомендуемый вариант — производный пункт (как страховка и виза)
+### 6.1 Миграция `trip_expenses` (в `ensureJourneyTables`, web/trip_journeys.js)
 
-Правки `trip_journeys.js`:
+```js
+  // Откуда строка расхода (28.09.2026, ADR-233). NULL — внесена руками в шторке «+ Расход».
+  // 'sim' — создана вкладкой «Связь»: source_id = trip_sims.id. Такие строки ведёт владелец —
+  // сумма синхронизируется при правке SIM, строка удаляется вместе с SIM, а в шторке расходов
+  // она только для чтения (иначе сумма разъедется с карточкой SIM).
+  try {
+    const ec = medDb.prepare('PRAGMA table_info(trip_expenses)').all().map(c => c.name);
+    if (!ec.includes('source')) medDb.exec('ALTER TABLE trip_expenses ADD COLUMN source TEXT');
+    if (!ec.includes('source_id')) medDb.exec('ALTER TABLE trip_expenses ADD COLUMN source_id INTEGER');
+    // Одна SIM — не больше одной строки расхода: повторный импорт и гонка двух сохранений упрутся сюда.
+    medDb.exec(`CREATE UNIQUE INDEX IF NOT EXISTS uq_trip_expenses_source ON trip_expenses(profile_id, source, source_id)
+      WHERE source IS NOT NULL`);
+  } catch (e) { console.error('trip_expenses source:', e.message); }
+```
+
+Порядок монтирования: `ensureTripTables` (в `mountTrip`) создаёт `trip_sims` раньше, чем `mountTripJourneys` создаёт
+колонки `trip_expenses`. `syncSimExpense` вызывается только из ручек, то есть после монтирования — гонки на старте нет.
+
+### 6.2 Категория «Связь»
 
 ```diff
 -export const CATS = { transport: 'Транспорт', stay: 'Жильё', food: 'Еда', fun: 'Развлечения', other: 'Прочее' };
@@ -1156,104 +953,297 @@ CSS (в `jr-css`): `#jr .jr-esim svg{width:12px;height:12px;vertical-align:-2px;
 ```
 
 ```diff
- const BANK_CAT = [
-   ['transport', …],
-   ['stay', …],
-   ['food', …],
-+  // Связь (28.09.2026, ADR-233): eSIM, пополнение, роуминг. До «развлечений» и «прочего».
-+  ['comm', /esim|e-sim|сим.?карт|sim.?card|airalo|holafly|yesim|nomad|ubigi|drimsim|роуминг|roaming|мобильн.*связ|сотов|пополнени.*телефон|top.?up|билайн|beeline|мтс|мегафон|megafon|tele2|теле2|\bais\b|dtac|truemove|turkcell|vodafone|orange|etisalat/i],
++  // Связь (ADR-233): SIM/eSIM, пополнение, роуминг. Стоит до «развлечений» и «прочего».
++  ['comm', /esim|e-sim|сим.?карт|sim.?card|airalo|holafly|yesim|nomad|ubigi|drimsim|роуминг|roaming|мобильн.*связ|сотов|пополнени.*телефон|top.?up|билайн|beeline|мтс|мегафон|megafon|tele2|теле2|turkcell|vodafone|etisalat|\bais\b|dtac|truemove/i],
    ['fun', …]
- ];
 ```
 
-`trip-journeys.js:7`:
+`trip-journeys.js:7`: `CAT_COLOR` + `comm: '#a78bfa'`. Чипы в шторке «+ Расход» строятся из `DATA.cats`, поэтому
+«Связь» появится там сама: ручной расход «пополнил Vodafone» тоже можно отнести к «Связи».
 
-```diff
--  const CAT_COLOR = { transport: '#00a0ff', stay: '#34d399', food: '#fbbf24', fun: '#f472b6', other: '#8a8a8a' };
-+  const CAT_COLOR = { transport: '#00a0ff', stay: '#34d399', food: '#fbbf24', comm: '#a78bfa', fun: '#f472b6', other: '#8a8a8a' };
-```
+### 6.3 Синхронизация: `syncSimExpense(profileId, simId)` (trip.js)
 
-(`CAT_COLOR` — литералы и сейчас; перевод палитры на токены — отдельная задача, не в этой правке.)
-
-Как это работает:
-- Сумма eSIM живёт в ОДНОМ месте — `trip_esims.price`. В поездке она появляется пунктом `kind:'esim'`,
-  категория «Связь». Итог поездки, полоса по категориям и «в день» пересчитываются сами.
-- Выписка: пункт проходит через `matchTx()` — оплата картой с той же суммой ±0,5% в окне 60 дней назад
-  получит метку «есть в выписке», и та же операция не придёт второй строкой из остатка выписки.
-- Повторный импорт: `POST /esims` находит близнеца по `booking_no`/`iccid` и дозаполняет его — второй записи нет,
-  значит и второго пункта нет. Уникальные индексы страхуют гонку.
-- Категория «Связь» — просто новый ключ в `CATS`: справочника в `/refs` у трат поездок нет; ручной расход
-  «Пополнил Vodafone» тоже можно отнести в «Связь» через шторку `+ Расход` (чипы берутся из `DATA.cats`).
-- Правка/удаление — только из вкладки eSIM (у пункта нет кнопок «править/удалить», как у страховки).
-
-### 6.2 Вариант из задания — строка `trip_expenses` + `expense_id`
-
-Если Константину важно, чтобы eSIM была именно строкой расходов (править сумму в шторке расхода):
+Функция вызывается внутри транзакции POST и PATCH SIM. Она идемпотентна: сколько ни зови, строка одна.
 
 ```js
-  // trip_journeys.js → ensureJourneyTables: откуда пришла строка расхода
-  const ec = medDb.prepare('PRAGMA table_info(trip_expenses)').all().map(c => c.name);
-  if (!ec.includes('source')) medDb.exec('ALTER TABLE trip_expenses ADD COLUMN source TEXT');
-  if (!ec.includes('source_id')) medDb.exec('ALTER TABLE trip_expenses ADD COLUMN source_id INTEGER');
-  medDb.exec(`CREATE UNIQUE INDEX IF NOT EXISTS uq_trip_expenses_source ON trip_expenses(profile_id, source, source_id)
-    WHERE source IS NOT NULL`);
-  // trip.js → trip_esims: + expense_id INTEGER (миграцией PRAGMA, если таблица уже создана)
+  // Строка расхода SIM (решение 28.09.2026): SIM — владелец, расход — её отражение в тратах.
+  //  • цена есть → upsert строки (category='comm', source='sim', source_id=id), expense_id на SIM;
+  //  • цены нет (стёрли) → строку удалить, expense_id = NULL;
+  //  • оплата баллами (Trip Coins) — тоже трата (решение 3): сумма идёт как есть, способ — в note.
+  // Ключ upsert — уникальный индекс (profile_id, source, source_id): повторный импорт той же брони
+  // попадает в ту же SIM (simTwin) и, значит, в ту же строку расхода.
+  function syncSimExpense(profileId, simId) {
+    const s = medDb.prepare('SELECT * FROM trip_sims WHERE id=? AND profile_id=?').get(simId, profileId);
+    if (!s) return;
+    const amount = s.price != null ? s.price : null, local = s.price_local != null ? s.price_local : null;
+    if (!amount && !local) {
+      medDb.prepare(`DELETE FROM trip_expenses WHERE profile_id=? AND source='sim' AND source_id=?`).run(profileId, simId);
+      if (s.expense_id != null) medDb.prepare('UPDATE trip_sims SET expense_id=NULL WHERE id=?').run(simId);
+      return;
+    }
+    // Дата траты — день покупки: по нему операция сойдётся с выпиской. Нет даты — день подключения/установки/заведения.
+    const spent = s.purchased_on || (s.activated_at || '').slice(0, 10) || s.installed_on || String(s.created_at || '').slice(0, 10) || today();
+    const row = {
+      profile_id: profileId, source: 'sim', source_id: simId, spent_on: spent, category: 'comm',
+      title: (SIM_KIND_RU[s.kind] || 'eSIM') + ' · ' + simLabel(s),
+      amount, currency: amount ? (s.price_currency || 'RUB') : null,
+      amount_local: local, currency_local: local ? s.price_local_currency : null,
+      note: [s.paid_with ? 'оплачено: ' + s.paid_with : '', s.booked_via || ''].filter(Boolean).join(' · ') || null
+    };
+    const cols = Object.keys(row), upd = cols.filter(k => !['profile_id', 'source', 'source_id'].includes(k));
+    medDb.prepare(`INSERT INTO trip_expenses (${cols.join(', ')}) VALUES (${cols.map(() => '?').join(',')})
+      ON CONFLICT(profile_id, source, source_id) WHERE source IS NOT NULL
+      DO UPDATE SET ${upd.map(k => k + '=excluded.' + k).join(', ')}, updated_at=datetime('now')`).run(...cols.map(k => row[k]));
+    const e = medDb.prepare(`SELECT id FROM trip_expenses WHERE profile_id=? AND source='sim' AND source_id=?`).get(profileId, simId);
+    if (e && e.id !== s.expense_id) medDb.prepare('UPDATE trip_sims SET expense_id=? WHERE id=?').run(e.id, simId);
+  }
 ```
 
-После `INSERT`/`UPDATE` eSIM — upsert:
-`INSERT INTO trip_expenses (profile_id, spent_on, category, title, amount, currency, amount_local, currency_local, source, source_id)
- VALUES (…,'comm',…,'esim',:id) ON CONFLICT(profile_id, source, source_id) WHERE source IS NOT NULL DO UPDATE SET …`
-→ `UPDATE trip_esims SET expense_id=?`. На `DELETE` eSIM — удалить строку расхода. В `compute()` пункт `esim`
-НЕ добавлять (иначе двойной счёт), бейдж — оставить.
+`ON CONFLICT … WHERE` для частичного уникального индекса требует SQLite ≥ 3.24 (upsert). Версию SQLite в
+better-sqlite3 на сервере я не проверял; если upsert не пройдёт — заменить на «SELECT по (source, source_id) →
+UPDATE или INSERT» внутри той же транзакции.
 
-Почему не рекомендую: сумма живёт в двух местах; правка суммы в шторке расхода разъедется с карточкой eSIM
-(нужно либо запрещать правку строк `source='esim'`, либо писать обратно); страховки и визы устроены иначе
-(ADR-222), и на обзоре появятся два способа учёта «документных» трат.
+Итог сценариев:
+
+| Сценарий | Что с расходом |
+|---|---|
+| Сохранили SIM с ценой 339,80 RUB, оплата Trip Coins | строка `trip_expenses`: 339,80 RUB, «Связь», note «оплачено: Trip Coins · Trip.com»; `trip_sims.expense_id` = её id |
+| Повторный импорт того же заказа | `simTwin` находит SIM по `booking_no`/`iccid` → дозаполнение → `syncSimExpense` обновляет ту же строку. Второй строки нет: её не пустит и уникальный индекс |
+| Правка цены / валюты / даты покупки / тарифа | та же строка обновляется (сумма, валюта, дата, заголовок) |
+| Цену стёрли | строка удаляется, `expense_id = NULL` |
+| Удалили SIM | строка удаляется в той же транзакции |
+| Строку правят или удаляют в шторке расходов | 409 «Эта трата ведётся во вкладке „Связь“» (§6.4) |
+| Сменили тип SIM ↔ eSIM | обновляется только заголовок строки |
+
+### 6.4 Защита строк `source='sim'` в ручках расходов (trip_journeys.js)
+
+```diff
+   app.patch(P + '/expenses/:id', (req, res) => {
+     const profileId = pid(req, res); if (!profileId) return;
+-    const cur0 = medDb.prepare('SELECT id FROM trip_expenses WHERE id=? AND profile_id=?').get(req.params.id, profileId);
++    const cur0 = medDb.prepare('SELECT id, source FROM trip_expenses WHERE id=? AND profile_id=?').get(req.params.id, profileId);
+     if (!cur0) return res.status(404).json({ ok: false, error: 'расход не найден' });
++    if (cur0.source) return res.status(409).json({ ok: false, error: 'Эта трата ведётся во вкладке «Связь» — правьте там' });
+```
+
+```diff
+   app.delete(P + '/expenses/:id', (req, res) => {
+     const profileId = pid(req, res); if (!profileId) return;
+-    const r = medDb.prepare('DELETE FROM trip_expenses WHERE id=? AND profile_id=?').run(req.params.id, profileId);
++    const r = medDb.prepare('DELETE FROM trip_expenses WHERE id=? AND profile_id=? AND source IS NULL').run(req.params.id, profileId);
+-    if (!r.changes) return res.status(404).json({ ok: false, error: 'расход не найден' });
++    if (!r.changes) return res.status(404).json({ ok: false, error: 'расход не найден или ведётся во вкладке «Связь»' });
+```
+
+`POST /expenses` берёт колонки из списка `COLS`, в котором `source` нет — вручную строку `source='sim'` создать нельзя.
+
+### 6.5 Строка в поездке (`compute()`)
+
+Сейчас ручной расход попадает в поездку, только если `spent_on` в окне поездки (сверка с выпиской ±3 дня). eSIM
+покупают заранее, поэтому для строк `source='sim'` окно шире и сверка с выпиской как у страховки:
+
+```diff
+-      for (const e of manual) if (inWin(e.spent_on)) items.push(item({ kind: 'manual', id: e.id, cat: CATS[e.category] ? e.category : 'other',
+-        title: e.title || CATS[e.category] || 'Расход', note: e.note || '', amount: e.amount, currency: e.currency,
+-        amount_local: e.amount_local, currency_local: e.currency_local }, e.spent_on, 3, 3));
++      for (const e of manual) {
++        // Строка SIM: в поездку — по той же привязке, что бейдж (страна маршрута + окно −30 дней),
++        // сверка с выпиской на 60 дней назад, как у полиса. Ручные — как было.
++        const isSim = e.source === 'sim';
++        if (isSim ? !simTrip.get(e.source_id) || simTrip.get(e.source_id) !== J : !inWin(e.spent_on)) continue;
++        items.push(item({ kind: 'manual', id: e.id, source: e.source || null, cat: CATS[e.category] ? e.category : 'other',
++          title: e.title || CATS[e.category] || 'Расход', note: e.note || '', amount: e.amount, currency: e.currency,
++          amount_local: e.amount_local, currency_local: e.currency_local }, e.spent_on, isSim ? 60 : 3, isSim ? 1 : 3));
++      }
+```
+
+Здесь `simTrip` — `Map(simId → J)`, построенная до цикла тем же подбором, что и бейдж (§5.3). Если SIM не подошла
+ни к одной поездке, её строка расхода в поездку не попадает. Это честно: трата есть, но к поездке не привязана.
+
+На странице (`trip-journeys.js`, `rowHtml`) у строк с `it.source === 'sim'` кнопок «править/удалить» нет. Вместо них
+чип «из „Связи“» (`<button class="jr-chip" data-go="sims">`), тап ведёт на вкладку: `go('sims')`.
+
+```diff
+-    const acts = it.kind === 'manual'
++    const acts = it.kind === 'manual' && it.source
++      ? '<div class="jr-acts"><button data-jgo="sims">во вкладке «Связь»</button></div>'
++      : it.kind === 'manual'
+```
 
 ---
 
-## 7. План правок по файлам
+## 7. Напоминания в Telegram (решение 5)
+
+### 7.1 Найденный механизм
+
+Общего планировщика уведомлений для пациентов нет — каждый модуль держит свой `setInterval`. Ближайший образец —
+`pauseTick` в `web/habits.js:1754-1796`:
+- тик: `setTimeout(tick, 60 000)` + `setInterval(tick, 30 мин)`;
+- тихие часы по МСК (10–22);
+- выборка по флагу `pinged_at IS NULL`, **метка ставится до отправки**: при сбое повтора не будет;
+- адресат: `patient_telegram_links l JOIN patient_accounts a ON a.id=l.account_id WHERE a.profile_id=? AND l.chat_id IS NOT NULL ORDER BY l.consumed_at DESC LIMIT 1`;
+- бот `@Ai_dcf_bot`: токен `TELEGRAM_BOT_TOKEN_AI_DCF` из env или из `/home/cashruflow/mcp-server/.env` (`aiDcfToken()`);
+- для профиля 1 (владелец) запасной канал `TELEGRAM_BOT_TOKEN_CASHRUFLOW` + `TG_CHAT_ID`;
+- отправка — `tgSend()` из `lib/tg.mjs`, который возвращает `null` или строку причины (правило CLAUDE.md).
+
+`aiDcfToken()` уже существует в двух копиях (`habits.js:1755`, `pair.js:360`). Третья копия в `trip.js` —
+вынужденная. Вынос в общий модуль (например, `lib/patient_notify.mjs` с функцией
+`notifyProfile(medDb, profileId, text, opts)`) — отдельная задача: нужна правка `habits.js` и `pair.js`, в эту не
+смешиваю (§10).
+
+### 7.2 Правила отправки
+
+| Событие | Когда | Флаг | Текст |
+|---|---|---|---|
+| Скоро кончится пакет | `activated_at` есть, срок есть, сейчас ≥ `expires − 24 ч` и < `expires` | `notify_pre_sent_at` | «eSIM Египет 2 ГБ/день истекает завтра в 14:10 (по местному). Продление — до 27.11 19:25.» |
+| Пакет кончился | сейчас ≥ `expires` и прошло не больше 12 ч | `notify_end_sent_at` | «eSIM Египет 2 ГБ/день закончилась. Мобильный интернет по ней больше не работает.» |
+| Завтра последний день активации | не активирована, `activate_by − 1 = сегодня` (в поясе SIM) | `notify_actby_pre_sent_at` | «eSIM Египет: активировать нужно до завтра, 26.11.» |
+| Сегодня последний день активации | не активирована, `activate_by = сегодня` | `notify_actby_sent_at` | «eSIM Египет: сегодня последний день активации.» |
+
+- **Тихие часы — по местному времени SIM** (`tz`), а не по МСК: человек в Египте. Отправляем с 09:00 до 22:00 местного.
+  Исключение — «пакет кончился»: он и так ждёт утра, если истёк ночью; окно 12 ч гарантирует, что утром он ещё уйдёт.
+- **Против повторов:** флаг ставится ДО `tgSend` (как `pinged_at`). При смене сроков (`SIM_WHEN` в `simBody`) флаги
+  сбрасываются — продлённая или перезаведённая SIM напомнит заново.
+- **Против лавины при первом выкате:** «кончилась» — только если прошло ≤ 12 ч; «скоро кончится» — только пока не
+  кончилась; события «активировать до» — только в сам день. Старые SIM молчат.
+- **Ошибка отправки** (`tgSend` вернул строку или у профиля нет привязанного Telegram) пишется в `notify_error` и в
+  `console.error`. Флаг остаётся — ретраев нет, как у пауз. На странице у SIM видно «напоминание не ушло: <причина>».
+
+### 7.3 Код тика (trip.js, в конце `mountTrip`)
+
+```js
+  // ---------- напоминания о сроках SIM (28.09.2026, ADR-233) ----------
+  // Образец — pauseTick в habits.js: тик 30 минут, метка ДО отправки, адресат из patient_telegram_links,
+  // бот @Ai_dcf_bot. Тихие часы — по местному времени SIM: человек в Египте, а не в Москве.
+  let AI_DCF_TOKEN = null;   // третья копия (habits.js, pair.js) — вынос в общий модуль отдельной задачей
+  const aiDcfToken = () => {
+    if (AI_DCF_TOKEN != null) return AI_DCF_TOKEN;
+    AI_DCF_TOKEN = (process.env.TELEGRAM_BOT_TOKEN_AI_DCF || '').trim();
+    if (!AI_DCF_TOKEN) {
+      try {
+        const line = fs.readFileSync('/home/cashruflow/mcp-server/.env', 'utf8').split('\n').find(l => l.startsWith('TELEGRAM_BOT_TOKEN_AI_DCF='));
+        AI_DCF_TOKEN = line ? line.split('=').slice(1).join('=').trim().replace(/^["']|["']$/g, '') : '';
+      } catch (e) { AI_DCF_TOKEN = ''; }
+    }
+    return AI_DCF_TOKEN;
+  };
+  async function sendToProfile(profileId, text) {
+    const link = medDb.prepare(`SELECT l.chat_id FROM patient_telegram_links l JOIN patient_accounts a ON a.id=l.account_id
+      WHERE a.profile_id=? AND l.chat_id IS NOT NULL ORDER BY l.consumed_at DESC LIMIT 1`).get(profileId);
+    if (link && aiDcfToken()) return tgSend(aiDcfToken(), link.chat_id, text, { buttons: [[{ text: 'Открыть «Связь»', url: 'https://ai.cashruflow.ru/trip/app' }]] });
+    if (profileId === 1 && process.env.TELEGRAM_BOT_TOKEN_CASHRUFLOW && process.env.TG_CHAT_ID)
+      return tgSend(process.env.TELEGRAM_BOT_TOKEN_CASHRUFLOW.trim(), process.env.TG_CHAT_ID.trim(), text);
+    return 'нет привязанного Telegram у профиля ' + profileId;
+  }
+  let simTickBusy = false;
+  async function simTick() {
+    if (simTickBusy) return;
+    simTickBusy = true;
+    try {
+      const now = Date.now();
+      // Кандидаты: не истёкшие давно. Точные условия — в JS: сроки считаются в поясе SIM.
+      const rows = medDb.prepare(`SELECT * FROM trip_sims WHERE
+        (activated_at IS NOT NULL AND days > 0 AND (notify_pre_sent_at IS NULL OR notify_end_sent_at IS NULL))
+        OR (activated_at IS NULL AND activate_by IS NOT NULL AND (notify_actby_pre_sent_at IS NULL OR notify_actby_sent_at IS NULL))`).all();
+      for (const s of rows) {
+        const tz = simTz(s);
+        const hour = +new Date(now).toLocaleString('en-GB', { timeZone: tz, hour: '2-digit', hour12: false });
+        const day = new Date(now).toLocaleDateString('sv-SE', { timeZone: tz });
+        const name = (SIM_KIND_RU[s.kind] || 'eSIM') + ' ' + simLabel(s);
+        const exp = simExpiresMs(s);
+        let flag = null, text = null;
+        if (exp != null) {
+          const hm = utcToMoment(exp, tz).slice(11, 16);
+          if (!s.notify_end_sent_at && now >= exp && now - exp <= 12 * 3600e3 && hour >= 9 && hour < 22) {
+            flag = 'notify_end_sent_at'; text = name + ' закончилась. Мобильный интернет по ней больше не работает.';
+            // «скоро кончится» после «кончилась» уже не нужно — гасим оба
+            if (!s.notify_pre_sent_at) medDb.prepare(`UPDATE trip_sims SET notify_pre_sent_at=datetime('now') WHERE id=?`).run(s.id);
+          } else if (!s.notify_pre_sent_at && now < exp && exp - now <= 24 * 3600e3 && hour >= 9 && hour < 22) {
+            flag = 'notify_pre_sent_at';
+            text = name + ' истекает ' + (utcToMoment(exp, tz).slice(0, 10) === day ? 'сегодня' : 'завтра') + ' в ' + hm + ' (по местному).'
+              + (s.extend_until ? ' Продлить можно до ' + RU_DT(s.extend_until) + '.' : '');
+          }
+        } else if (!s.activated_at && s.activate_by && hour >= 9 && hour < 22) {
+          if (!s.notify_actby_sent_at && s.activate_by === day) {
+            flag = 'notify_actby_sent_at'; text = name + ': сегодня последний день, когда её можно активировать.';
+            if (!s.notify_actby_pre_sent_at) medDb.prepare(`UPDATE trip_sims SET notify_actby_pre_sent_at=datetime('now') WHERE id=?`).run(s.id);
+          } else if (!s.notify_actby_pre_sent_at && addDays(s.activate_by, -1) === day) {
+            flag = 'notify_actby_pre_sent_at'; text = name + ': активировать нужно до завтра, ' + RU_D(s.activate_by) + '.';
+          }
+        }
+        if (!flag) continue;
+        // Метка ДО отправки — повторного сообщения не будет даже при сбое (как pinged_at у пауз).
+        medDb.prepare(`UPDATE trip_sims SET ${flag}=datetime('now'), notify_error=NULL WHERE id=?`).run(s.id);
+        const err = await sendToProfile(s.profile_id, text);
+        if (err) {
+          medDb.prepare('UPDATE trip_sims SET notify_error=? WHERE id=?').run(String(err).slice(0, 300), s.id);
+          console.error('[trip] напоминание SIM #' + s.id + ':', err);
+        }
+      }
+    } catch (e) { console.error('[trip] simTick:', e.message); }
+    finally { simTickBusy = false; }
+  }
+  setTimeout(simTick, 90 * 1000);
+  setInterval(simTick, 30 * 60 * 1000);
+```
+
+`RU_D` / `RU_DT` — форматирование «26.11» и «27.11 19:25» (две строки, рядом с тиком). `fs` и `tgSend` в `trip.js`:
+`fs` импортирован (стр. 40), `tgSend` — добавить `import { tgSend } from '../lib/tg.mjs';` в шапку.
+
+Флаг `simTickBusy` — чтобы медленный `tgSend` (таймаут 15 с на сообщение) не наложил два тика друг на друга.
+Флаги отправки держат корректность и без него, это страховка.
+
+---
+
+## 8. План правок по файлам
 
 | # | Файл | Правка | Рестарт |
 |---|---|---|---|
-| 1 | `web/trip.js` | `VIA_TABLES` + `trip_esims`; таблица и индексы в `ensureTripTables`; `ESIM_PROMPT`; `lpaParse/lpaBuild/iccidNorm/dataMb/speedKbps/curCode/normMoment`; `momentToUtc/utcToMoment/esimState/esimLabel`; `takeFiles`, `esimTwin`, `esimBody`, `esimView`; ручки `/esims` (GET/POST/PATCH/DELETE), `/esims/:id/secret`, `/esim-scan`; `REF_ACTIVITY` + `esims` (если да); `mountTripJourneys(..., { esimState, esimLabel })` | `pm2 restart web-interface` |
-| 2 | `web/server.js` | `RAW_BODY_RE` → `(scan|esim-scan)`; `encSecret, decSecret` в deps `mountTrip`; `ICONS_V` +1 | да |
-| 3 | `web/trip_journeys.js` | `CATS.comm`; `BANK_CAT` comm; пункт `esim` и `esims` в `compute()` | да |
-| 4 | `web/public/trip.html` | вкладка, `go()`, `paintEsim`, `esimReveal`, `esimQrSvg`, `bindEsimScan`, `localDay`, CSS; `trip-pass.js?v=6`; `trip-journeys.js?v=`+1 | нет (статика) |
-| 5 | `web/public/trip-pass.js` | экспорт `loadQrLib` | нет |
-| 6 | `web/public/trip-journeys.js` | `CAT_COLOR.comm`; бейдж eSIM в `cardHtml`; CSS `.jr-esim` | нет |
-| 7 | `web/public/assets/icons.svg` | `<symbol id="i-sim">` | нет, но `ICONS_V` |
-| 8 | `docs/ADR/ADR-233-trip-esim.md` | черновик §8, затем `node scripts/migrate-ard.js` и `node scripts/validate-ard.js` | — |
-| 9 | `docs/CHANGELOG.md`, VERSION модуля trip (ADR-099) | запись; версию платформы не поднимать без просьбы | — |
+| 1 | `web/trip.js` | `import { tgSend }`; `VIA_TABLES` + `trip_sims`; таблица и индексы в `ensureTripTables`; `SIM_PROMPT`; `DLR`, `lpaParse/lpaBuild/iccidNorm/phoneNorm/dataMb/speedKbps/curCode/normMoment`; `momentToUtc/utcToMoment/simTz/simExpiresMs/simState/simLabel/SIM_KIND_RU`; `SIM_KEY/simSeal/simOpen`; `takeFiles/simTwin/simBody/simView/syncSimExpense`; ручки `/sims` ×4, `/sims/:id/secret`, `/sim-scan`; `simTick`; deps `mountTripJourneys` | `pm2 restart web-interface` |
+| 2 | `web/trip_journeys.js` | миграция `trip_expenses.source/source_id` + уникальный индекс; `CATS.comm`; `BANK_CAT.comm`; защита PATCH/DELETE `/expenses` для строк с `source`; `compute()`: `source` в пункте, особое окно для строк SIM, `sims` в поездке | да |
+| 3 | `web/server.js` | `RAW_BODY_RE` → `(scan\|sim-scan)`; `ICONS_V` +1 | да |
+| 4 | `/home/cashruflow/mcp-server/.env` | `TRIP_SIM_KEY=<32 байта base64>` — **вносит Константин сам**; до этого модуль работает без сохранения кодов | рестарт web-interface |
+| 5 | `web/public/trip.html` | вкладка «Связь», `go()`, `paintSims` с переключателем SIM/eSIM, `simKindSet`, раскрытие кода + QR, `bindSimScan` + `simQrFromFiles`, CSS `.sim-ico/.sim-qr`; `?v=` у `trip-pass.js` и `trip-journeys.js` | статика |
+| 6 | `web/public/trip-pass.js` | экспорт `loadQrLib` | статика |
+| 7 | `web/public/trip-journeys.js` | `CAT_COLOR.comm`; бейдж SIM в `cardHtml`; в `rowHtml` у строк `source` вместо «править/удалить» ссылка во вкладку | статика |
+| 8 | `web/public/assets/icons.svg` | `i-sim`, `i-esim` | через `ICONS_V` |
+| 9 | `web/integrations.js` (по желанию) | `keyCard(... 'TRIP_SIM_KEY' ...)` | да |
+| 10 | `docs/ADR/ADR-233-trip-sims.md` | §9, затем `node scripts/migrate-ard.js` и `node scripts/validate-ard.js` | — |
+| 11 | `docs/CHANGELOG.md`, VERSION модуля trip | запись; версию платформы не поднимать без просьбы | — |
 
-Порядок выката: 1–3 (сервер, `node --check web/trip.js web/trip_journeys.js web/server.js`, рестарт, смотреть `↺`
-в pm2) → проверка `get_api GET /api/profile/me/trip/esims` (пустой список) → 4–7 (статика) → ручной прогон на
-тексте Trip.com из задания (ожидаемо: country «Египет», plan_kind daily, data_mb 2048, throttle 512, days 3,
-day_mode rolling24, smdp smdp.io, iccid 8948010010094791430 luhn:true, booking_no 1539367401113525,
-activate_by 2026-11-26, extend_until 2026-11-27 19:25:38, uses 1, price 339.80 RUB, price_base 357.69,
-discount 17.89, paid_with Trip Coins, booked_via Trip.com, sms/calls 0) → повторный импорт того же текста
-(ожидаемо: `dup_id`, при сохранении `merged:true`) → карточка поездки на «Обзоре» с бейджем.
+Порядок выката и проверка:
+1. Пункты 1–3, затем `node --check web/trip.js web/trip_journeys.js web/server.js`, рестарт, смотреть `↺` в pm2.
+2. `get_api GET /api/profile/me/trip/sims` → `key_ok:false`, пустой список. Сервер жив без ключа — это проверка
+   деградации.
+3. Константин добавляет `TRIP_SIM_KEY`, рестарт → `key_ok:true`.
+4. Прогон текста Trip.com из задания. Ожидаемо: `kind:'esim'`, «Египет», daily, 2048 МБ, 512 кбит/с, 3 дня, rolling24,
+   `smdp.io`, ICCID `8948010010094791430` (Luhn true), заказ `1539367401113525`, `activate_by` 2026-11-26,
+   `extend_until` 2026-11-27 19:25:38, 1 использование, 339.80 RUB, база 357.69, скидка 17.89, Trip Coins, Trip.com.
+5. Сохранить → в `GET /trip/journeys` у подходящей поездки строка «Связь 340 ₽», в `trip_sims.expense_id` — id строки.
+6. Повторить импорт → `dup_id`, при сохранении `merged:true`, строк расхода по-прежнему одна.
+7. Поменять цену → сумма в строке расхода та же, что в SIM. Удалить SIM → строки нет.
+8. Физическая SIM руками (Vodafone, номер, ICCID, 500 EGP) → нет поля кода, бейдж «SIM: …».
+9. Напоминание: тестовой SIM проставить `activated_at` так, чтобы до окончания было меньше 24 ч, в дневное местное
+   время → одно сообщение в Telegram, `notify_pre_sent_at` заполнен; следующий тик ничего не шлёт.
 
-Правила CLAUDE.md, которые правка обязана соблюсти (сверено):
-- прод — только `write_file`/`str_replace`; в `new_str` без `$&`, `` $` ``, `$'`, `$1` — **в этом коде есть `$`
-  внутри LPA-регулярок и строк (`'LPA:1$'`, `/^LPA:1\$…/`)**: безопасно, пока за `$` не идёт `&`, `` ` ``, `'` или
-  цифра. В `'LPA:1$' + p.smdp` за `$` идёт `'` — это **`$'`, опасная пара!** При вставке через `str_replace`
-  переписать как `'LPA:1' + '$' + …` или `'LPA:1$'` и перечитать кусок после правки.
-- `r.ok` проверяется перед `r.json()` — в `bindEsimScan` через `if (!r.ok || d.ok === false)`, как в `bindDocScan`;
-- «Сохранить» не закрывает карточку — форма вкладки инлайновая, как у страховки (закрывать нечего);
-- удаление — существующий `bindRows` (он на `confirm()`; перевод раздела на `uiConfirm` — отдельно, не здесь);
-- ключ дня — локальными полями (`localDay`), момент — `sv-SE` в поясе;
-- приватные данные — замок + пара кнопок «Показать/Скрыть», режим НЕ запоминается (разовый показ в хранилище не
-  пишется, при перерисовке закрыто).
+Правила CLAUDE.md, которые правка соблюдает:
+- знак доллара в строках — только через `DLR`, чтобы `str_replace` не развернул пару «доллар + апостроф»; после каждой
+  правки перечитывать изменённый кусок;
+- `r.ok` проверяется перед данными ответа (так в `bindSimScan` и `send`);
+- у кнопок нет своих стилей, скрытие через `hidden`, переключатель — пара `.btn`/`.tbtn`;
+- ключ дня собирается локальными полями, момент — `sv-SE` в поясе;
+- приватные данные: замок + «Показать/Скрыть», разовый показ в хранилище не пишется;
+- INSERT/UPDATE с длинным списком колонок — через объект и `Object.keys`;
+- Telegram — только через `tgSend`, отказ записывается (`notify_error`), а не глотается.
 
 ---
 
-## 8. Черновик ADR-233
+## 9. Черновик ADR-233
 
 ```markdown
 ---
 id: ADR-233
-title: eSIM в «Путешествиях» — своя таблица, распознавание заказа тремя входами, код активации шифром, траты в «Связь»
+title: «Связь» в «Путешествиях» — SIM и eSIM, распознавание заказа, код активации своим ключом, траты строкой расхода, напоминания в Telegram
 status: proposed
 date: 2026-09-28
 domain: platform
@@ -1261,68 +1251,62 @@ depends_on: [ADR-201, ADR-204, ADR-222]
 related: [ADR-158]
 ---
 
-# ADR-233: eSIM в «Путешествиях» (28.09.2026)
+# ADR-233: «Связь» (SIM / eSIM) в «Путешествиях» (28.09.2026)
 
 ## Контекст
-Туристическая eSIM (Trip.com, Airalo…) — тот же «документ поездки», что полис и виза: у неё есть
-тариф, срок, цена и данные для установки (LPA-строка, ICCID, ссылка на баланс). Держать её в заметках
-неудобно: срок считается не по датам, а по часам от активации (3 дня = 72 ч), код установки — секрет.
+Купленная для поездки сим-карта — физическая или eSIM — это документ поездки, как полис: тариф,
+срок, цена, данные установки. Срок eSIM считается часами от активации (3 дня = 72 ч), код установки
+(LPA) — секрет, а о конце пакета человек узнаёт, когда пропал интернет.
 
 ## Решение
-1. Таблица `trip_esims` (med.sqlite), владелец схемы — `trip.js`. Сущности «поездка» нет — eSIM
-   попадает в поездку при сборке (`trip_journeys.js`) по стране маршрута и дате, как страховка.
-2. Статус (куплена/установлена/активна/истекла) и окончание НЕ хранятся — считает сервер на GET
-   (`esimState`): `activated_at` + days × 24 ч в поясе страны (`rolling24`) или конец календарного дня.
-3. Распознавание — `POST …/trip/esim-scan`: файл, до 5 файлов JSON-ом или вставленный текст, один
-   конвейер с остальными сканами раздела (sniffMime, file_uploads, ai_calls, ai_generations,
-   белый список). LPA из текста дополнительно ловится регуляркой. Ручка идёт мимо глобального
-   express.json (RAW_BODY_RE, как /trip/scan по ADR-204).
-4. Код активации шифруется encSecret (AES-256-GCM, ключ сейфа доступов), в списке — маска,
-   целиком — `GET …/esims/:id/secret` по кнопке. PIN заказа и контакты не распознаются и не хранятся.
-5. Склейка повторного импорта — частичные уникальные индексы (profile_id, booking_no) и
-   (profile_id, iccid); POST с близнецом дозаполняет его.
-6. Траты: новая категория `comm: 'Связь'` в `CATS`; eSIM — производный пункт поездки (как полис
-   и виза, ADR-222), строка в trip_expenses не заводится — сумма живёт в одном месте.
-7. QR установки — из LPA-строки тем же qrcode-gen.js, что у посадочного талона (ADR-158).
+1. Таблица `trip_sims` (med.sqlite, владелец схемы — trip.js), `kind: 'sim' | 'esim'`, вкладка «Связь».
+   У физической SIM нет LPA/SM-DP+/QR, есть номер линии.
+2. Статус и окончание не хранятся — считает сервер (`simState`) в поясе страны.
+3. Распознавание — `POST …/trip/sim-scan`: файл, до 5 файлов или текст, общий конвейер сканов раздела;
+   мимо глобального express.json (RAW_BODY_RE). QR со скрина читает браузер (BarcodeDetector),
+   где его нет — строку LPA вставляют текстом. Новых зависимостей нет.
+4. Код активации — AES-256-GCM ключом `TRIP_SIM_KEY` из окружения (не ключ сейфа доступов). Нет
+   ключа — сервер работает, код не сохраняется и об этом говорится пользователю; открытым текстом
+   код не пишется никогда.
+5. Деньги — строка `trip_expenses` (`category='comm'` «Связь», `source='sim'`, `source_id`),
+   `trip_sims.expense_id`. Владелец — SIM: сумма синхронизируется при правке, строка удаляется с SIM,
+   в шторке расходов она только для чтения. Одна SIM — одна строка (уникальный индекс).
+   Оплата баллами (Trip Coins) — тоже трата, способ оплаты — атрибут.
+6. Повторный импорт склеивается по номеру заказа / ICCID (частичные уникальные индексы).
+7. Напоминания в Telegram (@Ai_dcf_bot, как паузы привычек): за сутки до конца пакета, в момент конца,
+   накануне и в день «активировать до». Флаги `notify_*_sent_at`, метка до отправки, сброс при смене
+   сроков, тихие часы по местному времени SIM.
 
 ## Последствия
-+ Срок eSIM виден «осталось 41 ч», бейдж в карточке поездки, траты на связь отдельной категорией.
-+ Повторная загрузка того же заказа не плодит записи и расходы.
-− Ключ сейфа доступов теперь защищает и данные пациентов: смена ключа ломает расшифровку кодов eSIM.
-− QR-картинку со скрина модель не читает: если LPA есть только картинкой, строку вписывают руками
-  (декодера QR на платформе нет).
++ Срок и «осталось N ч» видны, конец пакета не застаёт врасплох; траты на связь — своя категория.
++ Повторная загрузка заказа не плодит ни записей, ни расходов.
+− Строки расходов впервые получают владельца: правило «строку с source правит только владелец»
+  придётся соблюдать и будущим источникам.
+− Потеря TRIP_SIM_KEY = потеря сохранённых кодов (их надо будет вставить заново).
+− Третья копия aiDcfToken() — нужен общий модуль уведомлений пациенту.
 
 ## Отвергнуто
-- Строка в trip_expenses с expense_id/source='esim' — второй источник суммы (см. проект §6.2).
-- Хранить статус колонкой — разъезжался бы с часами; статус — функция от дат.
-- Хранить код открытым текстом — это ключ установки чужой eSIM.
+- Производный пункт в compute() без строки расхода (как у полиса) — пользователь выбрал строку.
+- Ключ сейфа доступов — одна утечка/смена задевала бы оба контура.
+- jsQR и другие декодеры — новая зависимость ради редкого случая.
 ```
 
 ---
 
-## 9. Открытые вопросы
+## 10. Оставшиеся открытые вопросы
 
-1. **Расход: производный пункт (рекомендую) или строка `trip_expenses` с `expense_id`/`source='esim'`?** (§6)
-2. **Оплата Trip Coins.** Баллы — это деньги? Если заказ оплачен баллами целиком, считать ли 339,80 ₽ тратой
-   поездки (сейчас — да, `price` попадает в итог) или вести `paid_with='Trip Coins'` как «без списания» и не
-   считать? Возможен флаг `paid_points INTEGER`.
-3. **Шифрование ключом сейфа доступов** (`/home/cashruflow/.access_key`) для данных пациентов — ок, или завести
-   отдельный ключ для пациентских секретов? Отдельный — чище (утечка/смена одного не задевает другое).
-4. **Хранить ли ICCID открыто?** Он нужен для ссылки баланса и склейки; сейчас — открыто, в UI маской. Можно
-   хранить хэш для склейки + шифр для показа.
-5. **Контакты (имя/телефон/email) и PIN** — предлагаю НЕ хранить вовсе (по правилам раздела). Нужны хотя бы маски?
-6. **QR на скрине вместо текста.** Декодера на платформе нет. Варианты: `BarcodeDetector` в браузере (Android
-   Chrome — да, iOS Safari — нет) до отправки на сервер; или вендорить `jsQR` (~130 КБ) в `/vendor/`. Нужно?
-7. **Оператор сети** — свободный текст с подсказками (datalist) или справочник `/refs` по стране (правило
-   «выпадающий список — только справочником `/refs`»)? Datalist — это подсказка, а не выпадающий список, но
-   если нужен фильтр/статистика по операторам — справочник.
-8. **Автоотметка в чек-листе** «SIM или eSIM» (`CHECKLIST_SEED`, группа «Деньги и связь») при сохранении eSIM
-   для привязанной поездки — делать?
-9. **Реф-награда**: считать сохранение eSIM «первой записью» Trip-реферала (`REF_ACTIVITY`)?
-10. **Уведомления**: «eSIM истекает через 6 ч» / «активируйте до 26.11» в Telegram (`tgSend`) — нужно? Сейчас
-    только в интерфейсе.
-11. **Перевод `/trip/scan` на общий `takeFiles()`** — отдельной правкой после выката eSIM (регресс-риск для отелей).
-12. `GET …/vendor-stats` (стр. 3629) — не читал целиком: проверить, подхватит ли он `trip_esims` из `VIA_TABLES`
-    сам или нужен явный `esims` + подпись в `KIND` (`trip.html:782`).
-13. `data-pick` / `/pick.js` на `trip.html` — не проверял подключение; у существующих `select` раздела
-    (`#pm-kind`) `data-pick` нет.
+1. **Реф-награда:** считать сохранение SIM «первой записью» Trip-реферала (`REF_ACTIVITY`, `trip.js:1730`)?
+2. **Автоотметка в чек-листе** «SIM или eSIM» (`CHECKLIST_SEED`) при сохранении SIM — делать?
+3. **Оператор** — оставить свободный ввод с подсказками или завести справочник в `/refs` по странам (если нужна
+   статистика по операторам)?
+4. **ICCID и номер телефона** хранятся открыто, в интерфейсе ICCID показан маской. Номер линии показывать целиком?
+5. **Общий модуль уведомлений пациенту** (`aiDcfToken` уже в трёх местах) — вынести отдельной задачей? Создавать её в
+   бэклоге без команды Константина нельзя.
+6. **SIM без поездки:** строка расхода SIM, не подошедшей ни к одной поездке (другая страна, нет билетов), в траты
+   поездок не попадает. Нормально, или показывать такие строки отдельным блоком «Вне поездок»?
+7. **Физическая SIM без срока** (обычный контракт) — нужны ли для неё напоминания о следующем списании / пополнении?
+   Сейчас напоминаний нет, потому что нет `days`.
+8. **Технические проверки до выката** (не делал, только чтение): версия SQLite для `ON CONFLICT … WHERE` (upsert
+   частичного индекса); вызовы `medDb.transaction` в других модулях; подключён ли `/pick.js` на `trip.html`;
+   подхватит ли «Где покупаю» (`/vendor-stats`, `trip.js:3629`) `trip_sims` из `VIA_TABLES` сам.
+9. **Перевод `/trip/scan` на общий `takeFiles()`** — отдельной правкой после выката.
