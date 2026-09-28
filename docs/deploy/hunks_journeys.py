@@ -1,0 +1,136 @@
+H = []
+
+H.append(("""export const CATS = { transport: 'Транспорт', stay: 'Жильё', food: 'Еда', fun: 'Развлечения', other: 'Прочее' };""",
+"""// «Связь» (comm) — 28.09.2026, ADR-233: SIM/eSIM, пополнение, роуминг, регистрация телефона.
+export const CATS = { transport: 'Транспорт', stay: 'Жильё', food: 'Еда', comm: 'Связь', fun: 'Развлечения', other: 'Прочее' };"""))
+
+H.append(("""  ['fun', /развлечен|кино|музе|театр""",
+"""  // Связь (ADR-233): SIM/eSIM, пополнение, роуминг. Раньше «развлечений» и «прочего».
+  ['comm', /esim|e-sim|сим.?карт|sim.?card|airalo|holafly|yesim|ubigi|drimsim|роуминг|roaming|мобильн.{0,6}связ|сотов.{0,6}связ|пополнени.{0,12}телефон|билайн|beeline|мегафон|megafon|tele2|теле2|turkcell|vodafone|etisalat|truemove/i],
+  ['fun', /развлечен|кино|музе|театр"""))
+
+H.append(("""    PRIMARY KEY (profile_id, tx_id)
+  )`);
+}""",
+"""    PRIMARY KEY (profile_id, tx_id)
+  )`);
+  // Откуда строка расхода (28.09.2026, ADR-233). NULL — внесена руками в шторке «+ Расход».
+  // 'sim' — создана вкладкой «Связь» (trip_sims.js): source_id = trip_sims.id. Такую строку ведёт
+  // владелец: сумма синхронизируется при правке SIM, строка удаляется вместе с SIM, а ручки
+  // /expenses её не правят и не удаляют — иначе сумма разъехалась бы с карточкой SIM.
+  try {
+    const ec = medDb.prepare('PRAGMA table_info(trip_expenses)').all().map(c => c.name);
+    if (!ec.includes('source')) medDb.exec('ALTER TABLE trip_expenses ADD COLUMN source TEXT');
+    if (!ec.includes('source_id')) medDb.exec('ALTER TABLE trip_expenses ADD COLUMN source_id INTEGER');
+    // Одна запись-владелец — не больше одной строки расхода.
+    medDb.exec(`CREATE UNIQUE INDEX IF NOT EXISTS uq_trip_expenses_source ON trip_expenses(profile_id, source, source_id)
+      WHERE source IS NOT NULL`);
+  } catch (e) { console.error('trip_expenses source:', e.message); }
+}
+
+// Куда относится SIM (ADR-233). Ручная привязка главнее: trip_manual=1 и trip_leg='none' — вне
+// поездок; trip_leg='f12'/'r5' — поездка, в которой есть это плечо (нет такой — lost_trip).
+// Иначе автоподбор: страна SIM = страна точки маршрута, дата в [начало − 30 дн., конец].
+// Дата SIM — подключение → установка → покупка → заведение.
+export function placeOf(rec, journeys) {
+  if (rec.trip_manual) {
+    if (rec.trip_leg === 'none') return { J: null, reason: 'manual_none' };
+    const J = journeys.find(J => J.legs.some(L => L.type[0] + L.id === rec.trip_leg));
+    return J ? { J, reason: null, manual: true } : { J: null, reason: 'lost_trip' };
+  }
+  if (!rec.country) return { J: null, reason: 'region' };
+  const c = norm(rec.country);
+  const d = [(rec.activated_at || '').slice(0, 10), rec.installed_on, rec.purchased_on, String(rec.created_at || '').slice(0, 10)].find(isDate);
+  const same = journeys.filter(J => J.legs.some(L => norm(L.to.country) === c || norm(L.from.country) === c));
+  if (!same.length) return { J: null, reason: 'no_trip' };
+  const J = d && same.find(J => d <= J.end && dnum(J.start) - dnum(d) <= 30);
+  if (J) return { J, reason: null };
+  const ahead = d ? same.filter(J => d < J.start).map(J => dnum(J.start) - dnum(d)) : [];
+  return { J: null, reason: ahead.length ? 'before_window' : 'no_trip', days_before: ahead.length ? Math.min(...ahead) : null };
+}"""))
+
+H.append(("""  const { pid, airport, tasksDb } = deps;
+  ensureJourneyTables(medDb);""",
+"""  const { pid, airport, tasksDb } = deps;
+  // simState/simLabel приходят из trip_sims.js через trip.js (своей копии логики сроков здесь нет).
+  const simState = deps.simState || null, simLabel = deps.simLabel || (s => s.country || 'SIM');
+  const SIM_RU = deps.simKindRu || { sim: 'SIM', esim: 'eSIM' };
+  ensureJourneyTables(medDb);"""))
+
+H.append(("""    const manual = medDb.prepare('SELECT * FROM trip_expenses WHERE profile_id=? ORDER BY spent_on, id').all(profileId);
+""",
+"""    const manual = medDb.prepare('SELECT * FROM trip_expenses WHERE profile_id=? ORDER BY spent_on, id').all(profileId);
+    // «Связь» (ADR-233): SIM профиля и их место в поездках.
+    let sims = [];
+    try { sims = medDb.prepare('SELECT * FROM trip_sims WHERE profile_id=? ORDER BY id').all(profileId); } catch (e) {}
+    const simPlace = new Map(sims.map(s => [s.id, placeOf(s, journeys)]));
+"""))
+
+H.append(("""      for (const e of manual) if (inWin(e.spent_on)) items.push(item({ kind: 'manual', id: e.id, cat: CATS[e.category] ? e.category : 'other',
+        title: e.title || CATS[e.category] || 'Расход', note: e.note || '', amount: e.amount, currency: e.currency,
+        amount_local: e.amount_local, currency_local: e.currency_local }, e.spent_on, 3, 3));
+      return { J, items };""",
+"""      for (const e of manual) {
+        // Строка SIM: в поездку — по той же привязке, что и бейдж (placeOf), сверка с выпиской
+        // на 60 дней назад, как у полиса: eSIM покупают заранее. Ручные строки — как было.
+        if (e.source === 'sim') {
+          const pl = simPlace.get(e.source_id);
+          if (!pl || pl.J !== J) continue;
+          items.push(item({ kind: 'manual', id: e.id, source: 'sim', source_id: e.source_id, cat: CATS[e.category] ? e.category : 'comm',
+            title: e.title || 'Связь', note: e.note || '', amount: e.amount, currency: e.currency,
+            amount_local: e.amount_local, currency_local: e.currency_local }, e.spent_on, 60, 1));
+          continue;
+        }
+        if (e.source) continue;
+        if (inWin(e.spent_on)) items.push(item({ kind: 'manual', id: e.id, cat: CATS[e.category] ? e.category : 'other',
+          title: e.title || CATS[e.category] || 'Расход', note: e.note || '', amount: e.amount, currency: e.currency,
+          amount_local: e.amount_local, currency_local: e.currency_local }, e.spent_on, 3, 3));
+      }
+      return { J, items };"""))
+
+H.append(("""    const today0 = today();
+    return result.map(({ J, items }) => {""",
+"""    const today0 = today();
+    const simBadge = s => {
+      const st = simState ? simState(s) : {};
+      return { id: s.id, kind: s.kind, kind_ru: SIM_RU[s.kind] || 'eSIM', label: simLabel(s), status: st.status || null,
+        expires_at: st.expires_at || null, activate_by: s.activate_by || null, manual: !!s.trip_manual };
+    };
+    // «Вне поездок» (ADR-233): SIM, не попавшие ни в одну поездку, — с причиной и суммой строки расхода.
+    const outside = sims.filter(s => !simPlace.get(s.id).J).map(s => {
+      const pl = simPlace.get(s.id), e = manual.find(x => x.source === 'sim' && x.source_id === s.id);
+      return Object.assign(simBadge(s), { country: s.country || s.region || '', reason: pl.reason, days_before: pl.days_before ?? null,
+        expense_id: e ? e.id : null, amount: e ? e.amount : null, currency: e ? e.currency : null, spent_on: e ? e.spent_on : null });
+    });
+    const list = result.map(({ J, items }) => {"""))
+
+H.append(("""        totals: { rub: Math.round(rub), by, other, per_day: days > 0 ? Math.round(rub / days) : null },
+        items
+      };
+    }).reverse();
+  }""",
+"""        totals: { rub: Math.round(rub), by, other, per_day: days > 0 ? Math.round(rub / days) : null },
+        items,
+        // Плечо-якорь для ручной привязки SIM к этой поездке (trip_leg).
+        leg: J.legs[0].type[0] + J.legs[0].id,
+        sims: sims.filter(s => simPlace.get(s.id).J === J).map(simBadge)
+      };
+    }).reverse();
+    return { list, outside };
+  }"""))
+
+H.append(("""      res.json({ ok: true, has_bank: hasBank(profileId), cats: CATS, journeys: compute(profileId) });""",
+"""      const c = compute(profileId);
+      res.json({ ok: true, has_bank: hasBank(profileId), cats: CATS, journeys: c.list, outside: c.outside });"""))
+
+H.append(("""    const cur0 = medDb.prepare('SELECT id FROM trip_expenses WHERE id=? AND profile_id=?').get(req.params.id, profileId);
+    if (!cur0) return res.status(404).json({ ok: false, error: 'расход не найден' });""",
+"""    const cur0 = medDb.prepare('SELECT id, source FROM trip_expenses WHERE id=? AND profile_id=?').get(req.params.id, profileId);
+    if (!cur0) return res.status(404).json({ ok: false, error: 'расход не найден' });
+    // Строку с владельцем (source) ведёт владелец — здесь её не правим (ADR-233).
+    if (cur0.source) return res.status(409).json({ ok: false, error: 'Эта трата ведётся во вкладке «Связь» — правьте там' });"""))
+
+H.append(("""    const r = medDb.prepare('DELETE FROM trip_expenses WHERE id=? AND profile_id=?').run(req.params.id, profileId);
+    if (!r.changes) return res.status(404).json({ ok: false, error: 'расход не найден' });""",
+"""    const r = medDb.prepare('DELETE FROM trip_expenses WHERE id=? AND profile_id=? AND source IS NULL').run(req.params.id, profileId);
+    if (!r.changes) return res.status(404).json({ ok: false, error: 'расход не найден или ведётся во вкладке «Связь»' });"""))
