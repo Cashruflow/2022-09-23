@@ -23,6 +23,9 @@ H.append(("""    PRIMARY KEY (profile_id, tx_id)
     const ec = medDb.prepare('PRAGMA table_info(trip_expenses)').all().map(c => c.name);
     if (!ec.includes('source')) medDb.exec('ALTER TABLE trip_expenses ADD COLUMN source TEXT');
     if (!ec.includes('source_id')) medDb.exec('ALTER TABLE trip_expenses ADD COLUMN source_id INTEGER');
+    // Чем оплачено (pay_sources.js): способ оплаты и сколько его единиц списано (для остатка).
+    if (!ec.includes('pay_source_id')) medDb.exec('ALTER TABLE trip_expenses ADD COLUMN pay_source_id INTEGER');
+    if (!ec.includes('pay_units')) medDb.exec('ALTER TABLE trip_expenses ADD COLUMN pay_units REAL');
     // Одна запись-владелец — не больше одной строки расхода.
     medDb.exec(`CREATE UNIQUE INDEX IF NOT EXISTS uq_trip_expenses_source ON trip_expenses(profile_id, source, source_id)
       WHERE source IS NOT NULL`);
@@ -145,3 +148,55 @@ H.append(("""    const r = medDb.prepare('DELETE FROM trip_expenses WHERE id=? A
     if (!r.changes) return res.status(404).json({ ok: false, error: 'расход не найден' });""",
 """    const r = medDb.prepare('DELETE FROM trip_expenses WHERE id=? AND profile_id=? AND source IS NULL').run(req.params.id, profileId);
     if (!r.changes) return res.status(404).json({ ok: false, error: 'расход не найден или ведётся во вкладке eSIM' });"""))
+
+# --- способы оплаты в ручных расходах (шестой круг) ---
+H.append(("""const today = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Moscow' });""",
+"""import { paySourceOf, payUnits } from './pay_sources.js';
+
+const today = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Moscow' });"""))
+H.append(("""  function expenseBody(b) {
+    const spent = String(b.spent_on || '').slice(0, 10);
+    if (!isDate(spent)) return { err: 'нужна дата расхода' };
+    const amount = num(b.amount), local = num(b.amount_local);
+    if (!amount && !local) return { err: 'нужна сумма' };
+    return { row: {
+      spent_on: spent, category: CATS[b.category] ? b.category : 'other', title: txt(b.title, 120),
+      amount, currency: amount ? (cur(b.currency) || 'RUB') : null,
+      amount_local: local, currency_local: local ? cur(b.currency_local) : null, note: txt(b.note, 300)
+    } };
+  }
+  const COLS = ['spent_on', 'category', 'title', 'amount', 'currency', 'amount_local', 'currency_local', 'note'];""",
+"""  function expenseBody(b, profileId) {
+    const spent = String(b.spent_on || '').slice(0, 10);
+    if (!isDate(spent)) return { err: 'нужна дата расхода' };
+    const amount = num(b.amount), local = num(b.amount_local);
+    if (!amount && !local) return { err: 'нужна сумма' };
+    const currency = amount ? (cur(b.currency) || 'RUB') : null, currency_local = local ? cur(b.currency_local) : null;
+    // Чем оплачено (pay_sources.js). Единицы: вписанные руками главнее, иначе пересчёт по курсу способа.
+    let pay_source_id = null, pay_units = null;
+    if (b.pay_source_id != null && b.pay_source_id !== '') {
+      const src = paySourceOf(medDb, profileId, b.pay_source_id);
+      if (!src) return { err: 'способ оплаты не найден' };
+      pay_source_id = src.id;
+      pay_units = num(b.pay_units) ?? payUnits(src, amount || local, amount ? currency : currency_local);
+    }
+    return { row: {
+      spent_on: spent, category: CATS[b.category] ? b.category : 'other', title: txt(b.title, 120),
+      amount, currency, amount_local: local, currency_local, note: txt(b.note, 300), pay_source_id, pay_units
+    } };
+  }
+  const COLS = ['spent_on', 'category', 'title', 'amount', 'currency', 'amount_local', 'currency_local', 'note', 'pay_source_id', 'pay_units'];"""))
+H.append(("""    const { err, row } = expenseBody(req.body || {});
+    if (err) return res.status(400).json({ ok: false, error: err });
+    try {
+      const r = medDb.prepare(""","""    const { err, row } = expenseBody(req.body || {}, profileId);
+    if (err) return res.status(400).json({ ok: false, error: err });
+    try {
+      const r = medDb.prepare("""))
+H.append(("""    const { err, row } = expenseBody(req.body || {});
+    if (err) return res.status(400).json({ ok: false, error: err });
+    try {
+      medDb.prepare(`UPDATE""","""    const { err, row } = expenseBody(req.body || {}, profileId);
+    if (err) return res.status(400).json({ ok: false, error: err });
+    try {
+      medDb.prepare(`UPDATE"""))

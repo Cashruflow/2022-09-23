@@ -19,12 +19,12 @@
 // распознавание тем же конвейером, что заказ SIM (ask/parseJson/журналы), IMEI проверяется по Луну,
 // IMEISV (16 цифр) переводится в IMEI (14 цифр + контрольная).
 
-import express from "express";
+const express = { raw: () => (q, r, n) => { const ch=[]; q.on("data",c=>ch.push(c)); q.on("end",()=>{ q.body=Buffer.concat(ch); n(); }); } };
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
-import { tgSend } from "../lib/tg.mjs";
-import { simKeyring, maskDigits, curCode } from "./trip_sims.js";
+import { tgSend } from "./stub.mjs";
+import { simKeyring, maskDigits, curCode } from "./trip_sims_test.js";
 import { paySourceOf, payUnits } from "./pay_sources.js";
 
 // ---------- схема ----------

@@ -30,11 +30,11 @@
 // пакета, в момент конца, за remind_days до «активировать до» и в этот день. Флаги *_sent_at
 // ставятся ДО отправки — повторов нет даже при сбое. Физическая SIM без срока — без напоминаний.
 
-import express from "express";
+const express = { raw: () => (q, r, n) => { const ch=[]; q.on("data",c=>ch.push(c)); q.on("end",()=>{ q.body=Buffer.concat(ch); n(); }); } };
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
-import { tgSend } from "../lib/tg.mjs";
+import { tgSend } from "./stub.mjs";
 import { paySourceOf, payUnits } from "./pay_sources.js";
 
 // Знак доллара константой: литерал рядом с кавычкой ломает правку через str_replace (CLAUDE.md).
