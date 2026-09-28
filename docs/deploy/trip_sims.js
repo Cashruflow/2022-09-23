@@ -1,4 +1,5 @@
-// «Связь» в «Путешествиях» (28.09.2026, ADR-233): купленные SIM и eSIM для поездки.
+// Вкладка «eSIM» в «Путешествиях» (28.09.2026, ADR-233): купленные SIM и eSIM для поездки.
+// Категория расхода при этом называется «Связь» (comm) — вкладка и категория разные вещи.
 //
 // ТАБЛИЦА trip_sims (med.sqlite), владелец схемы — этот модуль. kind — 'esim' | 'sim'.
 // У физической SIM нет кода активации: LPA-колонки сервер для неё обнуляет.
@@ -15,8 +16,13 @@
 // SIM: окончание = активация + days × 24 ч (rolling24) или конец календарного дня (calendar).
 //
 // ДЕНЬГИ. Цена SIM — СТРОКА trip_expenses (category='comm' «Связь», source='sim', source_id=id).
-// SIM — владелец: строка создаётся/обновляется при каждом сохранении SIM (syncSimExpense),
-// удаляется вместе с SIM, в ручках /expenses она только для чтения (trip_journeys.js).
+// SIM — владелец: строка создаётся/обновляется при каждом сохранении SIM (syncSimExpense), в ручках
+// /expenses она только для чтения (trip_journeys.js).
+// УДАЛЕНИЕ SIM НЕ УДАЛЯЕТ РАСХОД (решение 28.09.2026): деньги уже потрачены. Строка отвязывается
+// (source/source_id = NULL, в note пометка) и становится обычной редактируемой тратой.
+// СТЁРЛИ ЦЕНУ у живой SIM — строка удаляется: это правка данных записи («цена была указана
+// ошибочно / неизвестна»), а не отказ от покупки; оставленная строка держала бы сумму, которой
+// в карточке SIM больше нет, — второй источник правды. Вернули цену — строка появится снова.
 // Upsert — обычным SELECT → UPDATE/INSERT в транзакции, без ON CONFLICT … WHERE.
 // Оплата баллами (Trip Coins) — тоже трата (решение Константина 28.09.2026).
 //
@@ -164,6 +170,51 @@ export function maskPhone(s) {
   return "+" + cc + " " + nat.slice(0, 3) + " " + "*".repeat(nat.length - 7) + "-" + tail.slice(0, 2) + "-" + tail.slice(2);
 }
 
+// ---------- ключ TRIP_SIM_KEY: один на модули SIM и устройств ----------
+// Хранение — AES-256-GCM (формат v1:iv:tag:ct, случайный IV на каждую запись). Поиск дублей —
+// HMAC-SHA256 ОТДЕЛЬНЫМ ключом, выведенным из TRIP_SIM_KEY через HKDF с меткой назначения: один
+// ключ на шифр и на отпечатки не делим. Хеш с солью и bcrypt не годятся: значения нужно
+// показывать целиком, а у IMEI ~10^6 вариантов на модель — перебирается и через bcrypt (§15.6).
+// Нет ключа (или он не 32 байта) — ok:false, seal/hmac отдают null: сервер работает, секреты
+// просто не сохраняются. Ключ читается один раз на процесс.
+let KEYRING = null;
+export function simKeyring() {
+  if (KEYRING) return KEYRING;
+  const raw = String(process.env.TRIP_SIM_KEY || "").trim();
+  let key = null;
+  if (!raw) console.error("[trip] TRIP_SIM_KEY не задан — коды eSIM и идентификаторы устройств сохраняться не будут");
+  else {
+    const k = Buffer.from(raw, "base64");
+    if (k.length !== 32) console.error("[trip] TRIP_SIM_KEY: нужно 32 байта в base64, получено " + k.length);
+    else key = k;
+  }
+  const dupKey = key ? Buffer.from(crypto.hkdfSync("sha256", key, Buffer.alloc(0), "trip-sim/device-dedupe/v1", 32)) : null;
+  KEYRING = {
+    ok: !!key,
+    seal(txt) {
+      if (!key || txt == null || txt === "") return null;
+      const iv = crypto.randomBytes(12);
+      const c = crypto.createCipheriv("aes-256-gcm", key, iv);
+      const ct = Buffer.concat([c.update(String(txt), "utf8"), c.final()]);
+      return ["v1", iv.toString("hex"), c.getAuthTag().toString("hex"), ct.toString("hex")].join(":");
+    },
+    open(blob) {
+      if (!key || !blob) return null;
+      try {
+        const [v, iv, tag, ct] = String(blob).split(":");
+        if (v !== "v1") return null;
+        const d = crypto.createDecipheriv("aes-256-gcm", key, Buffer.from(iv, "hex"));
+        d.setAuthTag(Buffer.from(tag, "hex"));
+        return Buffer.concat([d.update(Buffer.from(ct, "hex")), d.final()]).toString("utf8");
+      } catch (e) { return null; }
+    },
+    hmac(value) { return dupKey && value ? crypto.createHmac("sha256", dupKey).update(String(value)).digest("hex") : null; }
+  };
+  return KEYRING;
+}
+// Только для тестов: перечитать ключ из окружения.
+export function _resetKeyring() { KEYRING = null; }
+
 // ---------- промт распознавания ----------
 const SIM_PROMPT = `Ты извлекаешь данные о купленной сим-карте для поездки — физической SIM или eSIM — из
 подтверждения заказа (скриншоты, PDF, текст письма) или фото упаковки/карточки SIM. Экранов может быть
@@ -220,31 +271,11 @@ export function mountTripSims(app, medDb, deps) {
   const dnum = s => Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10)) / 86400000;
   const todayMsk = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Moscow" });
 
-  // ---------- шифр кода активации: свой ключ модуля, не ключ сейфа доступов ----------
-  const SIM_KEY = (() => {
-    const raw = String(process.env.TRIP_SIM_KEY || "").trim();
-    if (!raw) { console.error("[trip] TRIP_SIM_KEY не задан — коды активации eSIM сохраняться не будут"); return null; }
-    const k = Buffer.from(raw, "base64");
-    if (k.length !== 32) { console.error("[trip] TRIP_SIM_KEY: нужно 32 байта в base64, получено " + k.length); return null; }
-    return k;
-  })();
-  function simSeal(txt) {
-    if (!SIM_KEY || !txt) return null;
-    const iv = crypto.randomBytes(12);
-    const c = crypto.createCipheriv("aes-256-gcm", SIM_KEY, iv);
-    const ct = Buffer.concat([c.update(String(txt), "utf8"), c.final()]);
-    return ["v1", iv.toString("hex"), c.getAuthTag().toString("hex"), ct.toString("hex")].join(":");
-  }
-  function simOpen(blob) {
-    if (!SIM_KEY || !blob) return null;
-    try {
-      const [v, iv, tag, ct] = String(blob).split(":");
-      if (v !== "v1") return null;
-      const d = crypto.createDecipheriv("aes-256-gcm", SIM_KEY, Buffer.from(iv, "hex"));
-      d.setAuthTag(Buffer.from(tag, "hex"));
-      return Buffer.concat([d.update(Buffer.from(ct, "hex")), d.final()]).toString("utf8");
-    } catch (e) { return null; }
-  }
+  // ---------- шифр кода активации: свой ключ модуля (TRIP_SIM_KEY), не ключ сейфа доступов ----------
+  const KR = simKeyring();
+  const SIM_KEY = KR.ok;
+  const simSeal = txt => KR.seal(txt);
+  const simOpen = blob => KR.open(blob);
 
   // ---------- сроки и статус ----------
   function momentToUtc(moment, tz) {
@@ -410,6 +441,27 @@ export function mountTripSims(app, medDb, deps) {
         out.trip_leg = v; out.trip_manual = 1;
       }
     } else { out.trip_leg = b.trip_leg ?? null; out.trip_manual = b.trip_manual ?? 0; }
+    // Оператор из справочника (этап 2, trip_operators): имя подставляется из справочника.
+    if (has("operator_id")) {
+      const v = body.operator_id == null || body.operator_id === "" ? null : parseInt(body.operator_id, 10);
+      if (v != null) {
+        let op = null;
+        try { op = medDb.prepare("SELECT name FROM trip_operators WHERE id=?").get(v); } catch (e) {}
+        if (!op) return err("bad_operator", "Оператор не найден в справочнике");
+        if (!has("operator") || !out.operator) { out.operator = op.name; out.operator_src = "manual"; }
+      }
+      out.operator_id = v;
+    } else out.operator_id = b.operator_id ?? null;
+    // В каком телефоне SIM (этап 2, trip_devices). Чужое устройство не привязать.
+    if (has("device_id")) {
+      const v = body.device_id == null || body.device_id === "" ? null : parseInt(body.device_id, 10);
+      if (v != null) {
+        let ok = null;
+        try { ok = medDb.prepare("SELECT 1 FROM trip_devices WHERE id=? AND profile_id=?").get(v, profileId); } catch (e) {}
+        if (!ok) return err("bad_device", "Устройство не найдено");
+      }
+      out.device_id = v;
+    } else out.device_id = b.device_id ?? null;
     if (has("booked_via")) out.booked_via = vendorResolve(medDb, body.booked_via) || null;
     else out.booked_via = b.booked_via ?? null;
     // Код активации — только у eSIM. Физическая SIM: все LPA-колонки обнуляются.
@@ -536,11 +588,14 @@ export function mountTripSims(app, medDb, deps) {
       const cur = medDb.prepare("SELECT id FROM trip_sims WHERE id=? AND profile_id=?").get(req.params.id, profileId);
       if (!cur) return res.status(404).json({ ok: false, error: "not_found" });
       medDb.transaction(() => {
-        // Строка расхода живёт ровно столько, сколько SIM: удаляем обе одной транзакцией.
-        medDb.prepare("DELETE FROM trip_expenses WHERE profile_id=? AND source='sim' AND source_id=?").run(profileId, cur.id);
+        // Покупка остаётся покупкой: строку расхода НЕ удаляем, а отвязываем — дальше это обычная
+        // трата, её можно править и удалить в «+ Расход».
+        medDb.prepare(`UPDATE trip_expenses SET source=NULL, source_id=NULL,
+          note=TRIM(COALESCE(note,'') || CASE WHEN COALESCE(note,'')='' THEN '' ELSE ' · ' END || 'запись SIM удалена'),
+          updated_at=datetime('now') WHERE profile_id=? AND source='sim' AND source_id=?`).run(profileId, cur.id);
         medDb.prepare("DELETE FROM trip_sims WHERE id=?").run(cur.id);
       })();
-      res.json({ ok: true });
+      res.json({ ok: true, expense_kept: true });
     } catch (e) { res.status(500).json({ ok: false, error: e.message }); }
   });
 
@@ -693,7 +748,7 @@ export function mountTripSims(app, medDb, deps) {
   async function sendToProfile(profileId, text) {
     const link = medDb.prepare(`SELECT l.chat_id FROM patient_telegram_links l JOIN patient_accounts a ON a.id=l.account_id
       WHERE a.profile_id=? AND l.chat_id IS NOT NULL ORDER BY l.consumed_at DESC LIMIT 1`).get(profileId);
-    if (link && aiDcfToken()) return tgSend(aiDcfToken(), link.chat_id, text, { buttons: [[{ text: "Открыть «Связь»", url: "https://ai.cashruflow.ru/trip/app" }]] });
+    if (link && aiDcfToken()) return tgSend(aiDcfToken(), link.chat_id, text, { buttons: [[{ text: "Открыть eSIM", url: "https://ai.cashruflow.ru/trip/app" }]] });
     if (profileId === 1 && process.env.TELEGRAM_BOT_TOKEN_CASHRUFLOW && process.env.TG_CHAT_ID)
       return tgSend(process.env.TELEGRAM_BOT_TOKEN_CASHRUFLOW.trim(), process.env.TG_CHAT_ID.trim(), text);
     return "нет привязанного Telegram у профиля " + profileId;

@@ -15,9 +15,10 @@ H.append(("""    PRIMARY KEY (profile_id, tx_id)
 """    PRIMARY KEY (profile_id, tx_id)
   )`);
   // Откуда строка расхода (28.09.2026, ADR-233). NULL — внесена руками в шторке «+ Расход».
-  // 'sim' — создана вкладкой «Связь» (trip_sims.js): source_id = trip_sims.id. Такую строку ведёт
-  // владелец: сумма синхронизируется при правке SIM, строка удаляется вместе с SIM, а ручки
-  // /expenses её не правят и не удаляют — иначе сумма разъехалась бы с карточкой SIM.
+  // 'sim' — создана вкладкой eSIM (trip_sims.js): source_id = trip_sims.id; 'imei_reg' — регистрация
+  // телефона в стране (trip_devices.js). Такую строку ведёт владелец: сумма синхронизируется при
+  // правке записи, ручки /expenses её не правят и не удаляют. Удалили запись-владельца — строка
+  // ОТВЯЗЫВАЕТСЯ (source=NULL) и дальше живёт обычной тратой: деньги уже потрачены.
   try {
     const ec = medDb.prepare('PRAGMA table_info(trip_expenses)').all().map(c => c.name);
     if (!ec.includes('source')) medDb.exec('ALTER TABLE trip_expenses ADD COLUMN source TEXT');
@@ -60,10 +61,14 @@ H.append(("""  const { pid, airport, tasksDb } = deps;
 H.append(("""    const manual = medDb.prepare('SELECT * FROM trip_expenses WHERE profile_id=? ORDER BY spent_on, id').all(profileId);
 """,
 """    const manual = medDb.prepare('SELECT * FROM trip_expenses WHERE profile_id=? ORDER BY spent_on, id').all(profileId);
-    // «Связь» (ADR-233): SIM профиля и их место в поездках.
-    let sims = [];
+    // Записи-владельцы строк расходов (ADR-233): SIM (trip_sims) и регистрации телефона в стране
+    // (trip_imei_regs), и их место в поездках. Таблиц может ещё не быть — тогда пусто.
+    let sims = [], regs = [];
     try { sims = medDb.prepare('SELECT * FROM trip_sims WHERE profile_id=? ORDER BY id').all(profileId); } catch (e) {}
+    try { regs = medDb.prepare('SELECT * FROM trip_imei_regs WHERE profile_id=? ORDER BY id').all(profileId); } catch (e) {}
     const simPlace = new Map(sims.map(s => [s.id, placeOf(s, journeys)]));
+    const regPlace = new Map(regs.map(r => [r.id, placeOf(Object.assign({}, r, { purchased_on: r.reg_on }), journeys)]));
+    const ownerPlace = e => e.source === 'sim' ? simPlace.get(e.source_id) : e.source === 'imei_reg' ? regPlace.get(e.source_id) : null;
 """))
 
 H.append(("""      for (const e of manual) if (inWin(e.spent_on)) items.push(item({ kind: 'manual', id: e.id, cat: CATS[e.category] ? e.category : 'other',
@@ -73,10 +78,10 @@ H.append(("""      for (const e of manual) if (inWin(e.spent_on)) items.push(ite
 """      for (const e of manual) {
         // Строка SIM: в поездку — по той же привязке, что и бейдж (placeOf), сверка с выпиской
         // на 60 дней назад, как у полиса: eSIM покупают заранее. Ручные строки — как было.
-        if (e.source === 'sim') {
-          const pl = simPlace.get(e.source_id);
+        if (e.source === 'sim' || e.source === 'imei_reg') {
+          const pl = ownerPlace(e);
           if (!pl || pl.J !== J) continue;
-          items.push(item({ kind: 'manual', id: e.id, source: 'sim', source_id: e.source_id, cat: CATS[e.category] ? e.category : 'comm',
+          items.push(item({ kind: 'manual', id: e.id, source: e.source, source_id: e.source_id, cat: CATS[e.category] ? e.category : 'comm',
             title: e.title || 'Связь', note: e.note || '', amount: e.amount, currency: e.currency,
             amount_local: e.amount_local, currency_local: e.currency_local }, e.spent_on, 60, 1));
           continue;
@@ -97,11 +102,17 @@ H.append(("""    const today0 = today();
         expires_at: st.expires_at || null, activate_by: s.activate_by || null, manual: !!s.trip_manual };
     };
     // «Вне поездок» (ADR-233): SIM, не попавшие ни в одну поездку, — с причиной и суммой строки расхода.
+    const expOf = (src, id) => manual.find(x => x.source === src && x.source_id === id);
     const outside = sims.filter(s => !simPlace.get(s.id).J).map(s => {
-      const pl = simPlace.get(s.id), e = manual.find(x => x.source === 'sim' && x.source_id === s.id);
-      return Object.assign(simBadge(s), { country: s.country || s.region || '', reason: pl.reason, days_before: pl.days_before ?? null,
+      const pl = simPlace.get(s.id), e = expOf('sim', s.id);
+      return Object.assign(simBadge(s), { owner: 'sim', country: s.country || s.region || '', reason: pl.reason, days_before: pl.days_before ?? null,
         expense_id: e ? e.id : null, amount: e ? e.amount : null, currency: e ? e.currency : null, spent_on: e ? e.spent_on : null });
-    });
+    }).concat(regs.filter(r => !regPlace.get(r.id).J).map(r => {
+      const pl = regPlace.get(r.id), e = expOf('imei_reg', r.id);
+      return { owner: 'imei_reg', id: r.id, kind_ru: 'Регистрация телефона', label: 'Регистрация телефона · ' + r.country,
+        country: r.country, reason: pl.reason, days_before: pl.days_before ?? null, manual: !!r.trip_manual,
+        expense_id: e ? e.id : null, amount: e ? e.amount : null, currency: e ? e.currency : null, spent_on: e ? e.spent_on : null };
+    }));
     const list = result.map(({ J, items }) => {"""))
 
 H.append(("""        totals: { rub: Math.round(rub), by, other, per_day: days > 0 ? Math.round(rub / days) : null },
@@ -128,9 +139,9 @@ H.append(("""    const cur0 = medDb.prepare('SELECT id FROM trip_expenses WHERE 
 """    const cur0 = medDb.prepare('SELECT id, source FROM trip_expenses WHERE id=? AND profile_id=?').get(req.params.id, profileId);
     if (!cur0) return res.status(404).json({ ok: false, error: 'расход не найден' });
     // Строку с владельцем (source) ведёт владелец — здесь её не правим (ADR-233).
-    if (cur0.source) return res.status(409).json({ ok: false, error: 'Эта трата ведётся во вкладке «Связь» — правьте там' });"""))
+    if (cur0.source) return res.status(409).json({ ok: false, error: 'Эта трата ведётся во вкладке eSIM — правьте там' });"""))
 
 H.append(("""    const r = medDb.prepare('DELETE FROM trip_expenses WHERE id=? AND profile_id=?').run(req.params.id, profileId);
     if (!r.changes) return res.status(404).json({ ok: false, error: 'расход не найден' });""",
 """    const r = medDb.prepare('DELETE FROM trip_expenses WHERE id=? AND profile_id=? AND source IS NULL').run(req.params.id, profileId);
-    if (!r.changes) return res.status(404).json({ ok: false, error: 'расход не найден или ведётся во вкладке «Связь»' });"""))
+    if (!r.changes) return res.status(404).json({ ok: false, error: 'расход не найден или ведётся во вкладке eSIM' });"""))

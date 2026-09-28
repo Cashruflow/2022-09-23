@@ -70,7 +70,8 @@ r = await call('POST', '/sims', { kind: 'sim', country: 'Турция', operator
 console.log('physical', r[0], r[1].sim && [r[1].sim.kind, r[1].sim.smdp, r[1].sim.has_code, r[1].sim.roaming]);
 r = await call('GET', '/journeys'); console.log('outside no_trip', JSON.stringify(r[1].outside.map(o => [o.kind_ru, o.reason, o.amount, o.currency])));
 r = await call('PATCH', '/sims/' + r[1].outside[0].id, { price: '' }); console.log('price cleared rows', db.prepare("SELECT COUNT(*) n FROM trip_expenses WHERE source_id=?").get(r[1].sim.id).n, r[1].sim.expense_id);
-r = await call('DELETE', '/sims/' + id); console.log('delete sim', r[0], db.prepare('SELECT COUNT(*) n FROM trip_expenses').get().n);
+r = await call('DELETE', '/sims/' + id); console.log('delete sim', r[0], r[1].expense_kept, JSON.stringify(db.prepare('SELECT id, amount, source, source_id, note FROM trip_expenses').all()));
+r = await call('PATCH', '/expenses/' + eid, { spent_on: '2026-10-01', amount: 350, category: 'comm', title: 'eSIM Египет' }); console.log('detached row editable', r[0], r[1].expense && r[1].expense.amount);
 r = await call('POST', '/sims', { country: '' }); console.log('empty', r[0], r[1].error);
 r = await call('POST', '/sims', { country: 'X', iccid: '123' }); console.log('bad iccid', r[0], r[1].error);
 r = await call('POST', '/expenses', { spent_on: '2026-10-03', amount: 100, category: 'comm', title: 'Пополнил' }); console.log('manual comm', r[0]);
