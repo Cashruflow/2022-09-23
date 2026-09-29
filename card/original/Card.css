@@ -1,0 +1,155 @@
+/* Оригинал из карусели frontendjoe «React Cards Part 09» — распознан со скриншотов как есть. */
+
+.card {
+  --color-primary: #1a73e8;
+  --color-muted: #5f6368;
+  --color-highlight: #f1f3f4;
+  --border: 1px solid #dadce0;
+
+  position: relative;
+  border-radius: 24px;
+  width: clamp(200px, 80vw, 500px);
+  padding-top: 30px;
+  color: #202124;
+  background: #ffffff;
+  border: var(--border);
+  box-shadow: 0 1px 3px rgb(60 64 67 / 15%);
+}
+
+.card > img {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% -50%;
+  width: 92px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: #ffffff;
+  padding: 20px;
+  border: 3px solid var(--color-highlight);
+}
+
+.main {
+  padding: 24px 24px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+:is(h2, h3, h4, h5) {
+  font-weight: 400;
+  margin: 0;
+}
+
+em {
+  font-style: normal;
+  color: var(--color-primary);
+}
+
+h2 {
+  margin: 18px 0;
+}
+
+h3 {
+  font-size: clamp(16px, 4vw, 20px);
+  color: var(--color-muted);
+}
+
+h4 {
+  font-weight: 500;
+  font-size: clamp(22px, 5.5vw, 26px);
+  margin-bottom: 6px;
+}
+
+h5 {
+  color: var(--color-muted);
+  font-size: clamp(14px, 4vw, 16px);
+  margin-bottom: 40px;
+}
+
+.details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  margin-bottom: 20px;
+  font-size: clamp(14px, 4vw, 16px);
+}
+
+.salary em, .date {
+  color: var(--color-muted);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 16px 24px;
+  border-top: var(--border);
+}
+
+.footer button {
+  background: transparent;
+  border: var(--border);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--color-muted);
+  transition: background 0.2s;
+}
+
+.footer button:hover {
+  background: var(--color-highlight);
+}
+
+.badge {
+  display: inline-flex;
+  margin-right: auto;
+  align-items: center;
+  gap: 12px;
+  padding-right: 20px;
+  border-radius: 50px;
+  background: var(--color-highlight);
+}
+
+.badge .text {
+  display: none;
+}
+
+.badge p {
+  color: var(--color-muted);
+}
+
+@media (width >= 430px) {
+  .card {
+    padding-top: 0;
+  }
+
+  .card > img {
+    top: 20px;
+    right: 20px;
+    left: auto;
+    translate: 0;
+    width: clamp(68px, 12vw, 80px);
+    padding: 16px;
+    border-color: transparent;
+    background: var(--color-highlight);
+    box-shadow: none;
+  }
+
+  .main {
+    text-align: left;
+  }
+
+  .badge .text {
+    display: inline;
+  }
+
+  h5 {
+    margin-bottom: 28px;
+  }
+}

@@ -1,0 +1,244 @@
+/*
+ * Job/Service card — адаптивная карточка ПК → мобильный.
+ * Основа: frontendjoe «React Cards Part 09», переработано (см. README.md).
+ *
+ * Главное отличие от оригинала: карточка перестраивается по ширине СВОЕГО контейнера
+ * (@container), а не экрана (@media). Поэтому одна и та же карточка корректно ведёт себя
+ * и на лендинге во всю ширину, и в узкой колонке/сайдбаре/виджете платформы.
+ *
+ * Все стили изолированы префиксом .job-card — не ломают h2/em/.footer лендинга.
+ * Цвета и шрифт переопределяются через custom properties (см. блок ниже).
+ */
+
+.job-card {
+  /* --- Настраиваемые токены (переопределяйте на лендинге/в виджете) --- */
+  --jc-color-primary: #1a73e8;
+  --jc-color-text: #202124;
+  --jc-color-muted: #5f6368;
+  --jc-color-highlight: #f1f3f4;
+  --jc-color-bg: #ffffff;
+  --jc-border: 1px solid #dadce0;
+  --jc-radius: 24px;
+  --jc-shadow: 0 1px 3px rgb(60 64 67 / 15%);
+  --jc-font: inherit;
+  --jc-logo-size: 92px;
+  --jc-max-width: 500px;
+
+  container: job-card / inline-size;
+  width: 100%;
+  max-width: var(--jc-max-width);
+  font-family: var(--jc-font);
+  box-sizing: border-box;
+}
+
+.job-card *,
+.job-card *::before,
+.job-card *::after {
+  box-sizing: border-box;
+}
+
+.job-card__body {
+  position: relative;
+  /* Место под логотип, который в узком режиме «висит» над карточкой наполовину.
+     В оригинале этого нет — логотип обрезается у родителя с overflow:hidden. */
+  margin-top: calc(var(--jc-logo-size) / 2);
+  border-radius: var(--jc-radius);
+  padding-top: 30px;
+  color: var(--jc-color-text);
+  background: var(--jc-color-bg);
+  border: var(--jc-border);
+  box-shadow: var(--jc-shadow);
+}
+
+.job-card__logo {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% -50%;
+  width: var(--jc-logo-size);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  border-radius: 50%;
+  background: var(--jc-color-bg);
+  padding: 20px;
+  border: 3px solid var(--jc-color-highlight);
+}
+
+.job-card__main {
+  padding: 24px 24px 0;
+  text-align: center;
+}
+
+.job-card__company,
+.job-card__level,
+.job-card__role,
+.job-card__location,
+.job-card__badge-text {
+  margin: 0;
+  font-weight: 400;
+}
+
+.job-card__company {
+  margin: 18px 0;
+  font-size: 1.125rem;
+}
+
+.job-card__level {
+  font-size: clamp(16px, 5cqi, 20px);
+  color: var(--jc-color-muted);
+}
+
+.job-card__role {
+  font-weight: 500;
+  font-size: clamp(22px, 7cqi, 26px);
+  line-height: 1.2;
+  margin-bottom: 6px;
+  overflow-wrap: anywhere; /* длинные названия не ломают карточку на 320px */
+}
+
+.job-card__location {
+  color: var(--jc-color-muted);
+  font-size: clamp(14px, 5cqi, 16px);
+  margin-bottom: 40px;
+}
+
+.job-card__accent {
+  font-style: normal;
+  color: var(--jc-color-primary);
+}
+
+.job-card__details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 0 24px;
+  margin-bottom: 20px;
+  font-size: clamp(14px, 5cqi, 16px);
+}
+
+.job-card__muted {
+  font-style: normal;
+  color: var(--jc-color-muted);
+}
+
+.job-card__footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px;
+  border-top: var(--jc-border);
+}
+
+.job-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-right: auto;
+  min-width: 0;
+  padding-right: 20px;
+  border-radius: 50px;
+  background: var(--jc-color-highlight);
+  color: var(--jc-color-muted);
+}
+
+.job-card__avatar {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.job-card__badge-text {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.job-card__badge-label {
+  display: none;
+}
+
+.job-card__btn {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: var(--jc-border);
+  color: var(--jc-color-muted);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.job-card__btn svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* hover только там, где он есть — на тач-экранах не «залипает» после тапа */
+@media (hover: hover) {
+  .job-card__btn:hover {
+    background: var(--jc-color-highlight);
+  }
+}
+
+.job-card__btn:focus-visible {
+  outline: 2px solid var(--jc-color-primary);
+  outline-offset: 2px;
+}
+
+.job-card__btn[aria-pressed="true"] {
+  color: var(--jc-color-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .job-card__btn {
+    transition: none;
+  }
+}
+
+/* ---------- Широкая карточка (ПК / планшет / широкая колонка) ----------
+ * 340px ширины карточки ≈ оригинальный брейкпоинт 430px экрана при width: 80vw. */
+@container job-card (min-width: 340px) {
+  .job-card__body {
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  .job-card__logo {
+    top: 20px;
+    right: 20px;
+    left: auto;
+    translate: 0;
+    width: clamp(68px, 16cqi, 80px);
+    padding: 16px;
+    border-color: transparent;
+    background: var(--jc-color-highlight);
+  }
+
+  .job-card__main {
+    text-align: left;
+    /* текст не залезает под логотип справа */
+    padding-right: calc(clamp(68px, 16cqi, 80px) + 32px);
+  }
+
+  .job-card__location {
+    margin-bottom: 28px;
+  }
+}
+
+/* Подпись «profile match» — только когда ей реально хватает места */
+@container job-card (min-width: 400px) {
+  .job-card__badge-label {
+    display: inline;
+  }
+}
