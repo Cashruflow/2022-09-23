@@ -1,0 +1,73 @@
+<!--
+  Карточка отзыва клиента: аватар/фото в бэджде с именем, цитата-отзыв как основной текст, город как локация.
+  Опциональные элементы: логотип компании клиента (может быть пропущен), дата публикации, рейтинг.
+  Обязательные: имя и должность клиента, текст отзыва, кнопки (поделиться/добавить в избранное).
+-->
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Отзыв клиента</title>
+  <link rel="stylesheet" href="../../../card/job-card.css">
+  <style>
+    body { margin: 0; padding: 24px 16px; font-family: system-ui, sans-serif; background: #f8f9fa; color: #202124; }
+    h1 { font-size: 20px; }
+    .label { font-size: 13px; color: #5f6368; margin: 32px 0 8px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+    .sidebar { width: 280px; max-width: 100%; }
+    .review .job-card { --jc-color-primary: #34a853; --jc-color-highlight: #e6f4ea; --jc-radius: 14px; }
+  </style>
+</head>
+<body>
+  <h1>Отзыв клиента</h1>
+  <p style="font-size: 14px; color: #5f6368;">Шаблон: аватар клиента с именем в бэджде, цитата-отзыв как основной текст, город как локация, дата как дополнение. Кнопки для поделиться и помечания.</p>
+
+  <template id="card-tpl">
+    <article class="job-card">
+      <div class="job-card__body">
+        <img class="job-card__logo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 92 92'%3E%3Ccircle cx='46' cy='46' r='46' fill='%2365d4ac'/%3E%3Ccircle cx='46' cy='38' r='14' fill='%23fff'/%3E%3Cpath d='M20 92a26 26 0 0 1 52 0z' fill='%23fff'/%3E%3C/svg%3E" alt="" width="92" height="92">
+        <div class="job-card__main">
+          <p class="job-card__company">Анна Петрова</p>
+          <p class="job-card__level">Маркетолог, ООО «Тест»</p>
+          <h3 class="job-card__role">Отличная работа! Результаты превзошли ожидания за две недели.</h3>
+          <p class="job-card__location">Москва</p>
+        </div>
+        <div class="job-card__details">
+          <span>28 сентября 2026</span>
+          <span class="job-card__muted">5 из 5 звёзд</span>
+        </div>
+        <div class="job-card__footer">
+          <div class="job-card__badge">
+            <img class="job-card__avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='18' fill='%2365d4ac'/%3E%3Ccircle cx='20' cy='15' r='8' fill='%23fff'/%3E%3Cpath d='M8 40a12 12 0 0 1 24 0z' fill='%23fff'/%3E%3C/svg%3E" alt="" width="40" height="40">
+            <p class="job-card__badge-text"><em class="job-card__accent">5★</em><span class="job-card__badge-label"> проверенный</span></p>
+          </div>
+          <button type="button" class="job-card__btn" aria-label="Поделиться отзывом">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11A2.99 2.99 0 1 0 15 5c0 .24.04.47.09.7L8.04 9.81a3 3 0 1 0 0 4.38l7.12 4.16c-.05.21-.08.43-.08.65A2.92 2.92 0 1 0 18 16.08z"/></svg>
+          </button>
+          <button type="button" class="job-card__btn" aria-label="Помечать отзыв" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>
+          </button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <p class="label">Сетка отзывов</p>
+  <div class="grid review" data-slot="3"></div>
+
+  <p class="label">Узкий сайдбар 280px</p>
+  <div class="sidebar review" data-slot="1"></div>
+
+  <script>
+    const tpl = document.getElementById('card-tpl');
+    document.querySelectorAll('[data-slot]').forEach(slot => {
+      for (let i = 0; i < +slot.dataset.slot; i++) slot.append(tpl.content.cloneNode(true));
+    });
+    document.addEventListener('click', e => {
+      const btn = e.target.closest('.job-card__btn[aria-pressed]');
+      if (btn) btn.setAttribute('aria-pressed', btn.getAttribute('aria-pressed') !== 'true');
+    });
+  </script>
+</body>
+</html>
