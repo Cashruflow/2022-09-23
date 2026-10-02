@@ -1,0 +1,351 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: #d946ef; } a:hover { color: #f0abfc; }
+  </style>
+</helmet>
+<div style="width: 880px; min-height: 2680px; background: #000000; color: #f5f5f7; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; padding: 56px 56px 72px; box-sizing: border-box; display: flex; flex-direction: column; gap: 40px">
+
+  <div style="display: flex; flex-direction: column; gap: 12px">
+    <div style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.18em; color: #d946ef; text-transform: uppercase">tokens.css</div>
+    <div style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 40px; font-weight: 700; line-height: 1.06; letter-spacing: -0.02em; max-width: 620px; text-wrap: pretty">Один экран, два набора значений</div>
+    <div style="font-size: 15px; line-height: 1.55; color: #8e8e93; max-width: 660px; text-wrap: pretty">Снято с артбордов «Нагрузка» в светлой и тёмной теме. Геометрия и типографика у них общие — различаются только цвета, и то не все. Левая колонка — значение в светлой теме, правая — в тёмной.</div>
+  </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <div style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; color: #48484a; text-transform: uppercase">Поверхности</div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--bg</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #f6f6f8; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#f6f6f8</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #000000; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#000000</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty"></div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--surface</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #ffffff; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#ffffff</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #141416; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#141416</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty">строка статистики, карточка</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--surface-hero</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #ffffff; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#ffffff</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #0a0a0b; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#0a0a0b</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty">карточка главного графика</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--surface-plot</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #fbfbfc; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#fbfbfc</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #0e0e10; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#0e0e10</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty">подложка области графика</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--surface-control</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #e9e9ee; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#e9e9ee</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #141416; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#141416</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty">дорожка сегментированного контрола</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--surface-control-on</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #ffffff; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#ffffff</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #2c2c2e; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#2c2c2e</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty">активный сегмент</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--surface-pill</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #ffffff; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#ffffff</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #1a1a1d; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#1a1a1d</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty">плавающая пилюля ИИ</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--surface-nav</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #ffffff; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#ffffff</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #141416; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#141416</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty"></div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <div style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; color: #48484a; text-transform: uppercase">Границы</div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--border</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #e5e5ea; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#e5e5ea</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #232326; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#232326</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty"></div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--border-subtle</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #f0f0f3; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#f0f0f3</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #1c1c1e; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#1c1c1e</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty"></div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <div style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; color: #48484a; text-transform: uppercase">Текст и иконки</div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--text</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #1c1c1e; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#1c1c1e</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #f5f5f7; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#f5f5f7</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty"></div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--text-secondary</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #8e8e93; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#8e8e93</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #8e8e93; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#8e8e93</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty"></div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--text-tertiary</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #c7c7cc; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#c7c7cc</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #636366; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#636366</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty"></div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--icon-muted</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #aeaeb2; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#aeaeb2</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #636366; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#636366</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty"></div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <div style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; color: #48484a; text-transform: uppercase">Смысл: норма / отклонение / риск</div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--zone-ok</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #1f9d4d; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#1f9d4d</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #30d158; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#30d158</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty">Пара несимметрична: #30d158 на белом даёт 1.8:1 — не проходит</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--zone-warn</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #c2740a; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#c2740a</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #ff9f0a; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#ff9f0a</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty">То же: янтарь пришлось затемнить для светлой темы</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--zone-risk</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #d7261e; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#d7261e</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #ff453a; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#ff453a</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty">Красный затемнён по той же причине</div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <div style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; color: #48484a; text-transform: uppercase">График</div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--zone-ok-fill</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: rgba(48, 209, 88, 0.16); border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">rgba(48, 209, 88, 0.16)</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: rgba(48, 209, 88, 0.13); border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">rgba(48, 209, 88, 0.13)</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty">Заливка коридора — яркий зелёный в обеих темах, он полупрозрачный</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--zone-ok-line</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: rgba(31, 157, 77, 0.45); border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">rgba(31, 157, 77, 0.45)</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: rgba(48, 209, 88, 0.40); border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">rgba(48, 209, 88, 0.40)</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty"></div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--zone-risk-line</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: rgba(215, 38, 30, 0.28); border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">rgba(215, 38, 30, 0.28)</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: rgba(255, 69, 58, 0.22); border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">rgba(255, 69, 58, 0.22)</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty"></div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--chart-connector</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #c7c7cc; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#c7c7cc</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #3a3a3c; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#3a3a3c</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty"></div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--chart-axis</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #8e8e93; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#8e8e93</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #48484a; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#48484a</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty"></div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--dot-halo</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">var(--surface-plot)</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">var(--surface-plot)</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty">Обводка точки повторяет подложку — точки не слипаются</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--stem-opacity</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">0.45</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">0.50</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty"></div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <div style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; color: #48484a; text-transform: uppercase">Акцент и свечение</div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--accent</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #d946ef; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#d946ef</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #d946ef; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#d946ef</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty">Единственный цвет, не зависящий от темы</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--accent-ring</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: rgba(217, 70, 239, 0.12); border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">rgba(217, 70, 239, 0.12)</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: rgba(217, 70, 239, 0.12); border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">rgba(217, 70, 239, 0.12)</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty">= --accent на 12 %</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--accent-orb-from</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #f0abfc; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#f0abfc</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #f0abfc; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#f0abfc</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty">одинаково в обеих темах</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--accent-orb-to</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #9333ea; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#9333ea</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #7c3aed; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#7c3aed</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty"></div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <div style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; color: #48484a; text-transform: uppercase">Навигация</div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--nav-active</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #4f7cf7; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#4f7cf7</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #f5f5f7; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#f5f5f7</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty"></div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--nav-active-bg</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">transparent</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #2c2c2e; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#2c2c2e</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty"></div>
+      </div>
+      <div style="display: grid; grid-template-columns: 215px 1fr 1fr 1.25fr; gap: 12px; align-items: center">
+        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5f5f7; overflow: hidden; text-overflow: ellipsis">--nav-inactive</div>
+        <div style="background: #ffffff; border: 1px solid #d1d1d6; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #8e8e93; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#8e8e93</div></div>
+        <div style="background: #0a0a0b; border: 1px solid #2c2c2e; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 9px; min-width: 0"><div style="width: 34px; height: 24px; border-radius: 6px; background: #8e8e93; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0"></div><div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #d1d1d6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">#8e8e93</div></div>
+        <div style="font-size: 12px; line-height: 1.4; color: #8e8e93; text-wrap: pretty"></div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <div style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; color: #48484a; text-transform: uppercase">Геометрия — от темы не зависит</div>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--r-hero</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">18px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--r-tile</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">14px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--r-row</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">12px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--r-control</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">12px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--r-segment</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">9px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--r-pill</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">22px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--r-plot</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">7px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--h-row</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">56px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--h-tab</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">56px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--h-pill</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">44px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--h-segment</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">32px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--h-tap-min</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">44px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--pad-screen</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">16px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--pad-card</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">14px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--pad-row</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">16px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--gap-block</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">14px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--gap-row</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">8px</div>
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <div style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.16em; color: #48484a; text-transform: uppercase">Типографика — от темы не зависит</div>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--fs-screen-title</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">26px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--fs-card-title</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">15px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--fs-row-title</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">15px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--fs-value</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">17px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--fs-sub</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">12px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--fs-zone</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">11px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--fs-axis</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">9px</div>
+        </div>
+        <div style="background: #131315; border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; min-width: 0">
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; color: #8e8e93; overflow: hidden; text-overflow: ellipsis">--fs-tab</div>
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: #f5f5f7">10px</div>
+        </div>
+      </div>
+    </div>
+
+  <div style="background: #131315; border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 10px">
+    <div style="font-size: 17px; font-weight: 600; letter-spacing: -0.01em">Почему пары цветов не симметричны</div>
+    <div style="font-size: 14px; line-height: 1.55; color: #8e8e93; text-wrap: pretty">Зелёный #30d158 и янтарь #ff9f0a задуманы для чёрного фона и дают на белом около 1.8:1 — точки на графике сливаются с подложкой. Поэтому в светлой теме те же смыслы несут затемнённые оттенки, а исходные яркие остаются только в полупрозрачной заливке коридора, где контраст не нужен. Это не разные палитры, а один смысл с двумя значениями — ровно то, для чего существует переменная.</div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
