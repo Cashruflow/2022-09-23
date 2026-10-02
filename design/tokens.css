@@ -1,0 +1,215 @@
+/* Токены экрана «Нагрузка» и полоски-входа.
+ *
+ * Снято с артбордов LoadLight / LoadDark / TodayPlus: светлое и тёмное
+ * значения каждого токена — одна и та же геометрия, разные цвета.
+ * Светлая тема — база в :root; тёмная переопределяет только цвет.
+ *
+ * Правило, из-за которого пары не симметричны: зелёный #30d158 и янтарь
+ * #ff9f0a отлично читаются на чёрном и дают около 1.8:1 на белом. Поэтому
+ * в светлой теме те же смыслы несут затемнённые оттенки (>= 3:1 к подложке),
+ * а исходные яркие остаются только в полупрозрачной заливке коридора.
+ */
+
+:root {
+  /* --- поверхности --- */
+  --bg:                 #f6f6f8;
+  --surface:            #ffffff;   /* строка статистики, карточка */
+  --surface-hero:       #ffffff;   /* карточка главного графика */
+  --surface-plot:       #fbfbfc;   /* подложка области графика */
+  --surface-control:    #e9e9ee;   /* дорожка сегментированного контрола */
+  --surface-control-on: #ffffff;   /* активный сегмент */
+  --surface-pill:       #ffffff;   /* плавающая пилюля ИИ */
+  --surface-nav:        #ffffff;
+
+  /* --- границы --- */
+  --border:             #e5e5ea;
+  --border-subtle:      #f0f0f3;
+
+  /* --- текст и иконки --- */
+  --text:               #1c1c1e;
+  --text-secondary:     #8e8e93;
+  --text-tertiary:      #c7c7cc;
+  --icon-muted:         #aeaeb2;
+
+  /* --- смысловые цвета: норма / отклонение / риск --- */
+  --zone-ok:            #1f9d4d;
+  --zone-warn:          #c2740a;
+  --zone-risk:          #d7261e;
+
+  /* --- график --- */
+  --zone-ok-fill:       rgba(48, 209, 88, 0.16);  /* заливка коридора */
+  --zone-ok-line:       rgba(31, 157, 77, 0.45);
+  --zone-risk-line:     rgba(215, 38, 30, 0.28);
+  --chart-connector:    #c7c7cc;
+  --chart-axis:         #8e8e93;
+  --dot-halo:           var(--surface-plot);      /* обводка точки = подложка */
+  --stem-opacity:       0.45;
+
+  /* --- акцент и свечение --- */
+  --accent:             #d946ef;
+  --accent-ring:        rgba(217, 70, 239, 0.12);  /* = --accent на 12 % */
+  --accent-orb-from:    #f0abfc;
+  --accent-orb-to:      #9333ea;
+  /* на белом неоновый ореол читается грязным пятном — вместо него кольцо */
+  --glow-hero:          0 0 0 4px var(--accent-ring),
+                        0 6px 18px rgba(0, 0, 0, 0.06);
+  --glow-pill:          0 0 0 4px var(--accent-ring),
+                        0 8px 24px rgba(0, 0, 0, 0.14);
+
+  /* --- нижняя навигация --- */
+  --nav-active:         #4f7cf7;
+  --nav-active-bg:      transparent;
+  --nav-inactive:       #8e8e93;
+
+  /* --- геометрия: от темы не зависит --- */
+  --r-hero:     18px;
+  --r-tile:     14px;
+  --r-row:      12px;
+  --r-control:  12px;
+  --r-segment:   9px;
+  --r-pill:     22px;
+  --r-plot:      7px;
+
+  --h-row:      56px;
+  --h-tab:      56px;
+  --h-pill:     44px;
+  --h-segment:  32px;
+  --h-tap-min:  44px;   /* ниже этого не опускается ни одна цель нажатия */
+
+  --pad-screen: 16px;
+  --pad-card:   14px;
+  --pad-row:    16px;
+  --gap-block:  14px;   /* между блоками экрана */
+  --gap-row:     8px;   /* между строками статистики */
+
+  /* --- типографика --- */
+  --fs-screen-title: 26px;  --fw-screen-title: 700;  --ls-screen-title: -0.02em;
+  --fs-card-title:   15px;  --fw-card-title:   600;
+  --fs-row-title:    15px;  --fw-row-title:    500;
+  --fs-value:        17px;  --fw-value:        600;
+  --fs-sub:          12px;
+  --fs-zone:         11px;
+  --fs-axis:          9px;
+  --fs-tab:          10px;  --fw-tab:          600;  --ls-tab: 0.09em;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:                 #000000;
+    --surface:            #141416;
+    --surface-hero:       #0a0a0b;
+    --surface-plot:       #0e0e10;
+    --surface-control:    #141416;
+    --surface-control-on: #2c2c2e;
+    --surface-pill:       #1a1a1d;
+    --surface-nav:        #141416;
+
+    --border:             #232326;
+    --border-subtle:      #1c1c1e;
+
+    --text:               #f5f5f7;
+    --text-secondary:     #8e8e93;
+    --text-tertiary:      #636366;
+    --icon-muted:         #636366;
+
+    --zone-ok:            #30d158;
+    --zone-warn:          #ff9f0a;
+    --zone-risk:          #ff453a;
+
+    --zone-ok-fill:       rgba(48, 209, 88, 0.13);
+    --zone-ok-line:       rgba(48, 209, 88, 0.40);
+    --zone-risk-line:     rgba(255, 69, 58, 0.22);
+    --chart-connector:    #3a3a3c;
+    --chart-axis:         #48484a;
+    --stem-opacity:       0.50;
+
+    --accent-orb-to:      #7c3aed;
+    --glow-hero:          0 0 26px -2px var(--accent),
+                          inset 0 0 22px -14px var(--accent);
+    --glow-pill:          0 0 20px -4px var(--accent),
+                          0 8px 24px rgba(0, 0, 0, 0.70);
+
+    --nav-active:         #f5f5f7;
+    --nav-active-bg:      #2c2c2e;
+    --nav-inactive:       #8e8e93;
+  }
+}
+
+/* Ручной переключатель темы перебивает системный в обе стороны. */
+:root[data-theme="dark"] {
+  --bg:                 #000000;
+  --surface:            #141416;
+  --surface-hero:       #0a0a0b;
+  --surface-plot:       #0e0e10;
+  --surface-control:    #141416;
+  --surface-control-on: #2c2c2e;
+  --surface-pill:       #1a1a1d;
+  --surface-nav:        #141416;
+
+  --border:             #232326;
+  --border-subtle:      #1c1c1e;
+
+  --text:               #f5f5f7;
+  --text-secondary:     #8e8e93;
+  --text-tertiary:      #636366;
+  --icon-muted:         #636366;
+
+  --zone-ok:            #30d158;
+  --zone-warn:          #ff9f0a;
+  --zone-risk:          #ff453a;
+
+  --zone-ok-fill:       rgba(48, 209, 88, 0.13);
+  --zone-ok-line:       rgba(48, 209, 88, 0.40);
+  --zone-risk-line:     rgba(255, 69, 58, 0.22);
+  --chart-connector:    #3a3a3c;
+  --chart-axis:         #48484a;
+  --stem-opacity:       0.50;
+
+  --accent-orb-to:      #7c3aed;
+  --glow-hero:          0 0 26px -2px var(--accent),
+                        inset 0 0 22px -14px var(--accent);
+  --glow-pill:          0 0 20px -4px var(--accent),
+                        0 8px 24px rgba(0, 0, 0, 0.70);
+
+  --nav-active:         #f5f5f7;
+  --nav-active-bg:      #2c2c2e;
+  --nav-inactive:       #8e8e93;
+}
+
+/* --------------------------------------------------------------------------
+ * Как это ложится на разметку экрана «Нагрузка».
+ * Имена классов — ваши, важны только сами присвоения.
+ *
+ *   .screen        { background: var(--bg); color: var(--text);
+ *                    padding: 50px var(--pad-screen) 0; }
+ *
+ *   .hero          { background: var(--surface-hero);
+ *                    border: 1.5px solid var(--accent);
+ *                    box-shadow: var(--glow-hero);
+ *                    border-radius: var(--r-hero); padding: var(--pad-card); }
+ *
+ *   .stat-row      { background: var(--surface); border-radius: var(--r-row);
+ *                    height: var(--h-row); padding: 0 var(--pad-row); }
+ *   .stat-row__now { font-size: var(--fs-value); font-weight: var(--fw-value);
+ *                    font-variant-numeric: tabular-nums; }
+ *   .stat-row__was { font-size: var(--fs-sub); color: var(--text-tertiary); }
+ *
+ *   .tab           { height: var(--h-tab); color: var(--nav-inactive); }
+ *   .tab[aria-current] { color: var(--nav-active);
+ *                        background: var(--nav-active-bg);
+ *                        border-radius: var(--r-tile); }
+ *   .tab__label    { font-size: var(--fs-tab); font-weight: var(--fw-tab);
+ *                    letter-spacing: var(--ls-tab); text-transform: uppercase; }
+ *
+ * В SVG графика цвет задаётся теми же переменными — fill и stroke их понимают:
+ *
+ *   <rect class="band"  fill="var(--zone-ok-fill)">
+ *   <line class="guide" stroke="var(--zone-ok-line)">
+ *   <circle class="dot" fill="var(--zone-warn)" stroke="var(--dot-halo)">
+ *
+ * Цвет точки выбирается по зоне, в которую попало значение, а не по тренду:
+ * --zone-ok внутри коридора, --zone-warn вне его, --zone-risk за красными
+ * линиями. Стрелка дельты рядом со значением — это отдельный смысл
+ * (выросло/упало), и она всегда --zone-ok либо --zone-risk; «без изменений»
+ * рисуется нейтральным прочерком цвета --text-tertiary, не янтарным.
+ * -------------------------------------------------------------------------- */
