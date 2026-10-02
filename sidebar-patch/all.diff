@@ -1,0 +1,841 @@
+diff --git a/web/public/sidebar.js b/web/public/sidebar.js
+--- a/web/public/sidebar.js
++++ b/web/public/sidebar.js
+@@ -103,7 +103,7 @@ function __sbLoad(id, src) {
+   if (!document.getElementById('cf-sb-profile-src')) {
+     const sp = document.createElement('script');
+     sp.id = 'cf-sb-profile-src';
+-    sp.src = '/sb-profile.js?v=4'; // v3 (29.09.2026): тень меню — токен --ui-shadow-md
++    sp.src = '/sb-profile.js?v=5'; // v5 (02.10.2026, ADR-309): «Быстрые клавиши»; v3 (29.09.2026): тень меню — токен --ui-shadow-md
+     document.head.appendChild(sp);
+   }
+ })();
+@@ -144,7 +144,7 @@ function __sbLoad(id, src) {
+ // в колонку иконок. Та же одна точка подключения, что у tbl-freeze и scroll-keep.
+ // На мобиле скрипт молчит: там сайдбар — нижняя шторка, тянуть нечего.
+ (function () {
+-  __sbLoad('cf-sb-resize-src', '/sb-resize.js?v=3');
++  __sbLoad('cf-sb-resize-src', '/sb-resize.js?v=4');
+ })();
+ 
+ // Возврат на прежнее место при «Назад» (/scroll-keep.js, 09.09.2026). Тот же приём,
+@@ -209,18 +209,18 @@ function __sbLoad(id, src) {
+       { href: '/projects', icon: 'projects', label: 'Проекты' },
+       { href: '/clients', icon: 'clients', label: 'Клиенты' },
+       { href: '/access', icon: 'access', label: 'Доступы' },
+-      { href: '/kb', icon: 'brain', label: 'БЗ' },
++      { href: '/kb', icon: 'kb', label: 'БЗ' },
+       // RAG-база (15.09.2026) — пары «вопрос — ответ», из которых отвечает ИИ-агент
+       // в «Чатах». Рядом с БЗ, но это НЕ база знаний: там статьи, здесь готовые ответы.
+       { href: '/rag/app', icon: 'brain', label: 'RAG' },
+-      { href: '/brief', icon: 'message', label: 'Бриф' },
++      { href: '/brief', icon: 'clipboard-list', label: 'Бриф' },
+     ]},
+     { group: 'AI-CRM', items: [
+       // Обзор раздела — первым пунктом. Подсветка активного идёт по ТОЧНОМУ совпадению
+       // пути, поэтому /crm не загорается на /crm/leads и остальных вложенных.
+-      { href: '/crm', icon: 'podium', label: 'CRM — обзор' },
+-      { href: '/contacts', icon: 'clients', label: 'Люди' },
+-      { href: '/company', icon: 'projects', label: 'Компании' },
++      { href: '/crm', icon: 'layout-dashboard', label: 'CRM — обзор' },
++      { href: '/contacts', icon: 'contact', label: 'Люди' },
++      { href: '/company', icon: 'building', label: 'Компании' },
+       { href: '/crm/leads', icon: 'leads', label: 'Лиды' },
+       { href: '/crm/soric', icon: 'zap', label: 'SORIC' },
+       { href: '/crm/docs', icon: 'file-stack', label: 'Документы' },
+@@ -229,16 +229,16 @@ function __sbLoad(id, src) {
+       { href: '/mail', icon: 'mail', label: 'Почта' },
+       // Трекинг (tracking.js, ADR-264): колл-/имейлтрекинг, пул адресов; раздел прав — tracking в roles.js.
+       { href: '/tracking/app', icon: 'phone-call', label: 'Трекинг' },
+-      { href: '/channels', icon: 'webhooks', label: 'Каналы' },
+-      { href: '/staff', icon: 'clients', label: 'Сотрудники' },
++      { href: '/channels', icon: 'radio-tower', label: 'Каналы' },
++      { href: '/staff', icon: 'id-card', label: 'Сотрудники' },
+       // Роли и права (ADR-263): какие разделы видит роль. Только владельцу — остальным
+       // пункт прячет фильтр ниже (/api/me/perms), а сервер отдаёт 403.
+       { href: '/roles', icon: 'shield-check', label: 'Роли и права' },
+       { href: '/projects/crm', icon: 'circle-pile', label: 'CRM клиентов' },
+       { href: '/crm/services', icon: 'services', label: 'Услуги' },
+-      { href: '/history', icon: 'tracking', label: 'История правок' },
++      { href: '/history', icon: 'history', label: 'История правок' },
+       // Загрузчик данных (29.09.2026): CSV/XLSX → лиды, люди, компании; журнал и откат импорта.
+-      { href: '/import', icon: 'upload', label: 'Загрузчик данных' },
++      { href: '/import', icon: 'import', label: 'Загрузчик данных' },
+     ]},
+     // Своя группа: до этого SEO-страницы были размазаны по «РАБОТЕ» (/sites, /jsonld)
+     // и «ИНТЕГРАЦИЯМ» (/crawl, /skills). Пункты ПЕРЕНЕСЕНЫ, а не продублированы —
+@@ -248,50 +248,50 @@ function __sbLoad(id, src) {
+     { group: 'SEO', items: [
+       // Главная SEO-раздела (16.09.2026): сводка техаудита Топвизора + входы в сервисы.
+       // #433: хаб «Сайт» — вкладки Сводка/Краулер/Индексация/PageSpeed/…; пункты ниже ведут в тот же хаб (редирект site_embed.js).
+-      { href: '/seo/app', icon: 'structure', label: 'Сайт' },
++      { href: '/seo/app', icon: 'app-window', label: 'Сайт' },
+       { href: '/sites', icon: 'sites', label: 'Сайты' },
+-      { href: '/crawl', icon: 'search', label: 'Краулер' },
++      { href: '/crawl', icon: 'scan-search', label: 'Краулер' },
+       // Скорость страниц клиентских сайтов (задача #365). Рядом с краулером:
+       // обе страницы про обход сайта целиком, а не про разметку одной страницы.
+-      { href: '/pagespeed', icon: 'zap', label: 'AI Google PageSpeed' },
++      { href: '/pagespeed', icon: 'gauge', label: 'AI Google PageSpeed' },
+       // Индексация (15.09.2026): статус страниц в Яндексе/Google/Bing из Топвизора,
+       // причины из Search Console, отправка на переобход. Здесь же галочки состава
+       // карты сайта — поэтому пункт стоит прямо над «Картой сайта».
+-      { href: '/index/app', icon: 'search', label: 'Индексация' },
++      { href: '/index/app', icon: 'file-search', label: 'Индексация' },
+       // Ключевые слова и позиции (#388): семантика по группам, частота, позиции из Топвизора.
+       { href: '/keywords/app', icon: 'search', label: 'Ключевые слова' },
+       // Я.Директ (23.09.2026): кампании, статистика и ключи рекламы по проектам.
+-      { href: '/yadirect', icon: 'chart', label: 'Я.Директ' },
++      { href: '/yadirect', icon: 'megaphone', label: 'Я.Директ' },
+       // Сжатие картинок через Tinify. Рядом с PageSpeed осознанно: вес картинок — первая
+       // причина низкой оценки скорости, чинится ровно здесь.
+-      { href: '/img', icon: 'image', label: 'Сжатие картинок' },
+-      { href: '/jsonld', icon: 'structure', label: 'JSON-LD' },
++      { href: '/img', icon: 'image-down', label: 'Сжатие картинок' },
++      { href: '/jsonld', icon: 'braces', label: 'JSON-LD' },
+       { href: '/skills', icon: 'skills', label: 'AI-навыки' },
+       // 23.09.2026: пункт ведёт на вкладку «Карта сайта» страницы «Индексация» — там
+       // галочки и ссылка на сам /sitemap.xml. Голый xml из меню смотреть было неудобно.
+-      { href: '/index/app#sitemap', icon: 'sites', label: 'Карта сайта' },
++      { href: '/index/app#sitemap', icon: 'network', label: 'Карта сайта' },
+       // 28.09.2026 (ADR-241): бейджи страниц — фавикон и иконка «На экран Домой» по пути.
+       { href: '/index/app#icons', icon: 'image', label: 'Иконки страниц' },
+       // 01.10.2026: SEO каждой страницы (title, description, Open Graph, H1, alt) — окно
+       // «Настройки страницы»; право — раздел «Индексация» (roles.js, menu).
+-      { href: '/pages', icon: 'settings', label: 'Страницы' },
+-      { href: '/emotion-journal', icon: 'diary', label: 'Дневник эмоций' },
++      { href: '/pages', icon: 'file-cog', label: 'Страницы' },
++      { href: '/emotion-journal', icon: 'smile', label: 'Дневник эмоций' },
+     ]},
+     { group: 'СПРАВОЧНИКИ', items: [
+-      { href: '/refs', icon: 'fields', label: 'Справочники' },
++      { href: '/refs', icon: 'library', label: 'Справочники' },
+       { href: '/crm/fields', icon: 'fields', label: 'Поля CRM' },
+-      { href: '/b24/fields', icon: 'fields', label: 'Поля Б24' },
++      { href: '/b24/fields', icon: 'table-properties', label: 'Поля Б24' },
+     ]},
+     { group: 'ФИНАНСЫ', items: [
+       { href: '/cash', icon: 'cash', label: 'Финансы' },
+-      { href: '/money/app', icon: 'cash', label: 'Деньги' },
+-      { href: '/renew', icon: 'services', label: 'Продления' },
++      { href: '/money/app', icon: 'coins', label: 'Деньги' },
++      { href: '/renew', icon: 'calendar-sync', label: 'Продления' },
+       // Расходы Roistat по проектам (web/rs_expenses.js): выбор проекта + общая
+       // история тарифов. Кабинетная половина — /<slug>/rs, ключ `rs` в cab-modules.js.
+       // Здесь, а не в «Интеграциях»: раздел про деньги проекта, а не про подключение сервиса.
+       { href: '/rs', icon: 'chart', label: 'Roistat' },
+       // «Генерации» = журнал расходов на платные обращения к ИИ (задача #240), документы — на /crm/docs
+-      { href: '/doclog', icon: 'tracking', label: 'Генерации (ИИ)' },
++      { href: '/doclog', icon: 'receipt', label: 'Генерации (ИИ)' },
+     ]},
+     { group: 'ЛИЧНОЕ', items: [
+       { href: '/diary', icon: 'diary', label: 'Дневник' },
+@@ -308,29 +308,29 @@ function __sbLoad(id, src) {
+         { href: '/medcard', icon: 'medcard', label: 'Медкарта' },
+       // страница «Активность» (вынос из вкладки «Цикл», v1.84.0, ADR-108)
+       { href: '/medcard/sex', icon: 'heart', label: 'Активность' },
+-      { href: '/med', icon: 'medcard', label: 'Нормы анализов' },
+-      { href: '/missions', icon: 'tracking', label: 'Миссии' },
+-      { href: '/patients', icon: 'clients', label: 'Пациенты' },
+-      { href: '/control', icon: 'tracking', label: 'Контроль' },
++      { href: '/med', icon: 'test-tubes', label: 'Нормы анализов' },
++      { href: '/missions', icon: 'flag', label: 'Миссии' },
++      { href: '/patients', icon: 'stethoscope', label: 'Пациенты' },
++      { href: '/control', icon: 'clipboard-check', label: 'Контроль' },
+     ]},
+     { group: 'ИНТЕГРАЦИИ', items: [
+-      { href: '/integrations', icon: 'zap', label: 'Интеграции' },
+-      { href: '/threads', icon: 'message', label: 'Тредс' },
+-      { href: '/mcp', icon: 'bot', label: 'MCP-серверы' },
++      { href: '/integrations', icon: 'plug', label: 'Интеграции' },
++      { href: '/threads', icon: 'at-sign', label: 'Тредс' },
++      { href: '/mcp', icon: 'server', label: 'MCP-серверы' },
+       { href: '/stats', icon: 'tracking', label: 'Статистика' },
+       { href: '/webhooks', icon: 'webhooks', label: 'Вебхуки' },
+       { href: '/uploads', icon: 'upload', label: 'Загрузки' },
+-      { href: '/auth-log', icon: 'access', label: 'История входов' },
++      { href: '/auth-log', icon: 'log-in', label: 'История входов' },
+       { href: '/structure', icon: 'structure', label: 'Структура' },
+-      { href: '/backups', icon: 'structure', label: 'Бэкапы' },
++      { href: '/backups', icon: 'database-backup', label: 'Бэкапы' },
+       { href: '/short', icon: 'link', label: 'Короткие ссылки' },
+       // Сниппеты аналитики по страницам (ADR-141) и публичная политика, на которую ссылается
+       // баннер кук — обе про внешние скрипты и данные, поэтому здесь, а не в «Справочниках».
+-      { href: '/scripts', icon: 'zap', label: 'Скрипты сайта' },
+-      { href: '/footer', icon: 'zap', label: 'Подвал лендингов' },
+-      { href: '/policy', icon: 'shield-check', label: 'Политика данных' },
+-      { href: '/prompt', icon: 'message', label: 'Промты' },
+-      { href: '/test', icon: 'structure', label: 'Тест' },
++      { href: '/scripts', icon: 'code-xml', label: 'Скрипты сайта' },
++      { href: '/footer', icon: 'panel-bottom', label: 'Подвал лендингов' },
++      { href: '/policy', icon: 'scroll-text', label: 'Политика данных' },
++      { href: '/prompt', icon: 'terminal', label: 'Промты' },
++      { href: '/test', icon: 'flask-conical', label: 'Тест' },
+     ]},
+   ];
+ 
+@@ -380,6 +380,18 @@ function __sbLoad(id, src) {
+ 
+   const path = location.pathname.replace(/\/$/, '') || '/';
+ 
++  // Подсказка сочетания поиска в поле (02.10.2026, ADR-309): на Mac — ⌘K, иначе Ctrl K.
++  // Платформу берём из userAgentData, где он есть, иначе из navigator.platform/UA.
++  const SB_MAC = (function () {
++    try {
++      const p = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || navigator.userAgent || '';
++      return /mac|iphone|ipad|ipod/i.test(p);
++    } catch (e) { return false; }
++  })();
++  const SB_KEY_HINT = SB_MAC ? '⌘K' : 'Ctrl K';
++  const SB_KEY_ARIA = SB_MAC ? 'Meta+K' : 'Control+K';
++  window.cfIsMac = SB_MAC;
++
+   const css = `
+ 
+     /* Цвета сайдбара — токенами платформы (/theme.css, ADR-142): он виден на КАЖДОЙ странице,
+@@ -451,19 +463,22 @@ function __sbLoad(id, src) {
+     #app-sidebar .sb-search input { width:100%; box-sizing:border-box; background:var(--ui-surface-3,#101010); border:1px solid var(--ui-line-2,#1e1e1e); border-radius:8px; padding:8px 10px; color:var(--ui-tx,#eee); font-size:13px; outline:none; }
+     #app-sidebar .sb-search input::placeholder { color:var(--ui-tx-3,#666); }
+     #app-sidebar .sb-search input:focus { border-color:#00a0ff55; }
+-
+-    #app-sidebar .sb-search-results { display:none; position:absolute; left:0; right:0; top:calc(100% + 6px); background:var(--ui-surface-3,#101010); border:1px solid var(--ui-line-2,#1e1e1e); border-radius:8px; max-height:260px; overflow-y:auto; z-index:10; box-shadow:var(--ui-shadow-md,0 6px 18px -2px rgba(0,0,0,.30)); }
+-    #app-sidebar .sb-search-results.open { display:block; }
+-    /* На телефоне подсказки НЕ висят поверх, а раздвигают список: всплывающая панель
+-       ложилась ровно на «Быстрый доступ», и до закреплённых строк было не дотянуться,
+-       пока не закроешь поиск. Список ниже прокручивается, места хватает. */
+-    @media (max-width:768px) {
+-      #app-sidebar .sb-search-results.open { position:static; margin-top:6px; max-height:220px; box-shadow:none; }
+-    }
+-    #app-sidebar .sb-search-results a { display:block; padding:8px 10px; font-size:13px; color:#ccc; text-decoration:none; border-left:none; }
+-    #app-sidebar .sb-search-results a:hover, #app-sidebar .sb-search-results a.hi { background:#1a1a1a; color:#fff; }
+-    #app-sidebar .sb-search-results .sb-sr-grp { font-size:10px; color:#555; }
+-    #app-sidebar .sb-search-results .sb-sr-empty { padding:10px; font-size:12px; color:#555; }
++    /* 02.10.2026 (ADR-309): поиск — ФИЛЬТР самого меню, а не выпадающий список поверх.
++       Несовпавшие строки прячутся классом .sb-f-off (display, а не удаление и не клон:
++       бейджи-поллеры ищут ссылку по href и должны найти ту же самую), пустые группы — тоже,
++       свёрнутые на время поиска раскрываются. Совпадение подсвечено <mark> в .sb-lbl.
++       Стрелки ведут выделение .sb-f-hi по видимым строкам. Подсказка ⌘K / Ctrl K — справа
++       в поле, пока оно пустое и без фокуса; на телефоне её нет (там нет клавиатуры). */
++    #app-sidebar .sb-search input { padding-right:56px; }
++    #app-sidebar .sb-kbd { position:absolute; right:8px; top:50%; transform:translateY(-50%); pointer-events:none; font:500 10.5px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; color:var(--ui-tx-3,#666); background:var(--ui-surface,#141414); border:1px solid var(--ui-line-2,#1e1e1e); border-radius:4px; padding:3px 5px; letter-spacing:.02em; }
++    #app-sidebar .sb-search input:focus ~ .sb-kbd, #app-sidebar .sb-search input:not(:placeholder-shown) ~ .sb-kbd { display:none; }
++    #app-sidebar .sb-f-off { display:none !important; }
++    #app-sidebar .sb-lbl mark { background:color-mix(in srgb, var(--ui-brand,#00a0ff) 28%, transparent); color:inherit; border-radius:3px; padding:0 1px; }
++    #app-sidebar .sb-group mark { background:none; color:var(--ui-brand,#00a0ff); }
++    #app-sidebar a.sb-link.sb-f-hi { background:var(--ui-surface-2,#1a1a1a); color:var(--ui-tx,#fff); box-shadow:inset 2px 0 0 var(--ui-brand,#00a0ff); }
++    #app-sidebar .sb-f-none { padding:14px 20px; font-size:12.5px; color:var(--ui-tx-3,#666); }
++    #app-sidebar .sb-f-none[hidden] { display:none !important; }
++    @media (max-width:768px) { #app-sidebar .sb-kbd { display:none; } #app-sidebar .sb-search input { padding-right:10px; } }
+     body { padding-left:var(--sb-w); }
+     #sb-burger { display:none; }
+     #sb-overlay { display:none; }
+@@ -614,8 +629,8 @@ function __sbLoad(id, src) {
+     <nav id="app-sidebar">
+       <div class="sb-grab" aria-hidden="true"></div>
+       <div class="sb-logo"><img class="sb-lg" src="/assets/logo.svg" alt="" style="width:22px;height:22px;flex-shrink:0;"><span class="sb-name">AI-платформа</span><span class="sb-vers"><span class="sb-vl"><span class="sb-vlbl">Платформа</span><span class="v" id="sb-version"></span><span id="sb-health-dot" title="Диагностика каналов" onclick="location.href='/agents'"></span></span><span class="sb-vl sb-vmod" id="sb-mod-ver"></span></span><span class="sb-acts"><span id="sb-logo-act"></span><button type="button" class="ibtn sb-mact" id="sb-refresh" aria-label="Обновить страницу" title="Обновить" onclick="window.hardReload ? window.hardReload() : location.reload()"><svg class="ico" aria-hidden="true"><use href="${window.ICONS_URL||'/assets/icons.svg?v=8'}#i-refresh"></use></svg></button><button type="button" class="ibtn sb-mact" id="sb-set" aria-label="Настройки" title="Настройки" onclick="window.mhSettings ? window.mhSettings() : (location.href='/set')"><svg class="ico" aria-hidden="true"><use href="${window.ICONS_URL||'/assets/icons.svg?v=8'}#i-settings"></use></svg></button></span></div>
+-      <div class="sb-search" id="sb-search"><input id="sb-search-input" type="text" placeholder="Поиск по порталу…" autocomplete="off"><div class="sb-search-results" id="sb-search-res"></div></div>
+-      <div class="sb-nav">${links}</div>
++      <div class="sb-search" id="sb-search" role="search"><input id="sb-search-input" type="text" placeholder="Поиск по меню…" autocomplete="off" spellcheck="false" aria-label="Поиск по меню" aria-controls="sb-nav" aria-keyshortcuts="${SB_KEY_ARIA}"><kbd class="sb-kbd" aria-hidden="true">${SB_KEY_HINT}</kbd></div>
++      <div class="sb-nav" id="sb-nav">${links}<div class="sb-f-none" id="sb-f-none" role="status" hidden>Ничего не найдено</div></div>
+       <div class="sb-foot"><a class="sb-frow${path === '/set' ? ' active' : ''}" href="/set"><svg class="ico" aria-hidden="true"><use href="${window.ICONS_URL||'/assets/icons.svg?v=8'}#i-settings"></use></svg><span class="sb-lbl">Настройки</span></a></div>
+     </nav>
+   `;
+@@ -648,6 +663,34 @@ function __sbLoad(id, src) {
+   };
+ 
+   document.addEventListener('keydown', e => { if (e.key === 'Escape') window.sbMenu(false); });
++
++  // ⌘K / Ctrl+K — поиск по меню на ЛЮБОЙ странице портала (02.10.2026, ADR-309).
++  // Раньше сочетание жило только на /issues и /ticket и ставило фокус в локальный поиск
++  // списка — на остальных страницах те же пальцы открывали поиск браузера. Теперь одно
++  // поведение везде; локальный поиск этих двух страниц остался на «/».
++  // Меню в режиме иконок — сперва разворачиваем (window.sbSetIcons из sb-resize.js),
++  // иначе поле поиска скрыто. На телефоне открываем шторку. Ловим в фазе перехвата на
++  // window: страница не успеет съесть сочетание своим обработчиком.
++  // По e.code — чтобы работало и в русской раскладке (там e.key = «л»).
++  window.sbFocusSearch = function () {
++    const inp = document.getElementById('sb-search-input');
++    if (!inp) return false;
++    if (window.innerWidth <= 768) window.sbMenu(true);
++    else if (document.documentElement.classList.contains('sb-icons') && typeof window.sbSetIcons === 'function') window.sbSetIcons(false);
++    inp.focus();
++    inp.select();
++    return true;
++  };
++  window.addEventListener('keydown', function (e) {
++    // На Mac — только ⌘ (Ctrl+K там в полях ввода — «удалить до конца строки»), иначе Ctrl.
++    if (!(SB_MAC ? e.metaKey : e.ctrlKey) || e.altKey || e.shiftKey) return;
++    if (e.code !== 'KeyK' && !/^[kл]$/i.test(e.key || '')) return;
++    if (!document.getElementById('sb-search-input')) return;   // ?embed=1 / экран входа
++    if (document.body && document.body.classList.contains('sb-authwall')) return;
++    e.preventDefault();
++    e.stopPropagation();
++    window.sbFocusSearch();
++  }, true);
+   window.addEventListener('resize', () => { if (window.innerWidth > 768) window.sbMenu(false); });
+   // переход по пункту меню закрывает шторку (иначе она висит поверх новой страницы,
+   // пока та грузится, и мигает при возврате «назад» из кэша)
+@@ -920,37 +963,167 @@ function __sbLoad(id, src) {
+     // запросе, и два места, считающих остаток, разошлись бы на первой правке.
+     window.sbUpdSess = updSess;
+ 
+-    // Поиск по порталу — плоский список всех пунктов меню (все группы)
+-    const ALL_ITEMS = MENU.flatMap(g => g.items.map(it => ({ ...it, group: g.group })));
++    // ===== Поиск по меню (02.10.2026, ADR-309) =====
++    // Было: выпадающий список из 10 клонов-ссылок поверх меню. Стало: фильтр самого меню —
++    // несовпавшие строки прячутся, совпадение подсвечено в подписи. Почему не клоны:
++    // бейджи (уведомления, чаты, почта) вешают поллеры по href на ОРИГИНАЛ ссылки, и у клона
++    // их не было; плюс «Быстрый доступ» (menu-pins.js) переносит сами строки — фильтр
++    // работает и по ним.
++    // Совпадение — по подписи пункта ИЛИ по названию группы (совпала группа — видны все её
++    // пункты). Регистр не важен, ё = е, и запрос пробуется ещё в другой раскладке
++    // (набрал «ktfls» вместо «лиды» — найдёт; и наоборот).
++    // Пункты закрытых ролью разделов (ADR-263) в поиске не участвуют: их прячет CSS
++    // из sbPermDenyCss, здесь мы их просто не считаем.
+     const inp = document.getElementById('sb-search-input');
+-    const res = document.getElementById('sb-search-res');
++    const nav = document.querySelector('#app-sidebar .sb-nav');
++    const none = document.getElementById('sb-f-none');
++    // href → название группы из MENU: пункт в «Быстром доступе» живёт вне своей группы,
++    // а искать его по группе всё равно нужно.
++    const GROUP_OF = {};
++    MENU.forEach(function (g) { g.items.forEach(function (it) { if (!GROUP_OF[it.href]) GROUP_OF[it.href] = g.group; }); });
++    const EN = "qwertyuiop[]asdfghjkl;'zxcvbnm,.`";
++    const RU = 'йцукенгшщзхъфывапролджэячсмитьбюё';
++    function swapLayout(s, from, to) {
++      let o = '';
++      for (const ch of s) { const i = from.indexOf(ch); o += i >= 0 ? to[i] : ch; }
++      return o;
++    }
++    // Нормализация: нижний регистр и ё→е. Длина строки не меняется — индексы совпадения
++    // в нормализованной подписи совпадают с индексами в исходной (нужно для <mark>).
++    function norm(s) { return String(s || '').toLowerCase().replace(/ё/g, 'е'); }
++    function variants(q) {
++      const n = norm(q).trim();
++      if (!n) return [];
++      const out = [n];
++      const ru = norm(swapLayout(n, EN, RU)), en = norm(swapLayout(n, RU, EN));
++      if (out.indexOf(ru) < 0) out.push(ru);
++      if (out.indexOf(en) < 0) out.push(en);
++      return out;
++    }
++    function find(text, vs) {
++      const t = norm(text);
++      for (const v of vs) { const i = t.indexOf(v); if (i >= 0) return { i: i, n: v.length }; }
++      return null;
++    }
++    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
++    // Подпись с подсветкой. Исходный текст держим в data-sbf-txt — к нему возвращаемся
++    // при каждом новом запросе и при очистке, а не к тому, что уже размечено.
++    function paintLbl(el, m) {
++      if (!el) return;
++      if (el.dataset.sbfTxt == null) el.dataset.sbfTxt = el.textContent;
++      const t = el.dataset.sbfTxt;
++      if (!m) { if (el.innerHTML !== esc(t)) el.textContent = t; return; }
++      el.innerHTML = esc(t.slice(0, m.i)) + '<mark>' + esc(t.slice(m.i, m.i + m.n)) + '</mark>' + esc(t.slice(m.i + m.n));
++    }
++    function denied(a) {
++      const deny = window.CF_PERM_DENY;
++      if (!deny || !deny.size) return false;
++      const h = a.getAttribute('href') || '';
++      return deny.has(h.split('#')[0].split('?')[0]);
++    }
++    // Строка пункта: ссылку menu-pins.js оборачивает в .mp-row (там же пин и ручка) —
++    // прятать надо обёртку целиком, иначе в «Быстром доступе» остаётся пустая полоса.
++    function unitOf(a) { return (a.closest && a.closest('.mp-row')) || a; }
++    function groupHead(box) {
++      const h = box && box.previousElementSibling;
++      return h && h.classList.contains('sb-group') ? h : null;
++    }
++    let curQ = '';
+     let hi = -1;
+-    function renderResults(list) {
+-      hi = -1;
+-      if (!list.length) { res.innerHTML = '<div class="sb-sr-empty">Ничего не найдено</div>'; res.classList.add('open'); return; }
+-      res.innerHTML = list.slice(0, 10).map(it =>
+-        `<a href="${it.href}"><span class="sb-sr-grp">${it.group}</span> · ${it.label}</a>`
+-      ).join('');
+-      res.classList.add('open');
++    function visibleLinks() {
++      return [].filter.call(nav.querySelectorAll('a.sb-link'), function (a) {
++        return !denied(a) && !unitOf(a).classList.contains('sb-f-off') && a.getClientRects().length;
++      });
++    }
++    function setHi(i) {
++      const list = visibleLinks();
++      list.forEach(function (a) { a.classList.remove('sb-f-hi'); a.removeAttribute('aria-selected'); });
++      hi = list.length ? Math.max(0, Math.min(i, list.length - 1)) : -1;
++      if (hi >= 0) { list[hi].classList.add('sb-f-hi'); list[hi].setAttribute('aria-selected', 'true'); list[hi].scrollIntoView({ block: 'nearest' }); }
+     }
+-    function search(q) {
+-      q = q.trim().toLowerCase();
+-      if (!q) { res.classList.remove('open'); res.innerHTML=''; return; }
+-      // закрытые ролью разделы (ADR-263) в поиск не попадают
+-      const deny = window.CF_PERM_DENY || new Set();
+-      renderResults(ALL_ITEMS.filter(it => !deny.has(it.href.split('#')[0]) && (it.label.toLowerCase().includes(q) || it.href.toLowerCase().includes(q))));
++    function filter(q) {
++      const vs = variants(q);
++      curQ = vs.length ? vs[0] : '';
++      const on = !!curQ;
++      nav.classList.toggle('sb-filtering', on);
++      let total = 0;
++      // 1) группы: совпало название — открыта целиком; свёрнутую раскрываем на время поиска
++      const boxes = [].slice.call(nav.querySelectorAll('.sb-items'));
++      const grpHit = new Map();
++      boxes.forEach(function (box) {
++        const head = groupHead(box);
++        const t = head && head.querySelector('span');
++        const m = on && t ? find(t.dataset.sbfTxt != null ? t.dataset.sbfTxt : t.textContent, vs) : null;
++        if (t) paintLbl(t, m);
++        grpHit.set(box, !!m);
++        if (on && box.classList.contains('collapsed')) {
++          box.dataset.sbfWas = '1';
++          box.classList.remove('collapsed'); if (head) head.classList.remove('collapsed');
++          box.style.maxHeight = 'none';
++        } else if (!on && box.dataset.sbfWas) {
++          delete box.dataset.sbfWas;
++          box.classList.add('collapsed'); if (head) head.classList.add('collapsed');
++        }
++      });
++      const grpHitByName = {};
++      boxes.forEach(function (box) {
++        const t = groupHead(box) && groupHead(box).querySelector('span');
++        if (t) grpHitByName[t.dataset.sbfTxt != null ? t.dataset.sbfTxt : t.textContent] = grpHit.get(box);
++      });
++      // 2) строки — и в группах, и в «Быстром доступе»
++      [].forEach.call(nav.querySelectorAll('a.sb-link'), function (a) {
++        const lbl = a.querySelector('.sb-lbl');
++        const m = on ? find(lbl ? (lbl.dataset.sbfTxt != null ? lbl.dataset.sbfTxt : lbl.textContent) : a.textContent, vs) : null;
++        const gName = GROUP_OF[a.getAttribute('href')] || '';
++        const show = !on || !!m || !!grpHitByName[gName];
++        paintLbl(lbl, m);
++        unitOf(a).classList.toggle('sb-f-off', !show);
++        a.classList.remove('sb-f-hi');
++        if (show && on && !denied(a)) total++;
++      });
++      // 3) пустые группы и пустой «Быстрый доступ» — прочь вместе с заголовком
++      boxes.forEach(function (box) {
++        const has = [].some.call(box.querySelectorAll('a.sb-link'), function (a) { return !denied(a) && !unitOf(a).classList.contains('sb-f-off'); });
++        const empty = on && !has;
++        box.classList.toggle('sb-f-off', empty);
++        const head = groupHead(box); if (head) head.classList.toggle('sb-f-off', empty);
++      });
++      const quick = nav.querySelector('.mp-quick');
++      if (quick) {
++        const qHas = [].some.call(quick.querySelectorAll('a.sb-link'), function (a) { return !denied(a) && !unitOf(a).classList.contains('sb-f-off'); });
++        quick.classList.toggle('sb-f-off', on && !qHas);
++        const cap = quick.previousElementSibling;
++        if (cap && cap.classList.contains('mp-cap')) cap.classList.toggle('sb-f-off', on && !qHas);
++      }
++      if (none) none.hidden = !(on && total === 0);
++      hi = -1;
++      if (on && total) setHi(0);
++      else if (!on) nav.scrollTop = 0;
+     }
+-    if (inp) {
+-      inp.addEventListener('input', () => search(inp.value));
+-      inp.addEventListener('focus', () => { if (inp.value.trim()) search(inp.value); });
+-      inp.addEventListener('keydown', e => {
+-        const links = [...res.querySelectorAll('a')];
+-        if (e.key === 'ArrowDown') { e.preventDefault(); if (links.length) { hi = Math.min(hi+1, links.length-1); links.forEach((a,i)=>a.classList.toggle('hi', i===hi)); links[hi].scrollIntoView({block:'nearest'}); } }
+-        else if (e.key === 'ArrowUp') { e.preventDefault(); if (links.length) { hi = Math.max(hi-1, 0); links.forEach((a,i)=>a.classList.toggle('hi', i===hi)); links[hi].scrollIntoView({block:'nearest'}); } }
+-        else if (e.key === 'Enter') { e.preventDefault(); const t = hi>=0 ? links[hi] : links[0]; if (t) location.href = t.getAttribute('href'); }
+-        else if (e.key === 'Escape') { res.classList.remove('open'); inp.blur(); }
++    window.sbFilter = function (q) { if (inp) inp.value = q || ''; filter(q || ''); };
++    if (inp && nav) {
++      inp.addEventListener('input', function () { filter(inp.value); });
++      inp.addEventListener('keydown', function (e) {
++        if (e.key === 'ArrowDown') { e.preventDefault(); setHi(hi + 1); }
++        else if (e.key === 'ArrowUp') { e.preventDefault(); setHi(hi <= 0 ? 0 : hi - 1); }
++        else if (e.key === 'Enter') {
++          e.preventDefault();
++          const list = visibleLinks();
++          const t = hi >= 0 ? list[hi] : list[0];
++          if (t && curQ) location.href = t.getAttribute('href');
++        }
++        else if (e.key === 'Escape') {
++          // первый Esc — очистить, второй (поле уже пустое) — уйти из поля.
++          // stopPropagation: глобальный Esc сайдбара закрыл бы шторку на телефоне.
++          if (inp.value) { e.stopPropagation(); inp.value = ''; filter(''); }
++          else inp.blur();
++        }
++      });
++      // Ушли в колонку иконок с непустым фильтром — сбрасываем: в 64px поле поиска
++      // не видно, и меню выглядело бы «потерявшим» пункты без объяснения.
++      window.addEventListener('sb:icons', function (e) {
++        if (e.detail && e.detail.icons && inp.value) { inp.value = ''; filter(''); }
+       });
+-      document.addEventListener('click', e => { if (!e.target.closest('#sb-search')) { res.classList.remove('open'); } });
+     }
+   }
+ 
+@@ -1024,7 +1197,7 @@ function __sbLoad(id, src) {
+ (function () {
+   if (document.querySelector('script[src^="/mhead.js"]')) return;
+   var s = document.createElement('script');
+-  s.src = '/mhead.js?v=9';
++  s.src = '/mhead.js?v=10'; // v10 (02.10.2026): без .sb-search-results (поиск меню стал фильтром, ADR-309)
+   document.head.appendChild(s);
+ })();
+ 
+diff --git a/web/public/sb-resize.js b/web/public/sb-resize.js
+--- a/web/public/sb-resize.js
++++ b/web/public/sb-resize.js
+@@ -74,6 +74,10 @@
+   var saved = parseInt(ls(K_W) || '', 10);
+   if (saved >= MIN && saved <= MAX) lastW = saved;
+   var icons = ls(K_I) === '1';
++  var sentIcons = icons;      // последнее разосланное состояние (событие sb:icons)
++  // Кнопка «свернуть/развернуть» — объявлена здесь, ВЫШЕ первого apply() и mount():
++  // mount() может отработать синхронно, и поздний «var tgl = null» обнулил бы ссылку.
++  var tgl = null;
+ 
+   // Пересчёт того, что зависит от ширины сайдбара (09.09.2026, разбор поломки
+   // бэклога). Меняя --sb-w, мы меняем body{padding-left} и, следом, реальные
+@@ -111,10 +115,23 @@
+     if (document.body) document.body.classList.toggle('sb-icons', icons);
+     if (persist) dbg('apply', { icons: icons, width: icons ? ICON : lastW });
+     if (persist) { ls(K_W, lastW); ls(K_I, icons ? '1' : '0'); }
++    syncToggle();
++    // Событие для соседей (sidebar.js сбрасывает фильтр поиска при уходе в иконки).
++    // Только на смену режима, а не на каждый pointermove.
++    if (icons !== sentIcons) {
++      sentIcons = icons;
++      try { window.dispatchEvent(new CustomEvent('sb:icons', { detail: { icons: icons } })); } catch (e) {}
++    }
+     relayout();
+   }
+   function setIcons(v) { if (icons === v) return; icons = v; dbg('snap →', v ? 'иконки' : 'полный'); apply(false); }
+ 
++  // Свернуть/развернуть снаружи (02.10.2026, ADR-309): Ctrl/⌘+K в sidebar.js разворачивает
++  // колонку иконок перед фокусом в поиск. Ширина восстанавливается прежняя (lastW),
++  // состояние запоминается так же, как двойным щелчком по границе.
++  window.sbSetIcons = function (v) { setIcons(!!v); apply(true); };
++  window.sbIsIcons = function () { return icons; };
++
+   apply(false);                                     // ширину ставим сразу, до отрисовки
+   onBody(function () { apply(false); });
+ 
+@@ -134,11 +151,26 @@
+     + '#sb-drag-shield{position:fixed;inset:0;z-index:9999;cursor:col-resize;}'
+     + 'body.sb-dragging{user-select:none;-webkit-user-select:none;}'
+     + '@media (max-width:768px){#sb-resizer{display:none;}}'
++    // Кнопка «свернуть/развернуть» на краю меню (02.10.2026, ADR-309). Сама кнопка —
++    // голая .ibtn (вид — роль из btnCss(), своего фона и рамки ей не пишем); кружок-подложка
++    // — обёртка #sb-collapse: кнопка стоит НА границе, половиной над контентом, и без
++    // подложки шеврон терялся бы на линии. Цвета — токенами, светлая тема берёт свои.
++    // z-index выше ручки (#sb-resizer, 501): клик попадает в кнопку, а тянуть границу
++    // можно выше и ниже неё. Ниже слоя перетаскивания (9999) — во время драга не мешает.
++    + '#sb-collapse{position:fixed;top:24px;left:calc(var(--sb-w) - 13px);z-index:502;width:26px;height:26px;'
++    +   'box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;'
++    +   'background:var(--ui-bg,#0a0a0a);border:1px solid var(--ui-line,#262626);'
++    +   'box-shadow:var(--ui-shadow-sm,0 2px 6px -1px rgba(0,0,0,.25));color:var(--ui-tx-2,#8b8b8b);}'
++    + '#sb-collapse:hover{border-color:var(--ui-brand,#00a0ff);color:var(--ui-tx,#fff);}'
++    + '#sb-collapse>.ibtn{min-width:24px;min-height:24px;}'
++    + '#sb-collapse>.ibtn svg{width:14px;height:14px;}'
++    + 'body.sb-authwall #sb-collapse{display:none;}'
++    + '@media (max-width:768px){#sb-collapse{display:none;}}'
+ 
+     + '@media (min-width:769px){'
+     // плавно только на снапе; во время перетаскивания анимация обязана молчать
+-    + '#app-sidebar,#sb-resizer,body{transition:width .16s ease,left .16s ease,padding-left .16s ease;}'
+-    + 'body.sb-dragging,body.sb-dragging #app-sidebar,body.sb-dragging #sb-resizer{transition:none;}'
++    + '#app-sidebar,#sb-resizer,#sb-collapse,body{transition:width .16s ease,left .16s ease,padding-left .16s ease;}'
++    + 'body.sb-dragging,body.sb-dragging #app-sidebar,body.sb-dragging #sb-resizer,body.sb-dragging #sb-collapse{transition:none;}'
+ 
+     // ---- режим иконок ----
+     + '.sb-icons #app-sidebar .sb-logo{justify-content:center;padding-left:0;padding-right:0;font-size:0;gap:0;}'
+@@ -209,6 +241,36 @@
+     titles();
+     drag(h);
+     h.addEventListener('dblclick', function () { setIcons(!icons); apply(true); });
++    toggleBtn();
++  }
++
++  // Кнопка «свернуть/развернуть» (02.10.2026, ADR-309). Клик = двойной щелчок по
++  // границе: та же пара setIcons + apply(true), прежняя ширина (lastW) возвращается.
++  // Спрайт — window.ICONS_URL (ICONS_V в server.js), своей ?v= не пишем.
++  function toggleBtn() {
++    if (document.getElementById('sb-collapse')) return;
++    var w = document.createElement('div');
++    w.id = 'sb-collapse';
++    w.innerHTML = '<button type="button" class="ibtn" aria-controls="app-sidebar">'
++      + '<svg aria-hidden="true"><use href=""></use></svg></button>';
++    document.body.appendChild(w);
++    tgl = w.querySelector('button');
++    tgl.addEventListener('click', function (e) {
++      e.preventDefault();
++      setIcons(!icons); apply(true);
++    });
++    // Нажатие по кнопке не должно стать началом перетаскивания и не должно уйти странице.
++    tgl.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
++    syncToggle();
++  }
++  function syncToggle() {
++    if (!tgl) return;
++    var t = icons ? 'Развернуть меню' : 'Свернуть меню';
++    tgl.setAttribute('aria-label', t);
++    tgl.setAttribute('aria-expanded', icons ? 'false' : 'true');
++    tgl.title = t;
++    var u = tgl.querySelector('use');
++    if (u) u.setAttribute('href', (window.ICONS_URL || '/assets/icons.svg?v=13') + (icons ? '#i-chevrons-right' : '#i-chevrons-left'));
+   }
+ 
+   // Подписи в тултипы: в режиме иконок текста не видно, а гадать по картинке нельзя.
+@@ -287,7 +349,7 @@
+   // Снимок состояния для отладки: sbResizeDebug() в консоли.
+   window.sbResizeDebug = function () {
+     var st = {
+-      icons: icons, lastW: lastW,
++      icons: icons, lastW: lastW, toggle: !!document.getElementById('sb-collapse'),
+       '--sb-w': getComputedStyle(root).getPropertyValue('--sb-w').trim(),
+       htmlClass: root.className, bodyClass: document.body && document.body.className,
+       shield: !!document.getElementById('sb-drag-shield'),
+diff --git a/web/public/sb-profile.js b/web/public/sb-profile.js
+--- a/web/public/sb-profile.js
++++ b/web/public/sb-profile.js
+@@ -44,6 +44,86 @@
+     return (parts[0].slice(0, 1) + parts[1].slice(0, 1)).toUpperCase();
+   }
+ 
++  /* «Быстрые клавиши» (02.10.2026, ADR-309). Справочник ВСЕХ сочетаний платформы —
++     собран поиском по keydown/ctrlKey/metaKey/altKey в web/public. Добавил сочетание
++     на странице — допиши строку сюда (и в docs/rules/ui.md «Быстрые клавиши»), иначе
++     окно начнёт врать. Формат строки: [клавиши, действие, где, href раздела или ''].
++     В клавишах «Mod» — ⌘ на Mac и Ctrl на остальных, «Alt» — ⌥ / Alt, «Shift» — ⇧ / Shift.
++     href нужен для прав роли (ADR-263): раздел, закрытый роли, в окне не показываем. */
++  var HOTKEYS = [
++    ['Mod+K', 'Поиск по меню: фокус в поле, меню разворачивается из режима иконок', 'Все страницы портала', ''],
++    ['↑ / ↓', 'Выбор пункта среди найденных', 'Поиск по меню', ''],
++    ['Enter', 'Открыть выбранный пункт', 'Поиск по меню', ''],
++    ['Esc', 'Очистить поиск; второй раз — выйти из поля', 'Поиск по меню', ''],
++    ['Esc', 'Закрыть шторку меню, меню профиля, окно или карточку', 'Все страницы', ''],
++    ['Esc', 'Прервать перетаскивание границы меню', 'Граница меню (ПК)', ''],
++    ['Mod+Enter', 'Отправить скриншот', 'Окно «Скрин»', ''],
++    ['Alt+↑ / Alt+↓', 'Переставить строку за ручку перетаскивания', 'Списки с ручкой (справочники /refs)', '/refs'],
++    ['/', 'Фокус в поиск списка', 'Ошибки, Тикеты, Тайминг', ''],
++    ['C', 'Новая ошибка', 'Ошибки (/issues)', '/issues'],
++    ['Mod+Enter', 'Сохранить карточку ошибки', 'Ошибки (/issues)', '/issues'],
++    ['C', 'Новый тикет', 'Тикеты (/ticket)', '/ticket'],
++    ['Mod+Enter', 'Сохранить тикет (в поле комментария — отправить комментарий)', 'Тикеты (/ticket)', '/ticket'],
++    ['← / →', 'Сдвинуть период назад / вперёд', 'Тайминг (/timing/app)', '/timing/app'],
++    ['Enter', 'Отправить сообщение (на ПК; Shift+Enter — новая строка)', 'Чаты (/crm/chats)', '/crm/chats'],
++    ['Mod+B', 'Жирный', 'Чаты — поле сообщения', '/crm/chats'],
++    ['Mod+I', 'Курсив', 'Чаты — поле сообщения', '/crm/chats'],
++    ['Mod+Shift+X', 'Зачёркнутый', 'Чаты — поле сообщения', '/crm/chats'],
++    ['Mod+Shift+P', 'Спойлер', 'Чаты — поле сообщения', '/crm/chats'],
++    ['Enter / Tab', 'Выбрать первого участника в списке «@»', 'Чаты — группа', '/crm/chats'],
++    ['Enter', 'Применить выбранную стадию', 'Карточка лида (/crm/leads)', '/crm/leads'],
++    ['Mod+Enter', 'Отправить письмо', 'Почта — новое письмо (/mail)', '/mail'],
++    ['Mod+S', 'Сохранить robots.txt / llms.txt', 'Индексация — редактор (/index/app)', '/index/app'],
++    ['Mod+Enter', 'Сохранить пару «вопрос — ответ»', 'RAG (/rag/app)', '/rag/app'],
++    ['Mod+Enter', 'Отправить', 'Бриф — окно отправки (/brief)', '/brief'],
++    ['Mod+Enter', 'Отправить запись', 'Дневник (/diary)', '/diary'],
++    ['Mod+Enter', 'Сохранить описание (Esc — отменить)', 'Нормы анализов (/med)', '/med'],
++    ['Enter', 'Отправить (Shift+Enter — новая строка)', 'Ai-агенты — чат (/agents)', '/agents'],
++    ['Mod+Enter', 'Сохранить подзаголовок', 'Окно «Название раздела»', ''],
++    ['← / →', 'Листать подсказки (Esc — закрыть)', 'Трекер привычек — «Как пользоваться»', '/habits/app']
++  ];
++  function keyLabel(k) {
++    var mac = (typeof window.cfIsMac === 'boolean') ? window.cfIsMac
++      : /mac|iphone|ipad|ipod/i.test(navigator.platform || navigator.userAgent || '');
++    return String(k)
++      .replace(/Mod\+/g, mac ? '⌘' : 'Ctrl+')
++      .replace(/Alt\+/g, mac ? '⌥' : 'Alt+')
++      .replace(/Shift\+/g, mac ? '⇧' : 'Shift+');
++  }
++  function hkEsc(s) {
++    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
++      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
++    });
++  }
++  // Окно — общий uiInfo() из /ui-dialogs.js (шторка .mdl-* с крестиком, ADR-231/033):
++  // своего модального окна не заводим. Таблица — на токенах, обе темы.
++  function showHotkeys() {
++    var deny = window.CF_PERM_DENY;
++    var rows = HOTKEYS.filter(function (r) { return !(r[3] && deny && deny.has && deny.has(r[3])); });
++    var html = '<style>'
++      + '.sb-hk{width:100%;border-collapse:collapse;font-size:13px;}'
++      + '.sb-hk th{text-align:left;font-weight:600;font-size:11px;letter-spacing:.04em;text-transform:uppercase;'
++      +   'color:var(--ui-tx-3,#666);padding:6px 8px;border-bottom:1px solid var(--ui-line,#262626);}'
++      + '.sb-hk td{padding:7px 8px;border-bottom:1px solid var(--ui-line-2,#1a1a1a);vertical-align:top;color:var(--ui-tx,#e8e8e8);}'
++      + '.sb-hk td:last-child{color:var(--ui-tx-2,#8b8b8b);}'
++      + '.sb-hk kbd{display:inline-block;white-space:nowrap;font-family:inherit;font-size:12px;font-weight:500;line-height:1.3;padding:1px 6px;border-radius:5px;'
++      +   'border:1px solid var(--ui-line,#262626);background:var(--ui-surface-2,#1a1a1a);color:var(--ui-tx,#e8e8e8);}'
++      + '@media (max-width:640px){.sb-hk th:last-child,.sb-hk td:last-child{display:none;}'
++      +   '.sb-hk td:nth-child(2)::after{content:attr(data-where);display:block;font-size:11.5px;color:var(--ui-tx-3,#666);margin-top:2px;}}'
++      + '</style>'
++      + '<table class="sb-hk"><thead><tr><th>Сочетание</th><th>Действие</th><th>Где</th></tr></thead><tbody>'
++      + rows.map(function (r) {
++          return '<tr><td><kbd>' + hkEsc(keyLabel(r[0])) + '</kbd></td><td data-where="' + hkEsc(r[2]) + '">'
++            + hkEsc(r[1]) + '</td><td>' + hkEsc(r[2]) + '</td></tr>';
++        }).join('')
++      + '</tbody></table>';
++    if (typeof window.uiInfo === 'function') window.uiInfo('Быстрые клавиши', html);
++    else if (window.uiAlert) window.uiAlert(rows.map(function (r) { return keyLabel(r[0]) + ' — ' + r[1] + ' — ' + r[2]; }).join('\n'), { tone: 'info', title: 'Быстрые клавиши' });
++  }
++  // Ручка для кабинета и страниц без строки профиля: cab-foot.js сможет повесить ту же
++  // строку одной строкой кода, не копируя справочник.
++  window.cfShowHotkeys = showHotkeys;
++
+   var CSS =
+     /* Подвал становится точкой отсчёта для меню: оно раскрывается ВВЕРХ, потому что
+        стоит у нижнего края экрана, а на телефоне — у нижнего края шторки. */
+@@ -143,6 +223,11 @@
+       +   'title="Скопировать адрес и все данные страницы для ИИ-агента">'
+       +   ico('i-copy') + 'Копия для ИИ</button>'
+       + '<a class="sb-pm-row" href="/app">' + ico('i-home') + 'На главную</a>'
++      /* «Быстрые клавиши» (02.10.2026, ADR-309) — видна любой роли портала (владелец и
++         сотрудник): справочник только читает, а сочетания закрытых роли разделов окно
++         отфильтрует само. Значок i-keyboard добавлен в спрайт (ICONS_V 13). */
++      + '<button type="button" class="sb-pm-row" id="sb-hotkeys">'
++      +   ico('i-keyboard') + 'Быстрые клавиши</button>'
+       + '<div class="sb-pm-sep"></div>'
+       + '<div class="sb-session" id="sb-session"></div>'
+       + '<button type="button" class="sb-pm-row dg" id="sb-logout">'
+@@ -226,6 +311,10 @@
+       if (window.cfCopyPage) window.cfCopyPage();
+       open(false);
+     });
++    document.getElementById('sb-hotkeys').addEventListener('click', function () {
++      open(false);
++      showHotkeys();
++    });
+     document.getElementById('sb-logout').addEventListener('click', logout);
+ 
+     // Остаток сессии считает sidebar.js (там же скользящее продление куки) — просим
+diff --git a/web/public/issues_page.js b/web/public/issues_page.js
+--- a/web/public/issues_page.js
++++ b/web/public/issues_page.js
+@@ -278,10 +278,9 @@
+     }
+     // Сохранение из карточки — ⌘/Ctrl+Enter, как в задачах.
+     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && $('iss-back').classList.contains('is-open')) { save(); return; }
+-    if (inField || e.metaKey || e.ctrlKey || e.altKey) {
+-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('iss-q').focus(); }
+-      return;
+-    }
++    // ⌘/Ctrl+K здесь больше не ловим (02.10.2026, ADR-309): это общий поиск по меню
++    // портала (sidebar.js, на всех страницах). Локальный поиск списка — клавиша «/».
++    if (inField || e.metaKey || e.ctrlKey || e.altKey) return;
+     if (e.key === '/') { e.preventDefault(); $('iss-q').focus(); return; }
+     if (e.key.toLowerCase() === 'c' || e.key.toLowerCase() === 'с') { e.preventDefault(); open(null); }
+   });
+diff --git a/web/public/ticket_page.js b/web/public/ticket_page.js
+--- a/web/public/ticket_page.js
++++ b/web/public/ticket_page.js
+@@ -585,10 +585,9 @@
+       if (document.activeElement && document.activeElement.id === 'tf-cmt') comment(); else save();
+       return;
+     }
+-    if (inField || e.metaKey || e.ctrlKey || e.altKey) {
+-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('tk-q').focus(); }
+-      return;
+-    }
++    // ⌘/Ctrl+K здесь больше не ловим (02.10.2026, ADR-309): это общий поиск по меню
++    // портала (sidebar.js, на всех страницах). Локальный поиск списка — клавиша «/».
++    if (inField || e.metaKey || e.ctrlKey || e.altKey) return;
+     if (e.key === '/') { e.preventDefault(); $('tk-q').focus(); return; }
+     if (e.key.toLowerCase() === 'c' || e.key.toLowerCase() === 'с') { e.preventDefault(); open(null); }
+   });
+diff --git a/web/public/mhead.js b/web/public/mhead.js
+--- a/web/public/mhead.js
++++ b/web/public/mhead.js
+@@ -192,7 +192,7 @@
+   // не должен через минуту обнулить стек случайному переходу.
+   document.addEventListener('click', function (e) {
+     if (!e.target.closest) return;
+-    if (e.target.closest('#app-sidebar a.sb-link, #app-sidebar .sb-frow, #app-sidebar .sb-search-results a, #cfbn, #cfbn-sheet, .med-tabs, .cl-sb a.cl-nav')) {
++    if (e.target.closest('#app-sidebar a.sb-link, #app-sidebar .sb-frow, #cfbn, #cfbn-sheet, .med-tabs, .cl-sb a.cl-nav')) {
+       ss(RESET, String(Date.now()));
+     }
+   }, true);
+diff --git a/web/server.js b/web/server.js
+--- a/web/server.js
++++ b/web/server.js
+@@ -208,7 +208,7 @@
+ // поднимать не обязательно: он срабатывает только на странице без <head>. Версионный
+ // адрес получает Cache-Control 7 дней (setHeaders у express.static ниже) — одна загрузка,
+ // дальше из кэша браузера. Правило — docs/rules/ui.md, «Адрес спрайта».
+-const ICONS_V = 12; // 12 — i-star/i-pushpin для «Моих продуктов» (ADR-286, 01.10.2026); 11 — i-flag/i-mail-open для «Почты» (ADR-283, 01.10.2026); 10 — i-utensils/i-scan-barcode/i-flashlight для «Питания» (29.09.2026)
++const ICONS_V = 13; // 13 — 31 значок Lucide: уникальные значки пунктов меню портала + i-keyboard «Быстрые клавиши» (ADR-309, 02.10.2026); 12 — i-star/i-pushpin для «Моих продуктов» (ADR-286, 01.10.2026); 11 — i-flag/i-mail-open для «Почты» (ADR-283, 01.10.2026); 10 — i-utensils/i-scan-barcode/i-flashlight для «Питания» (29.09.2026)
+ const ICONS_URL = "/assets/icons.svg?v=" + ICONS_V;
+ const ICONS_TAG = '<script>window.ICONS_URL="' + ICONS_URL + '"</script>';
+ const ICONS_RE = /\/assets\/icons\.svg(?:\?v=[\w.-]*)?(?=[#"'`)])/g;
+diff --git a/web/public/habits-sw.js b/web/public/habits-sw.js
+--- a/web/public/habits-sw.js
++++ b/web/public/habits-sw.js
+@@ -33,7 +33,7 @@ const SHELL = [
+   '/habits',
+   // Спрайт — тем же адресом, что просят страницы (ICONS_V в server.js, 27.09.2026): иначе
+   // установка качала бы отдельную копию без версии. Поднял ICONS_V — подними и здесь.
+-  '/assets/icons.svg?v=12',
++  '/assets/icons.svg?v=13',
+   '/assets/logo.svg',
+   '/habits.webmanifest',
+   '/toast.js',
+diff --git a/web/public/assets/icons.svg b/web/public/assets/icons.svg
+--- a/web/public/assets/icons.svg
++++ b/web/public/assets/icons.svg
+@@ -173,4 +173,36 @@
+ <symbol id="i-mail-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/><path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/></symbol>
+ <!-- Lucide star (01.10.2026, ADR-286 «Питание»): «В мои» в «Моих продуктах»; добавлен star, i-pushpin уже был выше («Закрепить»; i-pin — метка места на карте). Состояние «включено» показывает роль кнопки (.btn), не заливка значка. -->
+ <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></symbol>
++<!-- Lucide (lucide-static 1.50.0, ISC) — 02.10.2026, ADR-309 «Сайдбар»: уникальный значок у каждого пункта меню портала, i-keyboard — «Быстрые клавиши» в меню профиля. -->
++<symbol id="i-app-window" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 4v4"/><path d="M2 8h20"/><path d="M6 4v4"/></symbol>
++<symbol id="i-at-sign" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></symbol>
++<symbol id="i-braces" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"/><path d="M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"/></symbol>
++<symbol id="i-calendar-sync" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 10v4h4"/><path d="m11 14 1.535-1.605a5 5 0 018 1.5"/><path d="M16 2v3"/><path d="m21 18-1.535 1.605a5 5 0 01-8-1.5"/><path d="M21 22v-4h-4"/><path d="M21 8.517V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h3.517"/><path d="M3 9h4"/><path d="M8 2v3"/></symbol>
++<symbol id="i-clipboard-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></symbol>
++<symbol id="i-clipboard-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></symbol>
++<symbol id="i-code-xml" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></symbol>
++<symbol id="i-contact" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 2v2"/><path d="M7 21v-2a2 2 0 012-2h6a2 2 0 012 2v2"/><path d="M8 2v2"/><circle cx="12" cy="10" r="3"/><rect x="3" y="3" width="18" height="18" rx="2"/></symbol>
++<symbol id="i-database-backup" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 12a9 3 0 0 0 5 2.69"/><path d="M21 9.3V5"/><path d="M3 5v14a9 3 0 0 0 6.47 2.88"/><path d="M12 12v4h4"/><path d="M13 20a5 5 0 0 0 9-3 4.5 4.5 0 0 0-4.5-4.5c-1.33 0-2.54.54-3.41 1.41L12 16"/></symbol>
++<symbol id="i-file-cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 8a1 1 0 0 1-1-1V2a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8z"/><path d="M20 8v12a2 2 0 0 1-2 2h-4.182"/><path d="m3.305 19.53.923-.382"/><path d="M4 10.592V4a2 2 0 0 1 2-2h8"/><path d="m4.228 16.852-.924-.383"/><path d="m5.852 15.228-.383-.923"/><path d="m5.852 20.772-.383.924"/><path d="m8.148 15.228.383-.923"/><path d="m8.53 21.696-.382-.924"/><path d="m9.773 16.852.922-.383"/><path d="m9.773 19.148.922.383"/><circle cx="7" cy="18" r="3"/></symbol>
++<symbol id="i-file-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><circle cx="11.5" cy="14.5" r="2.5"/><path d="M13.3 16.3 15 18"/></symbol>
++<symbol id="i-flask-conical" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/></symbol>
++<symbol id="i-history" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></symbol>
++<symbol id="i-id-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 19a4 4 0 00-8 0"/><path d="M16 10h2"/><path d="M16 14h2"/><circle cx="9" cy="12" r="3"/><rect x="2" y="5" width="20" height="14" rx="2"/></symbol>
++<symbol id="i-image-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-3.1-3.1a2 2 0 0 0-2.814.014L6 21"/><path d="m14 19 3 3v-5.5"/><path d="m17 22 3-3"/><circle cx="9" cy="9" r="2"/></symbol>
++<symbol id="i-import" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 11 4 4 4-4"/><path d="M8 5H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-4"/></symbol>
++<symbol id="i-keyboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 8h.01"/><path d="M12 12h.01"/><path d="M14 8h.01"/><path d="M16 12h.01"/><path d="M18 8h.01"/><path d="M6 8h.01"/><path d="M7 16h10"/><path d="M8 12h.01"/><rect width="20" height="16" x="2" y="4" rx="2"/></symbol>
++<symbol id="i-layout-dashboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></symbol>
++<symbol id="i-library" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/></symbol>
++<symbol id="i-log-in" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/></symbol>
++<symbol id="i-megaphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/><path d="M8 6v8"/></symbol>
++<symbol id="i-network" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></symbol>
++<symbol id="i-plug" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M15 8V2"/><path d="M17 8a1 1 0 0 1 1 1v4a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1z"/><path d="M9 8V2"/></symbol>
++<symbol id="i-radio-tower" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/><path d="M7.8 4.7a6.14 6.14 0 0 0-.8 7.5"/><circle cx="12" cy="9" r="2"/><path d="M16.2 4.8c2 2 2.26 5.11.8 7.47"/><path d="M19.1 1.9a9.96 9.96 0 0 1 0 14.1"/><path d="M9.5 18h5"/><path d="m8 22 4-11 4 11"/></symbol>
++<symbol id="i-scan-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/><path d="m16 16-1.9-1.9"/></symbol>
++<symbol id="i-scroll-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></symbol>
++<symbol id="i-smile" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 10V9"/><path d="M16.472 15a6 6 0 01-8.943 0"/><path d="M9 10V9"/><circle cx="12" cy="12" r="10"/></symbol>
++<symbol id="i-stethoscope" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/></symbol>
++<symbol id="i-table-properties" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M21 9H3"/><path d="M21 15H3"/></symbol>
++<symbol id="i-terminal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19h8"/><path d="m4 17 6-6-6-6"/></symbol>
++<symbol id="i-test-tubes" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v17.5A2.5 2.5 0 0 1 6.5 22A2.5 2.5 0 0 1 4 19.5V2"/><path d="M20 2v17.5a2.5 2.5 0 0 1-2.5 2.5a2.5 2.5 0 0 1-2.5-2.5V2"/><path d="M3 2h7"/><path d="M14 2h7"/><path d="M9 16H4"/><path d="M20 16h-5"/></symbol>
+ </svg>
+\ No newline at end of file
+diff --git a/web/public/issues.html b/web/public/issues.html
+--- a/web/public/issues.html
++++ b/web/public/issues.html
+@@ -281,7 +281,7 @@
+ <script src="/loc-time.js?v=1"></script>
+ <script src="/toast.js"></script>
+ <script src="/list-toolbar.js?v=2"></script>
+-<script src="/issues_page.js?v=8"></script>
++<script src="/issues_page.js?v=9"></script>
+ <script src="/issues_adr.js?v=2"></script>
+ <script src="/sidebar.js"></script>
+ </body>
+diff --git a/web/public/ticket.html b/web/public/ticket.html
+--- a/web/public/ticket.html
++++ b/web/public/ticket.html
+@@ -311,7 +311,7 @@
+ <script src="/linkify.js?v=1"></script>
+ <script src="/ui-menu.js?v=10"></script>
+ <script src="/ui-color.js?v=1"></script><!-- цвет статуса тикета из справочника, метка .ui-st (ADR-285) -->
+-<script src="/ticket_page.js?v=15"></script>
++<script src="/ticket_page.js?v=16"></script>
+ <script src="/sidebar.js"></script>
+ </body>
+ </html>

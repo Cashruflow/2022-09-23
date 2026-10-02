@@ -1,0 +1,12 @@
+diff --git a/web/public/mhead.js b/web/public/mhead.js
+--- a/web/public/mhead.js
++++ b/web/public/mhead.js
+@@ -192,7 +192,7 @@
+   // не должен через минуту обнулить стек случайному переходу.
+   document.addEventListener('click', function (e) {
+     if (!e.target.closest) return;
+-    if (e.target.closest('#app-sidebar a.sb-link, #app-sidebar .sb-frow, #app-sidebar .sb-search-results a, #cfbn, #cfbn-sheet, .med-tabs, .cl-sb a.cl-nav')) {
++    if (e.target.closest('#app-sidebar a.sb-link, #app-sidebar .sb-frow, #cfbn, #cfbn-sheet, .med-tabs, .cl-sb a.cl-nav')) {
+       ss(RESET, String(Date.now()));
+     }
+   }, true);

@@ -1,0 +1,12 @@
+diff --git a/web/public/issues.html b/web/public/issues.html
+--- a/web/public/issues.html
++++ b/web/public/issues.html
+@@ -281,7 +281,7 @@
+ <script src="/loc-time.js?v=1"></script>
+ <script src="/toast.js"></script>
+ <script src="/list-toolbar.js?v=2"></script>
+-<script src="/issues_page.js?v=8"></script>
++<script src="/issues_page.js?v=9"></script>
+ <script src="/issues_adr.js?v=2"></script>
+ <script src="/sidebar.js"></script>
+ </body>

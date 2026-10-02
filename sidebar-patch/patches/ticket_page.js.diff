@@ -1,0 +1,17 @@
+diff --git a/web/public/ticket_page.js b/web/public/ticket_page.js
+--- a/web/public/ticket_page.js
++++ b/web/public/ticket_page.js
+@@ -585,10 +585,9 @@
+       if (document.activeElement && document.activeElement.id === 'tf-cmt') comment(); else save();
+       return;
+     }
+-    if (inField || e.metaKey || e.ctrlKey || e.altKey) {
+-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('tk-q').focus(); }
+-      return;
+-    }
++    // ⌘/Ctrl+K здесь больше не ловим (02.10.2026, ADR-309): это общий поиск по меню
++    // портала (sidebar.js, на всех страницах). Локальный поиск списка — клавиша «/».
++    if (inField || e.metaKey || e.ctrlKey || e.altKey) return;
+     if (e.key === '/') { e.preventDefault(); $('tk-q').focus(); return; }
+     if (e.key.toLowerCase() === 'c' || e.key.toLowerCase() === 'с') { e.preventDefault(); open(null); }
+   });
