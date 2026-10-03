@@ -6,7 +6,7 @@ diff --git a/web/public/sidebar.js b/web/public/sidebar.js
      const sp = document.createElement('script');
      sp.id = 'cf-sb-profile-src';
 -    sp.src = '/sb-profile.js?v=4'; // v3 (29.09.2026): тень меню — токен --ui-shadow-md
-+    sp.src = '/sb-profile.js?v=5'; // v5 (02.10.2026, ADR-309): «Быстрые клавиши»; v3 (29.09.2026): тень меню — токен --ui-shadow-md
++    sp.src = '/sb-profile.js?v=5'; // v5 (02.10.2026): «Быстрые клавиши»; v3 (29.09.2026): тень меню — токен --ui-shadow-md
      document.head.appendChild(sp);
    }
  })();
@@ -68,8 +68,8 @@ diff --git a/web/public/sidebar.js b/web/public/sidebar.js
      { group: 'SEO', items: [
        // Главная SEO-раздела (16.09.2026): сводка техаудита Топвизора + входы в сервисы.
        // #433: хаб «Сайт» — вкладки Сводка/Краулер/Индексация/PageSpeed/…; пункты ниже ведут в тот же хаб (редирект site_embed.js).
--      { href: '/seo/app', icon: 'structure', label: 'Сайт' },
-+      { href: '/seo/app', icon: 'app-window', label: 'Сайт' },
+-      { href: '/seo/app', icon: 'structure', label: 'SEO' },
++      { href: '/seo/app', icon: 'app-window', label: 'SEO' },
        { href: '/sites', icon: 'sites', label: 'Сайты' },
 -      { href: '/crawl', icon: 'search', label: 'Краулер' },
 +      { href: '/crawl', icon: 'scan-search', label: 'Краулер' },
@@ -178,7 +178,7 @@ diff --git a/web/public/sidebar.js b/web/public/sidebar.js
  
    const path = location.pathname.replace(/\/$/, '') || '/';
  
-+  // Подсказка сочетания поиска в поле (02.10.2026, ADR-309): на Mac — ⌘K, иначе Ctrl K.
++  // Подсказка сочетания поиска в поле (02.10.2026): на Mac — ⌘K, иначе Ctrl K.
 +  // Платформу берём из userAgentData, где он есть, иначе из navigator.platform/UA.
 +  const SB_MAC = (function () {
 +    try {
@@ -210,7 +210,7 @@ diff --git a/web/public/sidebar.js b/web/public/sidebar.js
 -    #app-sidebar .sb-search-results a:hover, #app-sidebar .sb-search-results a.hi { background:#1a1a1a; color:#fff; }
 -    #app-sidebar .sb-search-results .sb-sr-grp { font-size:10px; color:#555; }
 -    #app-sidebar .sb-search-results .sb-sr-empty { padding:10px; font-size:12px; color:#555; }
-+    /* 02.10.2026 (ADR-309): поиск — ФИЛЬТР самого меню, а не выпадающий список поверх.
++    /* 02.10.2026: поиск — ФИЛЬТР самого меню, а не выпадающий список поверх.
 +       Несовпавшие строки прячутся классом .sb-f-off (display, а не удаление и не клон:
 +       бейджи-поллеры ищут ссылку по href и должны найти ту же самую), пустые группы — тоже,
 +       свёрнутые на время поиска раскрываются. Совпадение подсвечено <mark> в .sb-lbl.
@@ -245,7 +245,7 @@ diff --git a/web/public/sidebar.js b/web/public/sidebar.js
  
    document.addEventListener('keydown', e => { if (e.key === 'Escape') window.sbMenu(false); });
 +
-+  // ⌘K / Ctrl+K — поиск по меню на ЛЮБОЙ странице портала (02.10.2026, ADR-309).
++  // ⌘K / Ctrl+K — поиск по меню на ЛЮБОЙ странице портала (02.10.2026).
 +  // Раньше сочетание жило только на /issues и /ticket и ставило фокус в локальный поиск
 +  // списка — на остальных страницах те же пальцы открывали поиск браузера. Теперь одно
 +  // поведение везде; локальный поиск этих двух страниц остался на «/».
@@ -275,13 +275,13 @@ diff --git a/web/public/sidebar.js b/web/public/sidebar.js
    window.addEventListener('resize', () => { if (window.innerWidth > 768) window.sbMenu(false); });
    // переход по пункту меню закрывает шторку (иначе она висит поверх новой страницы,
    // пока та грузится, и мигает при возврате «назад» из кэша)
-@@ -920,37 +963,167 @@ function __sbLoad(id, src) {
+@@ -920,37 +963,170 @@ function __sbLoad(id, src) {
      // запросе, и два места, считающих остаток, разошлись бы на первой правке.
      window.sbUpdSess = updSess;
  
 -    // Поиск по порталу — плоский список всех пунктов меню (все группы)
 -    const ALL_ITEMS = MENU.flatMap(g => g.items.map(it => ({ ...it, group: g.group })));
-+    // ===== Поиск по меню (02.10.2026, ADR-309) =====
++    // ===== Поиск по меню (02.10.2026) =====
 +    // Было: выпадающий список из 10 клонов-ссылок поверх меню. Стало: фильтр самого меню —
 +    // несовпавшие строки прячутся, совпадение подсвечено в подписи. Почему не клоны:
 +    // бейджи (уведомления, чаты, почта) вешают поллеры по href на ОРИГИНАЛ ссылки, и у клона
@@ -299,7 +299,9 @@ diff --git a/web/public/sidebar.js b/web/public/sidebar.js
 +    // href → название группы из MENU: пункт в «Быстром доступе» живёт вне своей группы,
 +    // а искать его по группе всё равно нужно.
 +    const GROUP_OF = {};
-+    MENU.forEach(function (g) { g.items.forEach(function (it) { if (!GROUP_OF[it.href]) GROUP_OF[it.href] = g.group; }); });
++    // Чтение — только через Object.hasOwn: href «constructor»/«__proto__» не должен достать
++    // свойство прототипа (правило CLAUDE.md «Белый список в объекте», 03.10.2026).
++    MENU.forEach(function (g) { g.items.forEach(function (it) { if (!Object.hasOwn(GROUP_OF, it.href)) GROUP_OF[it.href] = g.group; }); });
 +    const EN = "qwertyuiop[]asdfghjkl;'zxcvbnm,.`";
 +    const RU = 'йцукенгшщзхъфывапролджэячсмитьбюё';
 +    function swapLayout(s, from, to) {
@@ -406,8 +408,9 @@ diff --git a/web/public/sidebar.js b/web/public/sidebar.js
 +      [].forEach.call(nav.querySelectorAll('a.sb-link'), function (a) {
 +        const lbl = a.querySelector('.sb-lbl');
 +        const m = on ? find(lbl ? (lbl.dataset.sbfTxt != null ? lbl.dataset.sbfTxt : lbl.textContent) : a.textContent, vs) : null;
-+        const gName = GROUP_OF[a.getAttribute('href')] || '';
-+        const show = !on || !!m || !!grpHitByName[gName];
++        const gHref = a.getAttribute('href') || '';
++        const gName = Object.hasOwn(GROUP_OF, gHref) ? GROUP_OF[gHref] : '';
++        const show = !on || !!m || (Object.hasOwn(grpHitByName, gName) && !!grpHitByName[gName]);
 +        paintLbl(lbl, m);
 +        unitOf(a).classList.toggle('sb-f-off', !show);
 +        a.classList.remove('sb-f-hi');
@@ -469,12 +472,12 @@ diff --git a/web/public/sidebar.js b/web/public/sidebar.js
      }
    }
  
-@@ -1024,7 +1197,7 @@ function __sbLoad(id, src) {
+@@ -1024,7 +1200,7 @@ function __sbLoad(id, src) {
  (function () {
    if (document.querySelector('script[src^="/mhead.js"]')) return;
    var s = document.createElement('script');
 -  s.src = '/mhead.js?v=9';
-+  s.src = '/mhead.js?v=10'; // v10 (02.10.2026): без .sb-search-results (поиск меню стал фильтром, ADR-309)
++  s.src = '/mhead.js?v=10'; // v10 (02.10.2026): без .sb-search-results (поиск меню стал фильтром)
    document.head.appendChild(s);
  })();
  
@@ -507,7 +510,7 @@ diff --git a/web/public/sb-resize.js b/web/public/sb-resize.js
    }
    function setIcons(v) { if (icons === v) return; icons = v; dbg('snap →', v ? 'иконки' : 'полный'); apply(false); }
  
-+  // Свернуть/развернуть снаружи (02.10.2026, ADR-309): Ctrl/⌘+K в sidebar.js разворачивает
++  // Свернуть/развернуть снаружи (02.10.2026): Ctrl/⌘+K в sidebar.js разворачивает
 +  // колонку иконок перед фокусом в поиск. Ширина восстанавливается прежняя (lastW),
 +  // состояние запоминается так же, как двойным щелчком по границе.
 +  window.sbSetIcons = function (v) { setIcons(!!v); apply(true); };
@@ -520,7 +523,7 @@ diff --git a/web/public/sb-resize.js b/web/public/sb-resize.js
      + '#sb-drag-shield{position:fixed;inset:0;z-index:9999;cursor:col-resize;}'
      + 'body.sb-dragging{user-select:none;-webkit-user-select:none;}'
      + '@media (max-width:768px){#sb-resizer{display:none;}}'
-+    // Кнопка «свернуть/развернуть» на краю меню (02.10.2026, ADR-309). Сама кнопка —
++    // Кнопка «свернуть/развернуть» на краю меню (02.10.2026). Сама кнопка —
 +    // голая .ibtn (вид — роль из btnCss(), своего фона и рамки ей не пишем); кружок-подложка
 +    // — обёртка #sb-collapse: кнопка стоит НА границе, половиной над контентом, и без
 +    // подложки шеврон терялся бы на линии. Цвета — токенами, светлая тема берёт свои.
@@ -552,7 +555,7 @@ diff --git a/web/public/sb-resize.js b/web/public/sb-resize.js
 +    toggleBtn();
 +  }
 +
-+  // Кнопка «свернуть/развернуть» (02.10.2026, ADR-309). Клик = двойной щелчок по
++  // Кнопка «свернуть/развернуть» (02.10.2026). Клик = двойной щелчок по
 +  // границе: та же пара setIcons + apply(true), прежняя ширина (lastW) возвращается.
 +  // Спрайт — window.ICONS_URL (ICONS_V в server.js), своей ?v= не пишем.
 +  function toggleBtn() {
@@ -598,7 +601,7 @@ diff --git a/web/public/sb-profile.js b/web/public/sb-profile.js
      return (parts[0].slice(0, 1) + parts[1].slice(0, 1)).toUpperCase();
    }
  
-+  /* «Быстрые клавиши» (02.10.2026, ADR-309). Справочник ВСЕХ сочетаний платформы —
++  /* «Быстрые клавиши» (02.10.2026). Справочник ВСЕХ сочетаний платформы —
 +     собран поиском по keydown/ctrlKey/metaKey/altKey в web/public. Добавил сочетание
 +     на странице — допиши строку сюда (и в docs/rules/ui.md «Быстрые клавиши»), иначе
 +     окно начнёт врать. Формат строки: [клавиши, действие, где, href раздела или ''].
@@ -685,7 +688,7 @@ diff --git a/web/public/sb-profile.js b/web/public/sb-profile.js
        +   'title="Скопировать адрес и все данные страницы для ИИ-агента">'
        +   ico('i-copy') + 'Копия для ИИ</button>'
        + '<a class="sb-pm-row" href="/app">' + ico('i-home') + 'На главную</a>'
-+      /* «Быстрые клавиши» (02.10.2026, ADR-309) — видна любой роли портала (владелец и
++      /* «Быстрые клавиши» (02.10.2026) — видна любой роли портала (владелец и
 +         сотрудник): справочник только читает, а сочетания закрытых роли разделов окно
 +         отфильтрует само. Значок i-keyboard добавлен в спрайт (ICONS_V 13). */
 +      + '<button type="button" class="sb-pm-row" id="sb-hotkeys">'
@@ -715,7 +718,7 @@ diff --git a/web/public/issues_page.js b/web/public/issues_page.js
 -      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('iss-q').focus(); }
 -      return;
 -    }
-+    // ⌘/Ctrl+K здесь больше не ловим (02.10.2026, ADR-309): это общий поиск по меню
++    // ⌘/Ctrl+K здесь больше не ловим (02.10.2026): это общий поиск по меню
 +    // портала (sidebar.js, на всех страницах). Локальный поиск списка — клавиша «/».
 +    if (inField || e.metaKey || e.ctrlKey || e.altKey) return;
      if (e.key === '/') { e.preventDefault(); $('iss-q').focus(); return; }
@@ -732,7 +735,7 @@ diff --git a/web/public/ticket_page.js b/web/public/ticket_page.js
 -      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('tk-q').focus(); }
 -      return;
 -    }
-+    // ⌘/Ctrl+K здесь больше не ловим (02.10.2026, ADR-309): это общий поиск по меню
++    // ⌘/Ctrl+K здесь больше не ловим (02.10.2026): это общий поиск по меню
 +    // портала (sidebar.js, на всех страницах). Локальный поиск списка — клавиша «/».
 +    if (inField || e.metaKey || e.ctrlKey || e.altKey) return;
      if (e.key === '/') { e.preventDefault(); $('tk-q').focus(); return; }
@@ -753,12 +756,12 @@ diff --git a/web/public/mhead.js b/web/public/mhead.js
 diff --git a/web/server.js b/web/server.js
 --- a/web/server.js
 +++ b/web/server.js
-@@ -208,7 +208,7 @@
+@@ -214,7 +214,7 @@
  // поднимать не обязательно: он срабатывает только на странице без <head>. Версионный
  // адрес получает Cache-Control 7 дней (setHeaders у express.static ниже) — одна загрузка,
  // дальше из кэша браузера. Правило — docs/rules/ui.md, «Адрес спрайта».
--const ICONS_V = 12; // 12 — i-star/i-pushpin для «Моих продуктов» (ADR-286, 01.10.2026); 11 — i-flag/i-mail-open для «Почты» (ADR-283, 01.10.2026); 10 — i-utensils/i-scan-barcode/i-flashlight для «Питания» (29.09.2026)
-+const ICONS_V = 13; // 13 — 31 значок Lucide: уникальные значки пунктов меню портала + i-keyboard «Быстрые клавиши» (ADR-309, 02.10.2026); 12 — i-star/i-pushpin для «Моих продуктов» (ADR-286, 01.10.2026); 11 — i-flag/i-mail-open для «Почты» (ADR-283, 01.10.2026); 10 — i-utensils/i-scan-barcode/i-flashlight для «Питания» (29.09.2026)
+-const ICONS_V = 14; // 14 — i-sim/i-esim для вкладки «eSIM» (ADR-233, 03.10.2026); 13 — i-copy-plus (ADR-236, 02.10.2026); 12 — i-star/i-pushpin для «Моих продуктов» (ADR-286, 01.10.2026); 11 — i-flag/i-mail-open для «Почты» (ADR-283, 01.10.2026); 10 — i-utensils/i-scan-barcode/i-flashlight для «Питания» (29.09.2026)
++const ICONS_V = 15; // 15 — 31 значок Lucide: уникальные значки пунктов меню портала + i-keyboard «Быстрые клавиши» (сайдбар, 02.10.2026); 14 — i-sim/i-esim для вкладки «eSIM» (ADR-233, 03.10.2026); 13 — i-copy-plus (ADR-236, 02.10.2026); 12 — i-star/i-pushpin для «Моих продуктов» (ADR-286, 01.10.2026); 11 — i-flag/i-mail-open для «Почты» (ADR-283, 01.10.2026); 10 — i-utensils/i-scan-barcode/i-flashlight для «Питания» (29.09.2026)
  const ICONS_URL = "/assets/icons.svg?v=" + ICONS_V;
  const ICONS_TAG = '<script>window.ICONS_URL="' + ICONS_URL + '"</script>';
  const ICONS_RE = /\/assets\/icons\.svg(?:\?v=[\w.-]*)?(?=[#"'`)])/g;
@@ -769,19 +772,19 @@ diff --git a/web/public/habits-sw.js b/web/public/habits-sw.js
    '/habits',
    // Спрайт — тем же адресом, что просят страницы (ICONS_V в server.js, 27.09.2026): иначе
    // установка качала бы отдельную копию без версии. Поднял ICONS_V — подними и здесь.
--  '/assets/icons.svg?v=12',
-+  '/assets/icons.svg?v=13',
+-  '/assets/icons.svg?v=13',
++  '/assets/icons.svg?v=15',
    '/assets/logo.svg',
    '/habits.webmanifest',
    '/toast.js',
 diff --git a/web/public/assets/icons.svg b/web/public/assets/icons.svg
 --- a/web/public/assets/icons.svg
 +++ b/web/public/assets/icons.svg
-@@ -173,4 +173,36 @@
- <symbol id="i-mail-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/><path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/></symbol>
- <!-- Lucide star (01.10.2026, ADR-286 «Питание»): «В мои» в «Моих продуктах»; добавлен star, i-pushpin уже был выше («Закрепить»; i-pin — метка места на карте). Состояние «включено» показывает роль кнопки (.btn), не заливка значка. -->
- <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></symbol>
-+<!-- Lucide (lucide-static 1.50.0, ISC) — 02.10.2026, ADR-309 «Сайдбар»: уникальный значок у каждого пункта меню портала, i-keyboard — «Быстрые клавиши» в меню профиля. -->
+@@ -176,4 +176,36 @@
+ <!-- Lucide card-sim и свой i-esim — смартфон с сигналом (03.10.2026, ADR-233, вкладка «eSIM»): физическая SIM и eSIM; в списке различаются подписью, не только значком. -->
+ <symbol id="i-sim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14v4"/><path d="M14.172 2a2 2 0 0 1 1.414.586l3.828 3.828A2 2 0 0 1 20 7.828V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M8 14h8"/><rect x="8" y="10" width="8" height="8" rx="1"/></symbol>
+ <symbol id="i-esim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="12" height="20" x="6" y="2" rx="2" ry="2"/><path d="M9.5 8.5a3.5 3.5 0 0 1 5 0"/><path d="M11 11.5a1.5 1.5 0 0 1 2 0"/><path d="M12 15h.01"/></symbol>
++<!-- Lucide (lucide-static 1.50.0, ISC) — 02.10.2026, «Сайдбар»: уникальный значок у каждого пункта меню портала, i-keyboard — «Быстрые клавиши» в меню профиля. -->
 +<symbol id="i-app-window" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 4v4"/><path d="M2 8h20"/><path d="M6 4v4"/></symbol>
 +<symbol id="i-at-sign" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></symbol>
 +<symbol id="i-braces" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"/><path d="M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"/></symbol>
@@ -832,7 +835,7 @@ diff --git a/web/public/ticket.html b/web/public/ticket.html
 +++ b/web/public/ticket.html
 @@ -311,7 +311,7 @@
  <script src="/linkify.js?v=1"></script>
- <script src="/ui-menu.js?v=10"></script>
+ <script src="/ui-menu.js?v=11"></script>
  <script src="/ui-color.js?v=1"></script><!-- цвет статуса тикета из справочника, метка .ui-st (ADR-285) -->
 -<script src="/ticket_page.js?v=15"></script>
 +<script src="/ticket_page.js?v=16"></script>

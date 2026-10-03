@@ -79,7 +79,7 @@ function __sbLoad(id, src) {
   if (!document.getElementById('cf-shot-src') && !window.__pltShot) {
     const sh = document.createElement('script');
     sh.id = 'cf-shot-src';
-    sh.src = '/shot.js?v=5';
+    sh.src = '/shot.js?v=7';
     document.head.appendChild(sh);
   }
 })();
@@ -103,7 +103,7 @@ function __sbLoad(id, src) {
   if (!document.getElementById('cf-sb-profile-src')) {
     const sp = document.createElement('script');
     sp.id = 'cf-sb-profile-src';
-    sp.src = '/sb-profile.js?v=5'; // v5 (02.10.2026, ADR-309): «Быстрые клавиши»; v3 (29.09.2026): тень меню — токен --ui-shadow-md
+    sp.src = '/sb-profile.js?v=5'; // v5 (02.10.2026): «Быстрые клавиши»; v3 (29.09.2026): тень меню — токен --ui-shadow-md
     document.head.appendChild(sp);
   }
 })();
@@ -248,7 +248,7 @@ function __sbLoad(id, src) {
     { group: 'SEO', items: [
       // Главная SEO-раздела (16.09.2026): сводка техаудита Топвизора + входы в сервисы.
       // #433: хаб «Сайт» — вкладки Сводка/Краулер/Индексация/PageSpeed/…; пункты ниже ведут в тот же хаб (редирект site_embed.js).
-      { href: '/seo/app', icon: 'app-window', label: 'Сайт' },
+      { href: '/seo/app', icon: 'app-window', label: 'SEO' },
       { href: '/sites', icon: 'sites', label: 'Сайты' },
       { href: '/crawl', icon: 'scan-search', label: 'Краулер' },
       // Скорость страниц клиентских сайтов (задача #365). Рядом с краулером:
@@ -380,7 +380,7 @@ function __sbLoad(id, src) {
 
   const path = location.pathname.replace(/\/$/, '') || '/';
 
-  // Подсказка сочетания поиска в поле (02.10.2026, ADR-309): на Mac — ⌘K, иначе Ctrl K.
+  // Подсказка сочетания поиска в поле (02.10.2026): на Mac — ⌘K, иначе Ctrl K.
   // Платформу берём из userAgentData, где он есть, иначе из navigator.platform/UA.
   const SB_MAC = (function () {
     try {
@@ -463,7 +463,7 @@ function __sbLoad(id, src) {
     #app-sidebar .sb-search input { width:100%; box-sizing:border-box; background:var(--ui-surface-3,#101010); border:1px solid var(--ui-line-2,#1e1e1e); border-radius:8px; padding:8px 10px; color:var(--ui-tx,#eee); font-size:13px; outline:none; }
     #app-sidebar .sb-search input::placeholder { color:var(--ui-tx-3,#666); }
     #app-sidebar .sb-search input:focus { border-color:#00a0ff55; }
-    /* 02.10.2026 (ADR-309): поиск — ФИЛЬТР самого меню, а не выпадающий список поверх.
+    /* 02.10.2026: поиск — ФИЛЬТР самого меню, а не выпадающий список поверх.
        Несовпавшие строки прячутся классом .sb-f-off (display, а не удаление и не клон:
        бейджи-поллеры ищут ссылку по href и должны найти ту же самую), пустые группы — тоже,
        свёрнутые на время поиска раскрываются. Совпадение подсвечено <mark> в .sb-lbl.
@@ -664,7 +664,7 @@ function __sbLoad(id, src) {
 
   document.addEventListener('keydown', e => { if (e.key === 'Escape') window.sbMenu(false); });
 
-  // ⌘K / Ctrl+K — поиск по меню на ЛЮБОЙ странице портала (02.10.2026, ADR-309).
+  // ⌘K / Ctrl+K — поиск по меню на ЛЮБОЙ странице портала (02.10.2026).
   // Раньше сочетание жило только на /issues и /ticket и ставило фокус в локальный поиск
   // списка — на остальных страницах те же пальцы открывали поиск браузера. Теперь одно
   // поведение везде; локальный поиск этих двух страниц остался на «/».
@@ -963,7 +963,7 @@ function __sbLoad(id, src) {
     // запросе, и два места, считающих остаток, разошлись бы на первой правке.
     window.sbUpdSess = updSess;
 
-    // ===== Поиск по меню (02.10.2026, ADR-309) =====
+    // ===== Поиск по меню (02.10.2026) =====
     // Было: выпадающий список из 10 клонов-ссылок поверх меню. Стало: фильтр самого меню —
     // несовпавшие строки прячутся, совпадение подсвечено в подписи. Почему не клоны:
     // бейджи (уведомления, чаты, почта) вешают поллеры по href на ОРИГИНАЛ ссылки, и у клона
@@ -980,7 +980,9 @@ function __sbLoad(id, src) {
     // href → название группы из MENU: пункт в «Быстром доступе» живёт вне своей группы,
     // а искать его по группе всё равно нужно.
     const GROUP_OF = {};
-    MENU.forEach(function (g) { g.items.forEach(function (it) { if (!GROUP_OF[it.href]) GROUP_OF[it.href] = g.group; }); });
+    // Чтение — только через Object.hasOwn: href «constructor»/«__proto__» не должен достать
+    // свойство прототипа (правило CLAUDE.md «Белый список в объекте», 03.10.2026).
+    MENU.forEach(function (g) { g.items.forEach(function (it) { if (!Object.hasOwn(GROUP_OF, it.href)) GROUP_OF[it.href] = g.group; }); });
     const EN = "qwertyuiop[]asdfghjkl;'zxcvbnm,.`";
     const RU = 'йцукенгшщзхъфывапролджэячсмитьбюё';
     function swapLayout(s, from, to) {
@@ -1074,8 +1076,9 @@ function __sbLoad(id, src) {
       [].forEach.call(nav.querySelectorAll('a.sb-link'), function (a) {
         const lbl = a.querySelector('.sb-lbl');
         const m = on ? find(lbl ? (lbl.dataset.sbfTxt != null ? lbl.dataset.sbfTxt : lbl.textContent) : a.textContent, vs) : null;
-        const gName = GROUP_OF[a.getAttribute('href')] || '';
-        const show = !on || !!m || !!grpHitByName[gName];
+        const gHref = a.getAttribute('href') || '';
+        const gName = Object.hasOwn(GROUP_OF, gHref) ? GROUP_OF[gHref] : '';
+        const show = !on || !!m || (Object.hasOwn(grpHitByName, gName) && !!grpHitByName[gName]);
         paintLbl(lbl, m);
         unitOf(a).classList.toggle('sb-f-off', !show);
         a.classList.remove('sb-f-hi');
@@ -1197,7 +1200,7 @@ function __sbLoad(id, src) {
 (function () {
   if (document.querySelector('script[src^="/mhead.js"]')) return;
   var s = document.createElement('script');
-  s.src = '/mhead.js?v=10'; // v10 (02.10.2026): без .sb-search-results (поиск меню стал фильтром, ADR-309)
+  s.src = '/mhead.js?v=10'; // v10 (02.10.2026): без .sb-search-results (поиск меню стал фильтром)
   document.head.appendChild(s);
 })();
 
@@ -1230,7 +1233,7 @@ function __sbLoad(id, src) {
   // но запрос уходил впустую (15.09.2026).
   if (document.querySelector('script[src^="/ui-dialogs.js"]')) return;
   var s = document.createElement('script');
-  s.src = '/ui-dialogs.js?v=7'; // 30.09.2026: v7 — тени токенами; 29.09.2026: v6 — зазор над доком = --ui-toast-gap; v5 — тосты над доком (dockSync)
+  s.src = '/ui-dialogs.js?v=8'; // 03.10.2026: v8 — диалоги на телефоне шторкой + visualViewport; 30.09.2026: v7 — тени токенами; 29.09.2026: v6 — зазор над доком = --ui-toast-gap; v5 — тосты над доком (dockSync)
   document.head.appendChild(s);
 })();
 

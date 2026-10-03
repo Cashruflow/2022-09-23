@@ -1,7 +1,43 @@
-# Патч бокового меню портала (ПК) — ADR-309 (черновик), 02.10.2026
+# Патч бокового меню портала (ПК) — 02.10.2026, сверен с сервером 03.10.2026
+
+Черновик ADR — `docs/ADR-draft-*.md`, номер выдаст `create_adr`; в коде патча номер ADR не упоминается.
 
 Подготовлено, **НЕ применено**. На сервере только читалось (`read_file`, `search_code`, `read_docs`, `list_docs`).
 Ничего не коммитилось и не пушилось.
+
+## Сверка с сервером 03.10.2026 (что изменилось после 02.10 и как перенесено)
+
+Все 11 файлов перечитаны `read_file` в `/home/cashruflow`; полные копии сравнены построчно, выдержки — по
+затронутым местам и окрестностям.
+
+| Файл | Что на сервере | Что сделано |
+|---|---|---|
+| `sb-resize.js`, `sb-profile.js` | без изменений | — |
+| `sidebar.js` | `shot.js?v=5→7`; `ui-dialogs.js?v=7→8` (строка с комментарием 03.10); подпись `/seo/app` «Сайт» → «SEO» | внесено в `orig/` и `new/` как есть (в `new/` пункт «SEO» остался со значком `i-app-window`) |
+| `web/server.js` | +6 строк комментария выше (выдержка теперь стр. 213–220); `ICONS_V = 14` (13 — i-copy-plus, ADR-236; 14 — i-sim/i-esim, ADR-233) | наш бамп **14 → 15** (13 уже выдан другому — повтор запрещён правилом «только новое значение») |
+| `assets/icons.svg` | добавлены комментарий + `i-sim`, `i-esim` (стр. 176–178), `</svg>` теперь стр. 179 | выдержка 173–179; 31 символ вставляется перед `</svg>`; совпадений id с новыми нет |
+| `habits-sw.js` | SHELL `icons.svg?v=13`, `CACHE = 'habits-v112'` | SHELL → `?v=15`, CACHE → `habits-v113` (sed, см. ниже) |
+| `ticket.html` | `ui-menu.js?v=10→11` (строка контекста 312) | выдержка обновлена; `ticket_page.js?v=15→16` без изменений |
+| `issues.html`, `issues_page.js`, `ticket_page.js`, `mhead.js` | без изменений (строки на тех же номерах) | — |
+
+Все поднимаемые значения (`sb-resize ?v=4`, `sb-profile ?v=5`, `mhead ?v=10`, `issues_page ?v=9`,
+`ticket_page ?v=16`, `ICONS_V 15`, `habits-v113`) проверены `search_code` по `web/public` и `docs`: нигде
+раньше не выдавались.
+
+### Сверка с правилами CLAUDE.md (обновлён 02–03.10.2026)
+- «ADR — только `create_adr`, номер руками не выбирать, на будущий в коде не ссылаться» — **нарушалось**:
+  номер будущего ADR стоял в 14 комментариях (`sidebar.js`, `sb-resize.js`, `sb-profile.js`, `issues_page.js`,
+  `ticket_page.js`, `server.js`, `icons.svg`). Убран, остались дата и смысл. Черновик ADR переименован в
+  `docs/ADR-draft-…md`, номер — «выдаст create_adr». Шаг с `sed`-подстановкой номера удалён.
+- «Бамп `?v=` только на новое, ранее не выданное значение» (страховка page-err.js, 02.10) — **нарушалось**:
+  `ICONS_V = 13` и SHELL `?v=13` уже выданы 02.10 под i-copy-plus. Теперь 15. `page-err.js` патч не трогает.
+- «Синхронную функцию не делай async ради ожидания данных» — нарушений нет: новые `sbFocusSearch`,
+  `sbSetIcons`, фильтр и `showHotkeys` синхронные, права читают из уже готового `CF_PERM_DENY`,
+  внешние модули (`sbSetIcons`) — с проверкой `typeof`.
+- «Белый список в объекте — `Object.hasOwn`» (01.10) — `GROUP_OF[href]` и `grpHitByName[name]` в фильтре
+  переведены на `Object.hasOwn` (раньше было прямое `MAP[key]`).
+- `.replace` с пользовательской строкой вторым аргументом — нет (вторые аргументы — литералы или функции).
+- Статика едет без рестарта, `server.js` — с рестартом; общий `*.js` на странице с SW — `?v=` поднят.
 
 ## Что сделано
 
@@ -10,7 +46,7 @@
 | 1 | Кнопка «свернуть/развернуть» на границе меню: `div#sb-collapse` (подложка на токенах) + голая `button.ibtn`, `i-chevrons-left/right`, `aria-label`/`title`/`aria-expanded`, `z-index:502` (выше `#sb-resizer` 501, ниже слоя драга 9999), клик = двойной щелчок (`setIcons(!icons); apply(true)`), прежняя ширина возвращается, скрыта ≤768px и на экране входа. Колонка иконок — по-прежнему 64px. Экспорт `window.sbSetIcons(bool)`, `window.sbIsIcons()`, событие `sb:icons`. | `sb-resize.js` v4 |
 | 2 | ⌘K (Mac, только ⌘) / Ctrl+K (остальные) — на всех страницах портала: фокус + `select()` в поиск, из режима иконок меню разворачивается, на телефоне открывается шторка. Перехват на `window` в фазе capture, по `e.code` (работает в русской раскладке). Бейдж `⌘K` / `Ctrl K` в поле. | `sidebar.js` |
 | 3 | Поиск — фильтр самого меню: регистр, ё→е, другая раскладка (qwerty↔йцукен в обе стороны), совпадение по подписи или группе (совпала группа — все пункты, включая закреплённые в «Быстром доступе»), прячутся `a.sb-link`/`.mp-row` классом `.sb-f-off` (без клонов), пустые группы и пустой «Быстрый доступ» — тоже, свёрнутые группы раскрываются и восстанавливаются, `<mark>` в `.sb-lbl` (исходник в `data-sbf-txt`), ↑/↓ с выделением, Enter — переход, Esc — очистка (второй — выход), «Ничего не найдено» в `.sb-nav`. Учитываются права ролей (`CF_PERM_DENY`). Мобильная шторка: фильтр работает в ней же, бейдж скрыт. | `sidebar.js`, `mhead.js` v10 |
-| 4 | Уникальные значки у всех 76 пунктов MENU (было 22 повторяющихся значка). 38 замен, 31 новый символ Lucide. `ICONS_V` 12→13, `habits-sw.js` SHELL `?v=13`. | `sidebar.js`, `icons.svg`, `server.js`, `habits-sw.js` |
+| 4 | Уникальные значки у всех 76 пунктов MENU (было 22 повторяющихся значка). 38 замен, 31 новый символ Lucide. `ICONS_V` 14→15, `habits-sw.js` SHELL `?v=15`, CACHE `habits-v113`. | `sidebar.js`, `icons.svg`, `server.js`, `habits-sw.js` |
 | 5 | Пункт «Быстрые клавиши» (`i-keyboard`) в меню профиля — окно `uiInfo()` (общая шторка `.mdl-*` из `ui-dialogs.js`) со всеми сочетаниями «сочетание — действие — где», ⌘/⌥/⇧ на Mac, Ctrl/Alt/Shift иначе; сочетания разделов, закрытых ролью, скрыты. | `sb-profile.js` v5 |
 | 6 | `node --check` всех новых JS — OK; `cd orig && patch -p1 --dry-run < ../all.diff` — проходит (11 файлов). Дополнительно — прогон в jsdom (см. «Проверка»). | |
 | 7 | Черновик ADR, дополнение к `docs/rules/ui.md`, запись CHANGELOG, таблица `?v=`. | `docs/` |
@@ -34,7 +70,7 @@ sidebar-patch/
   all.diff               все диффы одним файлом
   icons-src/*.svg        31 исходник Lucide (lucide-static 1.50.0, ISC)
   icons-add.svg.txt      31 <symbol> (+ строка-комментарий) для вставки в assets/icons.svg
-  docs/                  ADR-309 (черновик), дополнение ui.md, CHANGELOG, таблица ?v=
+  docs/                  черновик ADR (номер выдаст create_adr), дополнение ui.md, CHANGELOG, таблица ?v=
   tools/make_diffs.sh    пересобрать patches/ и all.diff из orig/ и new/
   tools/make_excerpts.py как собраны выдержки
   tools/check_menu_icons.js  проверка «у каждого пункта MENU свой значок и он есть в спрайте»
@@ -43,9 +79,9 @@ sidebar-patch/
 **Полные копии:** `sidebar.js` (1074 строки), `sb-resize.js` (299), `sb-profile.js` (289).
 
 **Выдержки** (реальные строки на своих номерах, выше — пустые строки-заглушки; только чтобы
-собрать и проверить дифф): `server.js` (>1 МБ, стр. 207–214), `habits-sw.js` (стр. 30–39; строка 24 —
+собрать и проверить дифф): `server.js` (>1 МБ, стр. 213–220), `habits-sw.js` (стр. 30–39; строка 24 —
 16 КБ, её правим `sed`), `issues_page.js` (272–291), `ticket_page.js` (577–596), `mhead.js` (190–198),
-`assets/icons.svg` (173–176, файл без перевода строки в конце), `issues.html` (281–288), `ticket.html` (311–317).
+`assets/icons.svg` (173–179, файл без перевода строки в конце), `issues.html` (281–288), `ticket.html` (311–317).
 Контекст хунков — только реальные строки, номера совпадают с боевыми, поэтому `patch -p1` на сервере
 ляжет без смещений. Если файл успел измениться — patch скажет `offset`/`FAILED`, тогда сверять руками.
 
@@ -62,7 +98,7 @@ sidebar-patch/
 | AI-CRM | Сотрудники (`/staff`) | `i-clients` | `i-id-card` |
 | AI-CRM | История правок (`/history`) | `i-tracking` | `i-history` |
 | AI-CRM | Загрузчик данных (`/import`) | `i-upload` | `i-import` |
-| SEO | Сайт (`/seo/app`) | `i-structure` | `i-app-window` |
+| SEO | SEO (`/seo/app`; до 03.10 — «Сайт») | `i-structure` | `i-app-window` |
 | SEO | Краулер (`/crawl`) | `i-search` | `i-scan-search` |
 | SEO | AI Google PageSpeed (`/pagespeed`) | `i-zap` | `i-gauge` |
 | SEO | Индексация (`/index/app`) | `i-search` | `i-file-search` |
@@ -153,22 +189,22 @@ Enter/Пробел на строках с `role=button` (доступность)
 
 ## Порядок применения на сервере
 
-**Шаг 0 — номер ADR (ДО наложения патча).** `createAdr()` (`lib/adr.cjs`) берёт max(файлы, INDEX.md,
-номера, на которые уже ссылается код) + 1 — а патч ссылается на `ADR-309` в комментариях. Поэтому
-сначала `create_adr` (MCP) с текстом `docs/ADR-309-*.md` и `status: Proposed`, затем, если выдан не 309:
-`sed -i 's/ADR-309/ADR-NNN/g' all.diff patches/*.diff docs/*.md README.md` (в патче номер встречается только в
-комментариях и строках-подписях `?v=`).
+**Шаг 0 — ADR (ДО наложения патча).** Сначала `create_adr` (MCP) с текстом `docs/ADR-draft-*.md`
+(без строки `id:` и номера в заголовке) и `status: Proposed` — номер выдаст сам инструмент. В код номер
+**не вписывается**: в комментариях патча только дата (02.10.2026) и смысл правки, править `all.diff`
+после выдачи номера не нужно. Номер нужен только для записи в CHANGELOG/ui.md (дописать руками в
+`docs/CHANGELOG-entry.md` и `docs/ui.md-addition.md` при переносе в docs).
 
 Вариант А — через SSH (из корня проекта):
 
 ```bash
 cd /home/cashruflow
 # 0) бэкап затрагиваемых файлов
-tar czf /tmp/sidebar-adr309-backup-$(date +%Y%m%d-%H%M).tgz \
+tar czf /tmp/sidebar-backup-$(date +%Y%m%d-%H%M).tgz \
   web/public/sidebar.js web/public/sb-resize.js web/public/sb-profile.js web/public/issues_page.js \
   web/public/ticket_page.js web/public/mhead.js web/server.js web/public/habits-sw.js \
   web/public/assets/icons.svg web/public/issues.html web/public/ticket.html
-# 1) проверка и наложение (all.diff уже содержит вставку 31 символа в icons.svg и ICONS_V=13)
+# 1) проверка и наложение (all.diff уже содержит вставку 31 символа в icons.svg и ICONS_V=15)
 patch -p1 --dry-run < /path/to/sidebar-patch/all.diff && patch -p1 < /path/to/sidebar-patch/all.diff
 # 1а) если icons.svg не лёг — вставить символы руками перед последней строкой </svg>:
 #     python3 - <<'PY'
@@ -176,8 +212,8 @@ patch -p1 --dry-run < /path/to/sidebar-patch/all.diff && patch -p1 < /path/to/si
 #     i=s.rindex('</svg>'); open(p,'w').write(s[:i]+add+s[i:])
 #     PY
 # 2) кэш SW трекера (строка 24 не в диффе — 16 КБ комментария):
-sed -i "24s/^const CACHE = 'habits-v106'; \/\/ /const CACHE = 'habits-v107'; \/\/ v107 (02.10.2026, ADR-309) — спрайт ?v=13 в SHELL (уникальные значки меню, i-keyboard). /" web/public/habits-sw.js
-grep -n "habits-v107\|icons.svg?v=13" web/public/habits-sw.js
+sed -i "24s/^const CACHE = 'habits-v112'; \/\/ /const CACHE = 'habits-v113'; \/\/ v113 (02.10.2026, сайдбар) — спрайт ?v=15 в SHELL (уникальные значки меню, i-keyboard). /" web/public/habits-sw.js
+grep -n "habits-v113\|icons.svg?v=15" web/public/habits-sw.js
 # 3) синтаксис
 for f in sidebar sb-resize sb-profile issues_page ticket_page mhead habits-sw; do node --check web/public/$f.js || echo "FAIL $f"; done
 node --check web/server.js
@@ -190,7 +226,7 @@ node scripts/validate-ard.js      # падает на дублях номеро�
 # 6) рестарт — нужен только из-за ICONS_V в server.js; статика едет без рестарта
 sudo pm2 restart web-interface
 sudo pm2 logs web-interface --lines 30 --nostream   # ищем «[deploy] start» без стектрейса
-curl -s https://ai.cashruflow.ru/issues | grep -o 'icons.svg?v=[0-9]*' | head -1   # ?v=13
+curl -s https://ai.cashruflow.ru/issues | grep -o 'icons.svg?v=[0-9]*' | head -1   # ?v=15
 ```
 
 Вариант Б — через MCP (как принято в проекте: «прод правится только write_file/str_replace»):
@@ -214,18 +250,22 @@ curl -s https://ai.cashruflow.ru/issues | grep -o 'icons.svg?v=[0-9]*' | head -1
 - 390px: шторка ☰ — поиск фильтрует список, бейджа ⌘K нет, кнопки-кружка нет, Esc в поле очищает.
 - Сотрудник с урезанной ролью: закрытые пункты не всплывают в поиске; «Быстрые клавиши» без их строк.
 - Профиль ⋮ → «Быстрые клавиши»: шторка с таблицей, обе темы, 390px (колонка «Где» уходит под действие).
-- Значки: колонка иконок — все разные, тултипы верные; /habits/app офлайн-оболочка подтянула ?v=13.
+- Значки: колонка иконок — все разные, тултипы верные; /habits/app офлайн-оболочка подтянула ?v=15.
 
-## Проверка, которая сделана здесь
-- `node --check`: new/ `sidebar.js`, `sb-resize.js`, `sb-profile.js`, выдержки `issues_page.js`,
-  `ticket_page.js`, `mhead.js` — OK (выдержка `habits-sw.js` синтаксически неполная — проверяется на сервере).
-- `cd orig && patch -p1 --dry-run < ../all.diff` — все 11 файлов `checking file …` без ошибок.
-- jsdom: фильтр, раскладка, ё, группы, восстановление свёрнутой группы, ↑/↓, Ctrl+K из иконок
-  (ширина 230 восстановлена, фокус в поле), кнопка (aria-label/expanded/значок), окно хоткеев
-  (24 строки при закрытом /crm/chats, ⌘ на Mac), ошибок нет.
+## Проверка, которая сделана здесь (03.10.2026, после сверки)
+- `cd orig && patch -p1 --dry-run < ../all.diff` — все 11 файлов `checking file …` без ошибок, без offset/fuzz;
+  наложение на копию `orig/` даёт ровно `new/` (`diff -r` пуст).
+- `node --check` всех JS в `new/`: `sidebar.js`, `sb-resize.js`, `sb-profile.js`, `issues_page.js`,
+  `ticket_page.js`, `mhead.js`, `server.js` — OK; выдержка `habits-sw.js` обрывается внутри `SHELL = [`
+  (так и задумано) — с дописанным `];` проходит, целиком проверяется на сервере (шаг 3).
+- `grep -rn "ADR-309" new/ patches/ all.diff` — пусто.
+- `tools/check_menu_icons.js`: 76 пунктов — 76 разных значков, повторов нет (на выдержке спрайта
+  «нет в спрайте» пишет только для старых символов, которых в выдержке нет — на сервере они есть).
+- jsdom-прогон (02.10): фильтр, раскладка, ё, группы, восстановление свёрнутой группы, ↑/↓, Ctrl+K из
+  иконок, кнопка, окно хоткеев — без ошибок; правки 03.10 (Object.hasOwn, комментарии) логику не меняют.
 
 ## Риски
-- Строки-выдержки: если боевой файл изменился после 02.10.2026 19:00 — хунк может не лечь (patch скажет).
+- Строки-выдержки: если боевой файл изменился после сверки 03.10.2026 — хунк может не лечь (patch скажет).
 - `.ibtn` в `/theme.css` (btnCss) может задавать свой фон/рамку, если их включили в /set#btns —
   тогда внутри кружка будет ещё рамка кнопки. Проверить глазами; при необходимости кружок убрать.
 - Поле поиска получило `padding-right:56px` под бейдж — отступ полю ввода пишется локально (правило

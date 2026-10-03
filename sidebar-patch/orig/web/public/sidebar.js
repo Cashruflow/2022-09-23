@@ -79,7 +79,7 @@ function __sbLoad(id, src) {
   if (!document.getElementById('cf-shot-src') && !window.__pltShot) {
     const sh = document.createElement('script');
     sh.id = 'cf-shot-src';
-    sh.src = '/shot.js?v=5';
+    sh.src = '/shot.js?v=7';
     document.head.appendChild(sh);
   }
 })();
@@ -248,7 +248,7 @@ function __sbLoad(id, src) {
     { group: 'SEO', items: [
       // Главная SEO-раздела (16.09.2026): сводка техаудита Топвизора + входы в сервисы.
       // #433: хаб «Сайт» — вкладки Сводка/Краулер/Индексация/PageSpeed/…; пункты ниже ведут в тот же хаб (редирект site_embed.js).
-      { href: '/seo/app', icon: 'structure', label: 'Сайт' },
+      { href: '/seo/app', icon: 'structure', label: 'SEO' },
       { href: '/sites', icon: 'sites', label: 'Сайты' },
       { href: '/crawl', icon: 'search', label: 'Краулер' },
       // Скорость страниц клиентских сайтов (задача #365). Рядом с краулером:
@@ -1057,7 +1057,7 @@ function __sbLoad(id, src) {
   // но запрос уходил впустую (15.09.2026).
   if (document.querySelector('script[src^="/ui-dialogs.js"]')) return;
   var s = document.createElement('script');
-  s.src = '/ui-dialogs.js?v=7'; // 30.09.2026: v7 — тени токенами; 29.09.2026: v6 — зазор над доком = --ui-toast-gap; v5 — тосты над доком (dockSync)
+  s.src = '/ui-dialogs.js?v=8'; // 03.10.2026: v8 — диалоги на телефоне шторкой + visualViewport; 30.09.2026: v7 — тени токенами; 29.09.2026: v6 — зазор над доком = --ui-toast-gap; v5 — тосты над доком (dockSync)
   document.head.appendChild(s);
 })();
 

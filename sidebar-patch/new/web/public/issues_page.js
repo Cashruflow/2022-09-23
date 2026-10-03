@@ -278,7 +278,7 @@
     }
     // Сохранение из карточки — ⌘/Ctrl+Enter, как в задачах.
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && $('iss-back').classList.contains('is-open')) { save(); return; }
-    // ⌘/Ctrl+K здесь больше не ловим (02.10.2026, ADR-309): это общий поиск по меню
+    // ⌘/Ctrl+K здесь больше не ловим (02.10.2026): это общий поиск по меню
     // портала (sidebar.js, на всех страницах). Локальный поиск списка — клавиша «/».
     if (inField || e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key === '/') { e.preventDefault(); $('iss-q').focus(); return; }

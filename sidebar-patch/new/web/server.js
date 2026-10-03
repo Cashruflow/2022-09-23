@@ -204,11 +204,17 @@
 
 
 
+
+
+
+
+
+
 // Поправил спрайт (новый символ) — подними ICONS_V здесь, и всё. Фолбэк-строку в JS
 // поднимать не обязательно: он срабатывает только на странице без <head>. Версионный
 // адрес получает Cache-Control 7 дней (setHeaders у express.static ниже) — одна загрузка,
 // дальше из кэша браузера. Правило — docs/rules/ui.md, «Адрес спрайта».
-const ICONS_V = 13; // 13 — 31 значок Lucide: уникальные значки пунктов меню портала + i-keyboard «Быстрые клавиши» (ADR-309, 02.10.2026); 12 — i-star/i-pushpin для «Моих продуктов» (ADR-286, 01.10.2026); 11 — i-flag/i-mail-open для «Почты» (ADR-283, 01.10.2026); 10 — i-utensils/i-scan-barcode/i-flashlight для «Питания» (29.09.2026)
+const ICONS_V = 15; // 15 — 31 значок Lucide: уникальные значки пунктов меню портала + i-keyboard «Быстрые клавиши» (сайдбар, 02.10.2026); 14 — i-sim/i-esim для вкладки «eSIM» (ADR-233, 03.10.2026); 13 — i-copy-plus (ADR-236, 02.10.2026); 12 — i-star/i-pushpin для «Моих продуктов» (ADR-286, 01.10.2026); 11 — i-flag/i-mail-open для «Почты» (ADR-283, 01.10.2026); 10 — i-utensils/i-scan-barcode/i-flashlight для «Питания» (29.09.2026)
 const ICONS_URL = "/assets/icons.svg?v=" + ICONS_V;
 const ICONS_TAG = '<script>window.ICONS_URL="' + ICONS_URL + '"</script>';
 const ICONS_RE = /\/assets\/icons\.svg(?:\?v=[\w.-]*)?(?=[#"'`)])/g;
