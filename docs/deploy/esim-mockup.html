@@ -1,0 +1,374 @@
+<title>eSIM макет Путешествия</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Концепт: три экрана телефона 390px в ряд; страница светлая, SIM-карточки всегда тёмные, как в Wallet. */
+:root{
+  --page:#eceef2; --bg:#ffffff; --surface:#f4f5f7; --surface-2:#e9ebef; --line:#e3e5ea;
+  --fg:#14171c; --muted:#6a707b; --accent:#3552e8; --on-accent:#ffffff;
+  --danger:#d3302a; --ok:#14894f; --scrim:rgba(10,12,18,.42);
+  --card-base:#0c0f15; --card-fg:#f3f5f8; --card-mute:#9aa3b2;
+  --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --page:#07080b; --bg:#101216; --surface:#1a1d23; --surface-2:#242830; --line:#2a2e37;
+  --fg:#eef0f4; --muted:#979eab; --accent:#7f93ff; --on-accent:#0b0e1a;
+  --danger:#ff7a72; --ok:#4cc58a; --scrim:rgba(0,0,0,.6); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --page:#07080b; --bg:#101216; --surface:#1a1d23; --surface-2:#242830; --line:#2a2e37;
+  --fg:#eef0f4; --muted:#979eab; --accent:#7f93ff; --on-accent:#0b0e1a;
+  --danger:#ff7a72; --ok:#4cc58a; --scrim:rgba(0,0,0,.6); color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--page);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.45;padding-inline:16px;padding-block:28px 40px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.intro{max-width:1240px;margin:0 auto 24px}
+.intro h1{margin:0 0 4px;font-size:26px;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+.intro p{margin:0;color:var(--muted);max-width:68ch}
+.stage{display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start;max-width:1280px;margin:0 auto}
+figure{margin:0;width:390px;max-width:100%;min-width:0}
+figcaption{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+
+/* телефон */
+.phone{position:relative;height:820px;background:var(--bg);border:1px solid var(--line);border-radius:36px;overflow:hidden;box-shadow:0 18px 50px rgba(20,24,40,.12)}
+.scroll{height:100%;overflow-y:auto;overflow-x:hidden;padding-bottom:28px}
+.head{position:sticky;top:0;z-index:5;background:var(--bg);padding:16px 16px 12px;border-bottom:1px solid var(--line)}
+.head-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.head h2{margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em}
+.icon-btn{width:38px;height:38px;border-radius:12px;border:0;background:var(--surface);display:grid;place-items:center;flex:none}
+.icon-btn svg{width:20px;height:20px}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border-radius:12px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;border-radius:10px;padding:8px 10px;font-weight:600;color:var(--muted)}
+.seg button[aria-selected="true"]{background:var(--bg);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.pane{padding:16px;display:flex;flex-direction:column;gap:14px}
+.pane[hidden]{display:none!important}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
+.label{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.btn{border:0;border-radius:12px;padding:10px 16px;font-weight:600;background:var(--surface);color:var(--fg);min-height:40px}
+.btn.primary{background:var(--accent);color:var(--on-accent)}
+.btn.danger{background:transparent;color:var(--danger);box-shadow:inset 0 0 0 1.5px var(--danger)}
+.btn.block{width:100%}
+.grp{display:flex;flex-direction:column;gap:10px}
+
+/* карточка SIM: Wallet */
+.flip{perspective:1200px;height:218px;position:relative}
+.flip-in{position:relative;height:100%;transition:transform .65s cubic-bezier(.3,.7,.2,1);transform-style:preserve-3d}
+.flip.on .flip-in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:22px;
+  clip-path:polygon(0 0,calc(100% - 38px) 0,100% 38px,100% 100%,0 100%);
+  color:var(--card-fg);padding:16px 16px 14px;display:flex;flex-direction:column;gap:10px;overflow:hidden;cursor:pointer;
+  background:
+   radial-gradient(120% 90% at 0% 100%,color-mix(in srgb,var(--acc) 38%,transparent),transparent 62%),
+   linear-gradient(150deg,color-mix(in srgb,var(--acc) 14%,#1b2029),var(--card-base) 70%)}
+.face::after{content:"";position:absolute;inset:0;border-radius:22px;border:1px solid rgba(255,255,255,.1);pointer-events:none}
+.face.back{transform:rotateY(180deg);cursor:default}
+.flip.muted{filter:saturate(.25) brightness(.85)}
+.flip.muted .face{cursor:pointer}
+.top{display:flex;align-items:center;gap:10px;padding-right:34px;min-width:0}
+.flag{width:28px;height:19px;border-radius:4px;overflow:hidden;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.2)}
+.flag svg{display:block;width:100%;height:100%}
+.op{font-weight:700;font-size:16px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.op i{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--acc);margin-right:7px;vertical-align:1px}
+.kind{margin-left:auto;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--card-mute);white-space:nowrap}
+.mid{display:flex;align-items:center;gap:12px;margin-top:6px;min-width:0}
+.chip-svg{width:46px;height:36px;flex:none}
+.plan{font-size:20px;font-weight:700;letter-spacing:-.02em;line-height:1.15;min-width:0}
+.plan small{display:block;font-size:12px;font-weight:500;color:var(--card-mute);letter-spacing:0;margin-top:2px}
+.status{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,.1);white-space:nowrap}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--pc,#5be3a0)}
+.pill.soon{--pc:#ffd45c}.pill.done{--pc:#9aa3b2}
+.prog{display:flex;flex-direction:column;gap:6px}
+.prog-t{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--card-mute);font-variant-numeric:tabular-nums}
+.prog-t b{color:var(--card-fg);font-weight:600}
+.bar{height:6px;border-radius:9px;background:rgba(255,255,255,.14);overflow:hidden}
+.bar span{display:block;height:100%;border-radius:9px;background:var(--acc)}
+.flip.muted .bar span{background:#8b93a1}
+/* оборот */
+.back-body{display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:center;flex:1;padding-right:22px}
+.qr{width:96px;height:96px;background:#fff;border-radius:10px;padding:6px}
+.qr svg{display:block;width:100%;height:100%}
+.nochip{width:96px;height:96px;border-radius:12px;border:1.5px dashed rgba(255,255,255,.28);display:grid;place-items:center}
+.back-info{display:flex;flex-direction:column;gap:3px;min-width:0}
+.back-info .k{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--card-mute)}
+.mask{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:13px;white-space:nowrap}
+.eye{border:0;background:rgba(255,255,255,.1);color:var(--card-fg);width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none}
+.eye svg{width:16px;height:16px}
+.eye .off{display:none}.eye.show .off{display:block}.eye.show .on{display:none}
+.back-actions{display:flex;gap:8px;margin-top:auto}
+.back-actions button{flex:1;border:0;border-radius:12px;padding:9px 10px;font-weight:600;background:rgba(255,255,255,.12);color:var(--card-fg)}
+.back-actions button:first-child{background:var(--acc);color:#10131a}
+.hint{font-size:12px;color:var(--muted);text-align:center}
+
+/* телефон: карточка устройства */
+.dev{background:var(--surface);border-radius:16px;padding:16px;display:grid;grid-template-columns:104px minmax(0,1fr);gap:16px;align-items:center}
+.dev svg.ph{width:104px;height:auto;display:block}
+.dev h3{margin:0;font-size:20px;letter-spacing:-.02em}
+.dev .sub{color:var(--muted);margin:2px 0 10px}
+.dots{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.dots button{width:26px;height:26px;border-radius:50%;border:0;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+.dots button[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:3px}
+.imei{display:flex;align-items:center;gap:8px;min-width:0}
+.imei .mask{font-size:12.5px;min-width:0}
+.imei .eye{background:var(--surface-2);color:var(--fg)}
+.slot{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:16px;padding:12px 14px;min-width:0}
+.slot-ic{width:40px;height:40px;border-radius:12px;background:var(--card-base);display:grid;place-items:center;flex:none}
+.slot-ic svg{width:26px;height:20px}
+.slot b{display:block;font-weight:600}
+.slot span{color:var(--muted);font-size:13px}
+.slot>div{min-width:0;flex:1}
+.tag{font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px;background:var(--surface-2);color:var(--muted);white-space:nowrap}
+.tag.ok{color:var(--ok)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* шторка */
+.scrim{position:absolute;inset:0;background:var(--scrim);z-index:20}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:30;background:var(--bg);border-radius:26px 26px 0 0;max-height:90%;overflow-y:auto;padding:8px 16px 20px;box-shadow:0 -10px 40px rgba(0,0,0,.2);display:flex;flex-direction:column;gap:14px}
+.sheet[hidden],.scrim[hidden]{display:none!important}
+.grab{width:40px;height:4px;border-radius:9px;background:var(--line);margin:0 auto 2px;flex:none}
+.sheet h3{margin:0;font-size:19px;letter-spacing:-.02em}
+.steps{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.step[hidden]{display:none!important}
+.step{display:flex;flex-direction:column;gap:14px}
+.ta{width:100%;min-height:118px;resize:none;border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:12px;line-height:1.45}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{border:1.5px dashed var(--line);background:transparent;border-radius:14px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:600}
+.tile svg{width:26px;height:26px;color:var(--accent)}
+.ok-note{display:flex;gap:10px;align-items:center;background:color-mix(in srgb,var(--ok) 13%,transparent);color:var(--fg);border-radius:12px;padding:10px 12px;font-size:13px}
+.ok-note svg{width:18px;height:18px;color:var(--ok);flex:none}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f.full{grid-column:1/-1}
+.f label{font-size:12px;font-weight:600;color:var(--muted)}
+.f input,.f select{width:100%;min-width:0;height:42px;border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:0 12px}
+.more{border:0;background:transparent;color:var(--accent);font-weight:600;padding:4px 0;display:flex;align-items:center;gap:6px;align-self:flex-start}
+.more svg{width:16px;height:16px;transition:transform .2s}
+.more[aria-expanded="true"] svg{transform:rotate(180deg)}
+.act{display:grid;grid-template-columns:1fr 2fr;gap:10px;padding-top:2px}
+@media (max-width:420px){
+  .face{padding:14px 13px 12px}.plan{font-size:18px}
+  .back-body{grid-template-columns:84px minmax(0,1fr);gap:10px}.qr,.nochip{width:84px;height:84px}
+  .mask{font-size:12px}.dev{grid-template-columns:88px minmax(0,1fr);gap:12px}.dev svg.ph{width:88px}
+  .phone{height:auto;min-height:780px;border-radius:28px}
+  .scroll{height:auto}
+}
+@media (prefers-reduced-motion:reduce){.flip-in,.more svg{transition:none}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6e3a6"/><stop offset=".5" stop-color="#d9b25c"/><stop offset="1" stop-color="#a98035"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<header class="intro">
+  <h1>eSIM — макет</h1>
+  <p>Вкладка «eSIM» раздела «Путешествия»: список карточек, добавление в две стадии через шторку и отдельная вкладка «Телефоны». Нажми на карточку, чтобы перевернуть её.</p>
+</header>
+
+<main class="stage">
+  <figure><figcaption>Экран 1 · Список</figcaption><div class="phone" id="s1"></div></figure>
+  <figure><figcaption>Экран 2 · Добавление, шаг 2</figcaption><div class="phone" id="s2"></div></figure>
+  <figure><figcaption>Экран 3 · Телефоны</figcaption><div class="phone" id="s3"></div></figure>
+</main>
+
+<script>
+(function(){
+  var I={
+    gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>',
+    eye:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="on"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></g><g class="off"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/></g></svg>',
+    chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>',
+    img:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg>',
+    pdf:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5"/><path d="M9 14h6M9 17.5h4"/></svg>',
+    check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    chip:'<svg class="chip-svg" viewBox="0 0 46 36" aria-hidden="true"><rect x=".75" y=".75" width="44.5" height="34.5" rx="7" fill="url(#gold)" stroke="#7a5a1f" stroke-opacity=".5" stroke-width="1.5"/><g fill="none" stroke="#6b4d17" stroke-opacity=".6" stroke-width="1.2"><path d="M1 12h13M1 24h13M32 12h13M32 24h13M14 1v34M32 1v34"/><rect x="14" y="10" width="18" height="16" rx="4"/></g></svg>',
+    slotsim:'<svg viewBox="0 0 26 20" aria-hidden="true"><path d="M3 1h14l6 6v12H3z" fill="url(#gold)"/><rect x="8" y="8" width="9" height="8" rx="2" fill="none" stroke="#6b4d17" stroke-opacity=".7"/></svg>',
+    sloten:'<svg viewBox="0 0 26 20" aria-hidden="true"><rect x="2" y="1" width="22" height="18" rx="4" fill="none" stroke="#f3f5f8" stroke-width="1.6"/><path d="M8 13V7h6M8 10h5M8 13h6" fill="none" stroke="#f3f5f8" stroke-width="1.6" stroke-linecap="round"/><circle cx="19" cy="10" r="1.2" fill="#f3f5f8"/></svg>'
+  };
+  var FL={
+    eg:'<svg viewBox="0 0 28 19"><rect width="28" height="6.4" fill="#ce1126"/><rect y="6.3" width="28" height="6.4" fill="#fff"/><rect y="12.6" width="28" height="6.4" fill="#111"/><circle cx="14" cy="9.5" r="1.8" fill="#c09300"/></svg>',
+    uz:'<svg viewBox="0 0 28 19"><rect width="28" height="6.4" fill="#1eb4e6"/><rect y="6.3" width="28" height="6.4" fill="#fff"/><rect y="12.6" width="28" height="6.4" fill="#1eaa4b"/><rect y="5.6" width="28" height="1" fill="#ce1126"/><rect y="12.4" width="28" height="1" fill="#ce1126"/><circle cx="5" cy="3.2" r="1.6" fill="#fff"/></svg>',
+    tr:'<svg viewBox="0 0 28 19"><rect width="28" height="19" fill="#e30a17"/><circle cx="11" cy="9.5" r="5" fill="#fff"/><circle cx="12.4" cy="9.5" r="4" fill="#e30a17"/><circle cx="16.5" cy="9.5" r="1.5" fill="#fff"/></svg>'
+  };
+  function qr(seed){
+    var n=21,s=seed,g=[],r='';
+    function rnd(){s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff}
+    function fin(x,y){return (x<7&&y<7)||(x>n-8&&y<7)||(x<7&&y>n-8)}
+    for(var y=0;y<n;y++)for(var x=0;x<n;x++){
+      if(fin(x,y))continue;
+      if(rnd()>.52)r+='<rect x="'+x+'" y="'+y+'" width="1.02" height="1.02"/>';
+    }
+    [[0,0],[n-7,0],[0,n-7]].forEach(function(p){
+      r+='<path fill-rule="evenodd" d="M'+p[0]+' '+p[1]+'h7v7h-7z M'+(p[0]+1)+' '+(p[1]+1)+'v5h5v-5z"/><rect x="'+(p[0]+2)+'" y="'+(p[1]+2)+'" width="3" height="3"/>';
+    });
+    return '<svg viewBox="0 0 21 21" fill="#111" aria-hidden="true">'+r+'</svg>';
+  }
+  var uid=0;
+  function card(c){
+    var id='c'+(++uid);
+    var back=c.esim?'<div class="qr" aria-label="QR-код активации (заглушка)">'+qr(c.seed)+'</div>'
+      :'<div class="nochip">'+I.chip+'</div>';
+    return '<div class="flip'+(c.muted?' muted':'')+'" style="--acc:'+c.acc+'" tabindex="0" role="button" aria-label="'+c.op+': перевернуть карточку">'+
+    '<div class="flip-in">'+
+      '<div class="face front">'+
+        '<div class="top"><span class="flag">'+FL[c.fl]+'</span><span class="op"><i></i>'+c.op+'</span><span class="kind">'+(c.esim?'eSIM':'SIM')+'</span></div>'+
+        '<div class="mid">'+I.chip+'<div class="plan">'+c.plan+'<small>'+c.sub+'</small></div></div>'+
+        '<div class="status"><div class="prog" style="flex:1;min-width:0"><div class="prog-t"><b>'+c.l1+'</b><span>'+c.l2+'</span></div><div class="bar"><span style="width:'+c.pct+'%"></span></div></div><span class="pill '+c.pk+'">'+c.st+'</span></div>'+
+      '</div>'+
+      '<div class="face back">'+
+        '<div class="top"><span class="flag">'+FL[c.fl]+'</span><span class="op"><i></i>'+c.op+'</span></div>'+
+        '<div class="back-body">'+back+
+          '<div class="back-info"><span class="k">ICCID</span>'+
+          '<div class="mask"><span data-mask="'+c.iccid[0]+'" data-full="'+c.iccid[1]+'">'+c.iccid[0]+'</span><button class="eye" type="button" aria-label="Показать ICCID" id="'+id+'-eye">'+I.eye+'</button></div>'+
+          '<span class="k" style="margin-top:6px">Активировать до</span><span style="font-size:13px;font-weight:600">'+c.until+'</span></div>'+
+        '</div>'+
+        '<div class="back-actions"><button type="button">Баланс</button><button type="button">Изменить</button></div>'+
+      '</div>'+
+    '</div></div>';
+  }
+  var C1={op:'Orange EG',fl:'eg',esim:1,acc:'#ff7a1a',plan:'2 ГБ/день · 3 дня',sub:'Египет, Хургада',pct:62,l1:'День 2 из 3',l2:'осталось 14 ч',st:'Активна',pk:'',iccid:['8948 •••• •••• 1430','8948 2031 7765 1430'],until:'05.10.2026',seed:7};
+  var C2={op:'Beeline UZ',fl:'uz',esim:0,acc:'#f5c400',plan:'15 ГБ · 30 дней',sub:'Узбекистан, Ташкент',pct:12,l1:'Поездка 12 окт',l2:'через 9 дн',st:'Скоро',pk:'soon',iccid:['8998 •••• •••• 6071','8998 6604 1189 6071'],until:'12.10.2026',seed:19};
+  var C3={op:'Turkcell TR',fl:'tr',esim:1,muted:1,acc:'#4a8dff',plan:'5 ГБ · 7 дней',sub:'Турция, Анталья',pct:100,l1:'Использована',l2:'12–19 авг',st:'Завершена',pk:'done',iccid:['8990 •••• •••• 0925','8990 4417 3302 0925'],until:'—',seed:31};
+
+  function head(t){
+    return '<div class="head"><div class="head-row"><h2>Путешествия</h2><button class="icon-btn" type="button" aria-label="Настройки">'+I.gear+'</button></div>'+
+    '<div class="seg" role="tablist"><button type="button" role="tab" data-tab="esim" aria-selected="'+(t==='esim')+'">eSIM</button><button type="button" role="tab" data-tab="ph" aria-selected="'+(t==='ph')+'">Телефоны</button></div></div>';
+  }
+  function esimPane(vis){
+    return '<section class="pane" data-pane="esim"'+(vis?'':' hidden')+'>'+
+      '<div class="row"><span class="label">Сейчас в поездке</span><button class="btn primary" type="button" data-open="add">+ Добавить</button></div>'+
+      card(C1)+
+      '<span class="label" style="margin-top:6px">Скоро</span>'+card(C2)+
+      '<span class="label" style="margin-top:6px">Вне поездок</span>'+card(C3)+
+      '<p class="hint">Нажми на карточку, чтобы увидеть QR и ICCID</p></section>';
+  }
+  var DEVS=[{n:'Чёрный',c:'#2b2d31'},{n:'Белый',c:'#ececee'},{n:'Ультрамарин',c:'#7d8cf0'},{n:'Бирюзовый',c:'#8cc7c6'},{n:'Розовый',c:'#f0b3c8'}];
+  function phoneSvg(col){
+    return '<svg class="ph" viewBox="0 0 104 212" aria-label="iPhone 16"><rect x="1.5" y="1.5" width="101" height="209" rx="22" fill="'+col+'" stroke="rgba(0,0,0,.35)" stroke-width="1.5" class="pbody"/>'+
+    '<rect x="6" y="6" width="92" height="200" rx="17" fill="#07090d"/>'+
+    '<rect x="6" y="6" width="92" height="200" rx="17" fill="url(#wall)"/>'+
+    '<rect x="36" y="13" width="32" height="9" rx="4.5" fill="#000"/>'+
+    '<text x="52" y="62" text-anchor="middle" fill="#fff" font-family="Inter,sans-serif" font-size="26" font-weight="600">9:41</text>'+
+    '<rect x="34" y="198" width="36" height="3" rx="1.5" fill="#fff" fill-opacity=".7"/>'+
+    '<defs><linearGradient id="wall" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2c3a8a"/><stop offset="1" stop-color="#0a0d1c"/></linearGradient></defs></svg>';
+  }
+  function phonePane(vis){
+    var dots=DEVS.map(function(d,i){return '<button type="button" style="--c:'+d.c+'" data-name="'+d.n+'" aria-label="'+d.n+'" aria-pressed="'+(i===2)+'"></button>'}).join('');
+    return '<section class="pane" data-pane="ph"'+(vis?'':' hidden')+'>'+
+      '<div class="row"><span class="label">Мои устройства</span><button class="btn primary" type="button" data-open="dev">Добавить по *#06#</button></div>'+
+      '<div class="dev">'+phoneSvg(DEVS[2].c)+
+        '<div style="min-width:0"><h3>iPhone 16</h3><div class="sub" data-cname>Ультрамарин · 128 ГБ</div>'+
+        '<div class="dots" role="group" aria-label="Цвет корпуса">'+dots+'</div>'+
+        '<span class="k label" style="display:block;margin-bottom:4px">IMEI</span>'+
+        '<div class="imei"><div class="mask"><span data-mask="3569 •••• •••• 482" data-full="3569 2104 8870 482">3569 •••• •••• 482</span></div><button class="eye" type="button" aria-label="Показать IMEI">'+I.eye+'</button></div></div>'+
+      '</div>'+
+      '<span class="label" style="margin-top:4px">Слоты</span>'+
+      '<div class="slot"><div class="slot-ic">'+I.slotsim+'</div><div><b>SIM 1 · физическая</b><span>Beeline RU</span></div><span class="tag ok">Основная</span></div>'+
+      '<div class="slot"><div class="slot-ic">'+I.sloten+'</div><div><b>eSIM</b><span>Orange EG</span></div><span class="tag">Данные</span></div>'+
+      '<div class="two" style="margin-top:4px"><button class="btn danger" type="button">Телефон украли</button><button class="btn" type="button">Изменить</button></div>'+
+    '</section>';
+  }
+  function addSheet(p,step,open){
+    return '<div class="scrim" data-close hidden'+'></div>'+
+    '<div class="sheet" role="dialog" aria-label="Добавить eSIM" data-sheet="add"'+(open?'':' hidden')+'>'+
+      '<div class="grab"></div>'+
+      '<div class="row"><h3>Добавить eSIM</h3><span class="steps" data-steps></span></div>'+
+      '<div class="step" data-step="1"'+(step===1?'':' hidden')+'>'+
+        '<textarea class="ta" id="'+p+'-text" placeholder="Вставь текст брони, например: Orange Egypt, 2 ГБ в день, 3 дня, 12 $"></textarea>'+
+        '<div class="tiles"><button class="tile" type="button">'+I.img+'Скрин</button><button class="tile" type="button">'+I.pdf+'PDF</button></div>'+
+        '<button class="btn primary block" type="button" data-go="2">Распознать</button>'+
+      '</div>'+
+      '<div class="step" data-step="2"'+(step===2?'':' hidden')+'>'+
+        '<div class="ok-note">'+I.check+'<span>Распознано из брони. Проверь поля и сохрани.</span></div>'+
+        '<div class="fields">'+
+          '<div class="f"><label for="'+p+'-c">Страна</label><input id="'+p+'-c" value="Египет"></div>'+
+          '<div class="f"><label for="'+p+'-o">Оператор</label><input id="'+p+'-o" value="Orange EG"></div>'+
+          '<div class="f full"><label for="'+p+'-t">Тариф</label><input id="'+p+'-t" value="2 ГБ в день"></div>'+
+          '<div class="f"><label for="'+p+'-d">Дней</label><input id="'+p+'-d" inputmode="numeric" value="3"></div>'+
+          '<div class="f"><label for="'+p+'-p">Цена</label><input id="'+p+'-p" value="12 $"></div>'+
+          '<div class="f"><label for="'+p+'-u">Активировать до</label><input id="'+p+'-u" type="date" value="2026-10-05"></div>'+
+          '<div class="f"><label for="'+p+'-pay">Чем оплачено</label><select id="'+p+'-pay"><option>Карта •• 4412</option><option>Наличные</option><option>Бонусы</option></select></div>'+
+        '</div>'+
+        '<button class="more" type="button" aria-expanded="false" aria-controls="'+p+'-more">Подробнее'+I.chev+'</button>'+
+        '<div class="fields" id="'+p+'-more" hidden>'+
+          '<div class="f"><label for="'+p+'-ty">Тип</label><select id="'+p+'-ty"><option>eSIM</option><option>Физическая SIM</option></select></div>'+
+          '<div class="f"><label for="'+p+'-ic">ICCID</label><input id="'+p+'-ic" value="8948 2031 7765 1430"></div>'+
+          '<div class="f full"><label for="'+p+'-sm">Код активации (SM-DP+)</label><input id="'+p+'-sm" value="LPA:1$smdp.example$K2-9F4Q"></div>'+
+          '<div class="f full"><label for="'+p+'-n">Заметка</label><input id="'+p+'-n" placeholder="Например, взять с собой роутер"></div>'+
+        '</div>'+
+        '<div class="act"><button class="btn" type="button" data-go="1">Назад</button><button class="btn primary" type="button" data-close>Сохранить</button></div>'+
+      '</div>'+
+    '</div>';
+  }
+  function devSheet(){
+    return '<div class="scrim" data-close hidden></div>'+
+    '<div class="sheet" role="dialog" aria-label="Добавить телефон" data-sheet="dev" hidden>'+
+      '<div class="grab"></div><div class="row"><h3>Добавить по *#06#</h3></div>'+
+      '<p class="hint" style="text-align:left;margin:0">Набери *#06# на телефоне и вставь скрин или текст с IMEI.</p>'+
+      '<textarea class="ta" id="dv-text" style="min-height:84px" placeholder="IMEI 35692104887048…"></textarea>'+
+      '<div class="tiles"><button class="tile" type="button">'+I.img+'Скрин</button><div class="f" style="justify-content:center"><label for="dv-m">Модель</label><select id="dv-m"><option>iPhone 16</option><option>iPhone 16 Pro</option><option>Galaxy S25</option><option>Pixel 10</option></select></div></div>'+
+      '<div class="act"><button class="btn" type="button" data-close>Отмена</button><button class="btn primary" type="button" data-close>Добавить телефон</button></div>'+
+    '</div>';
+  }
+  function screen(el,o){
+    el.innerHTML='<div class="scroll">'+head(o.tab)+esimPane(o.tab==='esim')+phonePane(o.tab==='ph')+'</div>'+addSheet(el.id,o.step||1,!!o.open)+devSheet();
+    if(o.open)el.querySelector('.scrim').hidden=false;
+    sync(el);
+  }
+  function sync(el){
+    var sh=el.querySelector('[data-sheet="add"]'),st=sh.querySelector('[data-step]:not([hidden])');
+    sh.querySelector('[data-steps]').textContent='Шаг '+st.dataset.step+' из 2';
+  }
+  screen(document.getElementById('s1'),{tab:'esim'});
+  screen(document.getElementById('s2'),{tab:'esim',open:1,step:2});
+  screen(document.getElementById('s3'),{tab:'ph'});
+
+  document.addEventListener('click',function(e){
+    var t=e.target,ph=t.closest('.phone');if(!ph)return;
+    var eye=t.closest('.eye');
+    if(eye){
+      var s=eye.parentNode.querySelector('[data-mask]'),on=eye.classList.toggle('show');
+      s.textContent=on?s.dataset.full:s.dataset.mask;eye.setAttribute('aria-label',on?'Скрыть':'Показать');return;
+    }
+    if(t.closest('.back-actions')||t.closest('.back-info'))return;
+    var tab=t.closest('[data-tab]');
+    if(tab){
+      ph.querySelectorAll('[data-tab]').forEach(function(b){b.setAttribute('aria-selected',b===tab)});
+      ph.querySelectorAll('[data-pane]').forEach(function(p){p.hidden=p.dataset.pane!==tab.dataset.tab});return;
+    }
+    var f=t.closest('.flip');if(f){f.classList.toggle('on');return}
+    var op=t.closest('[data-open]');
+    if(op){
+      ph.querySelector('[data-sheet="'+op.dataset.open+'"]').hidden=false;
+      ph.querySelectorAll('.scrim').forEach(function(s){s.hidden=false});
+      if(op.dataset.open==='add'){setStep(ph,1)}return;
+    }
+    if(t.closest('[data-close]')){
+      ph.querySelectorAll('.sheet,.scrim').forEach(function(s){s.hidden=true});return;
+    }
+    var go=t.closest('[data-go]');if(go){setStep(ph,+go.dataset.go);return}
+    var more=t.closest('.more');
+    if(more){var b=more.getAttribute('aria-expanded')==='true';more.setAttribute('aria-expanded',!b);document.getElementById(more.getAttribute('aria-controls')).hidden=b;return}
+    var dot=t.closest('.dots button');
+    if(dot){
+      ph.querySelectorAll('.dots button').forEach(function(d){d.setAttribute('aria-pressed',d===dot)});
+      ph.querySelector('.pbody').setAttribute('fill',getComputedStyle(dot).getPropertyValue('--c'));
+      ph.querySelector('[data-cname]').textContent=dot.dataset.name+' · 128 ГБ';
+    }
+  });
+  function setStep(ph,n){
+    ph.querySelectorAll('[data-sheet="add"] [data-step]').forEach(function(s){s.hidden=+s.dataset.step!==n});
+    sync(ph);
+  }
+  document.addEventListener('keydown',function(e){
+    var f=e.target.closest&&e.target.closest('.flip');
+    if(f&&e.target===f&&(e.key==='Enter'||e.key===' ')){e.preventDefault();f.classList.toggle('on')}
+  });
+})();
+</script>
