@@ -1,0 +1,113 @@
+diff --git a/web/public/sb-resize.js b/web/public/sb-resize.js
+--- a/web/public/sb-resize.js
++++ b/web/public/sb-resize.js
+@@ -74,6 +74,10 @@
+   var saved = parseInt(ls(K_W) || '', 10);
+   if (saved >= MIN && saved <= MAX) lastW = saved;
+   var icons = ls(K_I) === '1';
++  var sentIcons = icons;      // последнее разосланное состояние (событие sb:icons)
++  // Кнопка «свернуть/развернуть» — объявлена здесь, ВЫШЕ первого apply() и mount():
++  // mount() может отработать синхронно, и поздний «var tgl = null» обнулил бы ссылку.
++  var tgl = null;
+ 
+   // Пересчёт того, что зависит от ширины сайдбара (09.09.2026, разбор поломки
+   // бэклога). Меняя --sb-w, мы меняем body{padding-left} и, следом, реальные
+@@ -111,10 +115,23 @@
+     if (document.body) document.body.classList.toggle('sb-icons', icons);
+     if (persist) dbg('apply', { icons: icons, width: icons ? ICON : lastW });
+     if (persist) { ls(K_W, lastW); ls(K_I, icons ? '1' : '0'); }
++    syncToggle();
++    // Событие для соседей (sidebar.js сбрасывает фильтр поиска при уходе в иконки).
++    // Только на смену режима, а не на каждый pointermove.
++    if (icons !== sentIcons) {
++      sentIcons = icons;
++      try { window.dispatchEvent(new CustomEvent('sb:icons', { detail: { icons: icons } })); } catch (e) {}
++    }
+     relayout();
+   }
+   function setIcons(v) { if (icons === v) return; icons = v; dbg('snap →', v ? 'иконки' : 'полный'); apply(false); }
+ 
++  // Свернуть/развернуть снаружи (02.10.2026): Ctrl/⌘+K в sidebar.js разворачивает
++  // колонку иконок перед фокусом в поиск. Ширина восстанавливается прежняя (lastW),
++  // состояние запоминается так же, как двойным щелчком по границе.
++  window.sbSetIcons = function (v) { setIcons(!!v); apply(true); };
++  window.sbIsIcons = function () { return icons; };
++
+   apply(false);                                     // ширину ставим сразу, до отрисовки
+   onBody(function () { apply(false); });
+ 
+@@ -134,11 +151,26 @@
+     + '#sb-drag-shield{position:fixed;inset:0;z-index:9999;cursor:col-resize;}'
+     + 'body.sb-dragging{user-select:none;-webkit-user-select:none;}'
+     + '@media (max-width:768px){#sb-resizer{display:none;}}'
++    // Кнопка «свернуть/развернуть» на краю меню (02.10.2026). Сама кнопка —
++    // голая .ibtn (вид — роль из btnCss(), своего фона и рамки ей не пишем); кружок-подложка
++    // — обёртка #sb-collapse: кнопка стоит НА границе, половиной над контентом, и без
++    // подложки шеврон терялся бы на линии. Цвета — токенами, светлая тема берёт свои.
++    // z-index выше ручки (#sb-resizer, 501): клик попадает в кнопку, а тянуть границу
++    // можно выше и ниже неё. Ниже слоя перетаскивания (9999) — во время драга не мешает.
++    + '#sb-collapse{position:fixed;top:24px;left:calc(var(--sb-w) - 13px);z-index:502;width:26px;height:26px;'
++    +   'box-sizing:border-box;border-radius:50%;display:flex;align-items:center;justify-content:center;'
++    +   'background:var(--ui-bg,#0a0a0a);border:1px solid var(--ui-line,#262626);'
++    +   'box-shadow:var(--ui-shadow-sm,0 2px 6px -1px rgba(0,0,0,.25));color:var(--ui-tx-2,#8b8b8b);}'
++    + '#sb-collapse:hover{border-color:var(--ui-brand,#00a0ff);color:var(--ui-tx,#fff);}'
++    + '#sb-collapse>.ibtn{min-width:24px;min-height:24px;}'
++    + '#sb-collapse>.ibtn svg{width:14px;height:14px;}'
++    + 'body.sb-authwall #sb-collapse{display:none;}'
++    + '@media (max-width:768px){#sb-collapse{display:none;}}'
+ 
+     + '@media (min-width:769px){'
+     // плавно только на снапе; во время перетаскивания анимация обязана молчать
+-    + '#app-sidebar,#sb-resizer,body{transition:width .16s ease,left .16s ease,padding-left .16s ease;}'
+-    + 'body.sb-dragging,body.sb-dragging #app-sidebar,body.sb-dragging #sb-resizer{transition:none;}'
++    + '#app-sidebar,#sb-resizer,#sb-collapse,body{transition:width .16s ease,left .16s ease,padding-left .16s ease;}'
++    + 'body.sb-dragging,body.sb-dragging #app-sidebar,body.sb-dragging #sb-resizer,body.sb-dragging #sb-collapse{transition:none;}'
+ 
+     // ---- режим иконок ----
+     + '.sb-icons #app-sidebar .sb-logo{justify-content:center;padding-left:0;padding-right:0;font-size:0;gap:0;}'
+@@ -209,6 +241,36 @@
+     titles();
+     drag(h);
+     h.addEventListener('dblclick', function () { setIcons(!icons); apply(true); });
++    toggleBtn();
++  }
++
++  // Кнопка «свернуть/развернуть» (02.10.2026). Клик = двойной щелчок по
++  // границе: та же пара setIcons + apply(true), прежняя ширина (lastW) возвращается.
++  // Спрайт — window.ICONS_URL (ICONS_V в server.js), своей ?v= не пишем.
++  function toggleBtn() {
++    if (document.getElementById('sb-collapse')) return;
++    var w = document.createElement('div');
++    w.id = 'sb-collapse';
++    w.innerHTML = '<button type="button" class="ibtn" aria-controls="app-sidebar">'
++      + '<svg aria-hidden="true"><use href=""></use></svg></button>';
++    document.body.appendChild(w);
++    tgl = w.querySelector('button');
++    tgl.addEventListener('click', function (e) {
++      e.preventDefault();
++      setIcons(!icons); apply(true);
++    });
++    // Нажатие по кнопке не должно стать началом перетаскивания и не должно уйти странице.
++    tgl.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
++    syncToggle();
++  }
++  function syncToggle() {
++    if (!tgl) return;
++    var t = icons ? 'Развернуть меню' : 'Свернуть меню';
++    tgl.setAttribute('aria-label', t);
++    tgl.setAttribute('aria-expanded', icons ? 'false' : 'true');
++    tgl.title = t;
++    var u = tgl.querySelector('use');
++    if (u) u.setAttribute('href', (window.ICONS_URL || '/assets/icons.svg?v=13') + (icons ? '#i-chevrons-right' : '#i-chevrons-left'));
+   }
+ 
+   // Подписи в тултипы: в режиме иконок текста не видно, а гадать по картинке нельзя.
+@@ -287,7 +349,7 @@
+   // Снимок состояния для отладки: sbResizeDebug() в консоли.
+   window.sbResizeDebug = function () {
+     var st = {
+-      icons: icons, lastW: lastW,
++      icons: icons, lastW: lastW, toggle: !!document.getElementById('sb-collapse'),
+       '--sb-w': getComputedStyle(root).getPropertyValue('--sb-w').trim(),
+       htmlClass: root.className, bodyClass: document.body && document.body.className,
+       shield: !!document.getElementById('sb-drag-shield'),

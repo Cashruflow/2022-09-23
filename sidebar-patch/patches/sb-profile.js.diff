@@ -1,0 +1,113 @@
+diff --git a/web/public/sb-profile.js b/web/public/sb-profile.js
+--- a/web/public/sb-profile.js
++++ b/web/public/sb-profile.js
+@@ -44,6 +44,86 @@
+     return (parts[0].slice(0, 1) + parts[1].slice(0, 1)).toUpperCase();
+   }
+ 
++  /* «Быстрые клавиши» (02.10.2026). Справочник ВСЕХ сочетаний платформы —
++     собран поиском по keydown/ctrlKey/metaKey/altKey в web/public. Добавил сочетание
++     на странице — допиши строку сюда (и в docs/rules/ui.md «Быстрые клавиши»), иначе
++     окно начнёт врать. Формат строки: [клавиши, действие, где, href раздела или ''].
++     В клавишах «Mod» — ⌘ на Mac и Ctrl на остальных, «Alt» — ⌥ / Alt, «Shift» — ⇧ / Shift.
++     href нужен для прав роли (ADR-263): раздел, закрытый роли, в окне не показываем. */
++  var HOTKEYS = [
++    ['Mod+K', 'Поиск по меню: фокус в поле, меню разворачивается из режима иконок', 'Все страницы портала', ''],
++    ['↑ / ↓', 'Выбор пункта среди найденных', 'Поиск по меню', ''],
++    ['Enter', 'Открыть выбранный пункт', 'Поиск по меню', ''],
++    ['Esc', 'Очистить поиск; второй раз — выйти из поля', 'Поиск по меню', ''],
++    ['Esc', 'Закрыть шторку меню, меню профиля, окно или карточку', 'Все страницы', ''],
++    ['Esc', 'Прервать перетаскивание границы меню', 'Граница меню (ПК)', ''],
++    ['Mod+Enter', 'Отправить скриншот', 'Окно «Скрин»', ''],
++    ['Alt+↑ / Alt+↓', 'Переставить строку за ручку перетаскивания', 'Списки с ручкой (справочники /refs)', '/refs'],
++    ['/', 'Фокус в поиск списка', 'Ошибки, Тикеты, Тайминг', ''],
++    ['C', 'Новая ошибка', 'Ошибки (/issues)', '/issues'],
++    ['Mod+Enter', 'Сохранить карточку ошибки', 'Ошибки (/issues)', '/issues'],
++    ['C', 'Новый тикет', 'Тикеты (/ticket)', '/ticket'],
++    ['Mod+Enter', 'Сохранить тикет (в поле комментария — отправить комментарий)', 'Тикеты (/ticket)', '/ticket'],
++    ['← / →', 'Сдвинуть период назад / вперёд', 'Тайминг (/timing/app)', '/timing/app'],
++    ['Enter', 'Отправить сообщение (на ПК; Shift+Enter — новая строка)', 'Чаты (/crm/chats)', '/crm/chats'],
++    ['Mod+B', 'Жирный', 'Чаты — поле сообщения', '/crm/chats'],
++    ['Mod+I', 'Курсив', 'Чаты — поле сообщения', '/crm/chats'],
++    ['Mod+Shift+X', 'Зачёркнутый', 'Чаты — поле сообщения', '/crm/chats'],
++    ['Mod+Shift+P', 'Спойлер', 'Чаты — поле сообщения', '/crm/chats'],
++    ['Enter / Tab', 'Выбрать первого участника в списке «@»', 'Чаты — группа', '/crm/chats'],
++    ['Enter', 'Применить выбранную стадию', 'Карточка лида (/crm/leads)', '/crm/leads'],
++    ['Mod+Enter', 'Отправить письмо', 'Почта — новое письмо (/mail)', '/mail'],
++    ['Mod+S', 'Сохранить robots.txt / llms.txt', 'Индексация — редактор (/index/app)', '/index/app'],
++    ['Mod+Enter', 'Сохранить пару «вопрос — ответ»', 'RAG (/rag/app)', '/rag/app'],
++    ['Mod+Enter', 'Отправить', 'Бриф — окно отправки (/brief)', '/brief'],
++    ['Mod+Enter', 'Отправить запись', 'Дневник (/diary)', '/diary'],
++    ['Mod+Enter', 'Сохранить описание (Esc — отменить)', 'Нормы анализов (/med)', '/med'],
++    ['Enter', 'Отправить (Shift+Enter — новая строка)', 'Ai-агенты — чат (/agents)', '/agents'],
++    ['Mod+Enter', 'Сохранить подзаголовок', 'Окно «Название раздела»', ''],
++    ['← / →', 'Листать подсказки (Esc — закрыть)', 'Трекер привычек — «Как пользоваться»', '/habits/app']
++  ];
++  function keyLabel(k) {
++    var mac = (typeof window.cfIsMac === 'boolean') ? window.cfIsMac
++      : /mac|iphone|ipad|ipod/i.test(navigator.platform || navigator.userAgent || '');
++    return String(k)
++      .replace(/Mod\+/g, mac ? '⌘' : 'Ctrl+')
++      .replace(/Alt\+/g, mac ? '⌥' : 'Alt+')
++      .replace(/Shift\+/g, mac ? '⇧' : 'Shift+');
++  }
++  function hkEsc(s) {
++    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
++      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
++    });
++  }
++  // Окно — общий uiInfo() из /ui-dialogs.js (шторка .mdl-* с крестиком, ADR-231/033):
++  // своего модального окна не заводим. Таблица — на токенах, обе темы.
++  function showHotkeys() {
++    var deny = window.CF_PERM_DENY;
++    var rows = HOTKEYS.filter(function (r) { return !(r[3] && deny && deny.has && deny.has(r[3])); });
++    var html = '<style>'
++      + '.sb-hk{width:100%;border-collapse:collapse;font-size:13px;}'
++      + '.sb-hk th{text-align:left;font-weight:600;font-size:11px;letter-spacing:.04em;text-transform:uppercase;'
++      +   'color:var(--ui-tx-3,#666);padding:6px 8px;border-bottom:1px solid var(--ui-line,#262626);}'
++      + '.sb-hk td{padding:7px 8px;border-bottom:1px solid var(--ui-line-2,#1a1a1a);vertical-align:top;color:var(--ui-tx,#e8e8e8);}'
++      + '.sb-hk td:last-child{color:var(--ui-tx-2,#8b8b8b);}'
++      + '.sb-hk kbd{display:inline-block;white-space:nowrap;font-family:inherit;font-size:12px;font-weight:500;line-height:1.3;padding:1px 6px;border-radius:5px;'
++      +   'border:1px solid var(--ui-line,#262626);background:var(--ui-surface-2,#1a1a1a);color:var(--ui-tx,#e8e8e8);}'
++      + '@media (max-width:640px){.sb-hk th:last-child,.sb-hk td:last-child{display:none;}'
++      +   '.sb-hk td:nth-child(2)::after{content:attr(data-where);display:block;font-size:11.5px;color:var(--ui-tx-3,#666);margin-top:2px;}}'
++      + '</style>'
++      + '<table class="sb-hk"><thead><tr><th>Сочетание</th><th>Действие</th><th>Где</th></tr></thead><tbody>'
++      + rows.map(function (r) {
++          return '<tr><td><kbd>' + hkEsc(keyLabel(r[0])) + '</kbd></td><td data-where="' + hkEsc(r[2]) + '">'
++            + hkEsc(r[1]) + '</td><td>' + hkEsc(r[2]) + '</td></tr>';
++        }).join('')
++      + '</tbody></table>';
++    if (typeof window.uiInfo === 'function') window.uiInfo('Быстрые клавиши', html);
++    else if (window.uiAlert) window.uiAlert(rows.map(function (r) { return keyLabel(r[0]) + ' — ' + r[1] + ' — ' + r[2]; }).join('\n'), { tone: 'info', title: 'Быстрые клавиши' });
++  }
++  // Ручка для кабинета и страниц без строки профиля: cab-foot.js сможет повесить ту же
++  // строку одной строкой кода, не копируя справочник.
++  window.cfShowHotkeys = showHotkeys;
++
+   var CSS =
+     /* Подвал становится точкой отсчёта для меню: оно раскрывается ВВЕРХ, потому что
+        стоит у нижнего края экрана, а на телефоне — у нижнего края шторки. */
+@@ -143,6 +223,11 @@
+       +   'title="Скопировать адрес и все данные страницы для ИИ-агента">'
+       +   ico('i-copy') + 'Копия для ИИ</button>'
+       + '<a class="sb-pm-row" href="/app">' + ico('i-home') + 'На главную</a>'
++      /* «Быстрые клавиши» (02.10.2026) — видна любой роли портала (владелец и
++         сотрудник): справочник только читает, а сочетания закрытых роли разделов окно
++         отфильтрует само. Значок i-keyboard добавлен в спрайт (ICONS_V 13). */
++      + '<button type="button" class="sb-pm-row" id="sb-hotkeys">'
++      +   ico('i-keyboard') + 'Быстрые клавиши</button>'
+       + '<div class="sb-pm-sep"></div>'
+       + '<div class="sb-session" id="sb-session"></div>'
+       + '<button type="button" class="sb-pm-row dg" id="sb-logout">'
+@@ -226,6 +311,10 @@
+       if (window.cfCopyPage) window.cfCopyPage();
+       open(false);
+     });
++    document.getElementById('sb-hotkeys').addEventListener('click', function () {
++      open(false);
++      showHotkeys();
++    });
+     document.getElementById('sb-logout').addEventListener('click', logout);
+ 
+     // Остаток сессии считает sidebar.js (там же скользящее продление куки) — просим

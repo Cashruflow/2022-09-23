@@ -1,0 +1,17 @@
+diff --git a/web/public/issues_page.js b/web/public/issues_page.js
+--- a/web/public/issues_page.js
++++ b/web/public/issues_page.js
+@@ -278,10 +278,9 @@
+     }
+     // Сохранение из карточки — ⌘/Ctrl+Enter, как в задачах.
+     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && $('iss-back').classList.contains('is-open')) { save(); return; }
+-    if (inField || e.metaKey || e.ctrlKey || e.altKey) {
+-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('iss-q').focus(); }
+-      return;
+-    }
++    // ⌘/Ctrl+K здесь больше не ловим (02.10.2026): это общий поиск по меню
++    // портала (sidebar.js, на всех страницах). Локальный поиск списка — клавиша «/».
++    if (inField || e.metaKey || e.ctrlKey || e.altKey) return;
+     if (e.key === '/') { e.preventDefault(); $('iss-q').focus(); return; }
+     if (e.key.toLowerCase() === 'c' || e.key.toLowerCase() === 'с') { e.preventDefault(); open(null); }
+   });
