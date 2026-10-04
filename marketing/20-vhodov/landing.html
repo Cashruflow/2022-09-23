@@ -1,0 +1,192 @@
+<title>Сквозная аналитика: 20 поводов</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=Onest:wght@400;500;700&display=swap">
+<style>
+/* Layout: одна колонка на телефоне, 2 колонки карточек от 760px; липкая панель-счётчик снизу. Идея: бухгалтерский лист, ситуации как строки реестра. */
+:root{
+  --bg:#f3f4f1; --surface:#ffffff; --fg:#1b2420; --muted:#5b6761; --line:#d9ddd6;
+  --accent:#0f6b4f; --accent-fg:#ffffff; --accent-soft:#dff0e8;
+  --font-body:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --gutter:16px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111613; --surface:#1a211d; --fg:#e8ede9; --muted:#9aa7a0; --line:#2e3832;
+    --accent:#4fc596; --accent-fg:#06150e; --accent-soft:#1d3a2e; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111613; --surface:#1a211d; --fg:#e8ede9; --muted:#9aa7a0; --line:#2e3832;
+  --accent:#4fc596; --accent-fg:#06150e; --accent-soft:#1d3a2e; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.5;
+  padding-inline:var(--gutter);padding-block:24px 112px;overflow-x:hidden}
+.wrap{max-width:1040px;margin-inline:auto;display:flex;flex-direction:column;gap:28px;min-width:0}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+h1{font-size:clamp(30px,8vw,52px);line-height:1.08;margin:8px 0 14px;font-weight:700;letter-spacing:-.02em;text-wrap:balance;max-width:18ch}
+.lead{max-width:60ch;color:var(--muted);margin:0;font-size:17px}
+.filters{display:flex;flex-direction:column;gap:12px}
+.fgroup{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-width:0}
+.flabel{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);width:100%}
+.chip{font:inherit;font-size:14px;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);
+  background:var(--surface);color:var(--fg);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.chip small{font-family:var(--font-mono);font-size:12px;opacity:.7;margin-left:4px}
+.grid{display:grid;grid-template-columns:1fr;gap:12px;margin:0;padding:0;list-style:none}
+@media (min-width:760px){.grid{grid-template-columns:1fr 1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;
+  cursor:pointer;min-width:0;position:relative}
+.card.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:linear-gradient(var(--accent-soft),var(--accent-soft)),var(--surface)}
+.top{display:flex;gap:12px;align-items:baseline;justify-content:space-between}
+.num{font-family:var(--font-mono);font-size:13px;color:var(--accent);font-weight:500}
+.tags{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.tag{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+.card h2{font-size:18px;line-height:1.3;margin:0;font-weight:700;text-wrap:balance}
+.hook{margin:0;font-size:16px;font-style:italic;color:var(--fg);padding-left:12px;border-left:2px solid var(--line)}
+.gives{margin:0;font-size:15px;color:var(--muted)}
+.gives b{color:var(--fg);font-weight:500;display:block;font-size:12px;font-family:var(--font-mono);letter-spacing:.06em;text-transform:uppercase}
+.foot{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;margin-top:auto}
+.cta{font-size:14px;font-weight:500;color:var(--accent);text-decoration:underline;text-underline-offset:3px;min-height:44px;display:inline-flex;align-items:center;min-width:0}
+.check{display:inline-flex;align-items:center;gap:10px;font-size:14px;min-height:44px;cursor:pointer}
+.check input{width:22px;height:22px;accent-color:var(--accent);margin:0}
+.empty{color:var(--muted);padding:24px 0}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
+  padding:12px var(--gutter) calc(12px + env(safe-area-inset-bottom,0px));z-index:5}
+.bar-in{max-width:1040px;margin-inline:auto;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.count{font-size:16px;margin:0}
+.count b{font-family:var(--font-mono);font-size:22px;color:var(--accent)}
+.btn{font:inherit;font-weight:700;min-height:44px;padding:0 20px;border-radius:8px;background:var(--accent);color:var(--accent-fg);
+  text-decoration:none;display:inline-flex;align-items:center}
+.contact{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px 16px;display:flex;flex-direction:column;gap:8px;scroll-margin-top:16px}
+.contact h2{margin:0;font-size:22px}
+.contact p{margin:0;color:var(--muted);max-width:60ch}
+.contact .ph{font-family:var(--font-mono);font-size:14px;color:var(--fg);overflow-wrap:anywhere}
+@media (prefers-reduced-motion:no-preference){.card{transition:border-color .15s,background .15s}}
+</style>
+
+<main class="wrap">
+  <header>
+    <p class="eyebrow">Сквозная аналитика для малого и среднего бизнеса</p>
+    <h1>Узнаёте себя в этих ситуациях?</h1>
+    <p class="lead">Ниже 20 ситуаций, с которыми владельцы и маркетологи приходят к цифрам. Ничего не продаём: отметьте те, что про вас, и в конце увидите, о чём стоит поговорить.</p>
+  </header>
+
+  <section class="filters" aria-label="Фильтры">
+    <div class="fgroup" role="group" aria-label="Сегмент">
+      <span class="flabel">Сегмент</span>
+      <span id="segs" style="display:contents"></span>
+    </div>
+    <div class="fgroup" role="group" aria-label="Группа">
+      <span class="flabel">Группа</span>
+      <span id="grps" style="display:contents"></span>
+    </div>
+  </section>
+
+  <ul class="grid" id="grid"></ul>
+  <p class="empty" id="empty" hidden>В этом сочетании фильтров ситуаций нет. Выберите «Все».</p>
+
+  <section class="contact" id="contact">
+    <h2>Обсудить разбор</h2>
+    <p>Напишите нам, назовите номера ситуаций, которые вы отметили. Подготовим короткий разбор на ваших данных.</p>
+    <span class="ph">Контакт: https://t.me/ (ссылка будет добавлена)</span>
+  </section>
+</main>
+
+<div class="bar" role="region" aria-label="Итог">
+  <div class="bar-in">
+    <p class="count" aria-live="polite">Узнали себя в <b id="n">0</b> <span id="word">ситуациях</span></p>
+    <a class="btn" id="discuss" href="#contact" hidden>Обсудить разбор</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  var SEG=[["all","Все"],["svc","Услуги и клиники"],["ecom","E-com"],["b2b","B2B"]];
+  var GRP=[["all","Все"],["A","Деньги"],["B","Реклама"],["C","Продажи"],["D","Собственник"],["E","Рост"]];
+  var SN={svc:"Услуги и клиники",ecom:"E-com",b2b:"B2B"};
+  // [группа, [сегменты], ситуация, крючок, даёт, CTA]
+  var D=[
+  ["A",[],"Реклама ест бюджет, а продаж больше не стало","Вы знаете, сколько стоит лид. А сколько стоит клиент, который заплатил?","ROMI по каждому каналу и кампании: от клика до оплаты в рублях.","Бесплатный разбор: покажем, какой канал съедает деньги впустую."],
+  ["A",[],"Лиды подорожали, и надо резать бюджет. Только что резать?","Самая дешёвая заявка бывает самой дорогой: она так и не платит.","Кампании ранжируются по выручке, а не по цене лида. Режем то, что не продаёт.","Аудит кампаний за 3 дня: что отключить завтра."],
+  ["A",[],"Планируете бюджет на сезон или квартал вслепую","Бюджет «как в прошлом году плюс 10%» это не план, это надежда.","Прогноз по факту: сколько вложить в канал, чтобы получить N продаж.","Медиаплан на данных к следующему сезону."],
+  ["A",[],"Кассовый разрыв: нужно срезать расходы на 30%, не потеряв продажи","Когда режете маркетинг, режьте скальпелем, а не топором.","Видно, какие 20% расходов дают 80% выручки. Остальное сокращается без боли.","Экспресс-аналитика за неделю: карта «оставить / убрать»."],
+  ["B",[],"Меняете агентство, а у каждого свои отчёты и «всё хорошо»","Подрядчик не должен сам себе ставить оценки.","Независимые цифры в вашем кабинете. Любой подрядчик отвечает за продажи, а не за клики.","Своя аналитика, которая остаётся у вас при любом подрядчике."],
+  ["B",[],"По Директу конверсий много, а в CRM пусто","Метрика говорит 120 заявок, менеджеры говорят 40. Кто врёт?","Каждая заявка сшита с источником и сделкой. Расхождения видны и объяснены.","Сверка «реклама и CRM» с отчётом о потерях."],
+  ["B",["ecom"],"Запускаете новый канал: Telegram Ads, VK, Авито, маркетплейс","Как понять за месяц, что новый канал работает, а не просто тратит?","Новый канал с первого дня в той же системе координат, что и старые. Честное сравнение.","Подключим канал к аналитике до старта рекламы."],
+  ["B",["b2b"],"Автостратегии учатся на мусорных заявках","Алгоритм Директа приводит тех, кто оставляет заявку. А вам нужны те, кто платит.","Передача офлайн-конверсий (оплат, квалифицированных лидов) в Директ, Метрику и CAPI. Алгоритм начинает искать покупателей.","Настройка офлайн-конверсий: тот же бюджет, лучше лиды."],
+  ["C",[],"Продажи говорят «лиды плохие», маркетинг говорит «вы не дорабатываете»","Спор маркетинга и продаж решается не на планёрке, а в отчёте.","Качество лидов по источникам и конверсия по менеджерам на одном экране.","Дашборд «лид, сделка», который закрывает этот спор."],
+  ["C",["svc"],"Звонки пропускают, заявки висят без ответа","Вы платите за звонок, который никто не взял.","Коллтрекинг и контроль обработки: сколько лидов потеряно, из какой рекламы, у кого.","Посчитаем, сколько денег теряется на необработанных заявках."],
+  ["C",["b2b"],"Нанимаете РОПа или расширяете отдел продаж","Новый РОП начнёт с вопроса: «А где цифры?»","Прозрачная воронка по этапам, на которую можно ставить планы и KPI.","Воронка продаж с источниками, готовая к первому дню нового РОПа."],
+  ["C",["b2b"],"Длинная сделка: лид сегодня, оплата через три месяца","Какая реклама привела клиента, который заплатил в декабре за сентябрьский клик?","Атрибуция с учётом длинного цикла. Выручка возвращается к первому касанию.","Сквозная аналитика для B2B со сделкой от 30 дней."],
+  ["D",[],"Хотите отойти от операционки и не терять контроль","Пять цифр на телефоне вместо пяти созвонов в неделю.","Дашборд собственника: заявки, продажи, выручка, ROMI, план-факт за сегодня.","Дашборд собственника за 2 недели."],
+  ["D",[],"Готовитесь к инвестору, кредиту или продаже бизнеса","Инвестор спросит CAC и LTV. Ответ «примерно» стоит вам оценки.","Unit-экономика на подтверждённых данных: стоимость клиента, LTV, окупаемость.","Пакет цифр для инвестора или банка."],
+  ["D",["ecom"],"Выручка растёт, а прибыль стоит на месте","Есть клиенты и товары, которые вы продаёте себе в убыток. Вы знаете, какие?","Маржинальность по каналам, услугам, товарам. Реклама считается от прибыли, а не от оборота.","Разбор «где теряется прибыль»."],
+  ["D",["svc"],"Открываете вторую точку, филиал или франшизу","Две клиники, одна реклама. Какая точка тянет, а какая тянет вниз?","Сравнение точек по одной методике: трафик, запись, доходимость, средний чек.","Единая аналитика сети с первого дня."],
+  ["E",["svc","ecom"],"Первая продажа убыточна, клиент окупается на третьей","Канал, который вы считаете убыточным, может приносить лучших клиентов.","LTV по источникам: повторные визиты и покупки привязаны к первому каналу.","Пересчёт окупаемости рекламы с учётом повторных продаж."],
+  ["E",[],"Заявки упали, и непонятно почему","Просел трафик, сайт, обработка или сезон? Ответ должен занимать 5 минут, а не неделю.","Воронка по шагам показывает, на каком этапе провал.","Диагностика падения за 48 часов."],
+  ["E",["ecom"],"Переделываете сайт или запускаете новый","Красивый новый сайт, который продаёт хуже старого, встречается чаще, чем кажется.","Замер «до и после» по конверсии в заявку и в продажу, а не только по дизайну.","Поставим аналитику до редизайна, чтобы было с чем сравнить."],
+  ["E",[],"Внедряете или меняете CRM","Встроить аналитику при внедрении CRM в 3 раза дешевле, чем переделывать потом.","Источники, UTM и звонки сразу пишутся в сделки. История с первого дня.","Внедрение CRM и сквозная аналитика одним проектом."]
+  ];
+  var seg="all",grp="all",on={};
+  try{var s=JSON.parse(localStorage.getItem("v20-filter")||"{}");
+    if(SEG.some(function(x){return x[0]===s.seg}))seg=s.seg;
+    if(GRP.some(function(x){return x[0]===s.grp}))grp=s.grp;}catch(e){}
+  function save(){try{localStorage.setItem("v20-filter",JSON.stringify({seg:seg,grp:grp}))}catch(e){}}
+  function esc(t){return t.replace(/&/g,"&amp;").replace(/</g,"&lt;")}
+  var grid=document.getElementById("grid");
+  grid.innerHTML=D.map(function(c,i){
+    var tags=c[1].length?c[1].map(function(t){return '<span class="tag">'+SN[t]+'</span>'}).join(""):'<span class="tag">Для всех</span>';
+    return '<li class="card" data-i="'+i+'"><div class="top"><span class="num">№ '+(i+1<10?"0":"")+(i+1)+'</span><span class="tags">'+tags+'</span></div>'+
+    '<h2>'+esc(c[2])+'</h2><p class="hook">«'+esc(c[3])+'»</p>'+
+    '<p class="gives"><b>Что даёт</b>'+esc(c[4])+'</p>'+
+    '<div class="foot"><a class="cta" href="#contact">'+esc(c[5])+'</a>'+
+    '<label class="check"><input type="checkbox" id="c'+i+'"> Это про нас</label></div></li>';
+  }).join("");
+  function count(list,fn){return D.filter(fn).length}
+  function chips(id,arr,cur,key){
+    document.getElementById(id).innerHTML=arr.map(function(x){
+      var n=count(D,function(c){return (key==="seg"?(x[0]==="all"||!c[1].length||c[1].indexOf(x[0])>-1):(x[0]==="all"||c[0]===x[0]))});
+      return '<button type="button" class="chip" data-k="'+key+'" data-v="'+x[0]+'" aria-pressed="'+(cur===x[0])+'">'+x[1]+'<small>'+n+'</small></button>';
+    }).join("");
+  }
+  function render(){
+    chips("segs",SEG,seg,"seg");chips("grps",GRP,grp,"grp");
+    var shown=0;
+    [].forEach.call(grid.children,function(li){
+      var c=D[li.dataset.i];
+      var ok=(seg==="all"||!c[1].length||c[1].indexOf(seg)>-1)&&(grp==="all"||c[0]===grp);
+      li.hidden=!ok;if(ok)shown++;
+    });
+    document.getElementById("empty").hidden=shown>0;
+  }
+  function total(){
+    var n=Object.keys(on).filter(function(k){return on[k]}).length;
+    document.getElementById("n").textContent=n;
+    var m=n%10,h=n%100;
+    document.getElementById("word").textContent=(m===1&&h!==11)?"ситуации":"ситуациях";
+    document.getElementById("discuss").hidden=n<1;
+  }
+  function set(li,v){
+    var i=li.dataset.i;on[i]=v;li.classList.toggle("on",v);
+    li.querySelector("input").checked=v;total();
+  }
+  document.querySelector(".filters").addEventListener("click",function(e){
+    var b=e.target.closest(".chip");if(!b)return;
+    if(b.dataset.k==="seg")seg=b.dataset.v;else grp=b.dataset.v;
+    save();render();
+  });
+  grid.addEventListener("click",function(e){
+    if(e.target.closest("a"))return;
+    var li=e.target.closest(".card");if(!li)return;
+    if(e.target.closest(".check")){
+      if(e.target.tagName==="INPUT")set(li,e.target.checked);
+      return;
+    }
+    set(li,!on[li.dataset.i]);
+  });
+  render();total();
+})();
+</script>
