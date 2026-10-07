@@ -1,0 +1,13 @@
+{
+  "name": "cashruflow-mods",
+  "owner": {
+    "name": "cashruflow"
+  },
+  "plugins": [
+    {
+      "name": "context-bar",
+      "source": "./claude-mods/context-bar",
+      "description": "Полоска контекста над промптом с разбивкой по типу"
+    }
+  ]
+}
