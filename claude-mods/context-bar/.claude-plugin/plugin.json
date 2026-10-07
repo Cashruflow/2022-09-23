@@ -1,0 +1,9 @@
+{
+  "name": "context-bar",
+  "version": "0.2.0",
+  "description": "Полоска контекста над промптом с разбивкой по типу",
+  "types": "./types/index.d.ts",
+  "author": {
+    "name": "cashruflow"
+  }
+}
