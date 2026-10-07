@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "cashruflow-mods": {
+      "source": {
+        "source": "github",
+        "repo": "cashruflow/2022-09-23"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "context-bar@cashruflow-mods": true
+  }
+}
