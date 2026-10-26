@@ -1,0 +1,31 @@
+diff --git a/web/server.js b/web/server.js
+--- a/web/server.js
++++ b/web/server.js
+@@ -3,6 +3,7 @@ import { readQueue as wcReadQueue, saveQueue as wcSaveQueue } from "./work_chann
+ import { mountMedShare, mountMedSharePages } from './medshare.js'; // #166 этап 4: пациент делится разделами медкарты с врачом
+ import { ensureSexTerms, syncSexActivity, sexTermsList, sexTermsUsage, sexTermsOp, sexKartReady } from './sex_terms.js'; // ADR-290 §4: позы/места/игрушки «Секса» в Картотеке
+ import { mountTaskDeps, depsMap as taskDepsMap, isDepClosed } from './task_deps.js'; // #139: зависимости задач /api/task-deps (диаграмма Ганта)
++import { mountDiscuss } from './discuss.js'; // «Треды» /discuss (26.10.2026): обсуждения задач и тикетов, чаты CRM и лента Threads одним списком, только чтение
+ import { mountMeProfile } from './me_profile.js'; // расширенный профиль для «Пара App» (#381 этап 1): /api/me/profile-ext, /sex-profile, /pair-profile, /car-profile
+ import { inputValue } from './page_texts.js'; // очистка formname из скрытого поля (#330)
+ import dotenv from 'dotenv';
+@@ -239,7 +240,7 @@ import dotenv from 'dotenv';
+ // поднимать не обязательно: он срабатывает только на странице без <head>. Версионный
+ // адрес получает Cache-Control 7 дней (setHeaders у express.static ниже) — одна загрузка,
+ // дальше из кэша браузера. Правило — docs/rules/ui.md, «Адрес спрайта».
+-const ICONS_V = 30; // 29 — i-gantt для модуля «Диаграмма Ганта» кабинета (#139, шаг 4); 28 — i-code для кнопки «исходник» в редакторе kb.html (27 занят ?v=27 в mail-box.js/mail.html); 26 — i-undo-2/i-timer/i-rotate-ccw для мобильной /tasks (макет B); 25 — i-newspaper для пункта «Блог» (#452, 06.10.2026); 24 — i-list/i-layout-grid для переключателя вида «Мои разделы» (#403, 04.10.2026); 23 — убран дубль i-panel-bottom (остался Lucide, #33, 04.10.2026); 22 — i-pin-tack для закрепления плитки в cab-sidebar.js (#403, 04.10.2026); 21 — i-test-tube/i-list-checks/i-clipboard-list/i-panel-bottom для нижнего меню (#33, 03.10.2026); 20 (выше своих ?v=15..19 в medcard_food/balance_core/toast.js/balance.html, чтобы не попасть в чужой кэш) — i-hand-heart/i-lightbulb для «Нашей связи» в «Паре» (#381, 03.10.2026); 14 — i-sim/i-esim для вкладки «eSIM» (ADR-233, 03.10.2026); 13 — i-copy-plus (ADR-236, 02.10.2026); 12 — i-star/i-pushpin для «Моих продуктов» (ADR-286, 01.10.2026); 11 — i-flag/i-mail-open для «Почты» (ADR-283, 01.10.2026); 10 — i-utensils/i-scan-barcode/i-flashlight для «Питания» (29.09.2026)
++const ICONS_V = 31; // 31 — i-messages-square/i-repeat-2 для раздела «Треды» (/discuss, 26.10.2026; 30 уже в habits-sw.js SHELL); 29 — i-gantt для модуля «Диаграмма Ганта» кабинета (#139, шаг 4); 28 — i-code для кнопки «исходник» в редакторе kb.html (27 занят ?v=27 в mail-box.js/mail.html); 26 — i-undo-2/i-timer/i-rotate-ccw для мобильной /tasks (макет B); 25 — i-newspaper для пункта «Блог» (#452, 06.10.2026); 24 — i-list/i-layout-grid для переключателя вида «Мои разделы» (#403, 04.10.2026); 23 — убран дубль i-panel-bottom (остался Lucide, #33, 04.10.2026); 22 — i-pin-tack для закрепления плитки в cab-sidebar.js (#403, 04.10.2026); 21 — i-test-tube/i-list-checks/i-clipboard-list/i-panel-bottom для нижнего меню (#33, 03.10.2026); 20 (выше своих ?v=15..19 в medcard_food/balance_core/toast.js/balance.html, чтобы не попасть в чужой кэш) — i-hand-heart/i-lightbulb для «Нашей связи» в «Паре» (#381, 03.10.2026); 14 — i-sim/i-esim для вкладки «eSIM» (ADR-233, 03.10.2026); 13 — i-copy-plus (ADR-236, 02.10.2026); 12 — i-star/i-pushpin для «Моих продуктов» (ADR-286, 01.10.2026); 11 — i-flag/i-mail-open для «Почты» (ADR-283, 01.10.2026); 10 — i-utensils/i-scan-barcode/i-flashlight для «Питания» (29.09.2026)
+ const ICONS_URL = "/assets/icons.svg?v=" + ICONS_V;
+ const ICONS_TAG = '<script>window.ICONS_URL="' + ICONS_URL + '"</script>';
+ const ICONS_RE = /\/assets\/icons\.svg(?:\?v=[\w.-]*)?(?=[#"'`)])/g;
+@@ -561,6 +562,10 @@ app.get("/mcp", (req, res) => res.sendFile("/home/cashruflow/web/public/mcp.html
+ // на платформе: вкладка «Посещения» встраивает GoatCounter в iframe (src="/gc/",
+ // путь должен указывать на GoatCounter в nginx), вкладка «Тепловая карта» — наша.
+ app.get("/stats", (req, res) => res.sendFile("/home/cashruflow/web/public/stats.html"));
++// «Треды» (26.10.2026, web/discuss.js): страница /discuss и GET /api/discuss/list, /api/discuss/item.
++// Монтируется ВЫШЕ app.get("/:slug") (иначе адрес уйдёт в кабинет со слагом «discuss»). pauth —
++// function-декларация ниже по файлу (hoisting), в обработчике уже есть; своё соединение с tasks.db — readonly.
++mountDiscuss(app, { pauth: (req, res) => pauth(req, res), scopeSql, roleOf, allowed: roleAllowed });
+ app.get("/api/mcp", async (req, res) => {
+   if (!pauth(req, res)) return;
+   const reg = mcpRegRead();

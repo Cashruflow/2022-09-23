@@ -1,0 +1,23 @@
+diff --git a/web/roles.js b/web/roles.js
+--- a/web/roles.js
++++ b/web/roles.js
+@@ -44,6 +44,9 @@ export const SECTIONS = [
+   { key: "tasks", group: "Работа", label: "Бэклог", href: "/tasks" },
+   { key: "issues", group: "Работа", label: "Ошибки", href: "/issues" },
+   { key: "ticket", group: "Работа", label: "Тикеты", href: "/ticket" },
++  // «Треды» (/discuss, web/discuss.js, 26.10.2026): только чтение обсуждений, чатов и ленты. Каждый источник ручка
++  // дополнительно режет правом своего раздела (tasks, ticket, chats, threads) и областью own_projects.
++  { key: "discuss", group: "Работа", label: "Треды", href: "/discuss", api: ["/api/discuss"] },
+   { key: "projects", group: "Работа", label: "Проекты", href: "/projects" },
+   { key: "clients", group: "Работа", label: "Клиенты", href: "/clients" },
+   { key: "access", group: "Работа", label: "Доступы и ключи", href: "/access",
+@@ -454,6 +457,9 @@ export const SECTIONS = [
+     ["manager", "/api/dict-path/lead_stage", "POST", true, true],
+     ["manager", "/api/tenant/demo/leads/5", "PUT", true, false],
+     ["manager", "/api/tenant/demo/crm-leads/5", "PUT", true, true, { body: { kanban_status: "paid", stage_force: 1 } }],
++    // «Треды» (/discuss): менеджеру открыты страница и чтение; подрядчику по умолчанию закрыты (CONTRACTOR_ALLOW)
++    ["manager", "/discuss", "GET", false, false], ["manager", "/api/discuss/list", "GET", true, false],
++    ["contractor", "/discuss", "GET", false, true], ["contractor", "/api/discuss/item", "GET", true, true],
+   ];
+   const saved = permCache; permCache = new Map(); permAt = Date.now(); // пустые галочки = умолчания
+   const bad = [];

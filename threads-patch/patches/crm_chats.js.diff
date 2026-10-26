@@ -1,0 +1,12 @@
+diff --git a/web/crm_chats.js b/web/crm_chats.js
+--- a/web/crm_chats.js
++++ b/web/crm_chats.js
+@@ -2583,6 +2583,8 @@
+     if (chat.name_src === "lead" && leadShortName(leadRow)) return leadShortName(leadRow);
+     return chat.client_name || "";
+   }
++  // «Треды» (/discuss, 26.10.2026): имя чата там считает ЭТА же функция — второй копии правила нет.
++  app.locals.chatDisplayName = chatDisplayName;
+ 
+   // Своё имя чата / сброс на имя лида. {name:"…"} — ручное (пустое = вернуть имя из Телеграма),
+   // {from_lead:true} — имя из лида, дальше следует за ним.

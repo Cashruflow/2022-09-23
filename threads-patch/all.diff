@@ -1,0 +1,1127 @@
+diff --git a/web/server.js b/web/server.js
+--- a/web/server.js
++++ b/web/server.js
+@@ -3,6 +3,7 @@ import { readQueue as wcReadQueue, saveQueue as wcSaveQueue } from "./work_chann
+ import { mountMedShare, mountMedSharePages } from './medshare.js'; // #166 этап 4: пациент делится разделами медкарты с врачом
+ import { ensureSexTerms, syncSexActivity, sexTermsList, sexTermsUsage, sexTermsOp, sexKartReady } from './sex_terms.js'; // ADR-290 §4: позы/места/игрушки «Секса» в Картотеке
+ import { mountTaskDeps, depsMap as taskDepsMap, isDepClosed } from './task_deps.js'; // #139: зависимости задач /api/task-deps (диаграмма Ганта)
++import { mountDiscuss } from './discuss.js'; // «Треды» /discuss (26.10.2026): обсуждения задач и тикетов, чаты CRM и лента Threads одним списком, только чтение
+ import { mountMeProfile } from './me_profile.js'; // расширенный профиль для «Пара App» (#381 этап 1): /api/me/profile-ext, /sex-profile, /pair-profile, /car-profile
+ import { inputValue } from './page_texts.js'; // очистка formname из скрытого поля (#330)
+ import dotenv from 'dotenv';
+@@ -239,7 +240,7 @@ import dotenv from 'dotenv';
+ // поднимать не обязательно: он срабатывает только на странице без <head>. Версионный
+ // адрес получает Cache-Control 7 дней (setHeaders у express.static ниже) — одна загрузка,
+ // дальше из кэша браузера. Правило — docs/rules/ui.md, «Адрес спрайта».
+-const ICONS_V = 30; // 29 — i-gantt для модуля «Диаграмма Ганта» кабинета (#139, шаг 4); 28 — i-code для кнопки «исходник» в редакторе kb.html (27 занят ?v=27 в mail-box.js/mail.html); 26 — i-undo-2/i-timer/i-rotate-ccw для мобильной /tasks (макет B); 25 — i-newspaper для пункта «Блог» (#452, 06.10.2026); 24 — i-list/i-layout-grid для переключателя вида «Мои разделы» (#403, 04.10.2026); 23 — убран дубль i-panel-bottom (остался Lucide, #33, 04.10.2026); 22 — i-pin-tack для закрепления плитки в cab-sidebar.js (#403, 04.10.2026); 21 — i-test-tube/i-list-checks/i-clipboard-list/i-panel-bottom для нижнего меню (#33, 03.10.2026); 20 (выше своих ?v=15..19 в medcard_food/balance_core/toast.js/balance.html, чтобы не попасть в чужой кэш) — i-hand-heart/i-lightbulb для «Нашей связи» в «Паре» (#381, 03.10.2026); 14 — i-sim/i-esim для вкладки «eSIM» (ADR-233, 03.10.2026); 13 — i-copy-plus (ADR-236, 02.10.2026); 12 — i-star/i-pushpin для «Моих продуктов» (ADR-286, 01.10.2026); 11 — i-flag/i-mail-open для «Почты» (ADR-283, 01.10.2026); 10 — i-utensils/i-scan-barcode/i-flashlight для «Питания» (29.09.2026)
++const ICONS_V = 31; // 31 — i-messages-square/i-repeat-2 для раздела «Треды» (/discuss, 26.10.2026; 30 уже в habits-sw.js SHELL); 29 — i-gantt для модуля «Диаграмма Ганта» кабинета (#139, шаг 4); 28 — i-code для кнопки «исходник» в редакторе kb.html (27 занят ?v=27 в mail-box.js/mail.html); 26 — i-undo-2/i-timer/i-rotate-ccw для мобильной /tasks (макет B); 25 — i-newspaper для пункта «Блог» (#452, 06.10.2026); 24 — i-list/i-layout-grid для переключателя вида «Мои разделы» (#403, 04.10.2026); 23 — убран дубль i-panel-bottom (остался Lucide, #33, 04.10.2026); 22 — i-pin-tack для закрепления плитки в cab-sidebar.js (#403, 04.10.2026); 21 — i-test-tube/i-list-checks/i-clipboard-list/i-panel-bottom для нижнего меню (#33, 03.10.2026); 20 (выше своих ?v=15..19 в medcard_food/balance_core/toast.js/balance.html, чтобы не попасть в чужой кэш) — i-hand-heart/i-lightbulb для «Нашей связи» в «Паре» (#381, 03.10.2026); 14 — i-sim/i-esim для вкладки «eSIM» (ADR-233, 03.10.2026); 13 — i-copy-plus (ADR-236, 02.10.2026); 12 — i-star/i-pushpin для «Моих продуктов» (ADR-286, 01.10.2026); 11 — i-flag/i-mail-open для «Почты» (ADR-283, 01.10.2026); 10 — i-utensils/i-scan-barcode/i-flashlight для «Питания» (29.09.2026)
+ const ICONS_URL = "/assets/icons.svg?v=" + ICONS_V;
+ const ICONS_TAG = '<script>window.ICONS_URL="' + ICONS_URL + '"</script>';
+ const ICONS_RE = /\/assets\/icons\.svg(?:\?v=[\w.-]*)?(?=[#"'`)])/g;
+@@ -561,6 +562,10 @@ app.get("/mcp", (req, res) => res.sendFile("/home/cashruflow/web/public/mcp.html
+ // на платформе: вкладка «Посещения» встраивает GoatCounter в iframe (src="/gc/",
+ // путь должен указывать на GoatCounter в nginx), вкладка «Тепловая карта» — наша.
+ app.get("/stats", (req, res) => res.sendFile("/home/cashruflow/web/public/stats.html"));
++// «Треды» (26.10.2026, web/discuss.js): страница /discuss и GET /api/discuss/list, /api/discuss/item.
++// Монтируется ВЫШЕ app.get("/:slug") (иначе адрес уйдёт в кабинет со слагом «discuss»). pauth —
++// function-декларация ниже по файлу (hoisting), в обработчике уже есть; своё соединение с tasks.db — readonly.
++mountDiscuss(app, { pauth: (req, res) => pauth(req, res), scopeSql, roleOf, allowed: roleAllowed });
+ app.get("/api/mcp", async (req, res) => {
+   if (!pauth(req, res)) return;
+   const reg = mcpRegRead();
+diff --git a/web/roles.js b/web/roles.js
+--- a/web/roles.js
++++ b/web/roles.js
+@@ -44,6 +44,9 @@ export const SECTIONS = [
+   { key: "tasks", group: "Работа", label: "Бэклог", href: "/tasks" },
+   { key: "issues", group: "Работа", label: "Ошибки", href: "/issues" },
+   { key: "ticket", group: "Работа", label: "Тикеты", href: "/ticket" },
++  // «Треды» (/discuss, web/discuss.js, 26.10.2026): только чтение обсуждений, чатов и ленты. Каждый источник ручка
++  // дополнительно режет правом своего раздела (tasks, ticket, chats, threads) и областью own_projects.
++  { key: "discuss", group: "Работа", label: "Треды", href: "/discuss", api: ["/api/discuss"] },
+   { key: "projects", group: "Работа", label: "Проекты", href: "/projects" },
+   { key: "clients", group: "Работа", label: "Клиенты", href: "/clients" },
+   { key: "access", group: "Работа", label: "Доступы и ключи", href: "/access",
+@@ -454,6 +457,9 @@ export const SECTIONS = [
+     ["manager", "/api/dict-path/lead_stage", "POST", true, true],
+     ["manager", "/api/tenant/demo/leads/5", "PUT", true, false],
+     ["manager", "/api/tenant/demo/crm-leads/5", "PUT", true, true, { body: { kanban_status: "paid", stage_force: 1 } }],
++    // «Треды» (/discuss): менеджеру открыты страница и чтение; подрядчику по умолчанию закрыты (CONTRACTOR_ALLOW)
++    ["manager", "/discuss", "GET", false, false], ["manager", "/api/discuss/list", "GET", true, false],
++    ["contractor", "/discuss", "GET", false, true], ["contractor", "/api/discuss/item", "GET", true, true],
+   ];
+   const saved = permCache; permCache = new Map(); permAt = Date.now(); // пустые галочки = умолчания
+   const bad = [];
+diff --git a/web/threads.js b/web/threads.js
+--- a/web/threads.js
++++ b/web/threads.js
+@@ -310,7 +310,34 @@
+     if (!(liveCache && Date.now() - liveCache.at < LIVE_TTL)) liveRefresh().catch(() => {});
+     return liveCache;
+   }
+-  app.locals.threads = { live: liveGet };
++  // Лента для «Тредов» (/discuss, 26.10.2026): свои последние посты — кэш 10 мин, НЕ блокирует (как liveGet):
++  // отдаёт кэш (null — ещё собирается) и при устаревании обновляет в фоне. Свои запросы /discuss в Meta не шлёт.
++  const POSTS_TTL = 600000;
++  let postsCache = null, postsBusy = null;
++  async function postsFetch() {
++    const r = row();
++    const token = r && decSecret(r.token_enc);
++    if (!token) return { ok: false, state: 'off', items: [], at: Date.now() };
++    try {
++      const userId = await ensureUserId(token, r);
++      const { resp, d } = await graphOwn(userId, 'threads', sp => {
++        sp.set('fields', 'id,text,permalink,timestamp,media_type,username');
++        sp.set('limit', '15');
++      }, token);
++      if (!resp.ok) { tlog('GET /{userId}/threads (лента /discuss)', resp.status, d); return { ok: false, state: 'error', items: [], at: Date.now() }; }
++      return { ok: true, state: 'ok', items: d.data || [], username: (liveCache && liveCache.username) || '', at: Date.now() };
++    } catch (e) {
++      tlog('GET /{userId}/threads (лента /discuss, сеть)', null, e);
++      return { ok: false, state: 'error', items: [], at: Date.now() };
++    }
++  }
++  function postsGet() {
++    if (!(postsCache && Date.now() - postsCache.at < POSTS_TTL) && !postsBusy) {
++      postsBusy = postsFetch().then(x => { postsCache = x; return x; }).catch(() => null).finally(() => { postsBusy = null; });
++    }
++    return postsCache;
++  }
++  app.locals.threads = { live: liveGet, posts: postsGet };
+ 
+   // ---------- статус ----------
+   app.get('/api/threads/status', async (req, res) => {
+diff --git a/web/crm_chats.js b/web/crm_chats.js
+--- a/web/crm_chats.js
++++ b/web/crm_chats.js
+@@ -2583,6 +2583,8 @@
+     if (chat.name_src === "lead" && leadShortName(leadRow)) return leadShortName(leadRow);
+     return chat.client_name || "";
+   }
++  // «Треды» (/discuss, 26.10.2026): имя чата там считает ЭТА же функция — второй копии правила нет.
++  app.locals.chatDisplayName = chatDisplayName;
+ 
+   // Своё имя чата / сброс на имя лида. {name:"…"} — ручное (пустое = вернуть имя из Телеграма),
+   // {from_lead:true} — имя из лида, дальше следует за ним.
+diff --git a/web/public/sidebar.js b/web/public/sidebar.js
+--- a/web/public/sidebar.js
++++ b/web/public/sidebar.js
+@@ -249,6 +249,9 @@
+       // Тикеты (ADR-136, задача #341) — клиентские запросы, не задачи: в бэклог и в
+       // квоты недели не попадают, закрытие стоит нормативные 15 минут.
+       { href: '/ticket', icon: 'ticket', label: 'Тикеты' },
++      // «Треды» (26.10.2026, web/discuss.js) — обсуждения задач и тикетов, чаты CRM и лента Threads одним списком,
++      // только чтение. Адрес /threads занят постингом в Threads («Тредс» в ИНТЕГРАЦИЯХ), поэтому /discuss; право — discuss.
++      { href: '/discuss', icon: 'messages-square', label: 'Треды' },
+       { href: '/projects', icon: 'projects', label: 'Проекты' },
+       { href: '/clients', icon: 'clients', label: 'Клиенты' },
+       { href: '/access', icon: 'access', label: 'Доступы' },
+diff --git a/web/public/assets/icons.svg b/web/public/assets/icons.svg
+--- a/web/public/assets/icons.svg
++++ b/web/public/assets/icons.svg
+@@ -221,4 +221,7 @@
+ <symbol id="i-clipboard-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></symbol>
+ <symbol id="i-panel-bottom" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 15h18"/></symbol>
+ <symbol id="i-newspaper" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18h-5"/><path d="M18 14h-8"/><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="10" y="6" rx="1"/></symbol>
++<!-- «Треды» (/discuss, 26.10.2026): Lucide messages-square — пункт меню «Треды» и пустой список; repeat-2 — чип «Лента» (репост). lucide-static 1.50.0, ISC. ICONS_V 31. -->
++<symbol id="i-messages-square" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/></symbol>
++<symbol id="i-repeat-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></symbol>
+ </svg>
+\ No newline at end of file
+diff --git a/web/public/habits-sw.js b/web/public/habits-sw.js
+--- a/web/public/habits-sw.js
++++ b/web/public/habits-sw.js
+@@ -33,7 +33,7 @@ const SHELL = [
+   '/habits',
+   // Спрайт — тем же адресом, что просят страницы (ICONS_V в server.js, 27.09.2026): иначе
+   // установка качала бы отдельную копию без версии. Поднял ICONS_V — подними и здесь.
+-  '/assets/icons.svg?v=30',
++  '/assets/icons.svg?v=31',
+   '/assets/logo.svg',
+   '/habits.webmanifest',
+   '/toast.js',
+diff --git a/web/discuss.js b/web/discuss.js
+new file mode 100644
+--- /dev/null
++++ b/web/discuss.js
+@@ -0,0 +1,368 @@
++// web/discuss.js — раздел «Треды» (/discuss, 26.10.2026): обсуждения задач и тикетов, чаты CRM и
++// лента Threads одним списком. Макет — «Треды» (Claude Design, 26.10.2026).
++//
++// ТОЛЬКО ЧТЕНИЕ. Своё соединение с tasks.db открыто readonly: модуль не пишет в базу ни строки,
++// таблиц и колонок не заводит (миграций нет). Ответ в тред здесь НЕ делается — кнопка «Открыть»
++// ведёт в исходную сущность (/tasks?id=, /ticket?id=, /crm/chats?chat=, пост в Threads).
++//
++// Адрес /threads занят постингом в Threads (threads.js), поэтому раздел живёт на /discuss.
++//
++// API (портал, ppass; раздел discuss в roles.js):
++//   GET /api/discuss/list?type=all|talks|feed|chats&q=&cursor=&limit=
++//       → { ok, items:[Item], next_cursor, counts:{all,talks,feed,chats}, unread:{chats}, awaiting, feed_state, access }
++//   GET /api/discuss/item?id=task:662|ticket:318|chat:81|post:<id>
++//       → { ok, item: Item + { tiles:[{l,v,s}], messages:[Msg], total } }
++//   Item = { kind:'talk'|'chat'|'feed', id, sub, ref, title, source, project, participants:[{name,role}],
++//            last_text, last_author, last_at (ISO, UTC), unread (число или null), awaiting, replies, status, url, ext }
++//
++// ПРАВА. Раздел discuss открывает страницу и ручки. Каждый источник ДОПОЛНИТЕЛЬНО режется правом
++// своего раздела (allowed(role, key) из roles.js): задачи — tasks, тикеты — ticket, чаты — chats,
++// лента — threads. Роль с областью own_projects (req.cfScope) видит только задачи и тикеты своих
++// проектов (scopeSql); чаты и ленту ей не отдаём вовсе (их ручки закрыты ей и в role_scope.js).
++//
++// НЕПРОЧИТАННОЕ. Честно считается только у чатов: business_chats.unread_count (его сбрасывает открытие
++// диалога на /crm/chats — GET …/messages без since/before). У комментариев задач и тикетов отметки
++// «прочитал этот сотрудник» нет, поэтому unread = null, а вместо него awaiting — последнее слово за
++// клиентом (author_type <> 'admin'). У постов Threads непрочитанного нет вовсе.
++//
++// Ожидаемые отказы — 4xx (403 нет права, 422 неверный запрос/запись исчезла), не 404/5xx:
++// page-err.js заводит в /issues только 5xx и 404.
++import Database from "better-sqlite3";
++import * as TS from "./task_status.js";
++import { labelMap, colorMap } from "./status_path.js";
++import { ST_RU as TICKET_ST_RU } from "./tickets.js";
++import { parseItems } from "./checklist_log.js";
++
++const DB_PATH = "/home/cashruflow/data/tasks.db";
++const TYPES = ["all", "talks", "feed", "chats"];
++const LIMIT_DEF = 30, LIMIT_MAX = 60, MSG_MAX = 40, Q_MAX = 100;
++const CH_LBL = { tg: "Telegram", wa: "WhatsApp", max: "MAX" };
++const MEDIA_LBL = { voice: "Голосовое сообщение", audio: "Аудио", photo: "Фото", video: "Видео",
++  video_note: "Видеосообщение", document: "Файл", sticker: "Стикер", animation: "GIF", contact: "Контакт", location: "Место" };
++
++const iso = s => (s ? String(s).replace(" ", "T") + "Z" : null);          // 'YYYY-MM-DD HH:MM:SS' (UTC) → ISO
++const sqlTs = ms => new Date(ms).toISOString().slice(0, 19).replace("T", " ");
++const str = (v, max) => String(v == null ? "" : v).trim().slice(0, max);
++const chanOf = src => { const s = String(src || "").toLowerCase(); return s === "whatsapp" ? "wa" : (s === "max" || s === "max_user") ? "max" : "tg"; };
++const own = (o, k) => o != null && Object.hasOwn(o, k);
++
++export function mountDiscuss(app, deps) {
++  const { pauth, scopeSql, roleOf, allowed } = deps;
++  let db = null;
++  try {
++    db = new Database(DB_PATH, { readonly: true, fileMustExist: true });
++    db.pragma("busy_timeout = 3000");
++    db.function("lower_ru", s => String(s == null ? "" : s).toLowerCase()); // кириллица без регистра — только так (ADR-162)
++  } catch (e) { console.error("[discuss] tasks.db (readonly):", e.message); }
++
++  app.get("/discuss", (req, res) => res.sendFile("/home/cashruflow/web/public/discuss.html"));
++
++  // ---------- права источников ----------
++  function access(req) {
++    let role = "owner";
++    try { role = roleOf(req).role; } catch (e) { /* без сотрудника — владелец (ADR-164) */ }
++    const can = k => { try { return !!allowed(role, k); } catch (e) { return false; } };
++    const scoped = Array.isArray(req.cfScope);
++    return { task: can("tasks"), ticket: can("ticket"), chats: can("chats") && !scoped, feed: can("threads") && !scoped };
++  }
++
++  // ---------- курсор: «момент последней активности + ключ» строки, после которой продолжать ----------
++  function cursorIn(raw) {
++    if (!raw) return null;
++    try {
++      const c = JSON.parse(Buffer.from(String(raw), "base64url").toString("utf8"));
++      if (!c || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(String(c.t)) || typeof c.k !== "string") return undefined;
++      return { t: c.t, k: c.k.slice(0, 80) };
++    } catch (e) { return undefined; }
++  }
++  const cursorOut = it => Buffer.from(JSON.stringify({ t: it._t, k: it._k }), "utf8").toString("base64url");
++  const before = (it, c) => !c || it._t < c.t || (it._t === c.t && it._k < c.k);
++  const byRecent = (a, b) => (a._t < b._t ? 1 : a._t > b._t ? -1 : a._k < b._k ? 1 : a._k > b._k ? -1 : 0);
++
++  // ---------- обсуждения: задачи и тикеты (общая таблица comments) ----------
++  const TALK = {
++    task: { table: "tasks", title: "t.task", label: "Задача", url: id => "/tasks?id=" + id },
++    ticket: { table: "tickets", title: "t.title", label: "Тикет", url: id => "/ticket?id=" + id },
++  };
++  // Сводка по сущности из comments + сама сущность. Параметры: позиционные «?» — только область scopeSql
++  // (они идут первыми), остальное — именованные (@q, @ct); better-sqlite3 принимает оба вида в одном вызове.
++  function talkSql(et, req, q, c, oid) {
++    const T = TALK[et];
++    const sc = scopeSql(req, "t.project_id");
++    // поиск: название, номер, проект и тексты/авторы комментариев сущности
++    const qs = q ? " AND (instr(lower_ru(COALESCE(" + T.title + ",'') || ' ' || t.id || ' ' || COALESCE(pr.name,'') || ' ' || COALESCE(t.client_slug,'')), lower_ru(@q)) > 0"
++      + " OR EXISTS (SELECT 1 FROM comments q2 WHERE q2.entity_type='" + et + "' AND q2.entity_id=t.id AND q2.deleted=0"
++      + " AND instr(lower_ru(COALESCE(q2.text,'') || ' ' || COALESCE(q2.author_name,'')), lower_ru(@q)) > 0))" : "";
++    const named = Object.assign({}, q ? { q } : {}, c ? { ct: c.t } : {}, oid ? { oid } : {});
++    return {
++      from: `FROM (SELECT entity_id, MAX(id) last_id, MAX(created_at) last_at, COUNT(*) n
++                   FROM comments WHERE entity_type='${et}' AND deleted=0 GROUP BY entity_id) a
++             JOIN ${T.table} t ON t.id = a.entity_id
++             LEFT JOIN projects pr ON pr.id = t.project_id
++             WHERE 1=1${sc.sql}${qs}${oid ? " AND t.id=@oid" : ""}`,
++      cur: c ? " AND datetime(a.last_at) <= @ct" : "",
++      args: Object.keys(named).length ? [...sc.args, named] : [...sc.args],
++    };
++  }
++  function talkCount(et, req, q) {
++    const s = talkSql(et, req, q, null);
++    return db.prepare("SELECT COUNT(*) n " + s.from).get(...s.args).n;
++  }
++  function talkAwaitingCount(et, req) {
++    const s = talkSql(et, req, "", null);
++    return db.prepare("SELECT COUNT(*) n " + s.from + " AND (SELECT COALESCE(author_type,'admin') FROM comments WHERE id=a.last_id) <> 'admin'").get(...s.args).n;
++  }
++  const peopleOf = {};
++  // oid — одна сущность (превью справа): та же сводка, что у строки списка.
++  function talkList(et, req, q, c, lim, oid) {
++    const T = TALK[et];
++    const s = talkSql(et, req, q, c, oid);
++    const rows = db.prepare(`SELECT t.id, ${T.title} title, t.status, t.project_id, t.client_slug, pr.name project_name,
++        datetime(a.last_at) last_at, a.n replies, a.last_id
++        ${s.from}${s.cur}
++        ORDER BY datetime(a.last_at) DESC, t.id DESC LIMIT ${lim}`).all(...s.args);
++    if (!rows.length) return [];
++    const lastQ = db.prepare("SELECT text, author_type, author_name FROM comments WHERE id=?");
++    const ppl = peopleOf[et] || (peopleOf[et] = db.prepare(`SELECT author_name, author_type FROM comments
++      WHERE entity_type='${et}' AND entity_id=? AND deleted=0 AND COALESCE(author_name,'')<>''
++      GROUP BY author_name ORDER BY MAX(id) DESC LIMIT 3`));
++    const tkLbl = et === "ticket" ? labelMap("ticket_status", TICKET_ST_RU) : null;
++    const tkClr = et === "ticket" ? colorMap("ticket_status", {}) : null;
++    return rows.map(r => {
++      const lc = lastQ.get(r.last_id) || {};
++      const status = et === "task"
++        ? { code: r.status || "", label: TS.labelOf(r.status), color: TS.colorOf(r.status), group: TS.groupOf(r.status) }
++        : { code: r.status || "", label: own(tkLbl, r.status) ? tkLbl[r.status] : (r.status || ""), color: own(tkClr, r.status) ? tkClr[r.status] : "" };
++      return {
++        kind: "talk", sub: et, id: et + ":" + r.id, ref: et === "task" ? "#" + r.id : "TIC-" + r.id,
++        title: r.title || (T.label + " " + r.id), source: T.label, project: r.project_name || r.client_slug || "",
++        project_id: r.project_id || null,
++        participants: ppl.all(r.id).map(p => ({ name: p.author_name, role: p.author_type === "admin" ? "team" : "client" })),
++        last_text: str(lc.text, 240), last_author: lc.author_name || (lc.author_type === "admin" ? "" : "Клиент"),
++        last_at: iso(r.last_at), unread: null, awaiting: !!lc.author_type && lc.author_type !== "admin",
++        replies: r.replies, status, url: T.url(r.id), ext: false,
++        _t: r.last_at || "", _k: et + ":" + String(r.id).padStart(9, "0"),
++      };
++    });
++  }
++
++  // ---------- чаты CRM (Telegram / WhatsApp / MAX) ----------
++  // Тот же набор, что видит /crm/chats по умолчанию: не архив, не заблокированные, группы — только подключённые.
++  const CHAT_BASE = `COALESCE(c.is_archived,0)=0 AND COALESCE(c.is_ignored,0)=0
++    AND (COALESCE(c.chat_type,'user')<>'group' OR COALESCE(c.is_enabled,1)=1)`;
++  const chatQ = q => q ? ` AND (instr(lower_ru(COALESCE(c.client_name,'') || ' ' || COALESCE(c.custom_name,'') || ' ' ||
++      COALESCE(c.client_username,'') || ' ' || COALESCE(l.name,'') || ' ' || COALESCE(l.last_name,'') || ' ' || COALESCE(pr.name,'')), lower_ru(@q)) > 0
++    OR EXISTS (SELECT 1 FROM business_messages m WHERE m.business_chat_id=c.id AND m.deleted_at IS NULL
++      AND instr(lower_ru(COALESCE(m.text,'')), lower_ru(@q)) > 0))` : "";
++  const CHAT_FROM = `FROM business_chats c
++    LEFT JOIN business_connections k ON k.business_connection_id = c.business_connection_id
++    LEFT JOIN crm_leads l ON l.id = c.crm_lead_id
++    LEFT JOIN projects pr ON pr.id = c.project_id`;
++  function chatCount(q) {
++    return db.prepare(`SELECT COUNT(*) n ${CHAT_FROM} WHERE ${CHAT_BASE}${chatQ(q)}`).get(q ? { q } : {}).n;
++  }
++  function chatUnread() {
++    // число диалогов с непрочитанным и сумма сообщений — то же поле, что у бейджа «Чаты» в меню
++    const r = db.prepare(`SELECT COUNT(*) chats, COALESCE(SUM(c.unread_count),0) msgs
++      FROM business_chats c WHERE ${CHAT_BASE} AND COALESCE(c.unread_count,0) > 0`).get();
++    return r || { chats: 0, msgs: 0 };
++  }
++  function chatAwaitingCount() {
++    return db.prepare(`SELECT COUNT(*) n FROM business_chats c WHERE ${CHAT_BASE}
++      AND (SELECT m.direction FROM business_messages m WHERE m.business_chat_id=c.id AND m.deleted_at IS NULL ORDER BY m.id DESC LIMIT 1)='in'`).get().n;
++  }
++  function mediaText(type, text) {
++    const t = String(text || "").trim();
++    if (t) return t;
++    return own(MEDIA_LBL, type) ? MEDIA_LBL[type] : (type && type !== "text" ? "Вложение" : "");
++  }
++  function chatTitle(r) {
++    const fn = app.locals.chatDisplayName;   // одна функция имени чата на платформу (crm_chats.js)
++    let n = "";
++    try { if (typeof fn === "function") n = fn(r, r.crm_lead_id ? { name: r.lead_name, last_name: r.lead_last_name } : null); } catch (e) {}
++    return n || r.client_name || (r.client_username ? "@" + String(r.client_username).replace(/^@+/, "") : "Чат " + r.id);
++  }
++  function chatList(q, c, lim, oid) {
++    const rows = db.prepare(`SELECT c.id, c.client_name, c.custom_name, c.name_src, c.client_username, c.crm_lead_id, c.chat_type,
++        c.unread_count, c.project_id, k.source conn_source, l.name lead_name, l.last_name lead_last_name, pr.name project_name,
++        datetime(COALESCE(c.last_message_at, c.created_at)) last_at,
++        (SELECT COUNT(*) FROM business_messages m WHERE m.business_chat_id=c.id AND m.deleted_at IS NULL) msgs,
++        (SELECT m.id FROM business_messages m WHERE m.business_chat_id=c.id AND m.deleted_at IS NULL ORDER BY m.id DESC LIMIT 1) last_mid
++      ${CHAT_FROM} WHERE ${CHAT_BASE}${chatQ(q)}${c ? " AND datetime(COALESCE(c.last_message_at, c.created_at)) <= @ct" : ""}${oid ? " AND c.id=@oid" : ""}
++      ORDER BY datetime(COALESCE(c.last_message_at, c.created_at)) DESC, c.id DESC LIMIT ${lim}`)
++      .all(Object.assign({}, q ? { q } : {}, c ? { ct: c.t } : {}, oid ? { oid } : {}));
++    const lastQ = db.prepare("SELECT direction, text, message_type, sender_name FROM business_messages WHERE id=?");
++    return rows.map(r => {
++      const m = r.last_mid ? (lastQ.get(r.last_mid) || {}) : {};
++      const ch = chanOf(r.conn_source);
++      const body = mediaText(m.message_type, m.text);
++      const title = chatTitle(r);
++      return {
++        kind: "chat", sub: ch, id: "chat:" + r.id, ref: "", title, source: CH_LBL[ch],
++        project: r.project_name || "", project_id: r.project_id || null,
++        participants: [{ name: title, role: "client" }],
++        last_text: str(m.direction === "out" ? "Вы: " + body : (r.chat_type === "group" && m.sender_name ? m.sender_name + ": " : "") + body, 240),
++        last_author: m.direction === "out" ? "Вы" : (m.sender_name || title), media: !String(m.text || "").trim() ? (m.message_type || "") : "",
++        last_at: iso(r.last_at), unread: +r.unread_count || 0, awaiting: m.direction === "in",
++        replies: r.msgs, status: null, url: "/crm/chats?chat=" + r.id, ext: false,
++        _t: r.last_at || "", _k: "chat:" + String(r.id).padStart(9, "0"),
++      };
++    });
++  }
++
++  // ---------- лента Threads: кэш постов threads.js (app.locals.threads.posts), без своих запросов в Meta ----------
++  function feedSnap() {
++    const T = app.locals.threads;
++    if (!T || typeof T.posts !== "function") return { state: "off", items: [] };
++    let s = null;
++    try { s = T.posts(); } catch (e) { s = null; }
++    if (!s) return { state: "loading", items: [] };           // первый запрос — кэш ещё собирается в фоне
++    return { state: s.state || (s.ok ? "ok" : "error"), items: Array.isArray(s.items) ? s.items : [], username: s.username || "" };
++  }
++  function feedItems(snap, q) {
++    const ql = String(q || "").toLowerCase();
++    return snap.items.map(p => {
++      const ms = Date.parse(p.timestamp || "");
++      if (!isFinite(ms) || !p.id) return null;
++      const at = sqlTs(ms);
++      const name = p.username || snap.username || "";
++      return {
++        kind: "feed", sub: "threads", id: "post:" + String(p.id).replace(/[^\w-]/g, ""), ref: "", title: name ? "@" + name : "Threads",
++        source: "Threads", project: "", project_id: null, participants: name ? [{ name: "@" + name, role: "team" }] : [],
++        last_text: str(p.text, 400), last_author: name ? "@" + name : "", media: p.media_type && p.media_type !== "TEXT_POST" ? String(p.media_type).toLowerCase() : "",
++        last_at: iso(at), unread: null, awaiting: false, replies: null, status: null,
++        url: /^https:\/\/(www\.)?threads\.(net|com)\//.test(String(p.permalink || "")) ? String(p.permalink) : "/threads", ext: true,
++        _t: at, _k: "post:" + String(p.id),
++      };
++    }).filter(it => it && (!ql || (it.last_text + " " + it.title).toLowerCase().includes(ql)));
++  }
++
++  // ---------- GET /api/discuss/list ----------
++  app.get("/api/discuss/list", (req, res) => {
++    if (!pauth(req, res)) return;
++    if (!db) return res.status(503).json({ ok: false, error: "База недоступна на чтение — смотри лог [discuss]" });
++    const type = str(req.query.type, 10) || "all";
++    if (!TYPES.includes(type)) return res.status(422).json({ ok: false, error: "type: all | talks | feed | chats", code: "bad_type" });
++    const c = cursorIn(req.query.cursor);
++    if (c === undefined) return res.status(422).json({ ok: false, error: "Неверный cursor — начни список заново", code: "bad_cursor" });
++    const q = str(req.query.q, Q_MAX);
++    const lim = Math.min(Math.max(parseInt(req.query.limit, 10) || LIMIT_DEF, 1), LIMIT_MAX);
++    const A = access(req);
++    try {
++      const want = k => type === "all" || type === k;
++      let pool = [];
++      const snap = A.feed ? feedSnap() : { state: "no_access", items: [] };
++      if (want("talks")) {
++        if (A.task) pool = pool.concat(talkList("task", req, q, c, lim + 1));
++        if (A.ticket) pool = pool.concat(talkList("ticket", req, q, c, lim + 1));
++      }
++      if (want("chats") && A.chats) pool = pool.concat(chatList(q, c, lim + 1));
++      if (want("feed") && A.feed) pool = pool.concat(feedItems(snap, q));
++      pool = pool.filter(it => before(it, c)).sort(byRecent);
++      const page = pool.slice(0, lim);
++      const more = pool.length > lim;
++      // Счётчики чипов — от поиска, но НЕ от выбранного чипа и курсора (правило ui.md «Фильтры… два числа»).
++      const counts = {
++        talks: (A.task ? talkCount("task", req, q) : 0) + (A.ticket ? talkCount("ticket", req, q) : 0),
++        chats: A.chats ? chatCount(q) : 0,
++        feed: A.feed ? feedItems(snap, q).length : 0,
++      };
++      counts.all = counts.talks + counts.chats + counts.feed;
++      const un = A.chats ? chatUnread() : { chats: 0, msgs: 0 };
++      const awaiting = (A.task ? talkAwaitingCount("task", req) : 0) + (A.ticket ? talkAwaitingCount("ticket", req) : 0) + (A.chats ? chatAwaitingCount() : 0);
++      res.json({
++        ok: true, type, q,
++        items: page.map(({ _t, _k, ...it }) => it),
++        next_cursor: more && page.length ? cursorOut(page[page.length - 1]) : null,
++        counts, unread: { chats: un.chats || 0, messages: un.msgs || 0 }, awaiting,
++        feed_state: snap.state, access: A,
++      });
++    } catch (e) {
++      console.error("[discuss] list:", e.message);
++      res.status(500).json({ ok: false, error: "Список не собрался: " + e.message });
++    }
++  });
++
++  // ---------- GET /api/discuss/item — превью справа (только чтение; прочитанным НЕ отмечает) ----------
++  app.get("/api/discuss/item", (req, res) => {
++    if (!pauth(req, res)) return;
++    if (!db) return res.status(503).json({ ok: false, error: "База недоступна на чтение — смотри лог [discuss]" });
++    const m = /^(task|ticket|chat|post):([\w-]{1,40})$/.exec(String(req.query.id || ""));
++    if (!m) return res.status(422).json({ ok: false, error: "id: task:N | ticket:N | chat:N | post:ID", code: "bad_id" });
++    const [, kind, rawId] = m;
++    const A = access(req);
++    const deny = () => res.status(403).json({ ok: false, error: "Раздел источника закрыт для вашей роли", code: "no_access" });
++    const gone = () => res.status(422).json({ ok: false, error: "Запись не найдена — её удалили или она вне вашей области", code: "gone" });
++    try {
++      if (kind === "task" || kind === "ticket") {
++        if (!A[kind]) return deny();
++        const id = parseInt(rawId, 10);
++        if (!(id > 0)) return res.status(422).json({ ok: false, error: "Номер записи — число", code: "bad_id" });
++        const sc = scopeSql(req, "t.project_id");
++        const T = TALK[kind];
++        const row = db.prepare(`SELECT t.*, pr.name project_name FROM ${T.table} t LEFT JOIN projects pr ON pr.id=t.project_id WHERE t.id=?${sc.sql}`).get(id, ...sc.args);
++        if (!row) return gone();
++        const total = db.prepare("SELECT COUNT(*) n FROM comments WHERE entity_type=? AND entity_id=? AND deleted=0").get(kind, id).n;
++        const today = db.prepare("SELECT COUNT(*) n FROM comments WHERE entity_type=? AND entity_id=? AND deleted=0 AND date(created_at)=date('now')").get(kind, id).n;
++        const msgs = db.prepare(`SELECT id, author_type, author_name, text, visibility, datetime(created_at) at FROM comments
++          WHERE entity_type=? AND entity_id=? AND deleted=0 ORDER BY id DESC LIMIT ${MSG_MAX}`).all(kind, id).reverse();
++        const base = talkList(kind, req, "", null, 1, id)[0]
++          || { kind: "talk", sub: kind, id: kind + ":" + id, ref: kind === "task" ? "#" + id : "TIC-" + id, title: kind === "task" ? row.task : row.title,
++               source: T.label, project: row.project_name || row.client_slug || "", participants: [], last_text: "", last_at: iso(row.updated_at || row.created_at),
++               unread: null, awaiting: false, replies: 0, status: null, url: T.url(id), ext: false };
++        delete base._t; delete base._k;
++        const tiles = [{ l: "Ответов", v: total, s: today ? "+" + today + " сегодня" : "" }];
++        if (kind === "task") {
++          const it = parseItems(row.comment || "").filter(x => !x.cancelled);
++          if (it.length) tiles.push({ l: "Чек-лист", v: it.filter(x => x.done).length + "/" + it.length, s: "пунктов" });
++          const fm = +row.fact_min || 0;
++          tiles.push({ l: "Время", v: Math.floor(fm / 60) ? Math.floor(fm / 60) + " ч " + (fm % 60) : String(fm), s: "мин" });
++          if (row.deadline) tiles.push({ l: "Срок", v: String(row.deadline).slice(8, 10) + "." + String(row.deadline).slice(5, 7), s: "", date: String(row.deadline).slice(0, 10) });
++        } else {
++          tiles.push({ l: "Единиц", v: Math.round((+row.minutes || 0) / 15), s: "по 15 мин" });
++          tiles.push({ l: "Создан", v: String(row.created_at || "").slice(8, 10) + "." + String(row.created_at || "").slice(5, 7), s: "", date: String(row.created_at || "").slice(0, 10) });
++        }
++        return res.json({ ok: true, item: Object.assign(base, {
++          tiles, total,
++          messages: msgs.map(x => ({ id: x.id, author: x.author_name || (x.author_type === "admin" ? "Команда" : "Клиент"),
++            role: x.author_type === "admin" ? "team" : "client", internal: x.visibility === "internal", text: String(x.text || ""), at: iso(x.at) })),
++        }) });
++      }
++      if (kind === "chat") {
++        if (!A.chats) return deny();
++        const id = parseInt(rawId, 10);
++        if (!(id > 0)) return res.status(422).json({ ok: false, error: "Номер чата — число", code: "bad_id" });
++        const base = chatList("", null, 1, id)[0];
++        if (!base) return gone();
++        delete base._t; delete base._k;
++        const msgs = db.prepare(`SELECT m.id, m.direction, m.text, m.message_type, m.sender_name, m.transcript, datetime(m.created_at) at,
++            (SELECT name FROM staff WHERE id=m.author_id) author_name
++          FROM business_messages m WHERE m.business_chat_id=? AND m.deleted_at IS NULL AND COALESCE(m.hidden_local,0)=0
++          ORDER BY m.created_at DESC, m.id DESC LIMIT ${MSG_MAX}`).all(id).reverse();
++        const tiles = [
++          { l: "Сообщений", v: base.replies, s: "" },
++          { l: "Непрочитано", v: base.unread, s: "" },
++          { l: "Канал", v: base.source, s: "" },
++        ];
++        if (base.project) tiles.push({ l: "Проект", v: base.project, s: "" });
++        return res.json({ ok: true, item: Object.assign(base, {
++          tiles, total: base.replies,
++          messages: msgs.map(x => ({ id: x.id, author: x.direction === "out" ? (x.author_name || "Вы") : (x.sender_name || base.title),
++            role: x.direction === "out" ? "team" : "client", internal: x.message_type === "system",
++            text: mediaText(x.message_type, x.text) + (x.transcript ? "\n«" + String(x.transcript).slice(0, 400) + "»" : ""), at: iso(x.at) })),
++        }) });
++      }
++      // post
++      if (!A.feed) return deny();
++      const snap = feedSnap();
++      const it = feedItems(snap, "").find(x => x.id === "post:" + rawId);
++      if (!it) return gone();
++      delete it._t; delete it._k;
++      return res.json({ ok: true, item: Object.assign(it, { tiles: [], total: 0,
++        messages: [{ id: it.id, author: it.title, role: "team", internal: false, text: it.last_text, at: it.last_at }] }) });
++    } catch (e) {
++      console.error("[discuss] item:", e.message);
++      res.status(500).json({ ok: false, error: "Превью не собралось: " + e.message });
++    }
++  });
++}
+diff --git a/web/public/discuss.html b/web/public/discuss.html
+new file mode 100644
+--- /dev/null
++++ b/web/public/discuss.html
+@@ -0,0 +1,52 @@
++<!doctype html>
++<html lang="ru">
++<head>
++<meta charset="utf-8">
++<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
++<meta name="theme-color" content="#0a0a0a">
++<meta name="robots" content="noindex">
++<title>Треды — AI-платформа</title>
++<link rel="stylesheet" href="/ui.css?v=100">
++<!-- /theme.css строго ПОСЛЕ /ui.css и ровно один раз (ADR-319) -->
++<link rel="stylesheet" href="/theme.css">
++<link rel="stylesheet" href="/discuss.css?v=1">
++<!-- метка статуса .ui-st рисуется синхронно — uiColorVar нужен ВЫШЕ скрипта страницы (ui.md, ADR-285) -->
++<script src="/ui-color.js?v=1"></script>
++<!-- ссылки в тексте сообщений — только cfLinkify (ui.md) -->
++<script src="/linkify.js?v=2"></script>
++</head>
++<body>
++<!-- «Треды» (/discuss, 26.10.2026): обсуждения задач и тикетов, чаты CRM и лента Threads одним списком.
++     Данные — GET /api/discuss/list и /api/discuss/item (web/discuss.js), только чтение. Адрес /threads
++     занят постингом в Threads, поэтому раздел на /discuss. Шапку собирает /page-header.js из <h1> и
++     p.ph-s (ADR-147), панель списка — шаблон .lt-one + ltBuild (ADR-338), вкладки — .ui-tabs > .ui-tab. -->
++<div id="app" class="ui-page dc-page">
++  <h1>Треды</h1>
++  <p class="ph-s"><span id="dc-sub">Загружаю…</span></p>
++
++  <div class="lt lt-one" data-lt-tpl="default">
++    <label class="lt-find" data-lt-slot="search">
++      <svg aria-hidden="true"><use href="/assets/icons.svg#i-search"></use></svg>
++      <input id="dc-q" type="search" placeholder="Поиск по тредам, людям, клиентам" autocomplete="off" title="Поиск — /">
++    </label>
++    <nav class="ui-tabs lt-tabs" data-lt-slot="tabs" id="dc-tabs" aria-label="Что показывать">
++      <button type="button" class="ui-tab is-on" data-type="all" aria-pressed="true">Все <span class="dc-n" id="dc-n-all"></span></button>
++      <button type="button" class="ui-tab" data-type="talks" aria-pressed="false">Обсуждения <span class="dc-n" id="dc-n-talks"></span></button>
++      <button type="button" class="ui-tab" data-type="feed" aria-pressed="false">Лента <span class="dc-n" id="dc-n-feed"></span></button>
++      <button type="button" class="ui-tab" data-type="chats" aria-pressed="false">Чаты <span class="dc-n" id="dc-n-chats"></span></button>
++    </nav>
++  </div>
++
++  <div class="dc-grid fx-row">
++    <section class="dc-list" id="dc-list" aria-label="Треды" aria-busy="true"></section>
++    <aside class="dc-pv" id="dc-pv" aria-label="Превью треда" aria-live="polite"></aside>
++  </div>
++</div>
++
++<script src="/toast.js"></script>
++<!-- ltBuild — порядок слотов панели из /toolbar-template.json -->
++<script src="/list-toolbar.js?v=6"></script>
++<script src="/discuss_page.js?v=1"></script>
++<script src="/sidebar.js?v=20261027a"></script>
++</body>
++</html>
+diff --git a/web/public/discuss.css b/web/public/discuss.css
+new file mode 100644
+--- /dev/null
++++ b/web/public/discuss.css
+@@ -0,0 +1,134 @@
++/* discuss.css — раздел «Треды» (/discuss, 26.10.2026). Только раскладка и строка треда:
++   шапка — .ph (ui.css + page-header.js), панель — .lt-one, вкладки — .ui-tabs, статус — .ui-st,
++   бейдж — .ui-badge, плитки — .ui-tiles.is-auto, пустое — .ui-empty, шторка — .mdl-*.
++   Цвета — только токены --ui-*; кнопкам и полям вид не пишем (btnCss/inpCss).
++   Брейкпоинты из канона: 768↔769 (мобила/ПК) и 1100 (две колонки → одна). */
++body { margin: 0; }
++html, body { max-width: 100vw; overflow-x: hidden; }
++#app { display: block; }                       /* ui.css держит #app{display:none} до входа */
++.dc-page { --dc-top: 112px; }                  /* высота липкой шапки .ph на ПК: превью встаёт под неё */
++
++/* ---------- раскладка ---------- */
++.dc-grid { --fx-gap: 16px; align-items: flex-start; margin-top: 16px; }
++.dc-list { flex: 0 0 auto; width: min(548px, 46%); min-width: 0; box-sizing: border-box; padding: 4px;
++  background: var(--ui-card-bg); border: 1px solid var(--ui-card-border); border-radius: var(--ui-radius-lg, 24px); }
++.dc-pv { flex: 1 1 0; min-width: 0; box-sizing: border-box; position: sticky; top: var(--dc-top);
++  max-height: calc(100dvh - var(--dc-top) - 24px); display: flex; flex-direction: column; overflow: hidden;
++  background: var(--ui-card-bg); border: 1px solid var(--ui-card-border); border-radius: var(--ui-radius-lg, 24px); }
++.dc-pv:empty { display: none; }
++@media (max-width: 1100px) {
++  /* одна колонка: превью открывается шторкой справа (.mdl-back.mdl-right) */
++  .dc-list { width: 100%; }
++  .dc-pv { display: none; }
++}
++
++/* подпись группы по дню */
++.dc-cap { padding: 14px 14px 6px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ui-tx-3); }
++.dc-cap:first-child { padding-top: 10px; }
++
++/* ---------- строка треда (кнопка без ролевых классов — btnCss её не трогает) ---------- */
++.dc-row { position: relative; display: flex; gap: 12px; width: 100%; box-sizing: border-box; margin: 0; padding: 11px 12px;
++  border: 0; border-radius: 16px; background: transparent; color: var(--ui-tx); font: inherit; text-align: left; cursor: pointer;
++  -webkit-tap-highlight-color: transparent; }
++.dc-row::after { content: ""; position: absolute; left: 68px; right: 12px; bottom: 0; height: 1px; background: var(--ui-line-2); }
++.dc-row:last-child::after, .dc-row:has(+ .dc-cap)::after, .dc-row:has(+ .dc-more)::after, .dc-row.is-sel::after { display: none; }
++.dc-row:hover { background: var(--ui-row-hover, var(--ui-surface-2)); }
++.dc-row.is-sel { background: var(--ui-brand-soft); box-shadow: inset 0 0 0 1px var(--ui-brand-soft-line); }
++.dc-row:focus-visible { outline: 2px solid var(--ui-brand); outline-offset: -2px; }
++.dc-b { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
++.dc-h { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
++.dc-t { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; font-weight: 600; }
++.dc-handle { color: var(--ui-tx-3); font-weight: 400; font-size: 13px; }
++.dc-time { flex: 0 0 auto; font-size: 12px; color: var(--ui-tx-3); font-variant-numeric: tabular-nums; }
++.dc-row.is-unread .dc-time, .dc-row.is-wait .dc-time { color: var(--ui-brand); font-weight: 600; }
++.dc-src { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 12px; color: var(--ui-tx-2); white-space: nowrap; overflow: hidden; }
++.dc-src > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
++.dc-dot { flex: 0 0 auto; width: 3px; height: 3px; border-radius: 50%; background: var(--ui-tx-3); }
++.dc-m { display: flex; align-items: center; gap: 8px; min-width: 0; }
++.dc-msg { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13.5px; color: var(--ui-tx-2); }
++.dc-msg > svg { width: 14px; height: 14px; vertical-align: -2px; margin-right: 3px; fill: none; stroke: currentColor; }
++.dc-row.is-unread .dc-msg { color: var(--ui-tx); }
++.dc-m > .ui-badge { margin-left: 0; }
++.dc-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 3px; font-size: 12px; color: var(--ui-tx-3); }
++.dc-meta > span { display: inline-flex; align-items: center; gap: 4px; }
++.dc-meta svg { width: 14px; height: 14px; fill: none; stroke: currentColor; }
++/* пост ленты: две строки текста */
++.dc-post { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.42; color: var(--ui-tx); }
++
++/* ---------- аватары-инициалы: оттенок от имени, как .sv2-fav (seo-v2.css); в токенах палитры аватаров нет ---------- */
++.dc-av { --s: 44px; position: relative; flex: 0 0 auto; width: var(--s); height: var(--s); border-radius: 50%; box-sizing: border-box;
++  display: inline-grid; place-items: center; font-size: calc(var(--s) * .36); font-weight: 600; letter-spacing: .01em;
++  color: var(--ui-btn1-text, #fff); background: hsl(var(--h, 210) 55% 44%); }
++.dc-av.is-ico { border-radius: 14px; background: var(--ui-surface-2); color: var(--ui-tx-2); }
++.dc-av.is-ico > svg { width: 22px; height: 22px; fill: none; stroke: currentColor; }
++.dc-stack { position: relative; flex: 0 0 auto; width: 44px; height: 44px; }
++.dc-stack > .dc-av { --s: 30px; position: absolute; border: 2px solid var(--ui-card-bg); font-size: 11px; }
++.dc-stack > .dc-av:first-child { left: 0; top: 0; }
++.dc-stack > .dc-av:nth-child(2) { right: 0; bottom: 0; }
++.dc-ch { position: absolute; right: -3px; bottom: -3px; width: 20px; height: 20px; border-radius: 50%; box-sizing: border-box;
++  display: grid; place-items: center; border: 2px solid var(--ui-card-bg); color: var(--ui-btn1-text, #fff); background: var(--ui-brand); }
++.dc-ch > svg { width: 11px; height: 11px; fill: none; stroke: currentColor; }
++.dc-ch.is-wa { background: var(--ui-ok); }
++.dc-ch.is-max { background: var(--ui-warn); }
++
++/* счётчик во вкладке — число, не тревога: приглушённо, не .ui-badge */
++.dc-n { font-size: 11.5px; font-weight: 600; color: var(--ui-tx-3); font-variant-numeric: tabular-nums; }
++.dc-n:empty { display: none; }
++.ui-tab.is-on .dc-n { color: inherit; opacity: .7; }
++
++/* «Показать ещё · осталось N» и заметки внутри списка */
++.dc-more { display: flex; justify-content: center; padding: 10px 8px 6px; }
++.dc-note { margin: 6px 8px; padding: 10px 12px; border-radius: 12px; font-size: 12.5px; line-height: 1.45;
++  color: var(--ui-tx-2); background: var(--ui-surface-3, var(--ui-surface-2)); }
++.dc-note a { color: var(--ui-brand); }
++.dc-err { color: var(--ui-danger); }
++.dc-sk { display: flex; gap: 12px; padding: 12px; }
++.dc-sk .ui-sk { margin: 4px 0; }
++
++/* ---------- превью ---------- */
++.dc-pv-h { flex: 0 0 auto; padding: 18px 20px 16px; border-bottom: 1px solid var(--ui-line-2); }
++.dc-pv-src { --fx-gap: 8px; font-size: 12.5px; color: var(--ui-tx-2); min-width: 0; }
++.dc-pv-t { margin: 10px 0 0; font-size: 22px; font-weight: 700; letter-spacing: -.01em; line-height: 1.25; overflow-wrap: anywhere; }
++.dc-pv-ppl { --fx-gap: 10px; margin-top: 10px; font-size: 13px; color: var(--ui-tx-2); flex-wrap: wrap; }
++.dc-avs { display: flex; }
++.dc-avs > .dc-av { --s: 28px; font-size: 10.5px; border: 2px solid var(--ui-card-bg); margin-left: -8px; }
++.dc-avs > .dc-av:first-child { margin-left: 0; }
++.dc-pv .ui-tiles, .dc-sheet .ui-tiles { margin-top: 14px; }
++.dc-pv-b { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 6px 20px 8px; }
++.dc-pv-f { flex: 0 0 auto; padding: 12px 20px 16px; border-top: 1px solid var(--ui-line-2); font-size: 12.5px; color: var(--ui-tx-2); }
++.dc-pv-f > span { flex: 1 1 auto; min-width: 0; }
++
++/* сообщение: аватар и линия ветки слева */
++.dc-msg-it { display: flex; gap: 12px; }
++.dc-msg-l { display: flex; flex-direction: column; align-items: center; flex: 0 0 36px; }
++.dc-msg-l > .dc-av { --s: 36px; }
++.dc-msg-l > i { flex: 1 1 auto; width: 2px; margin: 6px 0 2px; border-radius: 2px; background: var(--ui-line); }
++.dc-msg-it:last-child .dc-msg-l > i { display: none; }
++.dc-msg-b { flex: 1 1 auto; min-width: 0; padding: 12px 0 14px; }
++.dc-msg-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font-size: 13px; color: var(--ui-tx-3); }
++.dc-msg-h > b { font-size: 14px; font-weight: 600; color: var(--ui-tx); }
++.dc-role { font-size: 11.5px; padding: 0 6px; border-radius: 6px; background: var(--ui-surface-2); color: var(--ui-tx-2); }
++.dc-role.is-int { background: var(--ui-warn-soft); color: var(--ui-warn-soft-tx); }
++.dc-msg-t { margin-top: 3px; font-size: 14px; line-height: 1.5; color: var(--ui-tx); white-space: pre-wrap; overflow-wrap: anywhere; }
++.dc-msg-t a.cf-link { color: var(--ui-brand); }
++.dc-new { display: flex; align-items: center; gap: 10px; margin: 6px 0 2px; font-size: 11px; font-weight: 600; letter-spacing: .08em;
++  text-transform: uppercase; color: var(--ui-brand-soft-tx); }
++.dc-new::before, .dc-new::after { content: ""; flex: 1 1 auto; height: 1px; background: var(--ui-brand-soft-line); }
++
++/* превью в шторке (<1100px): тело — тот же разбор, без кнопок (действия — иконками в .mdl-acts) */
++.dc-sheet .dc-pv-src { margin-bottom: 4px; }
++.dc-sheet .dc-pv-t { font-size: 19px; margin-top: 6px; }
++
++/* ---------- телефон (M-77: шапка .ph + поиск .lt-find; список — карточка как .ui-ios-card) ---------- */
++@media (max-width: 768px) {
++  .dc-grid { margin-top: 12px; }
++  .dc-list { width: 100%; padding: 4px 0; }
++  .dc-row { border-radius: 0; padding: 11px 14px; }
++  .dc-row::after { left: 70px; right: 14px; }
++  .dc-row.is-sel { box-shadow: none; }
++  .dc-t { font-size: 16px; }
++  .dc-msg { font-size: 14px; }
++  .dc-cap { padding-left: 16px; }
++  .dc-pv-h { padding: 4px 0 12px; }
++  .dc-pv-b { padding: 4px 0 8px; overflow: visible; }
++}
+diff --git a/web/public/discuss_page.js b/web/public/discuss_page.js
+new file mode 100644
+--- /dev/null
++++ b/web/public/discuss_page.js
+@@ -0,0 +1,411 @@
++/* discuss_page.js — страница «Треды» (/discuss, 26.10.2026).
++ * Данные: GET /api/discuss/list (список, фильтр и поиск — на сервере, ui.md «Фильтры реестров считаются
++ * на сервере») и GET /api/discuss/item (превью; прочитанным ничего не отмечает). Писать здесь нечего:
++ * ответ в тред — в исходной карточке, кнопка «Открыть».
++ * ПК ≥1101px — список слева, превью справа (липкое); ≤1100 — превью шторкой .mdl-back.mdl-right
++ * (на телефоне ui.css делает её нижним листом). Состояние — в адресе: ?type=&q=&id= (общий набор
++ * GET-параметров, data.md). Поиск — «/», как на /issues и /ticket (Ctrl/⌘+K оставлен меню). */
++(function () {
++  'use strict';
++
++  var TYPES = ['all', 'talks', 'feed', 'chats'];
++  var MQ_ONE = window.matchMedia ? window.matchMedia('(max-width:1100px)') : null;   // одна колонка — превью шторкой
++  var MQ_MOB = window.matchMedia ? window.matchMedia('(max-width:768px)') : null;
++  var S = { type: 'all', q: '', items: [], next: null, counts: null, unread: null, awaiting: 0, feed: '', access: null,
++    sel: '', seq: 0, pvSeq: 0, busy: false, err: null, sheet: null };
++
++  // ---------- мелочи ----------
++  function $(id) { return document.getElementById(id); }
++  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
++  function spr() { return window.ICONS_URL || '/assets/icons.svg?v=31'; }
++  function ico(id, cls) { return '<svg' + (cls ? ' class="' + cls + '"' : '') + ' aria-hidden="true"><use href="' + spr() + '#' + id + '"></use></svg>'; }
++  function hue(s) { var h = 7; s = String(s || ''); for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360; return h; }
++  function initials(n) {
++    n = String(n || '').replace(/^@+/, '').trim();
++    if (!n) return '·';
++    var w = n.split(/[\s._-]+/).filter(Boolean);
++    return (w.length > 1 ? w[0].charAt(0) + w[1].charAt(0) : n.slice(0, 2)).toUpperCase();
++  }
++  function av(name, extra) { return '<span class="dc-av" style="--h:' + hue(name) + '">' + esc(initials(name)) + (extra || '') + '</span>'; }
++  function plural(n, a, b, c) { var m = Math.abs(n) % 100, k = m % 10; return m > 10 && m < 20 ? c : k === 1 ? a : k > 1 && k < 5 ? b : c; }
++  function isOne() { return !!(MQ_ONE && MQ_ONE.matches); }
++  function isMob() { return !!(MQ_MOB && MQ_MOB.matches); }
++  function toast(t, err) {
++    if (typeof window.pltToast === 'function') window.pltToast(t, { err: !!err, ms: err ? 5000 : 3000 });
++    else if (typeof window.uiToast === 'function') window.uiToast(t);
++  }
++  // локальное время (ADR-093): сегодня — «14:32», вчера — «вчера», неделя — «пн», иначе «26.10»
++  var WD = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
++  function dayKey(d) { return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
++  function dayDiff(d) {
++    var a = new Date(d.getFullYear(), d.getMonth(), d.getDate()), n = new Date(), b = new Date(n.getFullYear(), n.getMonth(), n.getDate());
++    return Math.round((b - a) / 86400000);
++  }
++  function hm(d) { return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
++  function dm(d) { return String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0'); }
++  function short(iso) {
++    var d = new Date(iso); if (isNaN(d)) return '';
++    var k = dayDiff(d);
++    return k <= 0 ? hm(d) : k === 1 ? 'вчера' : k < 7 ? WD[d.getDay()] : dm(d);
++  }
++  function long(iso) {
++    var d = new Date(iso); if (isNaN(d)) return '';
++    var k = dayDiff(d);
++    return (k <= 0 ? 'сегодня' : k === 1 ? 'вчера' : k < 7 ? WD[d.getDay()] : dm(d)) + ', ' + hm(d);
++  }
++  function group(iso) {
++    var d = new Date(iso); if (isNaN(d)) return 'Раньше';
++    var k = dayDiff(d);
++    return k <= 0 ? 'Сегодня' : k === 1 ? 'Вчера' : k < 7 ? 'На этой неделе' : 'Раньше';
++  }
++
++  // ---------- запросы: r.ok ДО разбора; сеть, 401/403, ошибка сервера и «пришла страница» — разные тексты (ui.md) ----------
++  function api(url) {
++    return fetch(url, { credentials: 'same-origin' }).catch(function () {
++      var e = new Error('Нет связи с сервером — проверь соединение и повтори'); e.kind = 'net'; throw e;
++    }).then(function (r) {
++      return r.text().then(function (t) {
++        var d = null;
++        try { d = t ? JSON.parse(t) : {}; } catch (x) { d = null; }
++        if (r.status === 401) { var e1 = new Error('Сессия истекла — войди заново'); e1.kind = 'auth'; throw e1; }
++        if (r.status === 403) { var e3 = new Error((d && d.error) || 'Раздел закрыт для вашей роли'); e3.kind = 'deny'; throw e3; }
++        if (!r.ok) { var e2 = new Error((d && d.error) || ('Сервер ответил ошибкой ' + r.status)); e2.kind = r.status === 422 ? 'gone' : 'http'; e2.status = r.status; throw e2; }
++        if (!d) { var e4 = new Error('Вместо данных пришла страница — покажи этот экран разработчику'); e4.kind = 'html'; throw e4; }
++        return d;
++      });
++    });
++  }
++
++  // ---------- адрес ----------
++  function readUrl() {
++    var p = new URLSearchParams(location.search);
++    var t = p.get('type') || 'all';
++    S.type = TYPES.indexOf(t) >= 0 ? t : 'all';
++    S.q = (p.get('q') || '').slice(0, 100);
++    S.sel = (p.get('id') || '').slice(0, 60);
++  }
++  function writeUrl() {
++    var p = new URLSearchParams();
++    if (S.type !== 'all') p.set('type', S.type);
++    if (S.q) p.set('q', S.q);
++    if (S.sel) p.set('id', S.sel);
++    var u = location.pathname + (p.toString() ? '?' + p.toString() : '');
++    try { history.replaceState(null, '', u); } catch (e) { /* адрес — удобство, не данные */ }
++  }
++
++  // ---------- список ----------
++  function listUrl(cursor) {
++    var p = new URLSearchParams();
++    p.set('type', S.type);
++    if (S.q) p.set('q', S.q);
++    if (cursor) p.set('cursor', cursor);
++    return '/api/discuss/list?' + p.toString();
++  }
++  function load(more) {
++    var seq = ++S.seq;
++    S.busy = true;
++    if (!more) { S.err = null; paintSkeleton(); }
++    return api(listUrl(more ? S.next : '')).then(function (d) {
++      if (seq !== S.seq) return;
++      S.items = more ? S.items.concat(d.items || []) : (d.items || []);
++      S.next = d.next_cursor || null;
++      S.counts = d.counts || null; S.unread = d.unread || null; S.awaiting = +d.awaiting || 0;
++      S.feed = d.feed_state || ''; S.access = d.access || null; S.err = null;
++    }, function (e) {
++      if (seq !== S.seq) return;
++      if (more) toast(e.message, true); else S.err = e;
++    }).then(function () {
++      if (seq !== S.seq) return;
++      S.busy = false;
++      paintList(); paintTabs(); paintSub();
++      if (!more && !isOne()) {
++        // ПК: превью первой строки, если в адресе ничего не выбрано или выбранного нет в списке
++        if (!S.sel || !S.items.some(function (x) { return x.id === S.sel; })) S.sel = S.items.length ? S.items[0].id : S.sel;
++        if (S.sel) openPreview(S.sel, true); else paintPreviewEmpty();
++      }
++    });
++  }
++
++  function paintSkeleton() {
++    var el = $('dc-list'); if (!el) return;
++    el.setAttribute('aria-busy', 'true');
++    var row = '<div class="dc-sk"><span class="dc-av is-ico"></span><span class="fx-grow"><span class="ui-sk"></span><span class="ui-sk"></span></span></div>';
++    el.innerHTML = row + row + row + row;
++  }
++
++  function paintSub() {
++    var el = $('dc-sub'); if (!el) return;
++    if (!S.counts) { el.textContent = S.err ? 'Список не загрузился' : 'Загружаю…'; return; }
++    var all = S.counts.all || 0, un = (S.unread && S.unread.chats) || 0, aw = S.awaiting || 0;
++    var parts = [all + ' ' + plural(all, 'тред', 'треда', 'тредов')];
++    if (un) parts.push(isMob() ? un + ' непрочит.' : un + ' ' + plural(un, 'чат', 'чата', 'чатов') + ' с непрочитанным');
++    if (aw) parts.push(isMob() ? aw + ' ждут ответа' : aw + ' ' + plural(aw, 'ждёт', 'ждут', 'ждут') + ' вашего ответа');
++    el.textContent = parts.join(' · ');   // .ph-s — одна строка (ADR-147)
++  }
++
++  function paintTabs() {
++    var A = S.access || {}, C = S.counts || {};
++    document.querySelectorAll('#dc-tabs .ui-tab').forEach(function (b) {
++      var t = b.getAttribute('data-type');
++      var on = t === S.type;
++      b.classList.toggle('is-on', on);
++      b.setAttribute('aria-pressed', on ? 'true' : 'false');
++      // нет права на источник — вкладки нет (сервер его и так не отдаст)
++      b.hidden = !!S.access && ((t === 'talks' && !A.task && !A.ticket) || (t === 'chats' && !A.chats) || (t === 'feed' && !A.feed));
++    });
++    TYPES.forEach(function (t) { var n = $('dc-n-' + t); if (n) n.textContent = S.counts && C[t] != null ? String(C[t]) : ''; });
++  }
++
++  function rowHtml(it) {
++    var cls = 'dc-row' + (it.unread ? ' is-unread' : '') + (it.awaiting ? ' is-wait' : '') + (it.id === S.sel ? ' is-sel' : '');
++    var left, head, src, msg, meta = '';
++    if (it.kind === 'talk') {
++      var ppl = (it.participants || []).slice(0, 2);
++      left = ppl.length > 1 ? '<span class="dc-stack">' + av(ppl[0].name) + av(ppl[1].name) + '</span>'
++        : ppl.length ? av(ppl[0].name) : '<span class="dc-av is-ico">' + ico(it.sub === 'ticket' ? 'i-ticket' : 'i-tasks') + '</span>';
++      src = '<span class="ui-id">' + esc(it.ref) + '</span><span class="dc-dot"></span><span>' + esc(it.source) + '</span>'
++        + (it.project ? '<span class="dc-dot"></span><span>' + esc(it.project) + '</span>' : '');
++      msg = (it.last_author ? '<b>' + esc(it.last_author) + ':</b> ' : '') + esc(it.last_text);
++      meta = '<span>' + ico('i-message') + it.replies + ' ' + plural(it.replies, 'ответ', 'ответа', 'ответов') + '</span>'
++        + (it.status && it.status.label ? '<span class="ui-st" style="' + esc(window.uiColorVar ? window.uiColorVar(it.status.color || '') : '') + '">' + esc(it.status.label) + '</span>' : '')
++        + (it.awaiting ? '<span class="ui-chip is-warn">ждёт ответа</span>' : '');
++    } else if (it.kind === 'chat') {
++      var chIco = it.sub === 'wa' ? 'i-phone' : it.sub === 'max' ? 'i-message' : 'i-send';
++      left = av(it.title, '<span class="dc-ch' + (it.sub === 'wa' ? ' is-wa' : it.sub === 'max' ? ' is-max' : '') + '">' + ico(chIco) + '</span>');
++      src = (it.project ? '<span>' + esc(it.project) + '</span><span class="dc-dot"></span>' : '') + '<span>' + esc(it.source) + '</span>';
++      msg = (it.media === 'voice' ? ico('i-mic') : '') + esc(it.last_text);
++    } else {
++      left = av(it.title || 'Threads');
++      src = '<span class="ui-chip is-violet has-ico">' + ico('i-repeat-2') + 'Лента</span><span class="dc-dot"></span><span>Threads</span>';
++      msg = '';
++      meta = '<span>' + ico('i-external-link') + 'Открыть в Threads</span>';
++    }
++    head = '<span class="dc-h"><span class="dc-t">' + esc(it.title) + '</span><span class="dc-time">' + esc(short(it.last_at)) + '</span></span>';
++    var body = it.kind === 'feed'
++      ? '<span class="dc-msg dc-post">' + esc(it.last_text) + '</span>'
++      : '<span class="dc-m"><span class="dc-msg">' + msg + '</span>' + (it.unread ? '<span class="ui-badge">' + (it.unread > 99 ? '99+' : it.unread) + '</span>' : '') + '</span>';
++    return '<button type="button" class="' + cls + '" data-id="' + esc(it.id) + '"' + (it.id === S.sel ? ' aria-current="true"' : '') + '>'
++      + left + '<span class="dc-b">' + head + '<span class="dc-src">' + src + '</span>' + body
++      + (meta ? '<span class="dc-meta">' + meta + '</span>' : '') + '</span></button>';
++  }
++
++  function emptyHtml(t, s, retry) {
++    return '<div class="ui-empty is-c">' + ico('i-messages-square', 'ui-empty__ico') + '<b class="ui-empty__t">' + esc(t) + '</b>'
++      + (s ? '<p class="ui-empty__s">' + s + '</p>' : '')
++      + (retry ? '<p class="ui-empty__s"><button type="button" class="tbtn btn-sm" data-a="retry">Повторить</button></p>' : '') + '</div>';
++  }
++
++  function feedNote() {
++    if (!(S.type === 'feed' || S.type === 'all') || !S.access || !S.access.feed) return '';
++    if (S.feed === 'loading') return '<div class="dc-note">Лента Threads собирается в фоне (кэш на 10 минут). <button type="button" class="ui-link" data-a="retry">Обновить</button></div>';
++    if (S.feed === 'off') return '<div class="dc-note">Threads не подключён — посты в ленту не попадают. Подключение — в разделе <a href="/threads">Тредс</a>.</div>';
++    if (S.feed === 'error') return '<div class="dc-note dc-err">Threads не ответил — лента может быть неполной. Подробности — в разделе <a href="/threads">Тредс</a>.</div>';
++    return '';
++  }
++
++  function paintList() {
++    var el = $('dc-list'); if (!el) return;
++    el.setAttribute('aria-busy', 'false');
++    if (S.err) {
++      el.innerHTML = emptyHtml(S.err.kind === 'auth' ? 'Сессия истекла' : S.err.kind === 'deny' ? 'Нет доступа' : 'Список не загрузился',
++        esc(S.err.message), S.err.kind !== 'auth' && S.err.kind !== 'deny');
++      return;
++    }
++    var html = feedNote(), last = '';
++    if (!S.items.length) {
++      el.innerHTML = html + (S.q ? emptyHtml('Ничего не найдено', 'По запросу «' + esc(S.q) + '» тредов нет. Поиск идёт по названиям, людям, клиентам и тексту сообщений.')
++        : emptyHtml('Тредов пока нет', S.type === 'chats' ? 'Чаты появятся, когда клиенты напишут в подключённые каналы.' : 'Здесь появятся обсуждения задач и тикетов, чаты клиентов и посты Threads.'));
++      return;
++    }
++    S.items.forEach(function (it) {
++      var g = group(it.last_at);
++      if (g !== last) { html += '<div class="dc-cap">' + esc(g) + '</div>'; last = g; }
++      html += rowHtml(it);
++    });
++    // обрезанный список называет остаток числом (ui.md)
++    var total = S.counts ? (S.counts[S.type] || 0) : 0;
++    if (S.next) {
++      var rest = Math.max(total - S.items.length, 0);
++      html += '<div class="dc-more"><button type="button" class="tbtn" data-a="more">Показать ещё' + (rest ? ' · осталось ' + rest : '') + '</button></div>';
++    }
++    el.innerHTML = html;
++  }
++
++  function markSel() {
++    document.querySelectorAll('#dc-list .dc-row').forEach(function (r) {
++      var on = r.getAttribute('data-id') === S.sel;
++      r.classList.toggle('is-sel', on);
++      if (on) r.setAttribute('aria-current', 'true'); else r.removeAttribute('aria-current');
++    });
++  }
++
++  // ---------- превью ----------
++  var KIND_LBL = { task: 'Задача', ticket: 'Тикет', tg: 'Telegram', wa: 'WhatsApp', max: 'MAX', threads: 'Лента' };
++  var OPEN_LBL = { task: 'Открыть задачу', ticket: 'Открыть тикет', tg: 'Открыть чат', wa: 'Открыть чат', max: 'Открыть чат', threads: 'Открыть в Threads' };
++  function openAttrs(it) { return 'href="' + esc(it.url) + '"' + (it.ext ? ' target="_blank" rel="noopener noreferrer"' : ''); }
++  function srcLine(it) {
++    var chip = it.kind === 'feed' ? '<span class="ui-chip is-violet has-ico">' + ico('i-repeat-2') + 'Лента</span>'
++      : '<span class="ui-chip is-brand has-ico">' + ico(it.kind === 'chat' ? 'i-message' : it.sub === 'ticket' ? 'i-ticket' : 'i-tasks') + esc(KIND_LBL[it.sub] || it.source) + '</span>';
++    return (it.ref ? '<span class="ui-id">' + esc(it.ref) + '</span>' : '') + chip
++      + (it.project ? '<span class="fx-ellipsis">Проект «' + esc(it.project) + '»</span>' : '');
++  }
++  function pplLine(it) {
++    var ppl = it.participants || [];
++    if (!ppl.length && !(it.status && it.status.label)) return '';
++    var names = ppl.map(function (p) { return p.name + (p.role === 'client' && it.kind === 'talk' ? ' (клиент)' : ''); });
++    return '<div class="dc-pv-ppl fx-row">' + (ppl.length ? '<span class="dc-avs">' + ppl.map(function (p) { return av(p.name); }).join('') + '</span>'
++      + '<span class="fx-ellipsis">' + esc(names.join(', ')) + '</span>' : '')
++      + (it.status && it.status.label ? '<span class="ui-st" style="' + esc(window.uiColorVar ? window.uiColorVar(it.status.color || '') : '') + '">' + esc(it.status.label) + '</span>' : '') + '</div>';
++  }
++  function tilesHtml(it) {
++    var t = it.tiles || [];
++    if (!t.length) return '';
++    return '<div class="ui-tiles is-auto">' + t.map(function (x) {
++      return '<div class="ui-tile"><div class="ui-tile__lbl">' + esc(x.l) + '</div><div class="ui-tile__val">' + esc(x.v)
++        + (x.s ? '<span class="u">' + esc(x.s) + '</span>' : '') + '</div></div>';
++    }).join('') + '</div>';
++  }
++  function text(s) { return window.cfLinkify ? window.cfLinkify(String(s || '')) : esc(s); }
++  function msgsHtml(it) {
++    var m = it.messages || [];
++    if (!m.length) return '<div class="dc-note">Сообщений пока нет.</div>';
++    // «N новых» — только у чатов: unread_count = непрочитанные входящие, разделитель ставим перед последними N входящими
++    var cut = -1;
++    if (it.kind === 'chat' && it.unread > 0) {
++      var need = it.unread;
++      for (var i = m.length - 1; i >= 0 && need > 0; i--) if (m[i].role === 'client') { need--; cut = i; }
++    }
++    var more = (it.total || 0) > m.length ? '<div class="dc-note">Показаны последние ' + m.length + ' из ' + it.total + ' — вся история в исходной карточке.</div>' : '';
++    return more + m.map(function (x, i) {
++      return (i === cut ? '<div class="dc-new">' + it.unread + ' ' + plural(it.unread, 'новое', 'новых', 'новых') + '</div>' : '')
++        + '<div class="dc-msg-it"><div class="dc-msg-l">' + av(x.author) + '<i></i></div><div class="dc-msg-b">'
++        + '<div class="dc-msg-h"><b>' + esc(x.author) + '</b>'
++        + (x.internal ? '<span class="dc-role is-int">внутреннее</span>' : x.role === 'client' && it.kind === 'talk' ? '<span class="dc-role">клиент</span>' : '')
++        + '<span>' + esc(long(x.at)) + '</span></div>'
++        + '<div class="dc-msg-t">' + text(x.text) + '</div></div></div>';
++    }).join('');
++  }
++  function paintPreviewEmpty(msg) {
++    var el = $('dc-pv'); if (!el || isOne()) return;
++    el.innerHTML = msg ? '<div class="dc-pv-b">' + msg + '</div>' : '';
++  }
++  function paintPane(it) {
++    var el = $('dc-pv'); if (!el) return;
++    el.innerHTML = '<div class="dc-pv-h"><div class="dc-pv-src fx-row">' + srcLine(it) + '<span class="fx-grow"></span>'
++      + '<a class="ibtn" ' + openAttrs(it) + ' title="' + esc(OPEN_LBL[it.sub] || 'Открыть') + '" aria-label="' + esc(OPEN_LBL[it.sub] || 'Открыть') + '">' + ico('i-open') + '</a></div>'
++      + '<h2 class="dc-pv-t">' + esc(it.title) + '</h2>' + pplLine(it) + tilesHtml(it) + '</div>'
++      + '<div class="dc-pv-b">' + msgsHtml(it) + '</div>'
++      + '<div class="dc-pv-f fx-row"><span>' + (it.kind === 'feed' ? 'Ответы и статистика поста — в Threads и в разделе «Тредс».' : 'Ответить можно в исходной карточке — здесь только чтение.') + '</span>'
++      + '<a class="btn btn-sm" ' + openAttrs(it) + '>' + esc(OPEN_LBL[it.sub] || 'Открыть') + '</a></div>';
++    var b = el.querySelector('.dc-pv-b'); if (b) b.scrollTop = b.scrollHeight;   // последние сообщения внизу, как в ленте чата
++  }
++
++  // шторка — только общий .mdl-* (ui.md «Шторки»): действия иконками в .mdl-acts, кнопок в теле нет
++  function sheetClose() {
++    if (!S.sheet) return;
++    document.removeEventListener('keydown', S.sheet.key, true);
++    S.sheet.el.remove(); S.sheet = null;
++  }
++  function sheetOpen(it, loading) {
++    sheetClose();
++    var back = document.createElement('div');
++    back.className = 'mdl-back mdl-right is-open';
++    back.innerHTML = '<div class="ui-card mdl-card dc-sheet" role="dialog" aria-modal="true" aria-label="Превью треда"><div class="mdl-handle"></div>'
++      + '<div class="mdl-head"><div class="mdl-head__ttl"><span class="mdl-head__t">' + esc(it ? it.title : 'Тред') + '</span></div><div class="mdl-acts">'
++      + (it && it.url ? '<a class="ibtn" ' + openAttrs(it) + ' title="' + esc(OPEN_LBL[it.sub] || 'Открыть') + '" aria-label="' + esc(OPEN_LBL[it.sub] || 'Открыть') + '">' + ico('i-open') + '</a>' : '')
++      + '<button type="button" class="ibtn" data-a="x" title="Закрыть — Esc" aria-label="Закрыть">' + ico('i-x') + '</button></div></div>'
++      + '<div class="mdl-body">' + (loading ? '<span class="ui-sk"></span><span class="ui-sk"></span><span class="ui-sk"></span>'
++        : '<div class="dc-pv-h"><div class="dc-pv-src fx-row">' + srcLine(it) + '</div>' + pplLine(it) + tilesHtml(it) + '</div><div class="dc-pv-b">' + msgsHtml(it) + '</div>') + '</div></div>';
++    document.body.appendChild(back);
++    var bgDown = false;   // закрытие по фону — только если и mousedown был на фоне (ERR-400)
++    back.addEventListener('mousedown', function (e) { bgDown = e.target === back; });
++    back.addEventListener('click', function (e) {
++      if (e.target === back && bgDown) { unselect(); return; }
++      var b = e.target.closest && e.target.closest('[data-a="x"]');
++      if (b) unselect();
++    });
++    var key = function (e) { if (e.key === 'Escape') { e.stopImmediatePropagation(); e.preventDefault(); unselect(); } };
++    document.addEventListener('keydown', key, true);
++    S.sheet = { el: back, key: key };
++  }
++  function unselect() { sheetClose(); if (isOne()) { S.sel = ''; markSel(); writeUrl(); } }
++
++  function openPreview(id, quiet) {
++    S.sel = id; markSel(); writeUrl();
++    var seq = ++S.pvSeq;
++    var row = null;
++    S.items.forEach(function (x) { if (x.id === id) row = x; });
++    if (isOne()) sheetOpen(row, true); else if (!quiet || !$('dc-pv').innerHTML) paintPreviewEmpty('<span class="ui-sk"></span><span class="ui-sk"></span><span class="ui-sk"></span>');
++    return api('/api/discuss/item?id=' + encodeURIComponent(id)).then(function (d) {
++      if (seq !== S.pvSeq) return;
++      if (isOne()) sheetOpen(d.item, false); else paintPane(d.item);
++    }, function (e) {
++      if (seq !== S.pvSeq) return;
++      var html = emptyHtml(e.kind === 'gone' ? 'Тред недоступен' : e.kind === 'deny' ? 'Нет доступа' : 'Превью не загрузилось', esc(e.message), e.kind === 'net' || e.kind === 'http');
++      if (isOne()) { sheetClose(); toast(e.message, true); } else paintPreviewEmpty(html);
++    });
++  }
++
++  // ---------- события ----------
++  var qTimer = 0;
++  function bind() {
++    var q = $('dc-q');
++    if (q) {
++      q.value = S.q;
++      q.addEventListener('input', function () {
++        clearTimeout(qTimer);
++        qTimer = setTimeout(function () { S.q = q.value.trim().slice(0, 100); writeUrl(); load(false); }, 300);
++      });
++      q.addEventListener('keydown', function (e) { if (e.key === 'Escape' && q.value) { e.preventDefault(); q.value = ''; S.q = ''; writeUrl(); load(false); } });
++    }
++    var tabs = $('dc-tabs');
++    if (tabs) tabs.addEventListener('click', function (e) {
++      var b = e.target.closest && e.target.closest('.ui-tab');
++      if (!b) return;
++      var t = b.getAttribute('data-type');
++      if (TYPES.indexOf(t) < 0 || t === S.type) return;
++      S.type = t; S.sel = ''; writeUrl(); load(false);
++    });
++    var list = $('dc-list');
++    if (list) list.addEventListener('click', function (e) {
++      var a = e.target.closest && e.target.closest('[data-a]');
++      if (a) {
++        var act = a.getAttribute('data-a');
++        if (act === 'retry') load(false);
++        else if (act === 'more' && S.next && !S.busy) load(true);
++        return;
++      }
++      var r = e.target.closest && e.target.closest('.dc-row');
++      if (r) openPreview(r.getAttribute('data-id'));
++    });
++    var pv = $('dc-pv');
++    if (pv) pv.addEventListener('click', function (e) {
++      var a = e.target.closest && e.target.closest('[data-a="retry"]');
++      if (a && S.sel) openPreview(S.sel);
++    });
++    // «/» — фокус в поиск (как /issues, /ticket); Ctrl/⌘+K не берём — это поиск по меню платформы
++    document.addEventListener('keydown', function (e) {
++      if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
++      var t = e.target, tag = t && t.tagName;
++      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable)) return;
++      if (q) { e.preventDefault(); q.focus(); q.select(); }
++    });
++    // смена ширины: шторка ↔ панель
++    if (MQ_ONE && MQ_ONE.addEventListener) MQ_ONE.addEventListener('change', function () {
++      if (!isOne()) { sheetClose(); if (S.sel) openPreview(S.sel, true); }
++      else { paintPreviewEmpty(); }
++      paintSub();
++    });
++  }
++
++  function init() {
++    readUrl();
++    bind();
++    paintTabs();
++    load(false).then(function () {
++      // телефон/узкий ПК: превью по ссылке ?id= открываем шторкой только если строка в списке
++      if (isOne() && S.sel && S.items.some(function (x) { return x.id === S.sel; })) openPreview(S.sel);
++    });
++  }
++  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
++})();

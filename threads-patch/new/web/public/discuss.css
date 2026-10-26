@@ -1,0 +1,134 @@
+/* discuss.css — раздел «Треды» (/discuss, 26.10.2026). Только раскладка и строка треда:
+   шапка — .ph (ui.css + page-header.js), панель — .lt-one, вкладки — .ui-tabs, статус — .ui-st,
+   бейдж — .ui-badge, плитки — .ui-tiles.is-auto, пустое — .ui-empty, шторка — .mdl-*.
+   Цвета — только токены --ui-*; кнопкам и полям вид не пишем (btnCss/inpCss).
+   Брейкпоинты из канона: 768↔769 (мобила/ПК) и 1100 (две колонки → одна). */
+body { margin: 0; }
+html, body { max-width: 100vw; overflow-x: hidden; }
+#app { display: block; }                       /* ui.css держит #app{display:none} до входа */
+.dc-page { --dc-top: 112px; }                  /* высота липкой шапки .ph на ПК: превью встаёт под неё */
+
+/* ---------- раскладка ---------- */
+.dc-grid { --fx-gap: 16px; align-items: flex-start; margin-top: 16px; }
+.dc-list { flex: 0 0 auto; width: min(548px, 46%); min-width: 0; box-sizing: border-box; padding: 4px;
+  background: var(--ui-card-bg); border: 1px solid var(--ui-card-border); border-radius: var(--ui-radius-lg, 24px); }
+.dc-pv { flex: 1 1 0; min-width: 0; box-sizing: border-box; position: sticky; top: var(--dc-top);
+  max-height: calc(100dvh - var(--dc-top) - 24px); display: flex; flex-direction: column; overflow: hidden;
+  background: var(--ui-card-bg); border: 1px solid var(--ui-card-border); border-radius: var(--ui-radius-lg, 24px); }
+.dc-pv:empty { display: none; }
+@media (max-width: 1100px) {
+  /* одна колонка: превью открывается шторкой справа (.mdl-back.mdl-right) */
+  .dc-list { width: 100%; }
+  .dc-pv { display: none; }
+}
+
+/* подпись группы по дню */
+.dc-cap { padding: 14px 14px 6px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ui-tx-3); }
+.dc-cap:first-child { padding-top: 10px; }
+
+/* ---------- строка треда (кнопка без ролевых классов — btnCss её не трогает) ---------- */
+.dc-row { position: relative; display: flex; gap: 12px; width: 100%; box-sizing: border-box; margin: 0; padding: 11px 12px;
+  border: 0; border-radius: 16px; background: transparent; color: var(--ui-tx); font: inherit; text-align: left; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; }
+.dc-row::after { content: ""; position: absolute; left: 68px; right: 12px; bottom: 0; height: 1px; background: var(--ui-line-2); }
+.dc-row:last-child::after, .dc-row:has(+ .dc-cap)::after, .dc-row:has(+ .dc-more)::after, .dc-row.is-sel::after { display: none; }
+.dc-row:hover { background: var(--ui-row-hover, var(--ui-surface-2)); }
+.dc-row.is-sel { background: var(--ui-brand-soft); box-shadow: inset 0 0 0 1px var(--ui-brand-soft-line); }
+.dc-row:focus-visible { outline: 2px solid var(--ui-brand); outline-offset: -2px; }
+.dc-b { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.dc-h { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.dc-t { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; font-weight: 600; }
+.dc-handle { color: var(--ui-tx-3); font-weight: 400; font-size: 13px; }
+.dc-time { flex: 0 0 auto; font-size: 12px; color: var(--ui-tx-3); font-variant-numeric: tabular-nums; }
+.dc-row.is-unread .dc-time, .dc-row.is-wait .dc-time { color: var(--ui-brand); font-weight: 600; }
+.dc-src { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 12px; color: var(--ui-tx-2); white-space: nowrap; overflow: hidden; }
+.dc-src > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.dc-dot { flex: 0 0 auto; width: 3px; height: 3px; border-radius: 50%; background: var(--ui-tx-3); }
+.dc-m { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.dc-msg { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13.5px; color: var(--ui-tx-2); }
+.dc-msg > svg { width: 14px; height: 14px; vertical-align: -2px; margin-right: 3px; fill: none; stroke: currentColor; }
+.dc-row.is-unread .dc-msg { color: var(--ui-tx); }
+.dc-m > .ui-badge { margin-left: 0; }
+.dc-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 3px; font-size: 12px; color: var(--ui-tx-3); }
+.dc-meta > span { display: inline-flex; align-items: center; gap: 4px; }
+.dc-meta svg { width: 14px; height: 14px; fill: none; stroke: currentColor; }
+/* пост ленты: две строки текста */
+.dc-post { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.42; color: var(--ui-tx); }
+
+/* ---------- аватары-инициалы: оттенок от имени, как .sv2-fav (seo-v2.css); в токенах палитры аватаров нет ---------- */
+.dc-av { --s: 44px; position: relative; flex: 0 0 auto; width: var(--s); height: var(--s); border-radius: 50%; box-sizing: border-box;
+  display: inline-grid; place-items: center; font-size: calc(var(--s) * .36); font-weight: 600; letter-spacing: .01em;
+  color: var(--ui-btn1-text, #fff); background: hsl(var(--h, 210) 55% 44%); }
+.dc-av.is-ico { border-radius: 14px; background: var(--ui-surface-2); color: var(--ui-tx-2); }
+.dc-av.is-ico > svg { width: 22px; height: 22px; fill: none; stroke: currentColor; }
+.dc-stack { position: relative; flex: 0 0 auto; width: 44px; height: 44px; }
+.dc-stack > .dc-av { --s: 30px; position: absolute; border: 2px solid var(--ui-card-bg); font-size: 11px; }
+.dc-stack > .dc-av:first-child { left: 0; top: 0; }
+.dc-stack > .dc-av:nth-child(2) { right: 0; bottom: 0; }
+.dc-ch { position: absolute; right: -3px; bottom: -3px; width: 20px; height: 20px; border-radius: 50%; box-sizing: border-box;
+  display: grid; place-items: center; border: 2px solid var(--ui-card-bg); color: var(--ui-btn1-text, #fff); background: var(--ui-brand); }
+.dc-ch > svg { width: 11px; height: 11px; fill: none; stroke: currentColor; }
+.dc-ch.is-wa { background: var(--ui-ok); }
+.dc-ch.is-max { background: var(--ui-warn); }
+
+/* счётчик во вкладке — число, не тревога: приглушённо, не .ui-badge */
+.dc-n { font-size: 11.5px; font-weight: 600; color: var(--ui-tx-3); font-variant-numeric: tabular-nums; }
+.dc-n:empty { display: none; }
+.ui-tab.is-on .dc-n { color: inherit; opacity: .7; }
+
+/* «Показать ещё · осталось N» и заметки внутри списка */
+.dc-more { display: flex; justify-content: center; padding: 10px 8px 6px; }
+.dc-note { margin: 6px 8px; padding: 10px 12px; border-radius: 12px; font-size: 12.5px; line-height: 1.45;
+  color: var(--ui-tx-2); background: var(--ui-surface-3, var(--ui-surface-2)); }
+.dc-note a { color: var(--ui-brand); }
+.dc-err { color: var(--ui-danger); }
+.dc-sk { display: flex; gap: 12px; padding: 12px; }
+.dc-sk .ui-sk { margin: 4px 0; }
+
+/* ---------- превью ---------- */
+.dc-pv-h { flex: 0 0 auto; padding: 18px 20px 16px; border-bottom: 1px solid var(--ui-line-2); }
+.dc-pv-src { --fx-gap: 8px; font-size: 12.5px; color: var(--ui-tx-2); min-width: 0; }
+.dc-pv-t { margin: 10px 0 0; font-size: 22px; font-weight: 700; letter-spacing: -.01em; line-height: 1.25; overflow-wrap: anywhere; }
+.dc-pv-ppl { --fx-gap: 10px; margin-top: 10px; font-size: 13px; color: var(--ui-tx-2); flex-wrap: wrap; }
+.dc-avs { display: flex; }
+.dc-avs > .dc-av { --s: 28px; font-size: 10.5px; border: 2px solid var(--ui-card-bg); margin-left: -8px; }
+.dc-avs > .dc-av:first-child { margin-left: 0; }
+.dc-pv .ui-tiles, .dc-sheet .ui-tiles { margin-top: 14px; }
+.dc-pv-b { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 6px 20px 8px; }
+.dc-pv-f { flex: 0 0 auto; padding: 12px 20px 16px; border-top: 1px solid var(--ui-line-2); font-size: 12.5px; color: var(--ui-tx-2); }
+.dc-pv-f > span { flex: 1 1 auto; min-width: 0; }
+
+/* сообщение: аватар и линия ветки слева */
+.dc-msg-it { display: flex; gap: 12px; }
+.dc-msg-l { display: flex; flex-direction: column; align-items: center; flex: 0 0 36px; }
+.dc-msg-l > .dc-av { --s: 36px; }
+.dc-msg-l > i { flex: 1 1 auto; width: 2px; margin: 6px 0 2px; border-radius: 2px; background: var(--ui-line); }
+.dc-msg-it:last-child .dc-msg-l > i { display: none; }
+.dc-msg-b { flex: 1 1 auto; min-width: 0; padding: 12px 0 14px; }
+.dc-msg-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font-size: 13px; color: var(--ui-tx-3); }
+.dc-msg-h > b { font-size: 14px; font-weight: 600; color: var(--ui-tx); }
+.dc-role { font-size: 11.5px; padding: 0 6px; border-radius: 6px; background: var(--ui-surface-2); color: var(--ui-tx-2); }
+.dc-role.is-int { background: var(--ui-warn-soft); color: var(--ui-warn-soft-tx); }
+.dc-msg-t { margin-top: 3px; font-size: 14px; line-height: 1.5; color: var(--ui-tx); white-space: pre-wrap; overflow-wrap: anywhere; }
+.dc-msg-t a.cf-link { color: var(--ui-brand); }
+.dc-new { display: flex; align-items: center; gap: 10px; margin: 6px 0 2px; font-size: 11px; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ui-brand-soft-tx); }
+.dc-new::before, .dc-new::after { content: ""; flex: 1 1 auto; height: 1px; background: var(--ui-brand-soft-line); }
+
+/* превью в шторке (<1100px): тело — тот же разбор, без кнопок (действия — иконками в .mdl-acts) */
+.dc-sheet .dc-pv-src { margin-bottom: 4px; }
+.dc-sheet .dc-pv-t { font-size: 19px; margin-top: 6px; }
+
+/* ---------- телефон (M-77: шапка .ph + поиск .lt-find; список — карточка как .ui-ios-card) ---------- */
+@media (max-width: 768px) {
+  .dc-grid { margin-top: 12px; }
+  .dc-list { width: 100%; padding: 4px 0; }
+  .dc-row { border-radius: 0; padding: 11px 14px; }
+  .dc-row::after { left: 70px; right: 14px; }
+  .dc-row.is-sel { box-shadow: none; }
+  .dc-t { font-size: 16px; }
+  .dc-msg { font-size: 14px; }
+  .dc-cap { padding-left: 16px; }
+  .dc-pv-h { padding: 4px 0 12px; }
+  .dc-pv-b { padding: 4px 0 8px; overflow: visible; }
+}
