@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Threads — AI-платформа</title>
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+<link rel="stylesheet" href="/ui.css?v=105">
+<link rel="stylesheet" href="/theme.css">
+<style>
+/* Шапку собирает /page-header.js из <h1> + <p class="ph-s"> (ADR-147). Своей вёрстки
+   заголовка здесь нет. Гейт страниц (page_gate.js) закрывает /threads по умолчанию —
+   отдельно вписывать никуда не нужно. */
+body { margin: 0; }
+#app { display: block; }
+
+#th-status { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+#th-status .dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
+.dot.ok { background: var(--ui-ok, #34d399); }
+.dot.err { background: #f87171; }
+#th-status .txt { color: var(--ui-tx-2, #8b8b8b); font-size: 13px; }
+#th-status .btn { margin-left: auto; }
+/* ERR-193: плашка «нет прав на статистику» — тот же вид, что #th-status; прячется атрибутом hidden */
+#th-noins:not([hidden]) { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+#th-noins .dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
+#th-noins .txt { color: var(--ui-tx-2, #8b8b8b); font-size: 13px; flex: 1 1 200px; }
+#th-noins .btn { margin-left: auto; }
+
+#th-compose { margin-top: var(--ui-gap, 22px); }
+#th-text {
+  width: 100%; box-sizing: border-box; min-height: 140px; resize: vertical;
+  font: inherit; padding: 12px; border-radius: var(--ui-radius, 8px);
+  border: 1px solid var(--ui-card-border, #262626); background: var(--ui-surface-2, #191919);
+  color: var(--ui-tx, #e8e8e8);
+}
+#th-preview { margin-top: 11px; }
+#th-preview[hidden], #th-connect[hidden], #th-img-file[hidden] { display: none; }
+#th-preview img { max-width: 100%; max-height: 220px; border-radius: var(--ui-radius, 8px); display: block; }
+#th-preview .rm { margin-top: 8px; }
+#th-foot { display: flex; align-items: center; gap: 10px; margin-top: 11px; }
+#th-count { color: var(--ui-tx-3, #666); font-size: 12px; font-variant-numeric: tabular-nums; }
+#th-count.over { color: #f87171; }
+#th-img-btn { flex: 0 0 auto; }
+#th-post { margin-left: auto; min-height: var(--ui-tap, 44px); }
+
+.ui-h2 { font-size: 15px; margin: var(--ui-gap, 22px) 0 11px; color: var(--ui-tx, #e8e8e8); }
+
+.th-search-row { display: flex; gap: 8px; }
+.th-search-row input { flex: 1 1 auto; }
+#th-search-results { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+
+#th-posts { display: flex; flex-direction: column; gap: 12px; }
+.th-post { border-top: 1px solid var(--ui-card-border, #262626); padding-top: 12px; }
+.th-post:first-child { border-top: none; padding-top: 0; }
+.th-post__text { white-space: pre-wrap; word-break: break-word; }
+.th-post__meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; font-size: 12px; color: var(--ui-tx-3, #666); }
+.th-post__meta a { color: var(--ui-tx-2, #8b8b8b); }
+.th-post__stats { display: flex; gap: 12px; flex-wrap: wrap; }
+.th-post__replies { margin-top: 10px; padding-left: 14px; border-left: 2px solid var(--ui-card-border, #262626); display: none; }
+.th-post__replies.is-open { display: block; }
+.th-reply { font-size: 13px; margin-bottom: 8px; }
+.th-reply b { color: var(--ui-tx-2, #8b8b8b); }
+</style>
+</head>
+<body>
+
+<div id="app" class="ui-page">
+  <h1>Threads</h1>
+  <p class="ph-s">Постинг, статистика и поиск по ключевым словам</p>
+
+  <div id="th-status" class="ui-card">
+    <span class="dot" id="th-dot"></span>
+    <span class="txt" id="th-txt">Проверяю…</span>
+    <button type="button" class="btn" id="th-connect" hidden>Подключить</button>
+  </div>
+
+  <div class="ui-tabs" id="th-tabs">
+    <a href="#posts" class="ui-tab" data-tab="posts">Мои посты</a>
+    <a href="#keywords" class="ui-tab" data-tab="keywords">Ключи</a>
+    <a href="#аналитика" class="ui-tab" data-tab="аналитика">Аналитика</a>
+  </div>
+
+  <div id="th-noins" class="ui-card" hidden>
+    <span class="dot err"></span>
+    <span class="txt">Нет прав на статистику Threads — переподключите Threads с правом insights</span>
+    <button type="button" class="btn" id="th-reconnect">Переподключить</button>
+  </div>
+
+  <div id="tab-analytics" hidden>
+    <h2 class="ui-h2">Аналитика аккаунта</h2>
+    <div id="th-analytics"></div>
+  </div>
+
+  <div id="tab-posts">
+    <div id="th-compose" class="ui-card">
+      <textarea id="th-text" maxlength="500" placeholder="О чём напишем в Threads?"></textarea>
+      <div id="th-preview" hidden><img id="th-preview-img" alt=""><button type="button" class="tbtn rm" id="th-img-rm">Убрать картинку</button></div>
+      <div id="th-foot">
+        <input type="file" id="th-img-file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+        <button type="button" class="tbtn" id="th-img-btn">Картинка</button>
+        <span id="th-count">0 / 500</span>
+        <button type="button" class="btn" id="th-post">Опубликовать</button>
+      </div>
+    </div>
+
+    <h2 class="ui-h2">Мои посты</h2>
+    <div class="ui-card">
+      <div id="th-posts">Загрузка…</div>
+    </div>
+  </div>
+
+  <div id="tab-keywords" hidden>
+    <h2 class="ui-h2">Поиск по ключевым словам</h2>
+    <div class="ui-card">
+      <div class="th-search-row">
+        <input id="th-q" placeholder="фраза или тема">
+        <button type="button" class="btn" id="th-search-btn">Искать</button>
+      </div>
+      <div id="th-search-results"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/toast.js"></script>
+<script src="/loc-time.js?v=1"></script>
+<script src="/threads-analytics-widget.js?v=3"></script>
+<script>
+(function () {
+  const dot = document.getElementById('th-dot');
+  const txt = document.getElementById('th-txt');
+  const connectBtn = document.getElementById('th-connect');
+  const ta = document.getElementById('th-text');
+  const count = document.getElementById('th-count');
+  const postBtn = document.getElementById('th-post');
+  const imgBtn = document.getElementById('th-img-btn');
+  const imgFile = document.getElementById('th-img-file');
+  const preview = document.getElementById('th-preview');
+  const previewImg = document.getElementById('th-preview-img');
+  const imgRm = document.getElementById('th-img-rm');
+  let imageB64 = '';
+
+  function toast(msg, err) { window.pltToast ? pltToast(msg, { err: !!err }) : (err ? alert(msg) : null); }
+
+  function refreshStatus() {
+    fetch('/api/threads/status').then(r => r.json()).then(d => {
+      if (d.connected) {
+        dot.className = 'dot ok';
+        txt.textContent = 'Подключено · id ' + d.threads_user_id + (d.expires_at ? ' · токен до ' + d.expires_at : '');
+        connectBtn.hidden = true;
+        postBtn.disabled = false;
+        loadPosts();
+      } else {
+        dot.className = 'dot err';
+        txt.textContent = 'Не подключено';
+        connectBtn.hidden = false;
+        postBtn.disabled = true;
+        document.getElementById('th-posts').textContent = 'Подключи Threads, чтобы увидеть посты.';
+      }
+    }).catch(() => { txt.textContent = 'Не удалось проверить статус'; });
+  }
+  connectBtn.onclick = () => { location.href = '/api/threads/oauth/start'; };
+
+  // ERR-193: нет права threads_manage_insights — плашка один раз, дальше статистику не спрашиваем
+  let insightsDenied = false;
+  function noInsights() {
+    insightsDenied = true;
+    document.getElementById('th-noins').hidden = false;
+  }
+  document.getElementById('th-reconnect').onclick = () => { location.href = '/api/threads/oauth/start'; };
+
+  function updCount() {
+    const n = ta.value.length;
+    count.textContent = n + ' / 500';
+    count.classList.toggle('over', n > 500);
+  }
+  ta.addEventListener('input', updCount);
+
+  imgBtn.onclick = () => imgFile.click();
+  imgFile.onchange = () => {
+    const f = imgFile.files[0];
+    if (!f) return;
+    compressImage(f).then(url => { imageB64 = url; previewImg.src = imageB64; preview.hidden = false; })
+      .catch(e => { imgFile.value = ''; toast(e.message || 'Не удалось обработать картинку', true); });
+  };
+  // ERR-509: общий express.json() пускает ~100 КБ — сжимаем через canvas в JPEG, сторона ≤1280px, base64 ≤ ~70 КБ
+  const PHOTO_MAX = 70 * 1024, PHOTO_SIDE = 1280;
+  function compressImage(file) {
+    return new Promise((resolve, reject) => {
+      const src = URL.createObjectURL(file);
+      const img = new Image();
+      img.onerror = () => { URL.revokeObjectURL(src); reject(new Error('Не удалось прочитать картинку')); };
+      img.onload = () => {
+        URL.revokeObjectURL(src);
+        let scale = Math.min(1, PHOTO_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+        for (let step = 0; step < 6; step++) {
+          const cv = document.createElement('canvas');
+          cv.width = Math.max(1, Math.round(img.naturalWidth * scale));
+          cv.height = Math.max(1, Math.round(img.naturalHeight * scale));
+          const cx = cv.getContext('2d');
+          cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); // прозрачность PNG/WebP иначе станет чёрной
+          cx.drawImage(img, 0, 0, cv.width, cv.height);
+          let done = '';
+          for (const q of [0.85, 0.7, 0.55, 0.4]) {
+            const out = cv.toDataURL('image/jpeg', q);
+            if (out.length <= PHOTO_MAX) { done = out; break; }
+          }
+          cv.width = cv.height = 0; // освобождаем память canvas (iOS держит её до GC)
+          if (done) return resolve(done);
+          scale *= 0.75; // качества не хватило — уменьшаем размер
+        }
+        reject(new Error('Фото слишком большое — выбери другое'));
+      };
+      img.src = src;
+    });
+  }
+  imgRm.onclick = () => { imageB64 = ''; imgFile.value = ''; preview.hidden = true; };
+
+  postBtn.onclick = () => {
+    const text = ta.value.trim();
+    if (!text && !imageB64) return;
+    postBtn.disabled = true;
+    postBtn.textContent = 'Публикую…';
+    fetch('/api/threads/post', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, image_base64: imageB64 || undefined })
+    }).then(r => r.text().then(t => {
+      let d; try { d = JSON.parse(t); } catch (e) { d = null; }  // 413 приходит HTML-страницей, не JSON
+      if (!d) d = { error: r.status === 413 ? 'Фото слишком большое' : 'Ошибка сервера (' + r.status + ')' };
+      return d;
+    })).then(d => {
+      postBtn.disabled = false; postBtn.textContent = 'Опубликовать';
+      if (d.ok) {
+        toast('Опубликовано');
+        ta.value = ''; updCount(); imgRm.onclick();
+        loadPosts();
+      } else toast(d.error || 'Ошибка публикации', true);
+    }).catch(e => { postBtn.disabled = false; postBtn.textContent = 'Опубликовать'; toast(e.message, true); });
+  };
+
+  // ---------- поиск ----------
+  const qInput = document.getElementById('th-q');
+  const searchBtn = document.getElementById('th-search-btn');
+  const results = document.getElementById('th-search-results');
+  function doSearch() {
+    const q = qInput.value.trim();
+    if (!q) return;
+    results.textContent = 'Ищу…';
+    fetch('/api/threads/search?q=' + encodeURIComponent(q)).then(r => r.json()).then(d => {
+      if (d.error) { results.textContent = ''; return toast(d.error, true); }
+      if (!d.items.length) { results.textContent = 'Ничего не нашлось'; return; }
+      results.innerHTML = d.items.map(it => `
+        <div class="th-post">
+          <div class="th-post__text">${esc(it.text || '')}</div>
+          <div class="th-post__meta">
+            <span>@${esc(it.username || '—')}</span>
+            <span>${it.timestamp ? new Date(it.timestamp).toLocaleString('ru-RU') : ''}</span>
+            ${it.permalink ? `<a href="${it.permalink}" target="_blank" rel="noopener">открыть →</a>` : ''}
+          </div>
+        </div>`).join('');
+    }).catch(e => { results.textContent = ''; toast(e.message, true); });
+  }
+  searchBtn.onclick = doSearch;
+  qInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+  // ---------- мои посты ----------
+  function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+  function loadPosts() {
+    const box = document.getElementById('th-posts');
+    box.textContent = 'Загрузка…';
+    fetch('/api/threads/posts').then(r => r.json()).then(d => {
+      if (d.error) { box.textContent = ''; return toast(d.error, true); }
+      if (!d.items.length) { box.textContent = 'Постов пока нет'; return; }
+      box.innerHTML = d.items.map(p => `
+        <div class="th-post" data-id="${p.id}">
+          <div class="th-post__text">${esc(p.text || '(без текста)')}</div>
+          <div class="th-post__meta">
+            <span>${p.timestamp ? new Date(p.timestamp).toLocaleString('ru-RU') : ''}</span>
+            ${p.permalink ? `<a href="${p.permalink}" target="_blank" rel="noopener">открыть →</a>` : ''}
+            <button type="button" class="btn th-show-replies">Ответы</button>
+          </div>
+          <div class="th-post__stats" id="stats-${p.id}">…</div>
+          <div class="th-post__replies" id="replies-${p.id}"></div>
+        </div>`).join('');
+      // ERR-193: статистику по репостам (REPOST_FACADE) Meta не отдаёт — не спрашиваем.
+      // Запросы идут по очереди: первый ответ с code no_insights_permission останавливает
+      // остальные и один раз показывает плашку «Переподключить» (вместо 15 одинаковых отказов).
+      const v = x => (x == null ? '—' : x);
+      const statsTxt = s => 'просмотры ' + v(s.views) + ' · лайки ' + v(s.likes) + ' · ответы ' + v(s.replies)
+        + ' · репосты ' + v(s.reposts) + ' · цитаты ' + v(s.quotes);
+      const queue = d.items.filter(p => p.media_type !== 'REPOST_FACADE');
+      d.items.forEach(p => {
+        if (p.media_type === 'REPOST_FACADE') { const el = document.getElementById('stats-' + p.id); if (el) el.textContent = 'репост — статистики нет'; }
+      });
+      if (insightsDenied) {
+        queue.forEach(q => { const e2 = document.getElementById('stats-' + q.id); if (e2) e2.textContent = ''; });
+        queue.length = 0;
+      }
+      const next = () => {
+        const p = queue.shift();
+        if (!p) return;
+        const el = document.getElementById('stats-' + p.id);
+        fetch('/api/threads/insights?id=' + encodeURIComponent(p.id))
+          .then(r => r.json().catch(() => ({})).then(s => ({ ok: r.ok, s })))
+          .then(({ ok, s }) => {
+            if (s.code === 'no_insights_permission') {
+              noInsights();
+              queue.concat([p]).forEach(q => { const e2 = document.getElementById('stats-' + q.id); if (e2) e2.textContent = ''; });
+              return;
+            }
+            if (el) el.textContent = ok && !s.error ? statsTxt(s) : '';
+            next();
+          })
+          .catch(() => { if (el) el.textContent = ''; next(); });
+      };
+      next();
+      box.querySelectorAll('.th-show-replies').forEach(btn => {
+        btn.onclick = () => {
+          const id = btn.closest('.th-post').dataset.id;
+          const el = document.getElementById('replies-' + id);
+          if (el.classList.contains('is-open')) { el.classList.remove('is-open'); return; }
+          el.classList.add('is-open');
+          el.textContent = 'Загрузка…';
+          fetch('/api/threads/replies?id=' + id).then(r => r.json()).then(d2 => {
+            if (d2.error) { el.textContent = ''; return toast(d2.error, true); }
+            el.innerHTML = d2.items.length
+              ? d2.items.map(rp => `<div class="th-reply"><b>@${esc(rp.username || '—')}</b> ${esc(rp.text || '')}</div>`).join('')
+              : 'Ответов пока нет';
+          }).catch(e => { el.textContent = ''; toast(e.message, true); });
+        };
+      });
+    }).catch(e => { box.textContent = ''; toast(e.message, true); });
+  }
+
+  refreshStatus();
+  updCount();
+
+  // ---------- вкладки #posts / #keywords ----------
+  const tabs = document.querySelectorAll('#th-tabs .ui-tab');
+  const panels = { posts: document.getElementById('tab-posts'), keywords: document.getElementById('tab-keywords'), 'аналитика': document.getElementById('tab-analytics') };
+  let analyticsLoaded = false;
+  function showTab(name) {
+    try { name = decodeURIComponent(name); } catch (e) {}
+    if (!panels[name]) name = 'posts';
+    if (name === 'аналитика' && !analyticsLoaded && window.renderThreadsAnalytics) {
+      analyticsLoaded = true;
+      window.renderThreadsAnalytics(document.getElementById('th-analytics'), { onNoInsights: noInsights });
+    }
+    // активная вкладка — .is-on (ui.css, .ui-tab.is-on); с .is-active подсветки не было
+    tabs.forEach(t => t.classList.toggle('is-on', t.dataset.tab === name));
+    Object.keys(panels).forEach(k => { panels[k].hidden = k !== name; });
+  }
+  tabs.forEach(t => t.addEventListener('click', e => { e.preventDefault(); location.hash = t.dataset.tab; showTab(t.dataset.tab); }));
+  // адрес — источник правды: «назад»/«вперёд» и ручная правка #хэша тоже переключают вкладку
+  window.addEventListener('hashchange', () => showTab((location.hash || '#posts').slice(1)));
+  showTab((location.hash || '#posts').slice(1));
+})();
+</script>
+<script src="/sidebar.js?v=20261028b"></script>
+</body>
+</html>

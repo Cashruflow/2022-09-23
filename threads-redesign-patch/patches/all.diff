@@ -1,0 +1,841 @@
+--- a/web/public/threads.html
++++ b/web/public/threads.html
+@@ -9,122 +9,220 @@
+ <link rel="stylesheet" href="/ui.css?v=105">
+ <link rel="stylesheet" href="/theme.css">
+ <style>
+-/* Шапку собирает /page-header.js из <h1> + <p class="ph-s"> (ADR-147). Своей вёрстки
+-   заголовка здесь нет. Гейт страниц (page_gate.js) закрывает /threads по умолчанию —
+-   отдельно вписывать никуда не нужно. */
++/* Шапку собирает /page-header.js из родного <header>: <h1> + <p class="ph-s">, остальное
++   (вкладки #th-tabs и статус #th-status) уезжает в ряд .ph-tools — на ПК справа от
++   заголовка, на телефоне под подзаголовком (ADR-147). Своей вёрстки шапки здесь нет.
++   Гейт страниц (page_gate.js) закрывает /threads по умолчанию — отдельно вписывать никуда не нужно.
++   Редизайн 28.10.2026 (макет threads-redesign): только вид. Цвета — только токены --ui-*,
++   кнопки — роли .btn/.tbtn/.btn-sm без своих стилей, поля — inpCss(). */
++html, body { max-width: 100vw; overflow-x: clip; }
+ body { margin: 0; }
+ #app { display: block; }
++.th-i { width: 16px; height: 16px; flex: 0 0 auto; fill: none; stroke: currentColor; }
+ 
+-#th-status { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+-#th-status .dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
+-.dot.ok { background: var(--ui-ok, #34d399); }
+-.dot.err { background: #f87171; }
+-#th-status .txt { color: var(--ui-tx-2, #8b8b8b); font-size: 13px; }
+-#th-status .btn { margin-left: auto; }
+-/* ERR-193: плашка «нет прав на статистику» — тот же вид, что #th-status; прячется атрибутом hidden */
+-#th-noins:not([hidden]) { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+-#th-noins .dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
+-#th-noins .txt { color: var(--ui-tx-2, #8b8b8b); font-size: 13px; flex: 1 1 200px; }
+-#th-noins .btn { margin-left: auto; }
+-
+-#th-compose { margin-top: var(--ui-gap, 22px); }
+-#th-text {
+-  width: 100%; box-sizing: border-box; min-height: 140px; resize: vertical;
+-  font: inherit; padding: 12px; border-radius: var(--ui-radius, 8px);
+-  border: 1px solid var(--ui-card-border, #262626); background: var(--ui-surface-2, #191919);
+-  color: var(--ui-tx, #e8e8e8);
++/* ---------- шапка: статус подключения (капсула на ПК, строка на телефоне) ---------- */
++.th-conn { display: inline-flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 6px 0 14px; box-sizing: border-box;
++  border-radius: 999px; background: var(--ui-card-bg); border: 1px solid var(--ui-card-border); box-shadow: var(--ui-shadow-sm);
++  font-size: 13px; color: var(--ui-tx-2); min-width: 0; }
++.th-conn:not(:has(#th-connect:not([hidden]))) { padding-right: 16px; }
++.th-conn__t { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 0 8px; min-width: 0; }
++.th-conn__t b { color: var(--ui-tx); font-weight: 600; }
++.th-conn__t .th-sep { color: var(--ui-tx-3); }
++.th-dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; background: var(--ui-tx-3); }
++.th-dot.ok { background: var(--ui-ok); box-shadow: 0 0 0 3px var(--ui-ok-soft); }
++.th-dot.err { background: var(--ui-danger); box-shadow: 0 0 0 3px var(--ui-danger-soft); }
++#th-tabs { flex: 0 1 auto; }
++
++/* ---------- плашка «Нет прав на статистику» (ERR-193), прячется атрибутом hidden ---------- */
++#th-noins:not([hidden]) { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: var(--ui-gap, 16px);
++  padding: 12px 12px 12px 16px; border-radius: var(--ui-card-radius, 12px);
++  background: var(--ui-danger-soft); border: 1px solid var(--ui-danger-soft-line); }
++.th-warn__ico { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex: 0 0 auto;
++  background: color-mix(in srgb, var(--ui-danger) 16%, var(--ui-card-bg)); color: var(--ui-danger-soft-tx); }
++.th-warn__t { flex: 1 1 220px; min-width: 0; font-size: 13.5px; color: var(--ui-tx); }
++.th-warn__t small { display: block; font-size: 12.5px; color: var(--ui-tx-2); }
++
++/* ---------- карточки ---------- */
++.th-card { box-shadow: var(--ui-shadow-sm); min-width: 0; }
++.th-card__h { display: flex; align-items: baseline; gap: 10px; margin: 0 0 6px; }
++.th-h2 { margin: 0; font-size: 17px; font-weight: 700; color: var(--ui-tx); }
++.th-card__sub { font-size: 12.5px; color: var(--ui-tx-3); }
++
++/* «Мои посты»: лента + «Новый пост». ПК (≥1101) — две колонки, «Новый пост» справа и липкий;
++   уже — одна колонка, «Новый пост» сверху. Флексом, без своего grid-template-columns (ADR-341). */
++.th-grid { display: flex; flex-direction: column; gap: var(--ui-gap, 16px); }
++.th-feed { flex: 1 1 auto; }
++@media (min-width: 1101px) {
++  .th-grid { flex-direction: row; align-items: flex-start; }
++  .th-feed { order: 1; flex: 1 1 0; }
++  #th-compose { order: 2; flex: 0 0 408px; position: sticky; top: calc(var(--th-sticky, 0px) + 12px); }
+ }
+-#th-preview { margin-top: 11px; }
+-#th-preview[hidden], #th-connect[hidden], #th-img-file[hidden] { display: none; }
+-#th-preview img { max-width: 100%; max-height: 220px; border-radius: var(--ui-radius, 8px); display: block; }
+-#th-preview .rm { margin-top: 8px; }
+-#th-foot { display: flex; align-items: center; gap: 10px; margin-top: 11px; }
+-#th-count { color: var(--ui-tx-3, #666); font-size: 12px; font-variant-numeric: tabular-nums; }
+-#th-count.over { color: #f87171; }
+-#th-img-btn { flex: 0 0 auto; }
+-#th-post { margin-left: auto; min-height: var(--ui-tap, 44px); }
+-
+-.ui-h2 { font-size: 15px; margin: var(--ui-gap, 22px) 0 11px; color: var(--ui-tx, #e8e8e8); }
+-
+-.th-search-row { display: flex; gap: 8px; }
+-.th-search-row input { flex: 1 1 auto; }
+-#th-search-results { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+-
+-#th-posts { display: flex; flex-direction: column; gap: 12px; }
+-.th-post { border-top: 1px solid var(--ui-card-border, #262626); padding-top: 12px; }
+-.th-post:first-child { border-top: none; padding-top: 0; }
+-.th-post__text { white-space: pre-wrap; word-break: break-word; }
+-.th-post__meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 8px; font-size: 12px; color: var(--ui-tx-3, #666); }
+-.th-post__meta a { color: var(--ui-tx-2, #8b8b8b); }
+-.th-post__stats { display: flex; gap: 12px; flex-wrap: wrap; }
+-.th-post__replies { margin-top: 10px; padding-left: 14px; border-left: 2px solid var(--ui-card-border, #262626); display: none; }
++
++/* ---------- композер ---------- */
++#th-compose { display: flex; flex-direction: column; gap: 12px; }
++.th-who { display: flex; align-items: center; gap: 10px; min-width: 0; }
++.th-who b { display: block; font-size: 15px; color: var(--ui-tx); }
++.th-who small { display: block; font-size: 12px; color: var(--ui-tx-3); }
++#th-text { width: 100%; box-sizing: border-box; min-height: 132px; resize: vertical; }
++#th-preview { position: relative; }
++#th-preview[hidden], #th-img-file[hidden] { display: none; }
++#th-preview img { display: block; width: 100%; max-height: 260px; object-fit: cover; border-radius: var(--ui-card-radius, 12px);
++  border: 1px solid var(--ui-line-2); }
++.th-prev-rm { position: absolute; top: 8px; right: 8px; border-radius: var(--ui-radius, 8px); background: var(--ui-card-bg); box-shadow: var(--ui-shadow-sm); }
++#th-foot { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
++.th-count { display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; white-space: nowrap;
++  font-size: 12.5px; color: var(--ui-tx-3); font-variant-numeric: tabular-nums; }
++.th-ring { position: relative; width: 20px; height: 20px; border-radius: 50%; flex: 0 0 auto;
++  background: conic-gradient(var(--ui-brand) calc(var(--p, 0) * 1%), var(--ui-line) 0); }
++.th-ring::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--ui-card-bg); }
++.th-count.over { color: var(--ui-danger); }
++.th-count.over .th-ring { background: var(--ui-danger); }
++#th-post { margin-left: auto; }
++
++/* ---------- аватары: свой — бренд, чужие — мягкие тона по нику ---------- */
++.th-av { --s: 40px; width: var(--s); height: var(--s); border-radius: 50%; flex: 0 0 auto; display: inline-grid; place-items: center;
++  font-size: calc(var(--s) * .36); font-weight: 600; letter-spacing: .02em;
++  background: var(--ui-surface-2); color: var(--ui-tx-2); }
++.th-av.is-me { background: var(--ui-brand); color: var(--ui-btn1-text, #04121e); }
++.th-av.is-c0 { background: var(--ui-brand-soft); color: var(--ui-brand-soft-tx); }
++.th-av.is-c1 { background: var(--ui-ok-soft); color: var(--ui-ok-soft-tx); }
++.th-av.is-c2 { background: var(--ui-warn-soft); color: var(--ui-warn-soft-tx); }
++.th-av.is-c3 { background: var(--ui-violet-soft); color: var(--ui-violet-soft-tx); }
++.th-av.is-sm { --s: 28px; }
++
++/* ---------- пост в ленте (свои посты и результаты поиска) ---------- */
++#th-posts, #th-search-results { display: flex; flex-direction: column; }
++.th-post { position: relative; display: flex; gap: 12px; padding: 14px 0 12px; }
++.th-post + .th-post::before { content: ""; position: absolute; left: 52px; right: 0; top: 0; height: 1px; background: var(--ui-line-2); }
++.th-post__l { display: flex; flex-direction: column; align-items: center; flex: 0 0 40px; }
++.th-post:has(.th-post__replies.is-open) .th-post__l::after { content: ""; flex: 1 1 auto; width: 2px; min-height: 12px; margin-top: 6px;
++  border-radius: 2px; background: var(--ui-line); }
++.th-post__b { flex: 1 1 auto; min-width: 0; }
++.th-post__h { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 13px; color: var(--ui-tx-3); }
++.th-post__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14.5px; font-weight: 600; color: var(--ui-tx); }
++.th-post__time { flex: 0 0 auto; white-space: nowrap; }
++.th-tag { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 7px; border-radius: 6px;
++  background: var(--ui-surface-2); color: var(--ui-tx-2); font-size: 11.5px; font-weight: 500; }
++.th-tag .th-i { width: 12px; height: 12px; }
++.th-open { margin-left: auto; flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; color: var(--ui-tx-2);
++  font-size: 12.5px; font-weight: 500; text-decoration: none; }
++.th-open:hover { color: var(--ui-brand); }
++.th-open .th-i { width: 15px; height: 15px; }
++.th-post__text { margin-top: 3px; font-size: 14.5px; line-height: 1.5; color: var(--ui-tx); white-space: pre-wrap; word-break: break-word; }
++.th-post__text.is-empty { color: var(--ui-tx-3); font-style: italic; }
++.th-post__meta { display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; margin-top: 8px; }
++.th-post__stats { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 14px; min-width: 0; flex: 1 1 auto; }
++.th-post__stats:empty { display: none; }
++.th-stat { display: inline-flex; align-items: center; gap: 5px; min-height: 28px; white-space: nowrap; font-size: 13px;
++  color: var(--ui-tx-3); font-variant-numeric: tabular-nums; }
++.th-stat .th-i { color: var(--ui-tx-2); }
++.th-stat b { color: var(--ui-tx); font-weight: 600; }
++.th-stat.is-na { font-size: 12.5px; }
++.th-sk { width: 220px; max-width: 100%; height: 12px; margin: 8px 0; }
++.th-post__meta > .tbtn { margin-left: auto; }
++/* ответы — ветка под постом */
++.th-post__replies { margin-top: 10px; display: none; font-size: 13.5px; color: var(--ui-tx-3); }
+ .th-post__replies.is-open { display: block; }
+-.th-reply { font-size: 13px; margin-bottom: 8px; }
+-.th-reply b { color: var(--ui-tx-2, #8b8b8b); }
++.th-reply { display: flex; gap: 10px; padding: 6px 0 4px; }
++.th-reply__b { min-width: 0; font-size: 13.5px; line-height: 1.45; color: var(--ui-tx); word-break: break-word; }
++.th-reply__b b { font-weight: 600; margin-right: 4px; }
++.th-reply__b small { font-size: 12px; color: var(--ui-tx-3); }
++
++/* ---------- поиск по ключам ---------- */
++.th-search-row { gap: 10px; align-items: center; }
++.th-search-row input { flex: 1 1 240px; min-width: 0; }
++#th-search-results { margin-top: 6px; }
++
++/* ---------- пустые состояния (общий .ui-empty) — значок в плитке ---------- */
++.th-empty .ui-empty__ico { box-sizing: border-box; width: 48px; height: 48px; padding: 13px; border-radius: 16px;
++  background: var(--ui-surface-2); color: var(--ui-tx-3); }
++
++/* ---------- телефон ---------- */
++@media (max-width: 768px) {
++  #th-status { order: -1; flex: 1 1 100%; min-height: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; font-size: 14px; }
++  #th-tabs { flex: 1 1 100%; }
++  #th-tabs .ui-tab > svg { display: none; }
++  .th-card { border-radius: var(--ui-sheet-radius, 22px); }
++  .th-post { padding: 14px 0 10px; }
++  .th-post__text { font-size: 15px; }
++  .th-post__stats { gap: 0 12px; }
++  .th-stat { min-height: 26px; font-size: 12.5px; }
++  .th-post__meta > .tbtn { margin-left: 0; }
++  .th-warn__t { flex-basis: 200px; }
++  #th-noins .btn { flex: 1 1 100%; }
++  #th-text { min-height: 72px; }
++  #th-post { flex: 1 1 100%; }
++  .th-exp-w, .th-open__l { display: none; }
++  .th-open { min-width: 28px; min-height: 28px; justify-content: flex-end; }
++}
+ </style>
+ </head>
+ <body>
+ 
+ <div id="app" class="ui-page">
+-  <h1>Threads</h1>
+-  <p class="ph-s">Постинг, статистика и поиск по ключевым словам</p>
+-
+-  <div id="th-status" class="ui-card">
+-    <span class="dot" id="th-dot"></span>
+-    <span class="txt" id="th-txt">Проверяю…</span>
+-    <button type="button" class="btn" id="th-connect" hidden>Подключить</button>
+-  </div>
+-
+-  <div class="ui-tabs" id="th-tabs">
+-    <a href="#posts" class="ui-tab" data-tab="posts">Мои посты</a>
+-    <a href="#keywords" class="ui-tab" data-tab="keywords">Ключи</a>
+-    <a href="#аналитика" class="ui-tab" data-tab="аналитика">Аналитика</a>
+-  </div>
++  <header>
++    <h1>Threads</h1>
++    <p class="ph-s">Постинг, статистика и поиск по ключевым словам</p>
++    <div class="ui-tabs" id="th-tabs">
++      <a href="#posts" class="ui-tab" data-tab="posts"><svg class="th-i" aria-hidden="true"><use href="/assets/icons.svg#i-newspaper"></use></svg>Мои посты</a>
++      <a href="#keywords" class="ui-tab" data-tab="keywords"><svg class="th-i" aria-hidden="true"><use href="/assets/icons.svg#i-search"></use></svg>Ключи</a>
++      <a href="#аналитика" class="ui-tab" data-tab="аналитика"><svg class="th-i" aria-hidden="true"><use href="/assets/icons.svg#i-chart"></use></svg>Аналитика</a>
++    </div>
++    <div id="th-status" class="th-conn" role="status">
++      <span class="th-dot" id="th-dot"></span>
++      <span class="th-conn__t" id="th-txt">Проверяю…</span>
++      <button type="button" class="btn btn-sm" id="th-connect" hidden><svg class="th-i" aria-hidden="true"><use href="/assets/icons.svg#i-link"></use></svg>Подключить</button>
++    </div>
++  </header>
+ 
+-  <div id="th-noins" class="ui-card" hidden>
+-    <span class="dot err"></span>
+-    <span class="txt">Нет прав на статистику Threads — переподключите Threads с правом insights</span>
+-    <button type="button" class="btn" id="th-reconnect">Переподключить</button>
++  <div id="th-noins" hidden>
++    <span class="th-warn__ico"><svg class="th-i" aria-hidden="true"><use href="/assets/icons.svg#i-circle-alert"></use></svg></span>
++    <span class="th-warn__t">Нет прав на статистику Threads<small>Переподключите Threads с правом insights</small></span>
++    <button type="button" class="btn btn-sm" id="th-reconnect"><svg class="th-i" aria-hidden="true"><use href="/assets/icons.svg#i-refresh"></use></svg>Переподключить</button>
+   </div>
+ 
+   <div id="tab-analytics" hidden>
+-    <h2 class="ui-h2">Аналитика аккаунта</h2>
+     <div id="th-analytics"></div>
+   </div>
+ 
+   <div id="tab-posts">
+-    <div id="th-compose" class="ui-card">
+-      <textarea id="th-text" maxlength="500" placeholder="О чём напишем в Threads?"></textarea>
+-      <div id="th-preview" hidden><img id="th-preview-img" alt=""><button type="button" class="tbtn rm" id="th-img-rm">Убрать картинку</button></div>
+-      <div id="th-foot">
+-        <input type="file" id="th-img-file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+-        <button type="button" class="tbtn" id="th-img-btn">Картинка</button>
+-        <span id="th-count">0 / 500</span>
+-        <button type="button" class="btn" id="th-post">Опубликовать</button>
+-      </div>
+-    </div>
+-
+-    <h2 class="ui-h2">Мои посты</h2>
+-    <div class="ui-card">
+-      <div id="th-posts">Загрузка…</div>
++    <div class="th-grid">
++      <section id="th-compose" class="ui-card th-card">
++        <div class="th-who">
++          <span class="th-av is-me" id="th-me-av" aria-hidden="true">TH</span>
++          <div><b>Новый пост</b><small id="th-me">Threads</small></div>
++        </div>
++        <textarea id="th-text" maxlength="500" placeholder="О чём напишем в Threads?" data-no-fl></textarea>
++        <div id="th-preview" hidden><img id="th-preview-img" alt=""><div class="th-prev-rm"><button type="button" class="tbtn btn-sm rm" id="th-img-rm"><svg class="th-i" aria-hidden="true"><use href="/assets/icons.svg#i-close"></use></svg>Убрать картинку</button></div></div>
++        <div id="th-foot">
++          <input type="file" id="th-img-file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
++          <button type="button" class="tbtn" id="th-img-btn"><svg class="th-i" aria-hidden="true"><use href="/assets/icons.svg#i-image"></use></svg>Картинка</button>
++          <span id="th-count" class="th-count"><span class="th-ring" aria-hidden="true"></span><span id="th-count-n">0 / 500</span></span>
++          <button type="button" class="btn" id="th-post"><svg class="th-i" aria-hidden="true"><use href="/assets/icons.svg#i-send"></use></svg><span id="th-post-l">Опубликовать</span></button>
++        </div>
++      </section>
++
++      <section class="ui-card th-card th-feed">
++        <div class="th-card__h"><h2 class="th-h2">Мои посты</h2><span class="th-card__sub" id="th-posts-n"></span></div>
++        <div id="th-posts">Загрузка…</div>
++      </section>
+     </div>
+   </div>
+ 
+   <div id="tab-keywords" hidden>
+-    <h2 class="ui-h2">Поиск по ключевым словам</h2>
+-    <div class="ui-card">
+-      <div class="th-search-row">
++    <section class="ui-card th-card">
++      <div class="ui-row th-search-row">
+         <input id="th-q" placeholder="фраза или тема">
+-        <button type="button" class="btn" id="th-search-btn">Искать</button>
++        <button type="button" class="btn" id="th-search-btn"><svg class="th-i" aria-hidden="true"><use href="/assets/icons.svg#i-search"></use></svg>Искать</button>
+       </div>
+       <div id="th-search-results"></div>
+-    </div>
++    </section>
+   </div>
+ </div>
+ 
+ <script src="/toast.js"></script>
+ <script src="/loc-time.js?v=1"></script>
+-<script src="/threads-analytics-widget.js?v=3"></script>
++<script src="/threads-analytics-widget.js?v=4"></script>
+ <script>
+ (function () {
+   const dot = document.getElementById('th-dot');
+@@ -132,30 +230,87 @@
+   const connectBtn = document.getElementById('th-connect');
+   const ta = document.getElementById('th-text');
+   const count = document.getElementById('th-count');
++  const countN = document.getElementById('th-count-n');
+   const postBtn = document.getElementById('th-post');
++  const postLbl = document.getElementById('th-post-l');
+   const imgBtn = document.getElementById('th-img-btn');
+   const imgFile = document.getElementById('th-img-file');
+   const preview = document.getElementById('th-preview');
+   const previewImg = document.getElementById('th-preview-img');
+   const imgRm = document.getElementById('th-img-rm');
+   let imageB64 = '';
++  let me = ''; // @username аккаунта из /api/threads/status (live.username), без «@»
+ 
+   function toast(msg, err) { window.pltToast ? pltToast(msg, { err: !!err }) : (err ? alert(msg) : null); }
+ 
++  // ---------- вид: значки, склонение, время, аватары ----------
++  const SPR = window.ICONS_URL || '/assets/icons.svg';
++  function ico(id) { return '<svg class="th-i" aria-hidden="true"><use href="' + SPR + '#' + id + '"></use></svg>'; }
++  // склонение — та же формула, что в analytics_app.js / seo-v2.js (общего модуля на платформе нет)
++  function plural(n, a, b, c) { var m = Math.abs(n) % 100, k = m % 10; return m > 10 && m < 20 ? c : k === 1 ? a : k > 1 && k < 5 ? b : c; }
++  function num(n) { return Number(n).toLocaleString('ru-RU'); }
++  function ini(name) { const s = String(name || '').replace(/^@+/, '').replace(/[^0-9A-Za-zА-Яа-яЁё]/g, ''); return (s.slice(0, 2) || 'TH').toUpperCase(); }
++  function tone(name) { let h = 0; String(name || '').split('').forEach(ch => { h = (h * 31 + ch.charCodeAt(0)) >>> 0; }); return 'is-c' + (h % 4); }
++  function dkey(d) { return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); }
++  // «сегодня, 14:32» / «вчера, 18:05» / «24.10, 11:40» (другой год — с годом)
++  function when(ts) {
++    if (!ts) return '';
++    const d = new Date(ts);
++    if (isNaN(d)) return '';
++    const now = new Date(), y = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
++    const hm = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
++    if (dkey(d) === dkey(now)) return 'сегодня, ' + hm;
++    if (dkey(d) === dkey(y)) return 'вчера, ' + hm;
++    const o = { day: '2-digit', month: '2-digit' };
++    if (d.getFullYear() !== now.getFullYear()) o.year = 'numeric';
++    return d.toLocaleDateString('ru-RU', o) + ', ' + hm;
++  }
++  function full(ts) { const d = ts ? new Date(ts) : null; return d && !isNaN(d) ? d.toLocaleString('ru-RU') : ''; }
++  function empty(box, icon, title, sub) {
++    box.innerHTML = '<div class="ui-empty is-c th-empty">' + '<svg class="ui-empty__ico" aria-hidden="true"><use href="' + SPR + '#' + icon + '"></use></svg>'
++      + '<b class="ui-empty__t">' + esc(title) + '</b>' + (sub ? '<p class="ui-empty__s">' + esc(sub) + '</p>' : '') + '</div>';
++  }
++  function paintMe() {
++    document.getElementById('th-me').textContent = me ? '@' + me + ' · Threads' : 'Threads';
++    document.getElementById('th-me-av').textContent = ini(me);
++  }
++
++  // липкий «Новый пост» на ПК встаёт под липкую шапку .ph — её высоту держим в --th-sticky
++  (function stickyTop() {
++    const app = document.getElementById('app');
++    let tries = 0;
++    function set(h) { app.style.setProperty('--th-sticky', (h && getComputedStyle(h).position === 'sticky' ? h.offsetHeight : 0) + 'px'); }
++    function find() {
++      const h = document.querySelector('header.ph');
++      if (!h) { if (++tries < 40) setTimeout(find, 250); return; }
++      set(h);
++      if (window.ResizeObserver) new ResizeObserver(() => set(h)).observe(h);
++      window.addEventListener('resize', () => set(h));
++    }
++    find();
++  })();
++
+   function refreshStatus() {
+     fetch('/api/threads/status').then(r => r.json()).then(d => {
+       if (d.connected) {
+-        dot.className = 'dot ok';
+-        txt.textContent = 'Подключено · id ' + d.threads_user_id + (d.expires_at ? ' · токен до ' + d.expires_at : '');
++        me = (d.live && d.live.username) || '';
++        dot.className = 'th-dot ok';
++        const exp = d.expires_at ? (window.locDate ? window.locDate(d.expires_at) : d.expires_at) : '';
++        txt.innerHTML = '<b>Подключено</b>' + (me ? '<span class="th-sep">·</span><span>@' + esc(me) + '</span>' : '')
++          + (exp ? '<span class="th-sep">·</span><span><span class="th-exp-w">токен </span>до ' + esc(exp) + '</span>' : '');
+         connectBtn.hidden = true;
+         postBtn.disabled = false;
++        paintMe();
+         loadPosts();
+       } else {
+-        dot.className = 'dot err';
+-        txt.textContent = 'Не подключено';
++        me = '';
++        dot.className = 'th-dot err';
++        txt.innerHTML = '<b>Не подключено</b>';
+         connectBtn.hidden = false;
+         postBtn.disabled = true;
+-        document.getElementById('th-posts').textContent = 'Подключи Threads, чтобы увидеть посты.';
++        paintMe();
++        document.getElementById('th-posts-n').textContent = '';
++        empty(document.getElementById('th-posts'), 'i-link', 'Подключи Threads, чтобы увидеть посты');
+       }
+     }).catch(() => { txt.textContent = 'Не удалось проверить статус'; });
+   }
+@@ -171,7 +326,8 @@
+ 
+   function updCount() {
+     const n = ta.value.length;
+-    count.textContent = n + ' / 500';
++    countN.textContent = n + ' / 500';
++    count.style.setProperty('--p', Math.min(100, Math.round(n / 5)));
+     count.classList.toggle('over', n > 500);
+   }
+   ta.addEventListener('input', updCount);
+@@ -220,7 +376,7 @@
+     const text = ta.value.trim();
+     if (!text && !imageB64) return;
+     postBtn.disabled = true;
+-    postBtn.textContent = 'Публикую…';
++    postLbl.textContent = 'Публикую…';
+     fetch('/api/threads/post', {
+       method: 'POST', headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ text, image_base64: imageB64 || undefined })
+@@ -229,13 +385,13 @@
+       if (!d) d = { error: r.status === 413 ? 'Фото слишком большое' : 'Ошибка сервера (' + r.status + ')' };
+       return d;
+     })).then(d => {
+-      postBtn.disabled = false; postBtn.textContent = 'Опубликовать';
++      postBtn.disabled = false; postLbl.textContent = 'Опубликовать';
+       if (d.ok) {
+         toast('Опубликовано');
+         ta.value = ''; updCount(); imgRm.onclick();
+         loadPosts();
+       } else toast(d.error || 'Ошибка публикации', true);
+-    }).catch(e => { postBtn.disabled = false; postBtn.textContent = 'Опубликовать'; toast(e.message, true); });
++    }).catch(e => { postBtn.disabled = false; postLbl.textContent = 'Опубликовать'; toast(e.message, true); });
+   };
+ 
+   // ---------- поиск ----------
+@@ -245,19 +401,25 @@
+   function doSearch() {
+     const q = qInput.value.trim();
+     if (!q) return;
+-    results.textContent = 'Ищу…';
++    empty(results, 'i-search', 'Ищу…');
+     fetch('/api/threads/search?q=' + encodeURIComponent(q)).then(r => r.json()).then(d => {
+       if (d.error) { results.textContent = ''; return toast(d.error, true); }
+-      if (!d.items.length) { results.textContent = 'Ничего не нашлось'; return; }
+-      results.innerHTML = d.items.map(it => `
++      if (!d.items.length) { empty(results, 'i-search', 'Ничего не нашлось'); return; }
++      results.innerHTML = d.items.map(it => {
++        const u = it.username || '';
++        return `
+         <div class="th-post">
+-          <div class="th-post__text">${esc(it.text || '')}</div>
+-          <div class="th-post__meta">
+-            <span>@${esc(it.username || '—')}</span>
+-            <span>${it.timestamp ? new Date(it.timestamp).toLocaleString('ru-RU') : ''}</span>
+-            ${it.permalink ? `<a href="${it.permalink}" target="_blank" rel="noopener">открыть →</a>` : ''}
++          <div class="th-post__l"><span class="th-av ${tone(u)}" aria-hidden="true">${esc(ini(u))}</span></div>
++          <div class="th-post__b">
++            <div class="th-post__h">
++              <b class="th-post__name">@${esc(u || '—')}</b>
++              <span class="th-post__time" title="${esc(full(it.timestamp))}">${esc(when(it.timestamp))}</span>
++              ${it.permalink ? `<a class="th-open" href="${it.permalink}" target="_blank" rel="noopener" aria-label="Открыть в Threads"><span class="th-open__l">Открыть</span>${ico('i-external-link')}</a>` : ''}
++            </div>
++            <div class="th-post__text">${esc(it.text || '')}</div>
+           </div>
+-        </div>`).join('');
++        </div>`;
++      }).join('');
+     }).catch(e => { results.textContent = ''; toast(e.message, true); });
+   }
+   searchBtn.onclick = doSearch;
+@@ -265,32 +427,56 @@
+ 
+   // ---------- мои посты ----------
+   function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
++  // счётчики: значок + число + подпись словами со склонением (1 лайк / 2 лайка / 5 лайков)
++  const STAT_F = [
++    ['views', 'i-eye', ['просмотр', 'просмотра', 'просмотров']],
++    ['likes', 'i-heart', ['лайк', 'лайка', 'лайков']],
++    ['replies', 'i-message', ['ответ', 'ответа', 'ответов']],
++    ['reposts', 'i-repeat-2', ['репост', 'репоста', 'репостов']],
++    ['quotes', 'i-text-quote', ['цитата', 'цитаты', 'цитат']]
++  ];
++  const statsHtml = s => STAT_F.map(f => {
++    const x = s[f[0]], n = x == null || x === '' || !isFinite(Number(x)) ? null : Number(x);
++    const w = n == null ? f[2][2] : plural(n, f[2][0], f[2][1], f[2][2]);
++    return '<span class="th-stat">' + ico(f[1]) + '<b>' + (n == null ? '—' : num(n)) + '</b>' + w + '</span>';
++  }).join('');
+   function loadPosts() {
+     const box = document.getElementById('th-posts');
++    const cnt = document.getElementById('th-posts-n');
+     box.textContent = 'Загрузка…';
+     fetch('/api/threads/posts').then(r => r.json()).then(d => {
+       if (d.error) { box.textContent = ''; return toast(d.error, true); }
+-      if (!d.items.length) { box.textContent = 'Постов пока нет'; return; }
+-      box.innerHTML = d.items.map(p => `
++      const n = d.items.length;
++      cnt.textContent = n ? n + ' ' + plural(n, 'последний', 'последних', 'последних') : '';
++      if (!n) { empty(box, 'i-newspaper', 'Постов пока нет'); return; }
++      const name = me || 'Вы';
++      box.innerHTML = d.items.map(p => {
++        const rp = p.media_type === 'REPOST_FACADE';
++        return `
+         <div class="th-post" data-id="${p.id}">
+-          <div class="th-post__text">${esc(p.text || '(без текста)')}</div>
+-          <div class="th-post__meta">
+-            <span>${p.timestamp ? new Date(p.timestamp).toLocaleString('ru-RU') : ''}</span>
+-            ${p.permalink ? `<a href="${p.permalink}" target="_blank" rel="noopener">открыть →</a>` : ''}
+-            <button type="button" class="btn th-show-replies">Ответы</button>
++          <div class="th-post__l"><span class="th-av is-me" aria-hidden="true">${esc(ini(me))}</span></div>
++          <div class="th-post__b">
++            <div class="th-post__h">
++              <b class="th-post__name">${esc(name)}</b>
++              ${rp ? `<span class="th-tag">${ico('i-repeat-2')}репост</span>` : ''}
++              <span class="th-post__time" title="${esc(full(p.timestamp))}">${esc(when(p.timestamp))}</span>
++              ${p.permalink ? `<a class="th-open" href="${p.permalink}" target="_blank" rel="noopener" aria-label="Открыть в Threads"><span class="th-open__l">Открыть</span>${ico('i-external-link')}</a>` : ''}
++            </div>
++            <div class="th-post__text${p.text ? '' : ' is-empty'}">${esc(p.text || '(без текста)')}</div>
++            <div class="th-post__meta">
++              <div class="th-post__stats" id="stats-${p.id}"><span class="ui-sk th-sk"></span></div>
++              <button type="button" class="tbtn btn-sm th-show-replies" aria-expanded="false">${ico('i-message')}<span class="th-rl">Ответы</span></button>
++            </div>
++            <div class="th-post__replies" id="replies-${p.id}"></div>
+           </div>
+-          <div class="th-post__stats" id="stats-${p.id}">…</div>
+-          <div class="th-post__replies" id="replies-${p.id}"></div>
+-        </div>`).join('');
++        </div>`;
++      }).join('');
+       // ERR-193: статистику по репостам (REPOST_FACADE) Meta не отдаёт — не спрашиваем.
+       // Запросы идут по очереди: первый ответ с code no_insights_permission останавливает
+       // остальные и один раз показывает плашку «Переподключить» (вместо 15 одинаковых отказов).
+-      const v = x => (x == null ? '—' : x);
+-      const statsTxt = s => 'просмотры ' + v(s.views) + ' · лайки ' + v(s.likes) + ' · ответы ' + v(s.replies)
+-        + ' · репосты ' + v(s.reposts) + ' · цитаты ' + v(s.quotes);
+       const queue = d.items.filter(p => p.media_type !== 'REPOST_FACADE');
+       d.items.forEach(p => {
+-        if (p.media_type === 'REPOST_FACADE') { const el = document.getElementById('stats-' + p.id); if (el) el.textContent = 'репост — статистики нет'; }
++        if (p.media_type === 'REPOST_FACADE') { const el = document.getElementById('stats-' + p.id); if (el) el.innerHTML = '<span class="th-stat is-na">' + ico('i-info') + 'Репост — статистики нет</span>'; }
+       });
+       if (insightsDenied) {
+         queue.forEach(q => { const e2 = document.getElementById('stats-' + q.id); if (e2) e2.textContent = ''; });
+@@ -308,23 +494,29 @@
+               queue.concat([p]).forEach(q => { const e2 = document.getElementById('stats-' + q.id); if (e2) e2.textContent = ''; });
+               return;
+             }
+-            if (el) el.textContent = ok && !s.error ? statsTxt(s) : '';
++            if (el) { if (ok && !s.error) el.innerHTML = statsHtml(s); else el.textContent = ''; }
+             next();
+           })
+           .catch(() => { if (el) el.textContent = ''; next(); });
+       };
+       next();
+       box.querySelectorAll('.th-show-replies').forEach(btn => {
++        const lbl = btn.querySelector('.th-rl');
+         btn.onclick = () => {
+           const id = btn.closest('.th-post').dataset.id;
+           const el = document.getElementById('replies-' + id);
+-          if (el.classList.contains('is-open')) { el.classList.remove('is-open'); return; }
++          if (el.classList.contains('is-open')) { el.classList.remove('is-open'); btn.setAttribute('aria-expanded', 'false'); lbl.textContent = 'Ответы'; return; }
+           el.classList.add('is-open');
++          btn.setAttribute('aria-expanded', 'true'); lbl.textContent = 'Скрыть ответы';
+           el.textContent = 'Загрузка…';
+           fetch('/api/threads/replies?id=' + id).then(r => r.json()).then(d2 => {
+             if (d2.error) { el.textContent = ''; return toast(d2.error, true); }
+             el.innerHTML = d2.items.length
+-              ? d2.items.map(rp => `<div class="th-reply"><b>@${esc(rp.username || '—')}</b> ${esc(rp.text || '')}</div>`).join('')
++              ? d2.items.map(rp => {
++                const u = rp.username || '';
++                return `<div class="th-reply"><span class="th-av is-sm ${tone(u)}" aria-hidden="true">${esc(ini(u))}</span>`
++                  + `<div class="th-reply__b"><b>@${esc(u || '—')}</b><small title="${esc(full(rp.timestamp))}">${esc(when(rp.timestamp))}</small><div>${esc(rp.text || '')}</div></div></div>`;
++              }).join('')
+               : 'Ответов пока нет';
+           }).catch(e => { el.textContent = ''; toast(e.message, true); });
+         };
+@@ -341,13 +533,14 @@
+   let analyticsLoaded = false;
+   function showTab(name) {
+     try { name = decodeURIComponent(name); } catch (e) {}
+-    if (!panels[name]) name = 'posts';
++    // белый список — Object.hasOwn: #constructor / #toString не должны находить «панель» в прототипе
++    if (!Object.hasOwn(panels, name)) name = 'posts';
+     if (name === 'аналитика' && !analyticsLoaded && window.renderThreadsAnalytics) {
+       analyticsLoaded = true;
+       window.renderThreadsAnalytics(document.getElementById('th-analytics'), { onNoInsights: noInsights });
+     }
+     // активная вкладка — .is-on (ui.css, .ui-tab.is-on); с .is-active подсветки не было
+-    tabs.forEach(t => t.classList.toggle('is-on', t.dataset.tab === name));
++    tabs.forEach(t => { const on = t.dataset.tab === name; t.classList.toggle('is-on', on); t.setAttribute('aria-current', on ? 'page' : 'false'); });
+     Object.keys(panels).forEach(k => { panels[k].hidden = k !== name; });
+   }
+   tabs.forEach(t => t.addEventListener('click', e => { e.preventDefault(); location.hash = t.dataset.tab; showTab(t.dataset.tab); }));
+--- a/web/public/threads-analytics-widget.js
++++ b/web/public/threads-analytics-widget.js
+@@ -2,27 +2,51 @@
+ // Самодостаточный файл: window.renderThreadsAnalytics(containerEl, opts) -> Promise.
+ // Данные: GET /api/threads/analytics (cards.{posts,views,replies,followers}: cur, prev, series[7]).
+ // opts.onNoInsights — если задан, вместо собственной плашки «нет прав» вызывается он (страница показывает свою).
+-// Подключение: <script src="/threads-analytics-widget.js?v=3"></script>. При правках поднимать ?v= во ВСЕХ местах.
++// Подключение: <script src="/threads-analytics-widget.js?v=4"></script>. При правках поднимать ?v= во ВСЕХ местах.
++// Вид (28.10.2026, редизайн /threads): плитка-значок у заголовка, число, «Предыдущие» + стрелка в пилюле,
++// 7 столбиков с подписями дней (на телефоне — справа от числа, без подписей). Цвета — только токены --ui-*,
++// кнопки — роль .btn, пустые состояния — общий .ui-empty, раскладка карточек — .ui-auto (ui.css).
+ (function () {
+   if (window.renderThreadsAnalytics) return;
+ 
+   var CSS = ''
+-    + '.tha-grid{display:grid;grid-template-columns:1fr;gap:var(--ui-gap,22px)}'
+-    + '@media(min-width:769px){.tha-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}'
+-    + '.tha-card{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;min-width:0}'
++    + '.tha-grid{--gap:var(--ui-gap,16px)}'
++    + '.tha-card{display:flex;flex-direction:column;gap:6px;min-width:0;box-shadow:var(--ui-shadow-sm)}'
++    + '.tha-title{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:500;color:var(--ui-tx-2,#8b8b8b)}'
++    + '.tha-ic{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;background:var(--ui-brand-soft);color:var(--ui-brand-soft-tx)}'
++    + '.tha-ic svg{width:16px;height:16px;fill:none;stroke:currentColor}'
++    + '.tha-ic.is-violet{background:var(--ui-violet-soft);color:var(--ui-violet-soft-tx)}'
++    + '.tha-ic.is-ok{background:var(--ui-ok-soft);color:var(--ui-ok-soft-tx)}'
++    + '.tha-ic.is-warn{background:var(--ui-warn-soft);color:var(--ui-warn-soft-tx)}'
++    + '.tha-row{display:flex;flex-direction:column;gap:6px;flex:1 1 auto;min-width:0}'
+     + '.tha-main{min-width:0;display:flex;flex-direction:column;gap:6px}'
+-    + '.tha-title{font-size:13px;color:var(--ui-tx-2,#8b8b8b)}'
+-    + '.tha-num{font-size:34px;font-weight:600;line-height:1.1;color:var(--ui-tx,#e8e8e8);font-variant-numeric:tabular-nums}'
+-    + '.tha-prev{font-size:13px;color:var(--ui-tx-2,#8b8b8b);display:flex;align-items:center;gap:6px;flex-wrap:wrap}'
+-    + '.tha-up{color:var(--ui-ok,#34d399)}.tha-down{color:var(--ui-danger,#f87171)}'
+-    + '.tha-note{font-size:12px;color:var(--ui-tx-3,#666)}'
+-    + '.tha-bars{flex:0 0 auto;width:132px;height:64px;display:block}'
+-    + '.tha-bars rect{fill:var(--ui-tx,#e8e8e8);opacity:.28}'
+-    + '.tha-bars rect.tha-last{opacity:1}'
+-    + '.tha-msg{display:flex;align-items:center;gap:12px;flex-wrap:wrap;color:var(--ui-tx-2,#8b8b8b);font-size:13px}'
+-    + '.tha-msg .tha-dot{width:9px;height:9px;border-radius:50%;background:var(--ui-danger,#f87171);flex:0 0 auto}'
+-    + '.tha-msg .btn{margin-left:auto}'
+-    + '.tha-upd{margin-top:12px;font-size:12px;color:var(--ui-tx-3,#666)}';
++    + '.tha-num{font-size:40px;font-weight:700;line-height:1.05;letter-spacing:-.02em;color:var(--ui-tx,#e8e8e8);font-variant-numeric:tabular-nums}'
++    + '.tha-prev{font-size:13px;color:var(--ui-tx-2,#8b8b8b);display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-variant-numeric:tabular-nums}'
++    + '.tha-up,.tha-down{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:999px;font-size:12px;font-weight:700}'
++    + '.tha-up{background:var(--ui-ok-soft);color:var(--ui-ok-soft-tx)}'
++    + '.tha-down{background:var(--ui-danger-soft);color:var(--ui-danger-soft-tx)}'
++    + '.tha-note{font-size:12.5px;color:var(--ui-tx-3,#666)}'
++    + '.tha-bars{display:flex;align-items:stretch;gap:8px;height:118px;margin-top:auto;padding-top:10px}'
++    + '.tha-bar{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:6px}'
++    + '.tha-col{position:relative;flex:1 1 auto;width:100%}'
++    + '.tha-col i{position:absolute;left:0;right:0;bottom:0;height:var(--h,3%);min-height:3px;border-radius:6px;background:color-mix(in srgb,var(--ui-tx,#e8e8e8) 14%,var(--ui-card-bg,#141414))}'
++    + '.tha-bar.tha-last .tha-col i{background:var(--ui-brand,#00a0ff)}'
++    + '.tha-bar span{font-size:11px;line-height:1;color:var(--ui-tx-3,#666)}'
++    + '.tha-bar.tha-last span{color:var(--ui-tx,#e8e8e8);font-weight:600}'
++    + '@media(max-width:768px){.tha-row{flex-direction:row;align-items:flex-end;gap:14px}.tha-main{flex:1 1 auto}'
++    + '.tha-num{font-size:32px}.tha-bars{flex:0 0 132px;height:64px;gap:5px;margin:0;padding:0}.tha-bar span{display:none}.tha-col i{border-radius:4px}}'
++    + '.tha-warn{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 12px 12px 16px;border-radius:var(--ui-card-radius,12px);'
++    + 'background:var(--ui-danger-soft);border:1px solid var(--ui-danger-soft-line);color:var(--ui-tx,#e8e8e8);font-size:13.5px}'
++    + '.tha-warn+.tha-grid{margin-top:var(--ui-gap,16px)}'
++    + '.tha-warn__ico{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;background:color-mix(in srgb,var(--ui-danger,#f87171) 16%,var(--ui-card-bg,#141414));color:var(--ui-danger-soft-tx)}'
++    + '.tha-warn__ico svg{width:16px;height:16px;fill:none;stroke:currentColor}'
++    + '.tha-warn__t{flex:1 1 200px;min-width:0}'
++    + '.tha-warn__t small{display:block;font-size:12.5px;color:var(--ui-tx-2,#8b8b8b)}'
++    + '.tha-msg .ui-empty__ico{box-sizing:border-box;width:48px;height:48px;padding:13px;border-radius:16px;background:var(--ui-surface-2,#1a1a1a);color:var(--ui-tx-3,#666)}'
++    + '.tha-msg .btn{margin-top:12px}'
++    + '.tha-btn-i{width:16px;height:16px;fill:none;stroke:currentColor}'
++    + '.tha-upd{display:flex;align-items:center;gap:8px;margin-top:14px;padding:0 4px;font-size:12.5px;color:var(--ui-tx-3,#666)}'
++    + '.tha-upd svg{width:15px;height:15px;flex:0 0 auto;fill:none;stroke:currentColor}';
+ 
+   function addCss() {
+     if (document.getElementById('tha-css')) return;
+@@ -35,26 +59,34 @@
+     return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+   }
+   function fmt(n) { return n == null ? '—' : Number(n).toLocaleString('ru-RU'); }
++  function ico(id, cls) {
++    return '<svg class="' + (cls || '') + '" aria-hidden="true"><use href="' + (window.ICONS_URL || '/assets/icons.svg?v=32') + '#' + id + '"></use></svg>';
++  }
++  // день недели по ключу YYYY-MM-DD: только T00:00:00Z + getUTCDay (локальная полночь МСК дала бы вчера)
++  var WD = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
++  function wd(day) {
++    var d = new Date(String(day || '') + 'T00:00:00Z');
++    return isNaN(d) ? '' : WD[d.getUTCDay()];
++  }
+ 
+   var DEFS = [
+-    { key: 'posts', title: 'Ваши действия', sub: 'публикации' },
+-    { key: 'views', title: 'Просмотры', sub: '' },
+-    { key: 'replies', title: 'Ответы', sub: '' },
+-    { key: 'followers', title: 'Новые подписчики', sub: '' }
++    { key: 'posts', title: 'Ваши действия', sub: 'публикации', icon: 'i-edit', tone: '' },
++    { key: 'views', title: 'Просмотры', sub: '', icon: 'i-eye', tone: 'is-violet' },
++    { key: 'replies', title: 'Ответы', sub: '', icon: 'i-reply', tone: 'is-ok' },
++    { key: 'followers', title: 'Новые подписчики', sub: '', icon: 'i-users', tone: 'is-warn' }
+   ];
+ 
+   function bars(series, dayLabels) {
+-    var W = 132, H = 64, n = 7, gap = 6, bw = (W - gap * (n - 1)) / n;
+-    var max = 0;
++    var n = 7, max = 0;
+     series.forEach(function (v) { if (v > max) max = v; });
+-    var out = '<svg class="tha-bars" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="По дням за неделю">';
+-    series.forEach(function (v, i) {
+-      var h = v == null || max === 0 ? 3 : Math.max(3, Math.round((v / max) * (H - 2)));
+-      var x = i * (bw + gap);
+-      out += '<rect class="' + (i === n - 1 ? 'tha-last' : '') + '" x="' + x.toFixed(1) + '" y="' + (H - h) + '" width="' + bw.toFixed(1)
+-        + '" height="' + h + '" rx="3"><title>' + esc((dayLabels[i] || '') + ': ' + fmt(v)) + '</title></rect>';
+-    });
+-    return out + '</svg>';
++    var out = '<div class="tha-bars" role="img" aria-label="По дням за неделю">';
++    for (var i = 0; i < n; i++) {
++      var v = series[i];
++      var h = v == null || max === 0 ? 3 : Math.max(3, Math.round((v / max) * 100));
++      out += '<div class="tha-bar' + (i === n - 1 ? ' tha-last' : '') + '" title="' + esc((dayLabels[i] || '') + ': ' + fmt(v)) + '">'
++        + '<div class="tha-col"><i style="--h:' + h + '%"></i></div><span>' + esc(wd(dayLabels[i])) + '</span></div>';
++    }
++    return out + '</div>';
+   }
+ 
+   function cardHtml(def, c, days) {
+@@ -73,27 +105,52 @@
+       note = '<div class="tha-note">' + esc(def.sub) + '</div>';
+     }
+     return '<div class="ui-card tha-card">'
+-      + '<div class="tha-main"><div class="tha-title">' + esc(def.title) + '</div>'
++      + '<div class="tha-title"><span class="tha-ic ' + def.tone + '">' + ico(def.icon) + '</span>' + esc(def.title) + '</div>'
++      + '<div class="tha-row"><div class="tha-main">'
+       + '<div class="tha-num">' + fmt(c.cur) + '</div>'
+       + '<div class="tha-prev">Предыдущие: ' + fmt(c.prev) + ' ' + arrow + '</div>' + note + '</div>'
+-      + bars(series, labels) + '</div>';
++      + bars(series, labels) + '</div></div>';
++  }
++
++  // плашка «нет прав» — тот же вид, что #th-noins на странице
++  function warnHtml(title, sub, extra) {
++    return '<div class="tha-warn"><span class="tha-warn__ico">' + ico('i-circle-alert') + '</span>'
++      + '<span class="tha-warn__t">' + esc(title) + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span>'
++      + '<button type="button" class="btn btn-sm" id="tha-reconnect">' + ico('i-refresh', 'tha-btn-i') + 'Переподключить</button>' + (extra || '') + '</div>';
++  }
++  function collectBtn() {
++    return '<button type="button" class="btn" id="tha-collect">' + ico('i-refresh', 'tha-btn-i') + '<span class="tha-cl">Собрать сейчас</span></button>';
++  }
++  // пустое состояние: значок в плитке, заголовок, пояснение (текст «А — Б» делится на заголовок и пояснение)
++  function emptyHtml(text, icon, btn) {
++    var parts = String(text).split(' — ');
++    var t = parts.shift(), s = parts.join(' — ');
++    if (s) s = s.charAt(0).toUpperCase() + s.slice(1);
++    return '<div class="ui-card tha-msg"><div class="ui-empty is-c">'
++      + ico(icon, 'ui-empty__ico') + '<b class="ui-empty__t">' + esc(t) + '</b>'
++      + (s ? '<p class="ui-empty__s">' + esc(s) + '</p>' : '') + (btn || '') + '</div></div>';
+   }
+ 
+   window.renderThreadsAnalytics = function (el, opts) {
+     opts = opts || {};
+     if (!el) return Promise.resolve();
+     addCss();
+-    el.innerHTML = '<div class="ui-card tha-msg">Загрузка…</div>';
++    el.innerHTML = emptyHtml('Загрузка…', 'i-chart');
+ 
+-    function msg(text, withReconnect, withCollect) {
+-      el.innerHTML = '<div class="ui-card tha-msg"><span class="tha-dot"></span><span>' + esc(text) + '</span>'
+-        + (withReconnect ? '<button type="button" class="btn" id="tha-reconnect">Переподключить</button>' : '')
+-        + (withCollect ? '<button type="button" class="btn" id="tha-collect">Собрать сейчас</button>' : '') + '</div>';
++    // kind: 'empty' — данных нет (значок графика), иначе ошибка (значок предупреждения)
++    function msg(text, withReconnect, withCollect, kind) {
++      if (withReconnect) {
++        var p = String(text).split(' — ');
++        el.innerHTML = warnHtml(p[0], p.slice(1).join(' — ').replace(/^./, function (c) { return c.toUpperCase(); }), withCollect ? collectBtn() : '');
++      } else {
++        el.innerHTML = emptyHtml(text, kind === 'empty' ? 'i-chart' : 'i-circle-alert',
++          withCollect ? collectBtn() : '');
++      }
+       var rc = el.querySelector('#tha-reconnect');
+       if (rc) rc.onclick = function () { location.href = '/api/threads/oauth/start'; };
+       var cb = el.querySelector('#tha-collect');
+       if (cb) cb.onclick = function () {
+-        cb.disabled = true; cb.textContent = 'Собираю…';
++        cb.disabled = true; cb.querySelector('.tha-cl').textContent = 'Собираю…';
+         // ERR-510: любой исход возвращает кнопку (msg() перерисовывает её) и показывает причину
+         fetch('/api/threads/analytics/collect', { method: 'POST' })
+           .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, status: r.status, d: d || {} }; }); })
+@@ -116,7 +173,7 @@
+       .then(function (x) {
+         var d = x.d || {};
+         if (d.code === 'no_insights_permission') {
+-          if (opts.onNoInsights) { opts.onNoInsights(); el.innerHTML = '<div class="ui-card tha-msg">Нет доступа к статистике Threads.</div>'; }
++          if (opts.onNoInsights) { opts.onNoInsights(); el.innerHTML = emptyHtml('Нет доступа к статистике Threads.', 'i-circle-alert'); }
+           else msg('Нет прав на статистику Threads — переподключите Threads с правом insights', true, false);
+           return;
+         }
+@@ -125,12 +182,11 @@
+           return msg(d.error || 'Не удалось загрузить аналитику', false, false);
+         }
+         if (d.collect_error && d.collect_error.code === 'no_insights_permission' && opts.onNoInsights) opts.onNoInsights();
+-        if (!d.has_data) return msg('Данных пока нет — статистика начнёт копироваться после первого сбора', false, true);
+-        var html = '<div class="tha-grid">' + DEFS.map(function (def) { return cardHtml(def, d.cards[def.key], d.days); }).join('') + '</div>';
+-        html += '<div class="tha-upd">За последние 7 дней, в сравнении с предыдущими 7. Обновлено: ' + esc(d.updated_at ? (typeof window.locTime === 'function' ? window.locTime(d.updated_at) : String(d.updated_at)) : '—') + '</div>';
++        if (!d.has_data) return msg('Данных пока нет — статистика начнёт копироваться после первого сбора', false, true, 'empty');
++        var html = '<div class="ui-auto tha-grid" style="--min:460px">' + DEFS.map(function (def) { return cardHtml(def, d.cards[def.key], d.days); }).join('') + '</div>';
++        html += '<div class="tha-upd">' + ico('i-clock') + '<span>За последние 7 дней, в сравнении с предыдущими 7. Обновлено: ' + esc(d.updated_at ? (typeof window.locTime === 'function' ? window.locTime(d.updated_at) : String(d.updated_at)) : '—') + '</span></div>';
+         if (d.collect_error && d.collect_error.code === 'no_insights_permission' && !opts.onNoInsights) {
+-          html = '<div class="ui-card tha-msg" style="margin-bottom:12px"><span class="tha-dot"></span><span>Нет прав на статистику Threads — показаны ранее собранные данные</span>'
+-            + '<button type="button" class="btn" id="tha-reconnect">Переподключить</button></div>' + html;
++          html = warnHtml('Нет прав на статистику Threads', 'Показаны ранее собранные данные') + html;
+         }
+         el.innerHTML = html;
+         var rc = el.querySelector('#tha-reconnect');
+--- a/web/public/assets/icons.svg
++++ b/web/public/assets/icons.svg
+@@ -222,4 +222,7 @@
+ <symbol id="i-panel-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></symbol>
+ <symbol id="i-panel-bottom" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 15h18"/></symbol>
+ <symbol id="i-newspaper" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18h-5"/><path d="M18 14h-8"/><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="10" y="6" rx="1"/></symbol>
++<!-- Редизайн /threads (28.10.2026): Lucide repeat-2 (репост), menu — lucide-static 0.460.0 (heart, calendar, clock, zap уже есть) -->
++<symbol id="i-repeat-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></symbol>
++<symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></symbol>
+ </svg>
+\ No newline at end of file
+--- a/web/server.js
++++ b/web/server.js
+@@ -239,7 +239,7 @@
+ // поднимать не обязательно: он срабатывает только на странице без <head>. Версионный
+ // адрес получает Cache-Control 7 дней (setHeaders у express.static ниже) — одна загрузка,
+ // дальше из кэша браузера. Правило — docs/rules/ui.md, «Адрес спрайта».
+-const ICONS_V = 31; // 31 — i-panel-left для сайдбара /analytics (28.10.2026); 30 — i-layout-dashboard (ADR-311); 29 — i-gantt для модуля «Диаграмма Ганта» кабинета (#139, шаг 4); 28 — i-code для кнопки «исходник» в редакторе kb.html (27 занят ?v=27 в mail-box.js/mail.html); 26 — i-undo-2/i-timer/i-rotate-ccw для мобильной /tasks (макет B); 25 — i-newspaper для пункта «Блог» (#452, 06.10.2026); 24 — i-list/i-layout-grid для переключателя вида «Мои разделы» (#403, 04.10.2026); 23 — убран дубль i-panel-bottom (остался Lucide, #33, 04.10.2026); 22 — i-pin-tack для закрепления плитки в cab-sidebar.js (#403, 04.10.2026); 21 — i-test-tube/i-list-checks/i-clipboard-list/i-panel-bottom для нижнего меню (#33, 03.10.2026); 20 (выше своих ?v=15..19 в medcard_food/balance_core/toast.js/balance.html, чтобы не попасть в чужой кэш) — i-hand-heart/i-lightbulb для «Нашей связи» в «Паре» (#381, 03.10.2026); 14 — i-sim/i-esim для вкладки «eSIM» (ADR-233, 03.10.2026); 13 — i-copy-plus (ADR-236, 02.10.2026); 12 — i-star/i-pushpin для «Моих продуктов» (ADR-286, 01.10.2026); 11 — i-flag/i-mail-open для «Почты» (ADR-283, 01.10.2026); 10 — i-utensils/i-scan-barcode/i-flashlight для «Питания» (29.09.2026)
++const ICONS_V = 32; // 32 — i-repeat-2, i-menu для редизайна /threads (28.10.2026); 31 — i-panel-left для сайдбара /analytics (28.10.2026); 30 — i-layout-dashboard (ADR-311); 29 — i-gantt для модуля «Диаграмма Ганта» кабинета (#139, шаг 4); 28 — i-code для кнопки «исходник» в редакторе kb.html (27 занят ?v=27 в mail-box.js/mail.html); 26 — i-undo-2/i-timer/i-rotate-ccw для мобильной /tasks (макет B); 25 — i-newspaper для пункта «Блог» (#452, 06.10.2026); 24 — i-list/i-layout-grid для переключателя вида «Мои разделы» (#403, 04.10.2026); 23 — убран дубль i-panel-bottom (остался Lucide, #33, 04.10.2026); 22 — i-pin-tack для закрепления плитки в cab-sidebar.js (#403, 04.10.2026); 21 — i-test-tube/i-list-checks/i-clipboard-list/i-panel-bottom для нижнего меню (#33, 03.10.2026); 20 (выше своих ?v=15..19 в medcard_food/balance_core/toast.js/balance.html, чтобы не попасть в чужой кэш) — i-hand-heart/i-lightbulb для «Нашей связи» в «Паре» (#381, 03.10.2026); 14 — i-sim/i-esim для вкладки «eSIM» (ADR-233, 03.10.2026); 13 — i-copy-plus (ADR-236, 02.10.2026); 12 — i-star/i-pushpin для «Моих продуктов» (ADR-286, 01.10.2026); 11 — i-flag/i-mail-open для «Почты» (ADR-283, 01.10.2026); 10 — i-utensils/i-scan-barcode/i-flashlight для «Питания» (29.09.2026)
+ const ICONS_URL = "/assets/icons.svg?v=" + ICONS_V;
+ const ICONS_TAG = '<script>window.ICONS_URL="' + ICONS_URL + '"</script>';
+ const ICONS_RE = /\/assets\/icons\.svg(?:\?v=[\w.-]*)?(?=[#"'`)])/g;
+--- a/web/public/habits-sw.js
++++ b/web/public/habits-sw.js
+@@ -21,7 +21,7 @@
+    это копия списка из habits.html, она разошлась бы на первом же бампе ?v=. Их кладёт
+    stale-while-revalidate при первом открытии с сетью — а для личного трекера первый заход
+    без сети всё равно бессмыслен, там нечего показывать до загрузки своих миссий. */
+-const CACHE = 'habits-v147'; // v145 (18.10.2026, ERR-548) — создан facts_feed.js, подключение ?v=2: сброс кэша. // v144 (18.10.2026) — лента фактов на экране ожидания тренера: facts_feed.js?v=1, habit_insights_ui.js?v=24: сброс кэша. // v143 (18.10.2026) — «Гены» в ряду разделов: app-switch.js?v=11, page-titles.js?v=10, cab-sidebar.js?v=20261018a: сброс кэша. // v142 (16.10.2026, #456) — energon-word.js?v=3 (склонение по показанному значению, округление toPrecision, нечисло → «—»): сброс кэша. // v141 (16.10.2026, #456) — energon-word.js?v=2 (форматтер cfFmtEn): сброс кэша. // v140 (15.10.2026, /bugs) — плитка: Enter на кнопке «Статистика», перенос ряда чипов на узком экране, чистка: medcard_habits.js?v=91, habit_insights_ui.js?v=23: сброс кэша. // v139 (15.10.2026) — баг «+ Результат» в виде «Карточки»: плитка перерисовывалась карточкой списка, medcard_habits.js?v=90: сброс кэша. // v138 (14.10.2026) — переключатель вида «Карточки/Список»: medcard_habits.js?v=89, habit_insights_ui.js?v=22: сброс кэша. // v137 (13.10.2026, #166 эт.4) — bottom-nav.js?v=46: сброс кэша. // v136 (12.10.2026, #658) — шторка справа: medcard_habits.js?v=88, ui.css?v=81: сброс кэша. // v135 (08.10.2026) — тосты: toast.js/ui-dialogs.js (копировать у каждого, пол 8 с): сброс кэша. // v134 (07.10.2026, #444) — серверный геокодер, автоподсказки места: place-field.js?v=17, geoloc.js?v=5: сброс кэша. // v132 (06.10.2026) — cab-sidebar.js?v=50 (dock.js?v=13, notify-alert.js?v=2): сброс кэша. v131 (06.10.2026) — «Медкарта» → «AI Здоровье» в текстах (habit_insights_ui.js?v=21, habit_medcard_banner.js?v=4, bottom-nav.js?v=44): сброс кэша. v130 (05.10.2026, #451) — «Единые места»: place-field.js?v=16 (placeId, очередь мест через merged_into): сброс кэша. v129 (05.10.2026, #403): свои названия меню — cab-sidebar.js?v=48, bottom-nav.js?v=43, sidebar-labels.js?v=1, menu-pins.js?v=7: сброс кэша. v128 (04.10.2026, #424 ADR-290 §9) — пауза «Болезнь»: подписи проявлений из набора «Симптомы» профиля (sick_labels): medcard_habits.js?v=87: сброс кэша. v127 (04.10.2026, #33) — токен --ui-sheet-h: ui.css?v=73, ui-dialogs.js?v=11, bottom-nav.js?v=42, habit_insights_ui.js?v=20, habit_settings.js?v=26: сброс кэша. v126 (04.10.2026, #33) — аудит нижнего меню: bottom-nav.js?v=41, dock-editor.js?v=3, спрайт ?v=23 (дубль i-panel-bottom убран): сброс кэша. v125 (04.10.2026, #33) — шторки: is-peek, выезд панели, тихая замена: ui.css?v=70, ui-dialogs.js?v=10, cab-sidebar.js?v=46: сброс кэша. v124 (04.10.2026, ERR-314) — habit_insights_ui.js?v=19: 409 confirm_paid → диалог подтверждения: сброс кэша. v123 (03.10.2026, #403) — «Мои разделы» плитками, закрепление, счётчики: cab-sidebar.js?v=44: сброс кэша. v122 (03.10.2026, #33) — ПК-панель шторки только opt-in (data-drawer): ui.css?v=69, task-card.js?v=9: сброс кэша. v121 (03.10.2026, #33) — шторка «Нижнее меню» (шапка закреплена, кнопки в шапке), без виджета баланса в «Профиле»: bottom-nav.js?v=40, dock-editor.js?v=2: сброс кэша. v120 (03.10.2026, #33) — жесты/три высоты/боковая панель шторки: ui.css?v=68, ui-dialogs.js?v=9, cab-sidebar.js?v=43: сброс кэша. v119 (03.10.2026) — «Повторить миссию» открывает форму миссии (medcard_habits.js?v=86), ряд действий карточки переносится, итог цепочки без многоточия (ui.css?v=66). v118 (03.10.2026, #166) — общая месячная квота AI-расшифровок: habit_insights_ui.js?v=18, bottom-nav.js?v=39 (cfContactOpen). v117 (03.10.2026, #33) — спрайт ?v=21 (4 значка нижнего меню), bottom-nav.js?v=38. v116 — bottom-nav.js?v=37 (пользовательский нижний док), dock-editor.js?v=1: сброс кэша. v115 (03.10.2026) — пока AI-тренер думает, вместо серых полосок крутятся факты из собственных данных: время суток записей, серия, всего за срок, лучший и худший день недели, дни в коридоре (новый GET /api/habits/facts — habits.js/factsOf, habit_insights_ui.js?v=17). v114 (03.10.2026, #420) — сопутствующий сброс кэша вместе с medcard-v110 (правки фронта «Питания»). v113 (03.10.2026, #277) — повтор выполненной миссии и итог цепочки: medcard_habits.js?v=84, ui.css?v=63 (.hab-card__chain). v112 (03.10.2026, ERR-185 в трекере) — AI-тренер и «Сводка» звали r.json() ДО проверки r.ok: при перезапуске апстрима nginx отдаёт 502 HTML-кой, Safari падал на разборе, и в окно вместо причины уезжало «The string did not match the expected pattern». Теперь по статусу пишем «Сервер перезапускается — повтори через минуту» (habit_insights_ui.js?v=16). v111 (03.10.2026) — строки щитка «Нагрузка» перестали притворяться кнопками (разделители вместо плашек), дельта числом со знаком «+3 / −6» вместо треугольника: треугольник вниз на платформе читается как шеврон сворачивания (habit_load.js?v=6). v110 (03.10.2026) — норму коридора можно задать руками: тап по подписи «коридор N ±M», хранится в habit_load_prefs, пусто — возврат к медиане (habit_load.js?v=5, GET/PUT /api/habits/load-prefs). v109 (02.10.2026) — щиток «Нагрузка» переехал ПОД список миссий и перекрашен на реальные токены платформы: был взят несуществующий --ui-field-bg, на светлой теме выходили чёрные плашки с нечитаемым текстом (habit_load.js?v=3). v108 (02.10.2026) — щиток «Нагрузка» над списком миссий: habit_load.js?v=1 в habits.html, коридор нагрузки по дням из /api/habits/insights?load=1 (habits.js/loadOf). v107 (02.10.2026, ADR-236) — спрайт в SHELL /assets/icons.svg?v=13 (ICONS_V 13, i-copy-plus). v106 (02.10.2026) — patient-auth.html: «Не помню код» и предупреждение о похожем логине. v105 (02.10.2026, #424, ADR-290 §7) — шторка самочувствия везде с symptoms_entry.js?v=10 (bottom-nav.js?v=31, cab-sidebar.js?v=38, cab-dock.js?v=8), значок эмоции — .kt-ava.is-chip в ui.css?v=57. v104 (02.10.2026, ADR-290 §6) — иконки эмоций в шторке самочувствия (symptoms_entry.js?v=9). v103 (01.10.2026) — личный бургер на /money/app и глубоких ссылках медкарты, пункты Дневник/Авто/Пара/Деньги/Питание в «Личном» кабинета, нижний док на /pair/app, названия «Деньги»/«Картотека» (cab-sidebar.js?v=36, page-titles.js?v=7). v102 (01.10.2026) — спрайт в SHELL /assets/icons.svg?v=12 (был ?v=8, разошёлся с ICONS_V в server.js; дубль i-pushpin убран). v101 (01.10.2026, ADR-285) — метка .ui-st и окно выбора цвета в ui.css?v=53, /ui-color.js?v=1 из cab-sidebar.js. v100 (30.09.2026, ADR-280) — строка «Картотека» в «+» (module-selector.js?v=12, cab-sidebar.js?v=34). v99 (30.09.2026, ADR-279) — пункт «Картотека» в личном бургере (cab-sidebar.js?v=33). v98 (30.09.2026) — /med-rules.js из дока грузится с ?v=4 (bottom-nav.js?v=30, cab-dock.js?v=7 → bottom-nav cab15, cab-sidebar.js?v=32); тени светлой темы на --ui-shadow-c (theme.css). v97 (30.09.2026) — тени на трёх токенах --ui-shadow-sm/-md/-lg (/refs#shadows): ui.css?v=52, ui-dialogs.js?v=7, module-selector.js?v=11, habit_snaps.js?v=19, bottom-nav.js?v=29, cab-sidebar.js?v=31. v96 (29.09.2026, поздний вечер) — нижний док: настоящие скругления углов в dockPath, контур больше не вылезает за экран при радиусе меньше H/2, подложка #cfbn-floor под доком убрана (bottom-nav.js?v=28); зазор тоста над доком --ui-toast-gap 14px, как у верхнего тоста (ui.css?v=51, toast.js?v=4, ui-dialogs.js?v=6); цепочкой auth-gate.js?v=5, page-copy.js?v=4, habit_settings.js?v=24, cab-sidebar.js?v=30. v95 (29.09.2026, ADR-262) — сохранённое название раздела без мелькания стандартного: page-titles.js?v=6 в <head> habits.html (H1 скрыт до подмены из кэша, страховка 1,5 с), cab-sidebar.js?v=29. v94 (29.09.2026, ADR-262) — «Изменить» в меню «⋮» названий разделов, счётчики символов по графемам, кэш названий без мелькания (page-titles.js?v=5, cab-sidebar.js?v=28). v93 (29.09.2026, поздний вечер, ADR-261) — шапка личных страниц: подзаголовок до 2 строк и сворачивается после 50px прокрутки (новый ph-collapse.js?v=1, событие cf:ph-resize), подзаголовок трекера по умолчанию в habits.html; названия разделов задаёт только админ, общие для всех, меню «⋮» на карточках /me (page-titles.js?v=4); тосты над нижним доком (ui.css?v=50, toast.js?v=3, ui-dialogs.js?v=5); шторка ⚙: строки выровнены, «Вид нижнего меню» без подсказки, многоточие у подписей (habit_settings.js?v=23); /medcard/set#dock без второй «Сохранить» внизу, выбранная вкладка в превью исправлена; cab-sidebar.js?v=27. v92 (29.09.2026, ADR-260) — внутренняя валюта в текстах пациента «энергоны» вместо «токенов» со склонением: новый /energon-word.js?v=1, medcard_habits.js?v=83 (пауза, заморозка, тосты списания); /me — плитка «Энергоны». v91 (29.09.2026, вечер) — /set: у каждого ползунка устойчивая строка (фиксированная колонка значения, на телефоне подпись отдельной строкой), кнопки − / + и ввод точного значения тапом по числу; подложка выбранной вкладки дока получила настройки «Скругление выбора» / «Обводка выбора» (bottom-nav.js?v=27, новые ключи темы ui_dock_sel_radius / ui_dock_sel_bw — сохраняются только после перезапуска сервера). v90 (29.09.2026, вечер) — шторка «+ Результат»: у штучных плюсик/минус по 1, чипы ставят значение вокруг средней записи за всё время (entry_avg из /api/habits), medcard_habits.js?v=82. v89 (29.09.2026, вечер) — откат «док растёт на safe-area» из v86: высота дока снова всегда H, отступ снизу = N + safe-area при N>0, а 0 = вплотную к кромке экрана, подложка #cfbn-floor при 0 скрыта; строки «Меню снизу» в шторке «Профиль» больше нет — настройки дока только через шестерёнку сверху (bottom-nav.js?v=26); /medcard/set#dock: липкое превью сверху, статус «Не сохранено»/«Сохранено ✓» с кнопкой «Сохранить», читаемый заголовок, превью на 5 вкладок; ключ dock убран из PMENU_DEF в set.html. v88 (29.09.2026) — доводка AI-тренера: квота первой в подзаголовке, «Сводка» пересчитывается после смены нормы, одна кнопка действия за раз (medcard_habits.js?v=81, habit_insights_ui.js?v=15). v87 (29.09.2026, ADR-257) — экран приветствия Mini App вместо оверлея с рукой: «У меня уже есть аккаунт» (логин + код → /api/tg/habits/webapp-link) и «Создать аккаунт» (чат бота), предпросмотр ?tgpreview=1 (tg-miniapp.js?v=2); строка бота в шестерёнке в одну строку «Бот @AiHabit_robot · не подключён» (habit_settings.js?v=22). v86 (29.09.2026) — строка «Меню снизу» в шторке «Профиль» (/medcard/set#dock); «Отступ снизу» = 0 теперь прижимает док к самому низу, док растёт на safe-area, подложка #cfbn-floor при 0 скрыта (bottom-nav.js?v=25); в шестерёнке «Настройки» строка «Настройки нижнего меню» и значки у всех строк (habit_settings.js?v=21); /theme.css идёт мимо SW, как в medcard-sw.js: stale-while-revalidate отдавал старую тему, и сохранённая настройка дока появлялась только со второй загрузки. v85 (29.09.2026, ADR-257) — строка «Бот напоминаний @AiHabit_robot» в шестерёнке трекера: «Подключить» (/start ln_…) и «Присылать напоминания» (habit_settings.js?v=20). v84 (29.09.2026, ADR-257) — вход из Telegram Mini App @AiHabit_robot: tg-miniapp.js?v=1 в <head> habits.html. v83 (29.09.2026) — раздел «Питание» в ряду и бургере: app-switch.js?v=7, module-selector.js?v=10, cab-sidebar.js?v=26. v82 (29.09.2026) — ошибки трекера красным тостом, окно «Изменить норму» (PUT /plan), AI-тренер закрывается только после открытия целевого окна, «Новый разбор» в шапке шторки (medcard_habits.js?v=80, habit_insights_ui.js?v=14). v81 (29.09.2026) — онбординг «как сторис» (habit_onboard.js?v=1, картинки /img/habonb/s1..s5.jpg), пункт «Как пользоваться» в шестерёнке (habit_settings.js?v=19). v80 (29.09.2026) — чёрный экран первого запуска PWA: заготовка «Загрузка…» и сторож 9 с с «Обновить» в habits.html, регистрация SW в <head>, J() с таймаутом 15 с и проверкой r.ok, 401 → вход (medcard_habits.js?v=79). v79 (29.09.2026, ADR-255) — «Мои места» с сервера (/api/places): один справочник на все устройства, localStorage — офлайн-копия, очередь правок, синонимы в matchMine (place-field.js?v=15). v78 (29.09.2026) — пункт «Локации» (/medcard/places, справочник своих мест) в шестерёнке и личном бургере: habit_settings.js?v=18, cab-sidebar.js?v=25. v77 (29.09.2026) — ручки шторок на токене --ui-grip, цвет заморозки на токене --ui-frz (/set), медкарта: #0a84ff → фирменный --ui-brand, главная кнопка --ui-btn1-*. v76 (29.09.2026, светлая тема везде в личном — 4 агента: общие модалки/тосты/меню на токенах, --ui-shadow-c и --ui-toast-* в themeVars, theme-toggle.js ловит тонированные тёмные и чёрные тени; трекер: главные кнопки --ui-btn1-*, цвет заморозки, острова снапов). v75 (29.09.2026) — после геопозиции в поле места подставляется СВОЁ место, адрес Nominatim — только фолбэк и укороченный (place-field.js?v=14). v74 (29.09.2026) — щит «Запросить доступ к геопозиции снова» в поле места + подсказка, как снять запрет (place-field.js?v=13, geoloc.js?v=4). v73 (29.09.2026, /bugs светлая тема на телефоне) — AI-тренер, «Сводка», экран уровня, чипы «Серия»/«Ур.» и экран «Готово» на токенах темы (habit_insights_ui.js?v=11, habit_level.js?v=3, medcard_habits.js?v=76, .hab-streak в habits.html); тень снапа без обрезки, крестики шторок на токенах --ui-sheet-btn-* (habit_snaps.js?v=16, .hrs-x); ручка шторки .mdl-* поверх шапки (ui.css?v=46); док прижат к низу — max(отступ, safe-area) + подложка #cfbn-floor, viewport-fit=cover (bottom-nav.js?v=22). v72 (27.09.2026) — спрайт значков одним адресом (window.ICONS_URL, ICONS_V в server.js), в SHELL — /assets/icons.svg?v=8; place-field.js?v=12, bottom-nav.js?v=21, medcard_habits.js?v=75, habit_snaps.js?v=15, habit_insights_ui.js?v=10, ui-viewer.js?v=3, ui-dialogs.js?v=3, habit_settings.js?v=15, cab-sidebar.js?v=23. v71 (27.09.2026, ADR-232) — общий ta-grow.js (авто-рост всех textarea), place-field.js?v=11, symptoms_entry.js?v=8, bottom-nav.js?v=20. v70 (27.09.2026, ADR-231 этап 4) — общая кнопка «i» (.ui-info) и окно uiInfo(): ui.css?v=44, ui-dialogs.js?v=2, в спрайте новый значок i-info. v69 (27.09.2026) — шторка, доводка ADR-231: кегль заголовков шторок из --ui-sheet-title-fs (ui.css?v=43, .hrs-head__t в habits.html, habit_insights_ui.js?v=9, habit_settings.js?v=14, bottom-nav.js?v=19, cab-sidebar.js?v=22). v68 (27.09.2026) — единая шторка платформы: высота от --ui-sheet-top (/set → «Шторка») у шторки места, AI-тренера, ⚙ и нижнего дока (ui.css?v=42, medcard_habits.js?v=74, habit_insights_ui.js?v=8, habit_settings.js?v=13, bottom-nav.js?v=18, cab-sidebar.js?v=21). v67 (27.09.2026) — textarea.lf-input в ui.css?v=41 → авто-рост вместо resize:vertical (заметка симптома в symptoms_entry.js?v=7). v66 (27.09.2026) — .pf-fieldrow: min-width:0 (адрес вылезал за карточку в column-flex, ui.css?v=41); v65 (26.09.2026) — sticky-шапка у .stats-head/.sym-top (ui.css?v=40), общий файл, бампую и здесь. v59 (25.09.2026, /bugs) — та же дыра ERR-170 была и в install-прекэше SHELL (c.put напрямую) — тоже переведено на safePut(). v58 — чип «Рядом» из «моих мест» по радиусу 300м (place-field.js?v=10, ui.css?v=34); v56 — радиус «изменить» токеном --ui-radius; v55 — фикс клика «изменить» (onclick, ERR); v54 (24.09.2026) — свёрнутая строка+шторка «Место» переехала в общий place-field.js (compactHtml/openSheet/closeSheet, классы .pf-fieldrow*/.pf-sheet* в ui.css) — то же самое выкатилось в дневник, «Жизнь» и «Секс» (place-field.js ?v=8, ui.css ?v=32); v53 (24.09.2026) — премиум-шапка шторки «Место»: иконка-квадрат на акценте + заголовок + подзаголовок текущим адресом + разделитель, как в шапке шторки результата (medcard_habits.js ?v=73); v52 (24.09.2026) — шторка «Место» вынесена из тела шторки результата в отдельную шторку сверху, до 88vh, топ-10 своих мест сразу без «Ещё» (medcard_habits.js ?v=72, place-field.js: опция chipsVisible, поведение остальных страниц не меняет); v51 (24.09.2026) — ERR-164: sticky шапки .ph стало базовым свойством (ui.css ?v=31), больше не зависит от body.cf-pburger; ERR-165: страховка pagehide снимает hab-stat-open, если он залип (medcard_habits.js ?v=71); v50 (24.09.2026) — «Сводка» вернулась в колонку иконок над снапом (2 кнопки, было 1) — на самом деле убрать нужно было её из строки вкладок над снапом (#habTabIns теперь display:none, кликабельна программно, переключатель не тронут) (habit_snaps.js ?v=14, habit_insights_ui.js ?v=7); v49 (24.09.2026) — плашки статуса (Активные/Выполненные/Проваленные/Сданные) переехали в шторку «Фильтр» снапов, снизу как .lt-drawer.accd; снапы+кнопка фильтра теперь рисуются на ЛЮБОМ статусе (было — только «Активные», кнопка пропадала бы вместе с ними) (habit_snaps.js ?v=13, medcard_habits.js ?v=70); v48 (24.09.2026) — убрана кнопка «Сводка» из колонки над снапом (дублировала вкладку в хедере), остался только «Фильтр», растянут на всю высоту ряда (habit_snaps.js ?v=12); v47 (24.09.2026) — фикс: свечение в углу карточки (::before + filter:blur) вылезало за скруглённый край на iOS Safari (blur игнорирует overflow:hidden+border-radius) — заменено на radial-gradient прямо в background, без blur (habit_snaps.js ?v=11); v46 (24.09.2026) — шторка AI-тренера сразу на полную высоту, закреплённая шапка, кнопка «копировать», лимит 1/3 разбора в неделю (habit_insights_ui.js ?v=6); v45 (24.09.2026) — фикс: колонка «Сводка/Фильтр» стягивалась по высоте трек+точки вместе (иконки уезжали заметно выше карточки) — точки вынесены отдельной строкой ниже; padding/gap острова урезаны (16/16/16/12, gap 10 — было 18/22/16), тексту больше не тесно (habit_snaps.js ?v=10); v44 (24.09.2026) — премиум-снапы, 5 островов вместо 7 («Фокус сейчас», «Как выполняешь»), медкарта пунктиром в «Сводке», кнопка и шторка AI-тренера (habit_snaps.js ?v=9, habit_insights_ui.js ?v=5, habits.js habit_coach_runs); v43 (24.09.2026) — колонка «Сводка/Фильтр» слева от карусели снапов (82/56px по высоте ряда), карточка «Всего за жизнь» на каждую привычку вместо одной (habit_snaps.js ?v=8, habits.js lifetimes[]); v42 (23.09.2026) — Пауза / Заморозка / + Новая привычка в один ряд, зазор 8px (medcard_habits.js ?v=69); v41 (18.09.2026) — заморозка всех миссий (7/21/30), снежинка в неделе, «Оформление» в шестерёнке, уровень в профиле (medcard_habits.js ?v=65, habit_settings ?v=6, habit_level ?v=2, bottom-nav ?v=13); v40 (17.09.2026) — пауза миссии — статистика/история миссии на каноне .mdl-*: шторка 64px, шапка «поделиться (ссылка ?mission=) — закрыть», вкладки в шапке (medcard_habits.js ?v=63, .hab-stat-* в habits.html); v38 (17.09.2026) — дата записи тоже пилюлей, как время; окантовка чипов в шторке времени (habits.html); v37 (17.09.2026) — просмотр иконки миссии вдвое меньше: uiViewImage({size:'sm'}) (ui-viewer.js ?v=2, medcard_habits.js ?v=62) — прячет артефакты вырезки PNG; v36 (17.09.2026) — барабан времени: чипы «Сейчас / −30 / −15 / −5 мин», дата и время 60/40 (medcard_habits.js ?v=61, .htw__chips в habits.html); v35 (17.09.2026) — H1 снова в две строки: habit_settings.js ?v=4 ставит только max-width до шестерёнки, кегль из /set не трогает; v34 (16.09.2026) — пикер иконки миссии: тап открывает иконку крупно (/ui-viewer.js ?v=1, в оболочке), выбор — галочкой или долгим нажатием (medcard_habits.js ?v=60, ui.css ?v=28 .hab-icosel); v33 (16.09.2026) — шестерёнка больше не накрывает бургер (placeLoose учитывает fixed-ряд .ph-act), нижний предел кегля H1 12px (habit_settings.js ?v=3); v32 (16.09.2026) — H1 подгоняется до шестерёнки в habit_settings.js ?v=2 (fitTitle), сайдбар грузится с ?v=2 (старый page-header.js застревал в кэше PWA); v31 (16.09.2026) — маскоты-осьминоги /img/habiticons в пикере иконок миссий (medcard_habits.js ?v=59, ui.css ?v=27 .hab-mico); v30 (16.09.2026) — название в шапке шторки результата ужимается в одну строку (medcard_habits.js ?v=58); v29 (16.09.2026) — дата и время записи раздельно, шторка-барабан времени (medcard_habits.js ?v=57, стили .hrs-dt/.htw в habits.html); v28 (16.09.2026) — шестерёнка настроек + шторка с версией модуля (habit_settings.js ?v=1), бейдж «Серия N» с огоньком у «Сводки» (habit_insights_ui.js ?v=4, habit_snaps.js ?v=7), H1 в одну строку (page-header.js ?v=4, ui.css ?v=26); v27 (15.09.2026) — ERR-24: ui-dialogs.js получил ?v=1 (был единственным статиком без версии: правка доезжала до PWA вторым заходом); проверки в sidebar.js/cab-sidebar.js переведены на префикс src^=, иначе грузилась вторая копия. /tz.js намеренно без версии — no-store, генерируется сервером; v26 (15.09.2026) — ERR-20: ignoreSearch только для навигации, /api/* сопоставляется со строкой запроса; ERR-15/17/19 в medcard_habits.js ?v=55; v25 (15.09.2026) — ряд разделов переехал на общий app-switch.js ?v=1 (habit_module_links.js больше не грузится), ui.css ?v=25; v24 (13.09.2026) — «последнее место на час» переехало в общий place-field.js ?v=7 (работает и в дневнике, и в «Жизни»), medcard_habits.js ?v=49; v23 (13.09.2026) — место прошлой записи подставляется час без GPS (medcard_habits.js ?v=48); v22 (13.09.2026) — секундомер считает в крупных полях мин:сек, мелкое табло убрано (medcard_habits.js ?v=47); v21 (13.09.2026) — правка записи открывает ту же шторку, что и ввод: количество, дата, ВРЕМЯ и место (medcard_habits.js ?v=45); v20 (13.09.2026) — /toast.js, /copy.js, /loc-time.js в оболочке + фолбэк ignoreSearch для статики: офлайн-старт больше не терял сообщения (ERR-4); v19 (13.09.2026) — ширина чипа на всех восьми углах (ui.css ?v=19: box-sizing + width:max-content); v18 (12.09.2026) — экран завершения нормы с осьминогом вместо двух плашек (medcard_habits.js ?v=41); v17 — остров «Вчера» приведён к общей геометрии островов (habit_snaps.js ?v=4); v16 (12.09.2026) — форма создания в 3 шага + AI-оценка цели (medcard_habits.js ?v=40); v15 (12.09.2026) — шторка «+ Результат» (medcard_habits.js ?v=39 + .hrs-* в habits.html); v14 — чип uiToast: угол и кегль из /set (ui.css ?v=18 + ui-dialogs.js, у него версии в адресе нет); v13 — разделы медкарты по одному флагу видимости
++const CACHE = 'habits-v148'; // v148 (28.10.2026, редизайн /threads) — спрайт ?v=32 (i-repeat-2, i-menu; ICONS_V 32 в server.js): сброс кэша. // v145 (18.10.2026, ERR-548) — создан facts_feed.js, подключение ?v=2: сброс кэша. // v144 (18.10.2026) — лента фактов на экране ожидания тренера: facts_feed.js?v=1, habit_insights_ui.js?v=24: сброс кэша. // v143 (18.10.2026) — «Гены» в ряду разделов: app-switch.js?v=11, page-titles.js?v=10, cab-sidebar.js?v=20261018a: сброс кэша. // v142 (16.10.2026, #456) — energon-word.js?v=3 (склонение по показанному значению, округление toPrecision, нечисло → «—»): сброс кэша. // v141 (16.10.2026, #456) — energon-word.js?v=2 (форматтер cfFmtEn): сброс кэша. // v140 (15.10.2026, /bugs) — плитка: Enter на кнопке «Статистика», перенос ряда чипов на узком экране, чистка: medcard_habits.js?v=91, habit_insights_ui.js?v=23: сброс кэша. // v139 (15.10.2026) — баг «+ Результат» в виде «Карточки»: плитка перерисовывалась карточкой списка, medcard_habits.js?v=90: сброс кэша. // v138 (14.10.2026) — переключатель вида «Карточки/Список»: medcard_habits.js?v=89, habit_insights_ui.js?v=22: сброс кэша. // v137 (13.10.2026, #166 эт.4) — bottom-nav.js?v=46: сброс кэша. // v136 (12.10.2026, #658) — шторка справа: medcard_habits.js?v=88, ui.css?v=81: сброс кэша. // v135 (08.10.2026) — тосты: toast.js/ui-dialogs.js (копировать у каждого, пол 8 с): сброс кэша. // v134 (07.10.2026, #444) — серверный геокодер, автоподсказки места: place-field.js?v=17, geoloc.js?v=5: сброс кэша. // v132 (06.10.2026) — cab-sidebar.js?v=50 (dock.js?v=13, notify-alert.js?v=2): сброс кэша. v131 (06.10.2026) — «Медкарта» → «AI Здоровье» в текстах (habit_insights_ui.js?v=21, habit_medcard_banner.js?v=4, bottom-nav.js?v=44): сброс кэша. v130 (05.10.2026, #451) — «Единые места»: place-field.js?v=16 (placeId, очередь мест через merged_into): сброс кэша. v129 (05.10.2026, #403): свои названия меню — cab-sidebar.js?v=48, bottom-nav.js?v=43, sidebar-labels.js?v=1, menu-pins.js?v=7: сброс кэша. v128 (04.10.2026, #424 ADR-290 §9) — пауза «Болезнь»: подписи проявлений из набора «Симптомы» профиля (sick_labels): medcard_habits.js?v=87: сброс кэша. v127 (04.10.2026, #33) — токен --ui-sheet-h: ui.css?v=73, ui-dialogs.js?v=11, bottom-nav.js?v=42, habit_insights_ui.js?v=20, habit_settings.js?v=26: сброс кэша. v126 (04.10.2026, #33) — аудит нижнего меню: bottom-nav.js?v=41, dock-editor.js?v=3, спрайт ?v=23 (дубль i-panel-bottom убран): сброс кэша. v125 (04.10.2026, #33) — шторки: is-peek, выезд панели, тихая замена: ui.css?v=70, ui-dialogs.js?v=10, cab-sidebar.js?v=46: сброс кэша. v124 (04.10.2026, ERR-314) — habit_insights_ui.js?v=19: 409 confirm_paid → диалог подтверждения: сброс кэша. v123 (03.10.2026, #403) — «Мои разделы» плитками, закрепление, счётчики: cab-sidebar.js?v=44: сброс кэша. v122 (03.10.2026, #33) — ПК-панель шторки только opt-in (data-drawer): ui.css?v=69, task-card.js?v=9: сброс кэша. v121 (03.10.2026, #33) — шторка «Нижнее меню» (шапка закреплена, кнопки в шапке), без виджета баланса в «Профиле»: bottom-nav.js?v=40, dock-editor.js?v=2: сброс кэша. v120 (03.10.2026, #33) — жесты/три высоты/боковая панель шторки: ui.css?v=68, ui-dialogs.js?v=9, cab-sidebar.js?v=43: сброс кэша. v119 (03.10.2026) — «Повторить миссию» открывает форму миссии (medcard_habits.js?v=86), ряд действий карточки переносится, итог цепочки без многоточия (ui.css?v=66). v118 (03.10.2026, #166) — общая месячная квота AI-расшифровок: habit_insights_ui.js?v=18, bottom-nav.js?v=39 (cfContactOpen). v117 (03.10.2026, #33) — спрайт ?v=21 (4 значка нижнего меню), bottom-nav.js?v=38. v116 — bottom-nav.js?v=37 (пользовательский нижний док), dock-editor.js?v=1: сброс кэша. v115 (03.10.2026) — пока AI-тренер думает, вместо серых полосок крутятся факты из собственных данных: время суток записей, серия, всего за срок, лучший и худший день недели, дни в коридоре (новый GET /api/habits/facts — habits.js/factsOf, habit_insights_ui.js?v=17). v114 (03.10.2026, #420) — сопутствующий сброс кэша вместе с medcard-v110 (правки фронта «Питания»). v113 (03.10.2026, #277) — повтор выполненной миссии и итог цепочки: medcard_habits.js?v=84, ui.css?v=63 (.hab-card__chain). v112 (03.10.2026, ERR-185 в трекере) — AI-тренер и «Сводка» звали r.json() ДО проверки r.ok: при перезапуске апстрима nginx отдаёт 502 HTML-кой, Safari падал на разборе, и в окно вместо причины уезжало «The string did not match the expected pattern». Теперь по статусу пишем «Сервер перезапускается — повтори через минуту» (habit_insights_ui.js?v=16). v111 (03.10.2026) — строки щитка «Нагрузка» перестали притворяться кнопками (разделители вместо плашек), дельта числом со знаком «+3 / −6» вместо треугольника: треугольник вниз на платформе читается как шеврон сворачивания (habit_load.js?v=6). v110 (03.10.2026) — норму коридора можно задать руками: тап по подписи «коридор N ±M», хранится в habit_load_prefs, пусто — возврат к медиане (habit_load.js?v=5, GET/PUT /api/habits/load-prefs). v109 (02.10.2026) — щиток «Нагрузка» переехал ПОД список миссий и перекрашен на реальные токены платформы: был взят несуществующий --ui-field-bg, на светлой теме выходили чёрные плашки с нечитаемым текстом (habit_load.js?v=3). v108 (02.10.2026) — щиток «Нагрузка» над списком миссий: habit_load.js?v=1 в habits.html, коридор нагрузки по дням из /api/habits/insights?load=1 (habits.js/loadOf). v107 (02.10.2026, ADR-236) — спрайт в SHELL /assets/icons.svg?v=13 (ICONS_V 13, i-copy-plus). v106 (02.10.2026) — patient-auth.html: «Не помню код» и предупреждение о похожем логине. v105 (02.10.2026, #424, ADR-290 §7) — шторка самочувствия везде с symptoms_entry.js?v=10 (bottom-nav.js?v=31, cab-sidebar.js?v=38, cab-dock.js?v=8), значок эмоции — .kt-ava.is-chip в ui.css?v=57. v104 (02.10.2026, ADR-290 §6) — иконки эмоций в шторке самочувствия (symptoms_entry.js?v=9). v103 (01.10.2026) — личный бургер на /money/app и глубоких ссылках медкарты, пункты Дневник/Авто/Пара/Деньги/Питание в «Личном» кабинета, нижний док на /pair/app, названия «Деньги»/«Картотека» (cab-sidebar.js?v=36, page-titles.js?v=7). v102 (01.10.2026) — спрайт в SHELL /assets/icons.svg?v=12 (был ?v=8, разошёлся с ICONS_V в server.js; дубль i-pushpin убран). v101 (01.10.2026, ADR-285) — метка .ui-st и окно выбора цвета в ui.css?v=53, /ui-color.js?v=1 из cab-sidebar.js. v100 (30.09.2026, ADR-280) — строка «Картотека» в «+» (module-selector.js?v=12, cab-sidebar.js?v=34). v99 (30.09.2026, ADR-279) — пункт «Картотека» в личном бургере (cab-sidebar.js?v=33). v98 (30.09.2026) — /med-rules.js из дока грузится с ?v=4 (bottom-nav.js?v=30, cab-dock.js?v=7 → bottom-nav cab15, cab-sidebar.js?v=32); тени светлой темы на --ui-shadow-c (theme.css). v97 (30.09.2026) — тени на трёх токенах --ui-shadow-sm/-md/-lg (/refs#shadows): ui.css?v=52, ui-dialogs.js?v=7, module-selector.js?v=11, habit_snaps.js?v=19, bottom-nav.js?v=29, cab-sidebar.js?v=31. v96 (29.09.2026, поздний вечер) — нижний док: настоящие скругления углов в dockPath, контур больше не вылезает за экран при радиусе меньше H/2, подложка #cfbn-floor под доком убрана (bottom-nav.js?v=28); зазор тоста над доком --ui-toast-gap 14px, как у верхнего тоста (ui.css?v=51, toast.js?v=4, ui-dialogs.js?v=6); цепочкой auth-gate.js?v=5, page-copy.js?v=4, habit_settings.js?v=24, cab-sidebar.js?v=30. v95 (29.09.2026, ADR-262) — сохранённое название раздела без мелькания стандартного: page-titles.js?v=6 в <head> habits.html (H1 скрыт до подмены из кэша, страховка 1,5 с), cab-sidebar.js?v=29. v94 (29.09.2026, ADR-262) — «Изменить» в меню «⋮» названий разделов, счётчики символов по графемам, кэш названий без мелькания (page-titles.js?v=5, cab-sidebar.js?v=28). v93 (29.09.2026, поздний вечер, ADR-261) — шапка личных страниц: подзаголовок до 2 строк и сворачивается после 50px прокрутки (новый ph-collapse.js?v=1, событие cf:ph-resize), подзаголовок трекера по умолчанию в habits.html; названия разделов задаёт только админ, общие для всех, меню «⋮» на карточках /me (page-titles.js?v=4); тосты над нижним доком (ui.css?v=50, toast.js?v=3, ui-dialogs.js?v=5); шторка ⚙: строки выровнены, «Вид нижнего меню» без подсказки, многоточие у подписей (habit_settings.js?v=23); /medcard/set#dock без второй «Сохранить» внизу, выбранная вкладка в превью исправлена; cab-sidebar.js?v=27. v92 (29.09.2026, ADR-260) — внутренняя валюта в текстах пациента «энергоны» вместо «токенов» со склонением: новый /energon-word.js?v=1, medcard_habits.js?v=83 (пауза, заморозка, тосты списания); /me — плитка «Энергоны». v91 (29.09.2026, вечер) — /set: у каждого ползунка устойчивая строка (фиксированная колонка значения, на телефоне подпись отдельной строкой), кнопки − / + и ввод точного значения тапом по числу; подложка выбранной вкладки дока получила настройки «Скругление выбора» / «Обводка выбора» (bottom-nav.js?v=27, новые ключи темы ui_dock_sel_radius / ui_dock_sel_bw — сохраняются только после перезапуска сервера). v90 (29.09.2026, вечер) — шторка «+ Результат»: у штучных плюсик/минус по 1, чипы ставят значение вокруг средней записи за всё время (entry_avg из /api/habits), medcard_habits.js?v=82. v89 (29.09.2026, вечер) — откат «док растёт на safe-area» из v86: высота дока снова всегда H, отступ снизу = N + safe-area при N>0, а 0 = вплотную к кромке экрана, подложка #cfbn-floor при 0 скрыта; строки «Меню снизу» в шторке «Профиль» больше нет — настройки дока только через шестерёнку сверху (bottom-nav.js?v=26); /medcard/set#dock: липкое превью сверху, статус «Не сохранено»/«Сохранено ✓» с кнопкой «Сохранить», читаемый заголовок, превью на 5 вкладок; ключ dock убран из PMENU_DEF в set.html. v88 (29.09.2026) — доводка AI-тренера: квота первой в подзаголовке, «Сводка» пересчитывается после смены нормы, одна кнопка действия за раз (medcard_habits.js?v=81, habit_insights_ui.js?v=15). v87 (29.09.2026, ADR-257) — экран приветствия Mini App вместо оверлея с рукой: «У меня уже есть аккаунт» (логин + код → /api/tg/habits/webapp-link) и «Создать аккаунт» (чат бота), предпросмотр ?tgpreview=1 (tg-miniapp.js?v=2); строка бота в шестерёнке в одну строку «Бот @AiHabit_robot · не подключён» (habit_settings.js?v=22). v86 (29.09.2026) — строка «Меню снизу» в шторке «Профиль» (/medcard/set#dock); «Отступ снизу» = 0 теперь прижимает док к самому низу, док растёт на safe-area, подложка #cfbn-floor при 0 скрыта (bottom-nav.js?v=25); в шестерёнке «Настройки» строка «Настройки нижнего меню» и значки у всех строк (habit_settings.js?v=21); /theme.css идёт мимо SW, как в medcard-sw.js: stale-while-revalidate отдавал старую тему, и сохранённая настройка дока появлялась только со второй загрузки. v85 (29.09.2026, ADR-257) — строка «Бот напоминаний @AiHabit_robot» в шестерёнке трекера: «Подключить» (/start ln_…) и «Присылать напоминания» (habit_settings.js?v=20). v84 (29.09.2026, ADR-257) — вход из Telegram Mini App @AiHabit_robot: tg-miniapp.js?v=1 в <head> habits.html. v83 (29.09.2026) — раздел «Питание» в ряду и бургере: app-switch.js?v=7, module-selector.js?v=10, cab-sidebar.js?v=26. v82 (29.09.2026) — ошибки трекера красным тостом, окно «Изменить норму» (PUT /plan), AI-тренер закрывается только после открытия целевого окна, «Новый разбор» в шапке шторки (medcard_habits.js?v=80, habit_insights_ui.js?v=14). v81 (29.09.2026) — онбординг «как сторис» (habit_onboard.js?v=1, картинки /img/habonb/s1..s5.jpg), пункт «Как пользоваться» в шестерёнке (habit_settings.js?v=19). v80 (29.09.2026) — чёрный экран первого запуска PWA: заготовка «Загрузка…» и сторож 9 с с «Обновить» в habits.html, регистрация SW в <head>, J() с таймаутом 15 с и проверкой r.ok, 401 → вход (medcard_habits.js?v=79). v79 (29.09.2026, ADR-255) — «Мои места» с сервера (/api/places): один справочник на все устройства, localStorage — офлайн-копия, очередь правок, синонимы в matchMine (place-field.js?v=15). v78 (29.09.2026) — пункт «Локации» (/medcard/places, справочник своих мест) в шестерёнке и личном бургере: habit_settings.js?v=18, cab-sidebar.js?v=25. v77 (29.09.2026) — ручки шторок на токене --ui-grip, цвет заморозки на токене --ui-frz (/set), медкарта: #0a84ff → фирменный --ui-brand, главная кнопка --ui-btn1-*. v76 (29.09.2026, светлая тема везде в личном — 4 агента: общие модалки/тосты/меню на токенах, --ui-shadow-c и --ui-toast-* в themeVars, theme-toggle.js ловит тонированные тёмные и чёрные тени; трекер: главные кнопки --ui-btn1-*, цвет заморозки, острова снапов). v75 (29.09.2026) — после геопозиции в поле места подставляется СВОЁ место, адрес Nominatim — только фолбэк и укороченный (place-field.js?v=14). v74 (29.09.2026) — щит «Запросить доступ к геопозиции снова» в поле места + подсказка, как снять запрет (place-field.js?v=13, geoloc.js?v=4). v73 (29.09.2026, /bugs светлая тема на телефоне) — AI-тренер, «Сводка», экран уровня, чипы «Серия»/«Ур.» и экран «Готово» на токенах темы (habit_insights_ui.js?v=11, habit_level.js?v=3, medcard_habits.js?v=76, .hab-streak в habits.html); тень снапа без обрезки, крестики шторок на токенах --ui-sheet-btn-* (habit_snaps.js?v=16, .hrs-x); ручка шторки .mdl-* поверх шапки (ui.css?v=46); док прижат к низу — max(отступ, safe-area) + подложка #cfbn-floor, viewport-fit=cover (bottom-nav.js?v=22). v72 (27.09.2026) — спрайт значков одним адресом (window.ICONS_URL, ICONS_V в server.js), в SHELL — /assets/icons.svg?v=8; place-field.js?v=12, bottom-nav.js?v=21, medcard_habits.js?v=75, habit_snaps.js?v=15, habit_insights_ui.js?v=10, ui-viewer.js?v=3, ui-dialogs.js?v=3, habit_settings.js?v=15, cab-sidebar.js?v=23. v71 (27.09.2026, ADR-232) — общий ta-grow.js (авто-рост всех textarea), place-field.js?v=11, symptoms_entry.js?v=8, bottom-nav.js?v=20. v70 (27.09.2026, ADR-231 этап 4) — общая кнопка «i» (.ui-info) и окно uiInfo(): ui.css?v=44, ui-dialogs.js?v=2, в спрайте новый значок i-info. v69 (27.09.2026) — шторка, доводка ADR-231: кегль заголовков шторок из --ui-sheet-title-fs (ui.css?v=43, .hrs-head__t в habits.html, habit_insights_ui.js?v=9, habit_settings.js?v=14, bottom-nav.js?v=19, cab-sidebar.js?v=22). v68 (27.09.2026) — единая шторка платформы: высота от --ui-sheet-top (/set → «Шторка») у шторки места, AI-тренера, ⚙ и нижнего дока (ui.css?v=42, medcard_habits.js?v=74, habit_insights_ui.js?v=8, habit_settings.js?v=13, bottom-nav.js?v=18, cab-sidebar.js?v=21). v67 (27.09.2026) — textarea.lf-input в ui.css?v=41 → авто-рост вместо resize:vertical (заметка симптома в symptoms_entry.js?v=7). v66 (27.09.2026) — .pf-fieldrow: min-width:0 (адрес вылезал за карточку в column-flex, ui.css?v=41); v65 (26.09.2026) — sticky-шапка у .stats-head/.sym-top (ui.css?v=40), общий файл, бампую и здесь. v59 (25.09.2026, /bugs) — та же дыра ERR-170 была и в install-прекэше SHELL (c.put напрямую) — тоже переведено на safePut(). v58 — чип «Рядом» из «моих мест» по радиусу 300м (place-field.js?v=10, ui.css?v=34); v56 — радиус «изменить» токеном --ui-radius; v55 — фикс клика «изменить» (onclick, ERR); v54 (24.09.2026) — свёрнутая строка+шторка «Место» переехала в общий place-field.js (compactHtml/openSheet/closeSheet, классы .pf-fieldrow*/.pf-sheet* в ui.css) — то же самое выкатилось в дневник, «Жизнь» и «Секс» (place-field.js ?v=8, ui.css ?v=32); v53 (24.09.2026) — премиум-шапка шторки «Место»: иконка-квадрат на акценте + заголовок + подзаголовок текущим адресом + разделитель, как в шапке шторки результата (medcard_habits.js ?v=73); v52 (24.09.2026) — шторка «Место» вынесена из тела шторки результата в отдельную шторку сверху, до 88vh, топ-10 своих мест сразу без «Ещё» (medcard_habits.js ?v=72, place-field.js: опция chipsVisible, поведение остальных страниц не меняет); v51 (24.09.2026) — ERR-164: sticky шапки .ph стало базовым свойством (ui.css ?v=31), больше не зависит от body.cf-pburger; ERR-165: страховка pagehide снимает hab-stat-open, если он залип (medcard_habits.js ?v=71); v50 (24.09.2026) — «Сводка» вернулась в колонку иконок над снапом (2 кнопки, было 1) — на самом деле убрать нужно было её из строки вкладок над снапом (#habTabIns теперь display:none, кликабельна программно, переключатель не тронут) (habit_snaps.js ?v=14, habit_insights_ui.js ?v=7); v49 (24.09.2026) — плашки статуса (Активные/Выполненные/Проваленные/Сданные) переехали в шторку «Фильтр» снапов, снизу как .lt-drawer.accd; снапы+кнопка фильтра теперь рисуются на ЛЮБОМ статусе (было — только «Активные», кнопка пропадала бы вместе с ними) (habit_snaps.js ?v=13, medcard_habits.js ?v=70); v48 (24.09.2026) — убрана кнопка «Сводка» из колонки над снапом (дублировала вкладку в хедере), остался только «Фильтр», растянут на всю высоту ряда (habit_snaps.js ?v=12); v47 (24.09.2026) — фикс: свечение в углу карточки (::before + filter:blur) вылезало за скруглённый край на iOS Safari (blur игнорирует overflow:hidden+border-radius) — заменено на radial-gradient прямо в background, без blur (habit_snaps.js ?v=11); v46 (24.09.2026) — шторка AI-тренера сразу на полную высоту, закреплённая шапка, кнопка «копировать», лимит 1/3 разбора в неделю (habit_insights_ui.js ?v=6); v45 (24.09.2026) — фикс: колонка «Сводка/Фильтр» стягивалась по высоте трек+точки вместе (иконки уезжали заметно выше карточки) — точки вынесены отдельной строкой ниже; padding/gap острова урезаны (16/16/16/12, gap 10 — было 18/22/16), тексту больше не тесно (habit_snaps.js ?v=10); v44 (24.09.2026) — премиум-снапы, 5 островов вместо 7 («Фокус сейчас», «Как выполняешь»), медкарта пунктиром в «Сводке», кнопка и шторка AI-тренера (habit_snaps.js ?v=9, habit_insights_ui.js ?v=5, habits.js habit_coach_runs); v43 (24.09.2026) — колонка «Сводка/Фильтр» слева от карусели снапов (82/56px по высоте ряда), карточка «Всего за жизнь» на каждую привычку вместо одной (habit_snaps.js ?v=8, habits.js lifetimes[]); v42 (23.09.2026) — Пауза / Заморозка / + Новая привычка в один ряд, зазор 8px (medcard_habits.js ?v=69); v41 (18.09.2026) — заморозка всех миссий (7/21/30), снежинка в неделе, «Оформление» в шестерёнке, уровень в профиле (medcard_habits.js ?v=65, habit_settings ?v=6, habit_level ?v=2, bottom-nav ?v=13); v40 (17.09.2026) — пауза миссии — статистика/история миссии на каноне .mdl-*: шторка 64px, шапка «поделиться (ссылка ?mission=) — закрыть», вкладки в шапке (medcard_habits.js ?v=63, .hab-stat-* в habits.html); v38 (17.09.2026) — дата записи тоже пилюлей, как время; окантовка чипов в шторке времени (habits.html); v37 (17.09.2026) — просмотр иконки миссии вдвое меньше: uiViewImage({size:'sm'}) (ui-viewer.js ?v=2, medcard_habits.js ?v=62) — прячет артефакты вырезки PNG; v36 (17.09.2026) — барабан времени: чипы «Сейчас / −30 / −15 / −5 мин», дата и время 60/40 (medcard_habits.js ?v=61, .htw__chips в habits.html); v35 (17.09.2026) — H1 снова в две строки: habit_settings.js ?v=4 ставит только max-width до шестерёнки, кегль из /set не трогает; v34 (16.09.2026) — пикер иконки миссии: тап открывает иконку крупно (/ui-viewer.js ?v=1, в оболочке), выбор — галочкой или долгим нажатием (medcard_habits.js ?v=60, ui.css ?v=28 .hab-icosel); v33 (16.09.2026) — шестерёнка больше не накрывает бургер (placeLoose учитывает fixed-ряд .ph-act), нижний предел кегля H1 12px (habit_settings.js ?v=3); v32 (16.09.2026) — H1 подгоняется до шестерёнки в habit_settings.js ?v=2 (fitTitle), сайдбар грузится с ?v=2 (старый page-header.js застревал в кэше PWA); v31 (16.09.2026) — маскоты-осьминоги /img/habiticons в пикере иконок миссий (medcard_habits.js ?v=59, ui.css ?v=27 .hab-mico); v30 (16.09.2026) — название в шапке шторки результата ужимается в одну строку (medcard_habits.js ?v=58); v29 (16.09.2026) — дата и время записи раздельно, шторка-барабан времени (medcard_habits.js ?v=57, стили .hrs-dt/.htw в habits.html); v28 (16.09.2026) — шестерёнка настроек + шторка с версией модуля (habit_settings.js ?v=1), бейдж «Серия N» с огоньком у «Сводки» (habit_insights_ui.js ?v=4, habit_snaps.js ?v=7), H1 в одну строку (page-header.js ?v=4, ui.css ?v=26); v27 (15.09.2026) — ERR-24: ui-dialogs.js получил ?v=1 (был единственным статиком без версии: правка доезжала до PWA вторым заходом); проверки в sidebar.js/cab-sidebar.js переведены на префикс src^=, иначе грузилась вторая копия. /tz.js намеренно без версии — no-store, генерируется сервером; v26 (15.09.2026) — ERR-20: ignoreSearch только для навигации, /api/* сопоставляется со строкой запроса; ERR-15/17/19 в medcard_habits.js ?v=55; v25 (15.09.2026) — ряд разделов переехал на общий app-switch.js ?v=1 (habit_module_links.js больше не грузится), ui.css ?v=25; v24 (13.09.2026) — «последнее место на час» переехало в общий place-field.js ?v=7 (работает и в дневнике, и в «Жизни»), medcard_habits.js ?v=49; v23 (13.09.2026) — место прошлой записи подставляется час без GPS (medcard_habits.js ?v=48); v22 (13.09.2026) — секундомер считает в крупных полях мин:сек, мелкое табло убрано (medcard_habits.js ?v=47); v21 (13.09.2026) — правка записи открывает ту же шторку, что и ввод: количество, дата, ВРЕМЯ и место (medcard_habits.js ?v=45); v20 (13.09.2026) — /toast.js, /copy.js, /loc-time.js в оболочке + фолбэк ignoreSearch для статики: офлайн-старт больше не терял сообщения (ERR-4); v19 (13.09.2026) — ширина чипа на всех восьми углах (ui.css ?v=19: box-sizing + width:max-content); v18 (12.09.2026) — экран завершения нормы с осьминогом вместо двух плашек (medcard_habits.js ?v=41); v17 — остров «Вчера» приведён к общей геометрии островов (habit_snaps.js ?v=4); v16 (12.09.2026) — форма создания в 3 шага + AI-оценка цели (medcard_habits.js ?v=40); v15 (12.09.2026) — шторка «+ Результат» (medcard_habits.js ?v=39 + .hrs-* в habits.html); v14 — чип uiToast: угол и кегль из /set (ui.css ?v=18 + ui-dialogs.js, у него версии в адресе нет); v13 — разделы медкарты по одному флагу видимости
+ 
+ // Оболочка: то, без чего страница не откроется вообще. Версий в путях нет намеренно (см. выше).
+ // toast/copy/loc-time лежат здесь БЕЗ ?v=, а находятся по фолбэку ignoreSearch в обработчике
+@@ -33,7 +33,7 @@
+   '/habits',
+   // Спрайт — тем же адресом, что просят страницы (ICONS_V в server.js, 27.09.2026): иначе
+   // установка качала бы отдельную копию без версии. Поднял ICONS_V — подними и здесь.
+-  '/assets/icons.svg?v=31',
++  '/assets/icons.svg?v=32',
+   '/assets/logo.svg',
+   '/habits.webmanifest',
+   '/toast.js',
