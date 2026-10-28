@@ -15,7 +15,9 @@
   })();
 </script>
 <style>
-/* ============ ТОКЕНЫ ПЛАТФОРМЫ (копия значений из ui.css / set.html DEFAULTS, как в утверждённом макете threads-mockup) ============ */
+/* ============ ТОКЕНЫ ПЛАТФОРМЫ (копия значений из ui.css / set.html DEFAULTS) ============
+   Стиль: каркас /analytics (seo-v2.css) — плавающий рейл слева, карточки радиус 18, мягкие тени в светлой теме,
+   iOS-сегмент вкладок, пилюли-кнопки; лента постов в духе Threads; на телефоне — крупный заголовок One UI. */
 :root {
   color-scheme: dark;
   --ui-brand: #00a0ff;
@@ -66,7 +68,7 @@
   --ui-violet-soft-line: color-mix(in srgb, var(--ui-violet) 32%, var(--ui-card-bg));
   --ui-violet-soft-tx: color-mix(in srgb, var(--ui-violet) 60%, var(--ui-tx));
 
-  /* ---- СВОЁ (нет в токенах платформы, см. README) ---- */
+  /* ---- СВОЁ (нет в токенах платформы, см. current-vs-new.md) ---- */
   --th-radius: 18px;          /* литерал .sv2-nav (seo-v2.css) — карточки каркаса /analytics */
   --th-row-radius: 14px;      /* литерал .sv2-tile (seo-v2.css) */
   --th-glass: color-mix(in srgb, var(--ui-card-bg) 86%, transparent);  /* «стекло» нижней панели iOS */
@@ -178,10 +180,12 @@ svg.i { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentCo
 .post-t { margin-top: 3px; font-size: 14.5px; line-height: 1.5; color: var(--ui-tx); white-space: pre-line; }
 .post-t.is-empty { color: var(--ui-tx-3); font-style: italic; }
 .stats { display: flex; align-items: center; gap: 4px; margin-top: 10px; flex-wrap: wrap; }
-.stat { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 10px 0 8px; border-radius: 999px; color: var(--ui-tx-2); font-size: 13px; font-variant-numeric: tabular-nums; }
-.stat svg { width: 17px; height: 17px; }
+.stats { column-gap: 14px; row-gap: 2px; }
+.stat { display: inline-flex; align-items: center; gap: 5px; height: 30px; color: var(--ui-tx-3); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.stat svg { width: 16px; height: 16px; color: var(--ui-tx-2); }
+.stat b { color: var(--ui-tx); font-weight: 600; }
 .stat.is-box { background: var(--ui-surface-3); border: 1px solid var(--ui-line-2); }
-.stat.is-na { color: var(--ui-tx-3); font-size: 12.5px; padding-left: 0; }
+.stat.is-na { color: var(--ui-tx-3); font-size: 12.5px; }
 .stats .tbtn { margin-left: auto; height: 32px; }
 .stats .tbtn .n { font-weight: 600; }
 /* раскрытые ответы — ветка */
@@ -217,13 +221,6 @@ svg.i { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentCo
 .cnt.is-over { color: var(--ui-danger); } .cnt.is-over .ring { background: var(--ui-danger); }
 .comp-f .btn { margin-left: auto; border-radius: 999px; }
 
-/* аккаунт — iOS-строки */
-.irows { padding: 4px 0 6px; }
-.irow { display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 18px; position: relative; font-size: 14px; }
-.irow + .irow::before { content: ""; position: absolute; left: 18px; right: 0; top: 0; height: 1px; background: var(--ui-line-2); }
-.irow .k { color: var(--ui-tx-2); }
-.irow .v { margin-left: auto; color: var(--ui-tx); font-weight: 500; display: inline-flex; align-items: center; gap: 8px; }
-.irow .v.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size: 12.5px; color: var(--ui-tx-2); }
 
 /* поиск по ключам */
 .sbar { display: flex; gap: 10px; align-items: center; }
@@ -300,6 +297,7 @@ svg.i { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentCo
 .body { flex: 1 1 auto; min-height: 0; padding: 0 28px 24px 4px; display: flex; flex-direction: column; gap: 14px; }
 .g-posts { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 408px; gap: 16px; }
 .col { display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+.col.is-sticky { position: sticky; top: 0; align-self: start; }  /* одна колонка «Новый пост», липкая при прокрутке ленты */
 .feed { display: flex; flex-direction: column; overflow: hidden; position: relative; }
 .feed-b { flex: 1 1 auto; min-height: 0; overflow: hidden; position: relative; }
 .feed-b::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 40px; background: linear-gradient(to bottom, transparent, var(--ui-card-bg)); pointer-events: none; }
@@ -342,8 +340,10 @@ svg.i { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentCo
 [data-view="mobile"] .post { padding: 14px 16px 10px; }
 [data-view="mobile"] .post + .post::before { left: 68px; right: 0; }
 [data-view="mobile"] .post-t { font-size: 15px; }
-[data-view="mobile"] .stat { padding: 0 8px 0 4px; gap: 4px; font-size: 12.5px; }
-[data-view="mobile"] .stat svg { width: 16px; height: 16px; }
+[data-view="mobile"] .stats { column-gap: 12px; row-gap: 0; }
+[data-view="mobile"] .stat { gap: 4px; height: 26px; font-size: 12.5px; }
+[data-view="mobile"] .stat svg { width: 15px; height: 15px; }
+[data-view="mobile"] .comp-who .av { --s: 32px !important; }
 [data-view="mobile"] .comp { padding: 14px 14px 12px; gap: 10px; }
 [data-view="mobile"] .ta { min-height: 72px; font-size: 15px; }
 [data-view="mobile"] .comp-f .btn { padding: 0 16px; }
@@ -364,7 +364,7 @@ svg.i { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentCo
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none"><style>symbol{stroke-width:var(--ui-ico-stroke,2)}</style>
-<!-- символы из web/public/assets/icons.svg; i-heart, i-repeat-2, i-menu, i-calendar, i-clock, i-zap — Lucide, в спрайте нет (см. current-vs-new.md) -->
+<!-- символы из web/public/assets/icons.svg; i-heart, i-repeat-2, i-menu, i-calendar, i-clock, i-zap — Lucide, в спрайте пока нет: добавить в web/public/assets/icons.svg (см. current-vs-new.md) -->
 <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /><circle cx="12" cy="12" r="3" /></symbol>
 <symbol id="i-reply" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 18v-2a4 4 0 0 0-4-4H4"/><path d="m9 17-5-5 5-5"/></symbol>
 <symbol id="i-text-quote" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 5H3"/><path d="M21 12H8"/><path d="M21 19H8"/><path d="M3 12v7"/></symbol>
@@ -408,21 +408,26 @@ svg.i { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentCo
   var H = document.documentElement;
   var VIEW = H.getAttribute('data-view'), SCR = H.getAttribute('data-screen');
   var M = VIEW === 'mobile';
+  /* склонение: plural(5, ['лайк','лайка','лайков']) */
+  function plural(n, f) { n = Math.abs(n) % 100; var d = n % 10; return n > 10 && n < 20 ? f[2] : d === 1 ? f[0] : d >= 2 && d <= 4 ? f[1] : f[2]; }
+  function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0'); }
+  var STAT_F = [['views', 'eye', ['просмотр', 'просмотра', 'просмотров']], ['likes', 'heart', ['лайк', 'лайка', 'лайков']],
+    ['replies', 'message', ['ответ', 'ответа', 'ответов']], ['reposts', 'repeat-2', ['репост', 'репоста', 'репостов']], ['quotes', 'text-quote', ['цитата', 'цитаты', 'цитат']]];
   function ic(id, cls) { return '<svg class="i ' + (cls || '') + '"><use href="#i-' + id + '"/></svg>'; }
 
   /* ---------- данные (форма — как отдают /api/threads/*) ---------- */
   var ME = { username: 'cashruflow', id: '26831904417712', exp: '24.12.2026' };   // /api/threads/status (live.username, threads_user_id, expires_at)
   var POSTS = [   // /api/threads/posts + /api/threads/insights?id=
     { t: 'сегодня, 14:32', text: 'Разобрали, почему CTR в Яндексе падает после смены сниппета: пять причин и что проверить первым делом. Спойлер: чаще всего виноват не заголовок, а дата в description.',
-      s: { views: '2 418', likes: 48, replies: 12, reposts: 6, quotes: 3 }, open: true,
+      s: { views: 2418, likes: 48, replies: 12, reposts: 6, quotes: 3 }, open: true,
       reps: [ { u: 'dmitry.orlov', h: 20, t: 'А если сниппет собирается из микроразметки, тоже дата?', w: '14:51' },
               { u: 'elena_seo', h: 300, t: 'Подтверждаю, у нас после правки description CTR вернулся за неделю.', w: '15:07' },
               { u: 'mebel.dom', h: 110, t: 'Сохранил, проверим на каталоге 👍', w: '15:20' } ] },
     { t: 'вчера, 18:05', text: 'Новая статья в блоге: как мы перенесли 64 статьи на новый шаблон без потери позиций. Карта 301-редиректов внутри.',
-      s: { views: '1 120', likes: 21, replies: 4, reposts: 2, quotes: 0 } },
+      s: { views: 1120, likes: 21, replies: 4, reposts: 2, quotes: 0 } },
     { t: '24.10, 11:40', repost: true },
     { t: '23.10, 09:12', text: 'Что смотреть в Вебмастере каждое утро — 3 отчёта, 5 минут.',
-      s: { views: '864', likes: 17, replies: 2, reposts: 1, quotes: 1 } }
+      s: { views: 864, likes: 17, replies: 2, reposts: 1, quotes: 1 } }
   ];
   var KW = [   // /api/threads/search?q=
     { u: 'seo.pulse', h: 200, t: '23.10.2026, 19:44', x: 'SEO-продвижение в 2026: что реально работает для малого бизнеса — короткий тред с цифрами по трём нишам.' },
@@ -465,11 +470,7 @@ svg.i { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentCo
     } else {
       var s = p.s;
       body = '<div class="post-t">' + p.text + '</div><div class="stats">'
-        + '<span class="stat" title="просмотры">' + ic('eye') + s.views + '</span>'
-        + '<span class="stat" title="лайки">' + ic('heart') + s.likes + '</span>'
-        + '<span class="stat" title="ответы">' + ic('message') + s.replies + '</span>'
-        + '<span class="stat" title="репосты">' + ic('repeat-2') + s.reposts + '</span>'
-        + '<span class="stat" title="цитаты">' + ic('text-quote') + s.quotes + '</span>'
+        + STAT_F.map(function (f) { var n = s[f[0]]; return '<span class="stat">' + ic(f[1]) + '<b>' + fmt(n) + '</b>' + plural(n, f[2]) + '</span>'; }).join('')
         + (M ? '' : '<span class="tbtn ' + (p.open ? 'is-on' : 'is-ghost') + '">' + ic('message', 'i-xs') + 'Ответы' + '</span>')
         + '</div>';
       if (M) body += '<div class="stats" style="margin-top:6px"><span class="tbtn ' + (p.open ? 'is-on' : 'is-ghost') + '" style="margin-left:0">' + ic('message', 'i-xs') + (p.open ? 'Скрыть ответы' : 'Ответы') + '</span></div>';
@@ -485,19 +486,12 @@ svg.i { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentCo
       : '<div class="ta is-focus">Пять причин, почему падает CTR после смены сниппета — разбор в карточках 👇\nСохраните, чтобы не потерять.</div>';
     var n = opts.empty ? 0 : 86;
     return '<div class="comp">'
-      + (M ? '' : '<div class="comp-who"><span class="av is-brand" style="--s:36px">DC</span><div><b>Новый пост</b><small>@' + ME.username + ' · Threads</small></div></div>')
+      + '<div class="comp-who"><span class="av is-brand" style="--s:36px">DC</span><div><b>Новый пост</b><small>@' + ME.username + ' · Threads</small></div></div>'
       + txt
       + (opts.img ? '<div class="prev"><span class="rm">' + ic('close') + 'Убрать картинку</span></div>' : '')
       + '<div class="comp-f"><span class="tbtn">' + ic('image', 'i-s') + (M ? '' : 'Картинка') + '</span>'
       + '<span class="cnt"><span class="ring" style="--p:' + Math.round(n / 5) + '"></span>' + n + ' / 500</span>'
       + '<span class="btn' + (opts.off ? ' is-dis' : '') + '">' + ic('send', 'i-s') + 'Опубликовать</span></div></div>';
-  }
-  function account() {
-    return '<div class="card"><div class="card-h"><h2>Аккаунт</h2></div><div class="irows">'
-      + '<div class="irow"><span class="k">Статус</span><span class="v"><span class="dot"></span>Подключено</span></div>'
-      + '<div class="irow"><span class="k">ID аккаунта</span><span class="v mono">' + ME.id + '</span></div>'
-      + '<div class="irow"><span class="k">Токен действует до</span><span class="v">' + ME.exp + '</span></div>'
-      + '</div></div>';
   }
   function kwRow(k) {
     return '<div class="post"><div class="post-l">' + avU(k.u, k.h) + '</div><div class="post-b"><div class="post-h"><b>@' + k.u + '</b><span>' + k.t + '</span><span class="lnk">' + (M ? '' : 'Открыть') + ic('external-link', 'i-xs') + '</span></div><div class="post-t">' + k.x + '</div></div></div>';
@@ -529,7 +523,7 @@ svg.i { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentCo
       cell('Композер без подключения', '<div class="card">' + composer({ empty: true, off: true }) + '</div>'),
       cell('Мои посты — не подключено', '<div class="card">' + emptyBox('link', 'Подключи Threads, чтобы увидеть посты', '', '') + '</div>'),
       cell('Мои посты — пусто', '<div class="card">' + emptyBox('newspaper', 'Постов пока нет', '') + '</div>'),
-      cell('Ответы — пусто / загрузка', '<div class="card" style="padding:4px 0">' + post({ t: 'сегодня, 10:02', text: 'Короткий пост без ответов.', s: { views: '96', likes: 2, replies: 0, reposts: 0, quotes: 0 } })
+      cell('Ответы — пусто / загрузка', '<div class="card" style="padding:4px 0">' + post({ t: 'сегодня, 10:02', text: 'Короткий пост без ответов.', s: { views: 96, likes: 2, replies: 0, reposts: 0, quotes: 0 } })
         .replace('tbtn is-ghost', 'tbtn is-on') + '<div style="padding:0 18px 14px 70px;font-size:13px;color:var(--ui-tx-3)">Ответов пока нет</div></div>'),
       cell('Ключи — ничего не нашлось', '<div class="card">' + emptyBox('search', 'Ничего не нашлось', '') + '</div>'),
       cell('Аналитика — данных нет', '<div class="card">' + emptyBox('chart', 'Данных пока нет', 'Статистика начнёт копироваться после первого сбора', '<span class="btn">' + ic('refresh', 'i-xs') + 'Собрать сейчас</span>') + '</div>'),
@@ -554,7 +548,7 @@ svg.i { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentCo
     html += '<div class="body">';
     if (SCR === 'posts') {
       html += '<div class="g-posts"><section class="card feed"><div class="card-h"><h2>Мои посты</h2><span class="sub">15 последних</span></div><div class="feed-b">' + POSTS.map(post).join('') + '</div></section>'
-        + '<div class="col"><div class="card">' + composer({ img: true }) + '</div>' + account() + '</div></div>';
+        + '<div class="col is-sticky"><div class="card">' + composer({ img: true }) + '</div></div></div>';
     } else if (SCR === 'keywords') {
       html += '<section class="card kw"><div class="kw-top"><div class="sbar"><div class="sfield is-val">' + ic('search') + '<span>seo продвижение</span></div><span class="btn">Искать</span></div>'
         + '</div><div class="feed-b">' + KW.map(kwRow).join('') + '</div></section>';
@@ -568,7 +562,7 @@ svg.i { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentCo
     html += '<div class="m"><div class="m-status"><span>9:41</span><span class="ic"><span class="bar2"><i style="height:4px"></i><i style="height:6px"></i><i style="height:9px"></i><i style="height:12px"></i></span><span class="bat"></span></span></div>'
       + '<div class="m-btns"><span class="wallet">' + ic('zap', 'i-xs') + '1 240</span><b>' + ic('settings') + '</b><b>' + ic('menu') + '</b></div>';
     var off = SCR === 'states';
-    html += '<div class="m-hero"><div class="eyebrow">Интеграции</div><h1>Threads</h1><p>' + (off ? '<span class="dot err"></span><b>Не подключено</b><span class="btn" style="height:34px;padding:0 14px;border-radius:999px;font-size:13px;margin-left:auto">' + ic('link', 'i-xs') + 'Подключить</span>' : '<span class="dot"></span><b>Подключено</b> · @' + ME.username + ' · до ' + ME.exp) + '</p></div>';
+    html += '<div class="m-hero"><div class="eyebrow">Интеграции</div><h1>Threads</h1><p>' + (off ? '<span class="dot err"></span><b>Не подключено</b><span class="btn" style="height:34px;padding:0 14px;border-radius:999px;font-size:13px;margin-left:auto">' + ic('link', 'i-xs') + 'Подключить</span>' : '<span class="dot"></span><b>Подключено</b><span style="margin-left:-4px">· @' + ME.username + ' · до ' + ME.exp + '</span>') + '</p></div>';
     html += '<div class="m-seg">' + seg() + '</div><div class="m-body">';
     if (SCR === 'posts') {
       html += '<div class="m-card">' + composer({ empty: true }) + '</div>'
