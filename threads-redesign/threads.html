@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Threads — редизайн</title>
+<script>
+  /* ?view=desktop|mobile&theme=light|dark&screen=posts|keywords|analytics|states — до первой отрисовки */
+  (function () {
+    var q = new URLSearchParams(location.search);
+    document.documentElement.setAttribute('data-theme', q.get('theme') === 'light' ? 'light' : 'dark');
+    document.documentElement.setAttribute('data-view', q.get('view') === 'mobile' ? 'mobile' : 'desktop');
+    var s = q.get('screen');
+    document.documentElement.setAttribute('data-screen', ['keywords', 'analytics', 'states'].indexOf(s) >= 0 ? s : 'posts');
+  })();
+</script>
+<style>
+/* ============ ТОКЕНЫ ПЛАТФОРМЫ (копия значений из ui.css / set.html DEFAULTS) ============
+   Стиль: каркас /analytics (seo-v2.css) — плавающий рейл слева, карточки радиус 18, мягкие тени в светлой теме,
+   iOS-сегмент вкладок, пилюли-кнопки; лента постов в духе Threads; на телефоне — крупный заголовок One UI. */
+:root {
+  color-scheme: dark;
+  --ui-brand: #00a0ff;
+  --ui-danger: #f87171;
+  --ui-ok: #4ade80;
+  --ui-warn: #fbbf24;
+  --ui-violet: #a78bfa;
+  --ui-id: #fbbf24;
+  --ui-bg: #0a0a0a;
+  --ui-page-bg: #0e0e0e;
+  --ui-surface: #141414;
+  --ui-card-bg: #141414;
+  --ui-surface-2: #1a1a1a;
+  --ui-surface-3: #111111;
+  --ui-line: #262626;
+  --ui-card-border: #262626;
+  --ui-line-2: #1e1e1e;
+  --ui-tx: #e8e8e8;
+  --ui-tx-2: #8b8b8b;
+  --ui-tx-3: #6a6a6a;
+  --ui-row-hover: #161616;
+  --ui-badge-bg: #e05252;
+  --ui-badge-text: #ffffff;
+  --ui-btn1-text: #ffffff;
+  --ui-radius: 8px;
+  --ui-card-radius: 12px;
+  --ui-radius-lg: 24px;
+  --ui-chip-radius: 16px;
+  --ui-sheet-radius: 22px;
+  --ui-tap: 44px;
+  --ui-badge-h: 18px;
+  --ui-badge-radius: 9px;
+  --ui-shadow-c: #000;
+  --ui-shadow-sm: 0 2px 6px -1px rgba(0,0,0,.25);
+  --ui-shadow-md: 0 6px 18px -2px rgba(0,0,0,.30);
+  --ui-shadow-lg: 0 16px 40px -8px rgba(0,0,0,.35);
+  /* softVars(): 9% / 22% к фону карточки; текст в тёмной — чистый цвет */
+  --ui-brand-soft: color-mix(in srgb, var(--ui-brand) 9%, var(--ui-card-bg));
+  --ui-brand-soft-line: color-mix(in srgb, var(--ui-brand) 22%, var(--ui-card-bg));
+  --ui-brand-soft-tx: var(--ui-brand);
+  --ui-ok-soft: color-mix(in srgb, var(--ui-ok) 9%, var(--ui-card-bg));
+  --ui-ok-soft-line: color-mix(in srgb, var(--ui-ok) 22%, var(--ui-card-bg));
+  --ui-ok-soft-tx: var(--ui-ok);
+  --ui-warn-soft: color-mix(in srgb, var(--ui-warn) 9%, var(--ui-card-bg));
+  --ui-warn-soft-line: color-mix(in srgb, var(--ui-warn) 22%, var(--ui-card-bg));
+  --ui-warn-soft-tx: var(--ui-warn);
+  --ui-violet-soft: color-mix(in srgb, var(--ui-violet) 12%, var(--ui-card-bg));
+  --ui-violet-soft-line: color-mix(in srgb, var(--ui-violet) 32%, var(--ui-card-bg));
+  --ui-violet-soft-tx: color-mix(in srgb, var(--ui-violet) 60%, var(--ui-tx));
+
+  /* ---- СВОЁ (нет в токенах платформы, см. current-vs-new.md) ---- */
+  --th-radius: 18px;          /* литерал .sv2-nav (seo-v2.css) — карточки каркаса /analytics */
+  --th-row-radius: 14px;      /* литерал .sv2-tile (seo-v2.css) */
+  --th-glass: color-mix(in srgb, var(--ui-card-bg) 86%, transparent);  /* «стекло» нижней панели iOS */
+  --th-av-l: 42%;             /* светлота аватара-инициалов, как .sv2-fav hsl(h 55% 42%) */
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --ui-brand: #0072c6;
+  --ui-ok: #15803d;
+  --ui-warn: #b45309;
+  --ui-id: #a16207;
+  --ui-bg: #f6f8fb;
+  --ui-page-bg: #f6f8fb;
+  --ui-surface: #ffffff;
+  --ui-card-bg: #ffffff;
+  --ui-surface-2: #eef2f7;
+  --ui-surface-3: #f3f6fa;
+  --ui-line: #dde5ee;
+  --ui-card-border: #dde5ee;
+  --ui-line-2: #e6ecf3;
+  --ui-tx: #0f1c2e;
+  --ui-tx-2: #5a6b80;
+  --ui-tx-3: #8595a8;
+  --ui-row-hover: #f3f6fa;
+  --ui-shadow-c: rgba(15,28,46,.35);
+  --ui-shadow-sm: 0 2px 6px -1px color-mix(in srgb, var(--ui-shadow-c) 23%, transparent);
+  --ui-shadow-md: 0 6px 18px -2px color-mix(in srgb, var(--ui-shadow-c) 29%, transparent);
+  --ui-shadow-lg: 0 16px 40px -8px color-mix(in srgb, var(--ui-shadow-c) 40%, transparent);
+  --ui-brand-soft-tx: color-mix(in srgb, var(--ui-brand) 90%, var(--ui-tx));
+  --ui-ok-soft-tx: color-mix(in srgb, var(--ui-ok) 90%, var(--ui-tx));
+  --ui-warn-soft-tx: color-mix(in srgb, var(--ui-warn) 90%, var(--ui-tx));
+  --th-glass: color-mix(in srgb, var(--ui-card-bg) 84%, transparent);
+  --th-av-l: 46%;
+}
+
+
+/* ============ БАЗА ============ */
+html, body { margin: 0; }
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Liberation Sans", sans-serif;
+  background: var(--ui-page-bg); color: var(--ui-tx); font-size: 14px; line-height: 1.45;
+  -webkit-font-smoothing: antialiased; overflow: hidden;
+}
+svg.i { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentColor; }
+.i-s { width: 16px !important; height: 16px !important; }
+.i-xs { width: 14px !important; height: 14px !important; }
+.ellip { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---- общие ---- */
+.av { --s: 40px; position: relative; flex: 0 0 auto; width: var(--s); height: var(--s); border-radius: 50%;
+  display: inline-grid; place-items: center; color: #fff; font-weight: 600; font-size: calc(var(--s) * .36);
+  background: hsl(var(--h, 210) 55% var(--th-av-l)); }
+.av.is-brand { background: var(--ui-brand); }
+.card { background: var(--ui-card-bg); border: 1px solid var(--ui-card-border); border-radius: var(--th-radius); min-width: 0; }
+[data-theme="light"] .card { box-shadow: var(--ui-shadow-sm); }
+.card-h { display: flex; align-items: center; gap: 10px; padding: 16px 18px 6px; }
+.card-h h2 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+.card-h .sub { font-size: 12.5px; color: var(--ui-tx-3); }
+.card-h .r { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+.cap { padding: 14px 4px 8px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ui-tx-3); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: var(--ui-tap); padding: 0 18px; border: 1px solid var(--ui-brand);
+  border-radius: var(--ui-radius); background: var(--ui-brand); color: var(--ui-btn1-text); font: inherit; font-size: 14px; font-weight: 600; white-space: nowrap; }
+.btn[disabled], .btn.is-dis { background: var(--ui-surface-2); border-color: var(--ui-line); color: var(--ui-tx-3); }
+.tbtn { display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 12px; border: 1px solid var(--ui-line);
+  border-radius: 999px; background: var(--ui-surface-2); color: var(--ui-tx); font: inherit; font-size: 13px; font-weight: 500; white-space: nowrap; }
+.tbtn.is-on { background: var(--ui-brand-soft); border-color: var(--ui-brand-soft-line); color: var(--ui-brand-soft-tx); }
+.tbtn.is-ghost { background: transparent; }
+.lnk { display: inline-flex; align-items: center; gap: 5px; color: var(--ui-tx-2); font-size: 12.5px; font-weight: 500; }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; background: var(--ui-ok); box-shadow: 0 0 0 3px var(--ui-ok-soft); }
+.dot.err { background: var(--ui-danger); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-danger) 14%, var(--ui-card-bg)); }
+
+/* сегмент вкладок (iOS) — #posts / #keywords / #аналитика */
+.seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 12px; background: var(--ui-surface-2); }
+.seg span { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 32px; padding: 0 14px; border-radius: 9px; color: var(--ui-tx-2); font-size: 13.5px; font-weight: 500; white-space: nowrap; }
+.seg span svg { width: 15px; height: 15px; }
+.seg span.is-on { background: var(--ui-card-bg); color: var(--ui-tx); box-shadow: var(--ui-shadow-sm); font-weight: 600; }
+[data-theme="dark"] .seg span.is-on { background: var(--ui-line); }
+
+/* статус подключения — капсула */
+.conn { display: inline-flex; align-items: center; gap: 10px; height: 40px; padding: 0 6px 0 14px; border-radius: 999px; background: var(--ui-card-bg);
+  border: 1px solid var(--ui-card-border); font-size: 13px; color: var(--ui-tx-2); white-space: nowrap; }
+[data-theme="light"] .conn { box-shadow: var(--ui-shadow-sm); }
+.conn b { color: var(--ui-tx); font-weight: 600; }
+.conn .sep { width: 3px; height: 3px; border-radius: 50%; background: var(--ui-tx-3); }
+.conn .btn { height: 30px; padding: 0 12px; font-size: 12.5px; border-radius: 999px; }
+.conn:not(.has-btn) { padding-right: 16px; }
+
+/* плашка «нет прав на статистику» */
+.warn { display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 16px; border-radius: var(--th-row-radius);
+  background: color-mix(in srgb, var(--ui-danger) 8%, var(--ui-card-bg)); border: 1px solid color-mix(in srgb, var(--ui-danger) 24%, var(--ui-card-bg)); }
+.warn .ico { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex: 0 0 auto;
+  background: color-mix(in srgb, var(--ui-danger) 16%, var(--ui-card-bg)); color: var(--ui-danger); }
+.warn .t { flex: 1 1 auto; font-size: 13.5px; color: var(--ui-tx); min-width: 0; }
+.warn .t small { display: block; color: var(--ui-tx-2); font-size: 12.5px; }
+.warn .btn { height: 36px; font-size: 13px; padding: 0 14px; border-radius: 999px; }
+
+/* ============ ПОСТ (стиль Threads) ============ */
+.post { display: flex; gap: 12px; padding: 14px 18px 12px; position: relative; }
+.post + .post::before { content: ""; position: absolute; left: 70px; right: 18px; top: 0; height: 1px; background: var(--ui-line-2); }
+.post-l { display: flex; flex-direction: column; align-items: center; flex: 0 0 40px; }
+.post-line { flex: 1 1 auto; width: 2px; min-height: 12px; margin: 6px 0 0; border-radius: 2px; background: var(--ui-line); }
+.post-b { flex: 1 1 auto; min-width: 0; }
+.post-h { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 13px; color: var(--ui-tx-3); }
+.post-h b { font-size: 14.5px; font-weight: 600; color: var(--ui-tx); }
+.post-h .lnk { margin-left: auto; }
+.post-h .tag { display: inline-flex; align-items: center; gap: 4px; padding: 0 7px; height: 20px; border-radius: 6px; background: var(--ui-surface-2); color: var(--ui-tx-2); font-size: 11.5px; font-weight: 500; }
+.post-t { margin-top: 3px; font-size: 14.5px; line-height: 1.5; color: var(--ui-tx); white-space: pre-line; }
+.post-t.is-empty { color: var(--ui-tx-3); font-style: italic; }
+.stats { display: flex; align-items: center; gap: 4px; margin-top: 10px; flex-wrap: wrap; }
+.stats { column-gap: 14px; row-gap: 2px; }
+.stat { display: inline-flex; align-items: center; gap: 5px; height: 30px; color: var(--ui-tx-3); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.stat svg { width: 16px; height: 16px; color: var(--ui-tx-2); }
+.stat b { color: var(--ui-tx); font-weight: 600; }
+.stat.is-box { background: var(--ui-surface-3); border: 1px solid var(--ui-line-2); }
+.stat.is-na { color: var(--ui-tx-3); font-size: 12.5px; }
+.stats .tbtn { margin-left: auto; height: 32px; }
+.stats .tbtn .n { font-weight: 600; }
+/* раскрытые ответы — ветка */
+.reps { margin-top: 10px; }
+.rep { display: flex; gap: 10px; padding: 8px 0 4px; }
+.rep .av { --s: 28px; font-size: 10.5px; }
+.rep-b { min-width: 0; font-size: 13.5px; line-height: 1.45; color: var(--ui-tx); }
+.rep-b b { font-weight: 600; margin-right: 4px; }
+.rep-b small { color: var(--ui-tx-3); font-size: 12px; }
+
+/* ============ КОМПОЗЕР ============ */
+.comp { padding: 16px 18px 14px; display: flex; flex-direction: column; gap: 12px; }
+.comp-who { display: flex; align-items: center; gap: 10px; }
+.comp-who b { font-size: 14.5px; }
+.comp-who small { display: block; font-size: 12px; color: var(--ui-tx-3); }
+.ta { min-height: 132px; padding: 12px 14px; border-radius: 14px; background: var(--ui-surface-3); border: 1px solid var(--ui-line);
+  font-size: 14.5px; line-height: 1.5; color: var(--ui-tx); white-space: pre-line; }
+.ta.is-ph { color: var(--ui-tx-3); }
+.ta.is-focus { border-color: var(--ui-brand); box-shadow: 0 0 0 3px var(--ui-brand-soft); background: var(--ui-card-bg); }
+.prev { position: relative; align-self: flex-start; width: 100%; height: 156px; border-radius: 14px; overflow: hidden; border: 1px solid var(--ui-line-2);
+  background:
+    radial-gradient(circle at 78% 30%, hsl(40 90% 70%) 0 12%, transparent 13%),
+    linear-gradient(180deg, hsl(205 70% 62%) 0%, hsl(205 60% 78%) 55%, hsl(150 32% 46%) 56%, hsl(150 38% 34%) 100%); }
+.prev::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 46%;
+  background: linear-gradient(150deg, transparent 0 40%, hsl(150 30% 28%) 41% 100%); opacity: .7; }
+.prev .rm { position: absolute; top: 8px; right: 8px; z-index: 1; display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 11px 0 9px;
+  border-radius: 999px; background: rgba(15,20,28,.62); color: #fff; font-size: 12.5px; font-weight: 500; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.prev .rm svg { width: 14px; height: 14px; }
+.comp-f { display: flex; align-items: center; gap: 10px; }
+.cnt { white-space: nowrap; flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ui-tx-3); font-variant-numeric: tabular-nums; }
+.cnt .ring { flex: 0 0 auto; width: 20px; height: 20px; border-radius: 50%; background: conic-gradient(var(--ui-brand) calc(var(--p) * 1%), var(--ui-line) 0); position: relative; }
+.cnt .ring::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--ui-card-bg); }
+.cnt.is-over { color: var(--ui-danger); } .cnt.is-over .ring { background: var(--ui-danger); }
+.comp-f .btn { margin-left: auto; border-radius: 999px; }
+
+
+/* поиск по ключам */
+.sbar { display: flex; gap: 10px; align-items: center; }
+.sfield { flex: 1 1 auto; display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 16px; border-radius: 999px; background: var(--ui-surface-2);
+  color: var(--ui-tx-3); font-size: 15px; border: 1px solid transparent; }
+.sfield.is-val { color: var(--ui-tx); border-color: var(--ui-brand); box-shadow: 0 0 0 3px var(--ui-brand-soft); background: var(--ui-card-bg); }
+.sbar .btn { border-radius: 999px; height: 46px; }
+
+/* аналитика */
+.an-grid { display: grid; gap: 16px; }
+.an { padding: 18px 20px 16px; display: flex; height: 100%; flex-direction: column; gap: 6px; min-width: 0; }
+.an-t { display: flex; align-items: center; gap: 10px; font-size: 13.5px; color: var(--ui-tx-2); font-weight: 500; }
+.an-t .ic { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; background: var(--ui-brand-soft); color: var(--ui-brand-soft-tx); }
+.an-t .ic svg { width: 16px; height: 16px; }
+.an-t .ic.vio { background: var(--ui-violet-soft); color: var(--ui-violet-soft-tx); }
+.an-t .ic.ok { background: var(--ui-ok-soft); color: var(--ui-ok-soft-tx); }
+.an-t .ic.amb { background: var(--ui-warn-soft); color: var(--ui-warn-soft-tx); }
+.an-n { font-size: 40px; font-weight: 700; line-height: 1.05; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.an-p { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--ui-tx-2); }
+.delta { display: inline-flex; align-items: center; gap: 3px; height: 22px; padding: 0 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.delta.up { background: var(--ui-ok-soft); color: var(--ui-ok-soft-tx); }
+.delta.down { background: color-mix(in srgb, var(--ui-danger) 10%, var(--ui-card-bg)); color: var(--ui-danger); }
+.an-note { font-size: 12.5px; color: var(--ui-tx-3); }
+.bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; margin-top: auto; padding-top: 10px; }
+.bar { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; }
+.bar i { display: block; width: 100%; border-radius: 6px; background: color-mix(in srgb, var(--ui-tx) 14%, var(--ui-card-bg)); }
+.bar.is-last i { background: var(--ui-brand); }
+.bar span { font-size: 11px; color: var(--ui-tx-3); }
+.bar.is-last span { color: var(--ui-tx); font-weight: 600; }
+.an-upd { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ui-tx-3); padding: 14px 4px 0; }
+
+/* пустые состояния */
+.empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; padding: 28px 20px; color: var(--ui-tx-2); font-size: 13.5px; }
+.empty .ico { width: 48px; height: 48px; border-radius: 16px; display: grid; place-items: center; background: var(--ui-surface-2); color: var(--ui-tx-3); }
+.empty .ico svg { width: 22px; height: 22px; }
+.empty b { color: var(--ui-tx); font-size: 15px; }
+.empty .btn { height: 38px; border-radius: 999px; font-size: 13px; margin-top: 4px; }
+.toast { display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 16px 0 12px; border-radius: 999px; background: var(--ui-tx); color: var(--ui-card-bg); font-size: 13.5px; font-weight: 500; box-shadow: var(--ui-shadow-md); }
+.toast svg { color: var(--ui-ok); }
+[data-theme="light"] .toast svg { color: #4ade80; }
+.toast.err svg { color: var(--ui-danger); }
+.st-lbl { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ui-tx-3); margin: 0 0 8px 2px; }
+.skel { height: 12px; border-radius: 6px; background: var(--ui-surface-2); }
+
+/* ============ ПК ============ */
+[data-view="desktop"] body { width: 1440px; height: 900px; }
+.rail { position: fixed; left: 24px; top: 24px; bottom: 24px; width: 84px; padding: 20px; border-radius: 24px;
+  background: var(--ui-surface); box-shadow: var(--ui-shadow-lg); display: flex; flex-direction: column; gap: 16px; z-index: 5; }
+[data-theme="light"] .rail { box-shadow: var(--ui-shadow-lg), 0 0 0 1px var(--ui-line-2); }
+.rail .r-ava { width: 44px; height: 44px; border-radius: 50%; background: var(--ui-brand); color: #fff; display: grid; place-items: center; font-weight: 600; font-size: 15px; position: relative; }
+.rail .r-ava i { position: absolute; right: 0; bottom: 0; width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--ui-surface); background: var(--ui-ok); }
+.rail .r-search { width: 44px; height: 44px; border: 1px solid var(--ui-line-2); border-radius: 10px; display: grid; place-items: center; color: var(--ui-tx-2); }
+.rail .r-mid { flex: 1 1 auto; display: flex; flex-direction: column; }
+.rail .r-it { position: relative; height: 52px; width: 44px; display: grid; place-items: center; color: var(--ui-tx-2); }
+.rail .r-it svg { width: 22px; height: 22px; position: relative; }
+.rail .r-it.is-on { color: var(--ui-brand); }
+.rail .r-it.is-on::before { content: ""; position: absolute; inset: 4px 0; border-radius: 12px; background: color-mix(in srgb, var(--ui-brand) 12%, transparent); }
+.rail .r-it .ui-badge { position: absolute; top: 6px; right: -10px; display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--ui-badge-bg); color: var(--ui-badge-text); font-size: 10px; font-weight: 600; }
+.rail .r-act { display: flex; flex-direction: column; gap: 8px; }
+.rail .r-act b { width: 44px; height: 44px; border-radius: 10px; background: var(--ui-surface-2); color: var(--ui-tx-2); display: grid; place-items: center; }
+.rail .r-act svg { width: 20px; height: 20px; }
+
+.dk { position: absolute; left: 132px; right: 0; top: 0; bottom: 0; display: flex; flex-direction: column; }
+.top { flex: 0 0 64px; display: flex; align-items: center; gap: 12px; padding: 0 28px 0 4px; }
+.crumbs { flex: 1 1 auto; display: flex; align-items: center; gap: 6px; font-size: 13.5px; color: var(--ui-tx-2); }
+.crumbs b { color: var(--ui-tx); font-weight: 600; }
+.crumbs .sep { transform: rotate(-90deg); color: var(--ui-tx-3); }
+.wallet { display: inline-flex; align-items: center; gap: 4px; height: 30px; padding: 0 10px; border-radius: 999px; background: var(--ui-surface-3); color: var(--ui-tx-2); font-size: 13px; font-weight: 600; border: 1px solid var(--ui-line-2); }
+.wallet svg { color: var(--ui-warn); }
+.phead { flex: 0 0 auto; display: flex; align-items: flex-end; gap: 16px; padding: 4px 28px 18px 4px; }
+.phead h1 { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -.01em; line-height: 1.1; }
+.phead p { margin: 5px 0 0; font-size: 13.5px; color: var(--ui-tx-2); }
+.phead .r { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.body { flex: 1 1 auto; min-height: 0; padding: 0 28px 24px 4px; display: flex; flex-direction: column; gap: 14px; }
+.g-posts { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 408px; gap: 16px; }
+.col { display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+.col.is-sticky { position: sticky; top: 0; align-self: start; }  /* одна колонка «Новый пост», липкая при прокрутке ленты */
+.feed { display: flex; flex-direction: column; overflow: hidden; position: relative; }
+.feed-b { flex: 1 1 auto; min-height: 0; overflow: hidden; position: relative; }
+.feed-b::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 40px; background: linear-gradient(to bottom, transparent, var(--ui-card-bg)); pointer-events: none; }
+[data-view="desktop"] .an-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+[data-view="desktop"] .bars { height: 118px; }
+.kw { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.kw-top { padding: 18px 18px 8px; display: flex; flex-direction: column; gap: 10px; }
+.kw-meta { font-size: 12.5px; color: var(--ui-tx-3); padding: 0 6px; }
+.g-states { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.g-states { gap: 10px 16px; }
+.g-states .ta { min-height: 64px; }
+.g-states .comp { gap: 10px; padding: 14px 16px 12px; }
+.g-states .empty { padding: 18px 16px; }
+.g-states .empty .ico { width: 40px; height: 40px; border-radius: 13px; }
+
+/* ============ ТЕЛЕФОН ============ */
+[data-view="mobile"] body { width: 390px; height: 844px; background: var(--ui-bg); }
+.m { position: relative; width: 390px; height: 844px; overflow: hidden; background: var(--ui-bg); }
+.m-status { height: 47px; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 30px 8px 34px; font-size: 16px; font-weight: 600; color: var(--ui-tx); }
+.m-status .ic { display: flex; gap: 6px; align-items: center; }
+.m-status .bat { width: 25px; height: 12px; border-radius: 4px; border: 1.5px solid color-mix(in srgb, var(--ui-tx) 45%, transparent); padding: 1.5px; }
+.m-status .bat::before { content: ""; display: block; height: 100%; width: 72%; border-radius: 2px; background: var(--ui-tx); }
+.m-status .bar2 { display: flex; gap: 2px; align-items: flex-end; height: 12px; }
+.m-status .bar2 i { width: 3px; border-radius: 1px; background: var(--ui-tx); }
+.m-btns { position: absolute; top: 59px; left: 12px; right: 12px; display: flex; justify-content: flex-end; gap: 8px; z-index: 3; }
+.m-btns b { width: 42px; height: 42px; border-radius: 10px; background: var(--ui-surface-2); border: 1px solid var(--ui-line); color: var(--ui-tx); display: grid; place-items: center; }
+.m-btns b svg { width: 19px; height: 19px; }
+.m-btns .wallet { height: 42px; padding: 0 12px; margin-right: auto; border-radius: 10px; }
+.m-hero { padding: 108px 20px 16px; }
+.m-hero .eyebrow { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .14em; color: var(--ui-tx-2); }
+.m-hero h1 { margin: 4px 0 0; font-size: 34px; line-height: 1.1; font-weight: 800; letter-spacing: -.01em; }
+.m-hero p { margin: 8px 0 0; font-size: 14px; color: var(--ui-tx-2); display: flex; align-items: center; gap: 8px; }
+.m-hero p b { color: var(--ui-tx); font-weight: 600; }
+.m-seg { padding: 0 16px 14px; }
+.m-seg .seg { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; }
+.m-seg .seg span { height: 36px; padding: 0 6px; font-size: 14px; }
+.m-body { padding: 0 12px; display: flex; flex-direction: column; gap: 12px; }
+.m-card { background: var(--ui-card-bg); border: 1px solid var(--ui-card-border); border-radius: var(--ui-radius-lg); overflow: hidden; }
+[data-theme="light"] .m-card { box-shadow: var(--ui-shadow-sm); }
+[data-view="mobile"] .post { padding: 14px 16px 10px; }
+[data-view="mobile"] .post + .post::before { left: 68px; right: 0; }
+[data-view="mobile"] .post-t { font-size: 15px; }
+[data-view="mobile"] .stats { column-gap: 12px; row-gap: 0; }
+[data-view="mobile"] .stat { gap: 4px; height: 26px; font-size: 12.5px; }
+[data-view="mobile"] .stat svg { width: 15px; height: 15px; }
+[data-view="mobile"] .comp-who .av { --s: 32px !important; }
+[data-view="mobile"] .comp { padding: 14px 14px 12px; gap: 10px; }
+[data-view="mobile"] .ta { min-height: 72px; font-size: 15px; }
+[data-view="mobile"] .comp-f .btn { padding: 0 16px; }
+[data-view="mobile"] .comp-f .tbtn { width: 44px; height: 44px; padding: 0; justify-content: center; }
+[data-view="mobile"] .an { padding: 16px; }
+[data-view="mobile"] .warn { flex-wrap: wrap; }
+[data-view="mobile"] .warn .t { flex: 1 1 200px; }
+[data-view="mobile"] .warn .btn { flex: 1 1 100%; height: 42px; }
+[data-view="mobile"] .an-row { display: flex; align-items: flex-end; gap: 14px; }
+[data-view="mobile"] .an-row > div:first-child { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+[data-view="mobile"] .an-n { font-size: 32px; }
+[data-view="mobile"] .bars { flex: 0 0 132px; height: 64px; gap: 5px; margin: 0; }
+[data-view="mobile"] .bar i { border-radius: 4px; }
+[data-view="mobile"] .bar span { display: none; }
+.m-fade { position: absolute; left: 0; right: 0; bottom: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--ui-bg)); z-index: 2; pointer-events: none; }
+.m-home { position: absolute; left: 50%; bottom: 8px; width: 134px; height: 5px; margin-left: -67px; border-radius: 3px; background: var(--ui-tx); z-index: 5; }
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none"><style>symbol{stroke-width:var(--ui-ico-stroke,2)}</style>
+<!-- символы из web/public/assets/icons.svg; i-heart, i-repeat-2, i-menu, i-calendar, i-clock, i-zap — Lucide, в спрайте пока нет: добавить в web/public/assets/icons.svg (см. current-vs-new.md) -->
+<symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /><circle cx="12" cy="12" r="3" /></symbol>
+<symbol id="i-reply" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 18v-2a4 4 0 0 0-4-4H4"/><path d="m9 17-5-5 5-5"/></symbol>
+<symbol id="i-text-quote" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 5H3"/><path d="M21 12H8"/><path d="M21 19H8"/><path d="M3 12v7"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16" /><path d="M18 17V9" /><path d="M13 17V5" /><path d="M8 17v-3" /></symbol>
+<symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34" /><circle cx="11" cy="11" r="8" /></symbol>
+<symbol id="i-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></symbol>
+<symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
+<symbol id="i-external-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></symbol>
+<symbol id="i-circle-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></symbol>
+<symbol id="i-circle-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 9-5.5 5.5L8 12"/></symbol>
+<symbol id="i-message" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z" /></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" /><circle cx="12" cy="12" r="3" /></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></symbol>
+<symbol id="i-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 17 5-5-5-5" /><path d="M21 12H9" /><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /></symbol>
+<symbol id="i-notify" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0" /><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" /></symbol>
+<symbol id="i-tasks" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="M12 11h4" /><path d="M12 16h4" /><path d="M8 11h.01" /><path d="M8 16h.01" /></symbol>
+<symbol id="i-ticket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></symbol>
+<symbol id="i-podium" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6V2h-1"/><path d="M9 15a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1"/><path d="M9 21V11a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v10"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></symbol>
+<symbol id="i-cash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1" /><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" /></symbol>
+<symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+<symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" /></symbol>
+<symbol id="i-newspaper" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18h-5"/><path d="M18 14h-8"/><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="10" y="6" rx="1"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /><path d="m15 5 4 4" /></symbol>
+<symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></symbol>
+<symbol id="i-repeat-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+</svg>
+<div id="root"></div>
+<script>
+(function () {
+  var H = document.documentElement;
+  var VIEW = H.getAttribute('data-view'), SCR = H.getAttribute('data-screen');
+  var M = VIEW === 'mobile';
+  /* склонение: plural(5, ['лайк','лайка','лайков']) */
+  function plural(n, f) { n = Math.abs(n) % 100; var d = n % 10; return n > 10 && n < 20 ? f[2] : d === 1 ? f[0] : d >= 2 && d <= 4 ? f[1] : f[2]; }
+  function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0'); }
+  var STAT_F = [['views', 'eye', ['просмотр', 'просмотра', 'просмотров']], ['likes', 'heart', ['лайк', 'лайка', 'лайков']],
+    ['replies', 'message', ['ответ', 'ответа', 'ответов']], ['reposts', 'repeat-2', ['репост', 'репоста', 'репостов']], ['quotes', 'text-quote', ['цитата', 'цитаты', 'цитат']]];
+  function ic(id, cls) { return '<svg class="i ' + (cls || '') + '"><use href="#i-' + id + '"/></svg>'; }
+
+  /* ---------- данные (форма — как отдают /api/threads/*) ---------- */
+  var ME = { username: 'cashruflow', id: '26831904417712', exp: '24.12.2026' };   // /api/threads/status (live.username, threads_user_id, expires_at)
+  var POSTS = [   // /api/threads/posts + /api/threads/insights?id=
+    { t: 'сегодня, 14:32', text: 'Разобрали, почему CTR в Яндексе падает после смены сниппета: пять причин и что проверить первым делом. Спойлер: чаще всего виноват не заголовок, а дата в description.',
+      s: { views: 2418, likes: 48, replies: 12, reposts: 6, quotes: 3 }, open: true,
+      reps: [ { u: 'dmitry.orlov', h: 20, t: 'А если сниппет собирается из микроразметки, тоже дата?', w: '14:51' },
+              { u: 'elena_seo', h: 300, t: 'Подтверждаю, у нас после правки description CTR вернулся за неделю.', w: '15:07' },
+              { u: 'mebel.dom', h: 110, t: 'Сохранил, проверим на каталоге 👍', w: '15:20' } ] },
+    { t: 'вчера, 18:05', text: 'Новая статья в блоге: как мы перенесли 64 статьи на новый шаблон без потери позиций. Карта 301-редиректов внутри.',
+      s: { views: 1120, likes: 21, replies: 4, reposts: 2, quotes: 0 } },
+    { t: '24.10, 11:40', repost: true },
+    { t: '23.10, 09:12', text: 'Что смотреть в Вебмастере каждое утро — 3 отчёта, 5 минут.',
+      s: { views: 864, likes: 17, replies: 2, reposts: 1, quotes: 1 } }
+  ];
+  var KW = [   // /api/threads/search?q=
+    { u: 'seo.pulse', h: 200, t: '23.10.2026, 19:44', x: 'SEO-продвижение в 2026: что реально работает для малого бизнеса — короткий тред с цифрами по трём нишам.' },
+    { u: 'anna_marketing', h: 330, t: '23.10.2026, 12:10', x: 'Кто делал SEO-продвижение для интернет-магазина мебели? Ищу подрядчика, бюджет есть, нужна прозрачная отчётность.' },
+    { u: 'digital.notes', h: 160, t: '22.10.2026, 08:31', x: 'Продвижение сайта без ссылок — миф или нет? Собрал кейсы из Яндекса и Google за полгода.' },
+    { u: 'kirill.dev', h: 40, t: '21.10.2026, 21:02', x: 'Ускорил сайт до 95 в PageSpeed — позиции выросли через две недели. SEO-продвижение начинается с техники.' },
+    { u: 'smm.lab', h: 260, t: '20.10.2026, 16:18', x: 'Threads как канал: за месяц 40 заявок на SEO-продвижение. Делимся форматом постов.' }
+  ];
+  var DAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+  var AN = [   // /api/threads/analytics → cards.{posts,views,replies,followers}
+    { key: 'posts', title: 'Ваши действия', ic: 'edit', c: '', cur: '9', prev: '6', up: true, note: 'публикации', s: [1, 2, 0, 1, 3, 1, 1] },
+    { key: 'views', title: 'Просмотры', ic: 'eye', c: 'vio', cur: '12 480', prev: '9 935', up: true, s: [1300, 1650, 980, 2100, 2400, 1700, 2350] },
+    { key: 'replies', title: 'Ответы', ic: 'reply', c: 'ok', cur: '64', prev: '71', up: false, s: [8, 12, 6, 9, 11, 7, 11] },
+    { key: 'followers', title: 'Новые подписчики', ic: 'users', c: 'amb', cur: '38', prev: '24', up: true, note: 'Сейчас подписчиков: 1 912', s: [3, 5, 4, 8, 6, 5, 7] }
+  ];
+
+  /* ---------- блоки ---------- */
+  function seg() {
+    var t = [['posts', 'Мои посты', 'newspaper'], ['keywords', 'Ключи', 'search'], ['analytics', 'Аналитика', 'chart']];
+    var cur = SCR === 'states' ? 'posts' : SCR;
+    return '<div class="seg">' + t.map(function (x) { return '<span class="' + (x[0] === cur ? 'is-on' : '') + '">' + (M ? '' : ic(x[2])) + x[1] + '</span>'; }).join('') + '</div>';
+  }
+  function conn(off) {
+    if (off) return '<span class="conn has-btn"><span class="dot err"></span><b>Не подключено</b><span class="btn">' + ic('link', 'i-xs') + 'Подключить</span></span>';
+    return '<span class="conn"><span class="dot"></span><b>Подключено</b><span class="sep"></span>@' + ME.username + '<span class="sep"></span>токен до ' + ME.exp + '</span>';
+  }
+  function warn() {
+    return '<div class="warn"><span class="ico">' + ic('circle-alert', 'i-s') + '</span><span class="t">Нет прав на статистику Threads<small>Переподключите Threads с правом insights</small></span><span class="btn">' + ic('refresh', 'i-xs') + 'Переподключить</span></div>';
+  }
+  function avU(u, h, s) { var a = u.replace(/[^a-z]/g, '').slice(0, 2).toUpperCase(); return '<span class="av" style="--h:' + h + (s ? ';--s:' + s + 'px' : '') + '">' + a + '</span>'; }
+  function post(p) {
+    var me = '<span class="av is-brand">DC</span>';
+    var hasLine = p.open;
+    var head = '<div class="post-h"><b>' + ME.username + '</b>' + (p.repost ? '<span class="tag">' + ic('repeat-2', 'i-xs') + 'репост</span>' : '') + '<span>' + p.t + '</span>'
+      + '<span class="lnk">' + (M ? '' : 'Открыть') + ic('external-link', 'i-xs') + '</span></div>';
+    var body;
+    if (p.repost) {
+      body = '<div class="post-t is-empty">(без текста)</div><div class="stats"><span class="stat is-na">' + ic('info', 'i-xs') + '&nbsp;Репост — статистики нет</span>'
+        + '<span class="tbtn is-ghost">' + ic('message', 'i-xs') + 'Ответы</span></div>';
+    } else {
+      var s = p.s;
+      body = '<div class="post-t">' + p.text + '</div><div class="stats">'
+        + STAT_F.map(function (f) { var n = s[f[0]]; return '<span class="stat">' + ic(f[1]) + '<b>' + fmt(n) + '</b>' + plural(n, f[2]) + '</span>'; }).join('')
+        + (M ? '' : '<span class="tbtn ' + (p.open ? 'is-on' : 'is-ghost') + '">' + ic('message', 'i-xs') + 'Ответы' + '</span>')
+        + '</div>';
+      if (M) body += '<div class="stats" style="margin-top:6px"><span class="tbtn ' + (p.open ? 'is-on' : 'is-ghost') + '" style="margin-left:0">' + ic('message', 'i-xs') + (p.open ? 'Скрыть ответы' : 'Ответы') + '</span></div>';
+      if (p.open) body += '<div class="reps">' + p.reps.slice(0, M ? 2 : 3).map(function (r) {
+        return '<div class="rep">' + avU(r.u, r.h) + '<div class="rep-b"><b>@' + r.u + '</b><small>' + r.w + '</small><br>' + r.t + '</div></div>';
+      }).join('') + '</div>';
+    }
+    return '<div class="post"><div class="post-l">' + me + (hasLine ? '<span class="post-line"></span>' : '') + '</div><div class="post-b">' + head + body + '</div></div>';
+  }
+  function composer(opts) {
+    opts = opts || {};
+    var txt = opts.empty ? '<div class="ta is-ph">О чём напишем в Threads?</div>'
+      : '<div class="ta is-focus">Пять причин, почему падает CTR после смены сниппета — разбор в карточках 👇\nСохраните, чтобы не потерять.</div>';
+    var n = opts.empty ? 0 : 86;
+    return '<div class="comp">'
+      + '<div class="comp-who"><span class="av is-brand" style="--s:36px">DC</span><div><b>Новый пост</b><small>@' + ME.username + ' · Threads</small></div></div>'
+      + txt
+      + (opts.img ? '<div class="prev"><span class="rm">' + ic('close') + 'Убрать картинку</span></div>' : '')
+      + '<div class="comp-f"><span class="tbtn">' + ic('image', 'i-s') + (M ? '' : 'Картинка') + '</span>'
+      + '<span class="cnt"><span class="ring" style="--p:' + Math.round(n / 5) + '"></span>' + n + ' / 500</span>'
+      + '<span class="btn' + (opts.off ? ' is-dis' : '') + '">' + ic('send', 'i-s') + 'Опубликовать</span></div></div>';
+  }
+  function kwRow(k) {
+    return '<div class="post"><div class="post-l">' + avU(k.u, k.h) + '</div><div class="post-b"><div class="post-h"><b>@' + k.u + '</b><span>' + k.t + '</span><span class="lnk">' + (M ? '' : 'Открыть') + ic('external-link', 'i-xs') + '</span></div><div class="post-t">' + k.x + '</div></div></div>';
+  }
+  function bars(s) {
+    var mx = Math.max.apply(null, s);
+    return '<div class="bars">' + s.map(function (v, i) {
+      var h = mx ? Math.max(4, Math.round(v / mx * (M ? 62 : 92))) : 4;
+      return '<div class="bar' + (i === 6 ? ' is-last' : '') + '"><i style="height:' + h + 'px"></i><span>' + DAYS[i] + '</span></div>';
+    }).join('') + '</div>';
+  }
+  function anCard(a) {
+    var d = '<span class="delta ' + (a.up ? 'up' : 'down') + '">' + (a.up ? '↑' : '↓') + '</span>';
+    var head = '<div class="an-t"><span class="ic ' + a.c + '">' + ic(a.ic) + '</span>' + a.title + '</div>';
+    var info = '<div class="an-n">' + a.cur + '</div><div class="an-p">Предыдущие: ' + a.prev + ' ' + d + '</div>' + (a.note ? '<div class="an-note">' + a.note + '</div>' : '');
+    if (M) return '<div class="m-card an">' + head + '<div class="an-row"><div>' + info + '</div>' + bars(a.s) + '</div></div>';
+    return '<div class="card an">' + head + info + bars(a.s) + '</div>';
+  }
+  var UPD = '<div class="an-upd">' + ic('clock', 'i-xs') + 'За последние 7 дней, в сравнении с предыдущими 7. Обновлено: сегодня, 09:00</div>';
+
+  function emptyBox(icon, title, text, btn) {
+    return '<div class="empty"><span class="ico">' + ic(icon) + '</span><b>' + title + '</b>' + (text ? '<span>' + text + '</span>' : '') + (btn || '') + '</div>';
+  }
+  function statesSheet() {
+    var cell = function (lbl, html) { return '<div><div class="st-lbl">' + lbl + '</div>' + html + '</div>'; };
+    var items = [
+      cell('Статус: не подключено', '<div class="card" style="padding:14px">' + conn(true) + '</div>'),
+      cell('Нет прав на статистику', warn()),
+      cell('Композер без подключения', '<div class="card">' + composer({ empty: true, off: true }) + '</div>'),
+      cell('Мои посты — не подключено', '<div class="card">' + emptyBox('link', 'Подключи Threads, чтобы увидеть посты', '', '') + '</div>'),
+      cell('Мои посты — пусто', '<div class="card">' + emptyBox('newspaper', 'Постов пока нет', '') + '</div>'),
+      cell('Ответы — пусто / загрузка', '<div class="card" style="padding:4px 0">' + post({ t: 'сегодня, 10:02', text: 'Короткий пост без ответов.', s: { views: 96, likes: 2, replies: 0, reposts: 0, quotes: 0 } })
+        .replace('tbtn is-ghost', 'tbtn is-on') + '<div style="padding:0 18px 14px 70px;font-size:13px;color:var(--ui-tx-3)">Ответов пока нет</div></div>'),
+      cell('Ключи — ничего не нашлось', '<div class="card">' + emptyBox('search', 'Ничего не нашлось', '') + '</div>'),
+      cell('Аналитика — данных нет', '<div class="card">' + emptyBox('chart', 'Данных пока нет', 'Статистика начнёт копироваться после первого сбора', '<span class="btn">' + ic('refresh', 'i-xs') + 'Собрать сейчас</span>') + '</div>'),
+      cell('Уведомления (toast)', '<div style="display:flex;flex-direction:column;gap:10px;align-items:flex-start"><span class="toast">' + ic('circle-check', 'i-s') + 'Опубликовано</span><span class="toast err">' + ic('circle-alert', 'i-s') + 'Текст длиннее 500 символов (лимит Threads)</span><span class="toast err">' + ic('circle-alert', 'i-s') + 'Фото слишком большое — выбери другое</span></div>')
+    ];
+    if (M) return items.slice(0, 6).join('');
+    return '<div class="g-states">' + items.join('') + '</div>';
+  }
+
+  /* ---------- сборка ---------- */
+  var TITLES = { posts: 'Мои посты', keywords: 'Ключи', analytics: 'Аналитика', states: 'Состояния' };
+  var html = '';
+  if (!M) {
+    html += '<nav class="rail"><div class="r-ava">КЛ<i></i></div><div class="r-search">' + ic('search') + '</div><div class="r-mid">'
+      + '<span class="r-it">' + ic('notify') + '<span class="ui-badge">3</span></span><span class="r-it">' + ic('tasks') + '</span><span class="r-it">' + ic('ticket') + '</span>'
+      + '<span class="r-it">' + ic('podium') + '</span><span class="r-it is-on">' + ic('message') + '</span><span class="r-it">' + ic('mail') + '</span>'
+      + '<span class="r-it">' + ic('calendar') + '</span><span class="r-it">' + ic('cash') + '</span></div>'
+      + '<div class="r-act"><b>' + ic('sun') + '</b><b>' + ic('settings') + '</b><b>' + ic('plus') + '</b><b>' + ic('logout') + '</b></div></nav>';
+    html += '<main class="dk"><header class="top"><nav class="crumbs"><span>Интеграции</span>' + ic('chevron', 'i-s sep') + '<span>Threads</span>' + ic('chevron', 'i-s sep') + '<b>' + TITLES[SCR] + '</b></nav>'
+      + '<span class="wallet">' + ic('zap', 'i-xs') + '1 240</span></header>';
+    html += '<div class="phead"><div><h1>Threads</h1><p>Постинг, статистика и поиск по ключевым словам</p></div><div class="r">' + seg() + conn(SCR === 'states') + '</div></div>';
+    html += '<div class="body">';
+    if (SCR === 'posts') {
+      html += '<div class="g-posts"><section class="card feed"><div class="card-h"><h2>Мои посты</h2><span class="sub">15 последних</span></div><div class="feed-b">' + POSTS.map(post).join('') + '</div></section>'
+        + '<div class="col is-sticky"><div class="card">' + composer({ img: true }) + '</div></div></div>';
+    } else if (SCR === 'keywords') {
+      html += '<section class="card kw"><div class="kw-top"><div class="sbar"><div class="sfield is-val">' + ic('search') + '<span>seo продвижение</span></div><span class="btn">Искать</span></div>'
+        + '</div><div class="feed-b">' + KW.map(kwRow).join('') + '</div></section>';
+    } else if (SCR === 'analytics') {
+      html += '<div><div class="an-grid">' + AN.map(anCard).join('') + '</div>' + UPD + '</div>';
+    } else {
+      html += statesSheet();
+    }
+    html += '</div></main>';
+  } else {
+    html += '<div class="m"><div class="m-status"><span>9:41</span><span class="ic"><span class="bar2"><i style="height:4px"></i><i style="height:6px"></i><i style="height:9px"></i><i style="height:12px"></i></span><span class="bat"></span></span></div>'
+      + '<div class="m-btns"><span class="wallet">' + ic('zap', 'i-xs') + '1 240</span><b>' + ic('settings') + '</b><b>' + ic('menu') + '</b></div>';
+    var off = SCR === 'states';
+    html += '<div class="m-hero"><div class="eyebrow">Интеграции</div><h1>Threads</h1><p>' + (off ? '<span class="dot err"></span><b>Не подключено</b><span class="btn" style="height:34px;padding:0 14px;border-radius:999px;font-size:13px;margin-left:auto">' + ic('link', 'i-xs') + 'Подключить</span>' : '<span class="dot"></span><b>Подключено</b><span style="margin-left:-4px">· @' + ME.username + ' · до ' + ME.exp + '</span>') + '</p></div>';
+    html += '<div class="m-seg">' + seg() + '</div><div class="m-body">';
+    if (SCR === 'posts') {
+      html += '<div class="m-card">' + composer({ empty: true }) + '</div>'
+        + '<div class="m-card">' + POSTS.map(post).join('') + '</div>';
+    } else if (SCR === 'keywords') {
+      html += '<div class="sbar"><div class="sfield is-val">' + ic('search') + '<span>seo продвижение</span></div><span class="btn">Искать</span></div>'
+        + '<div class="m-card">' + KW.map(kwRow).join('') + '</div>';
+    } else if (SCR === 'analytics') {
+      html += AN.map(anCard).join('') + UPD;
+    } else {
+      html += warn()
+        + '<div class="m-card">' + composer({ empty: true, off: true }) + '</div>'
+        + '<div class="m-card">' + emptyBox('link', 'Подключи Threads, чтобы увидеть посты', '') + '</div>';
+    }
+    html += '</div><div class="m-fade"></div><div class="m-home"></div></div>';
+  }
+  document.getElementById('root').innerHTML = html;
+})();
+</script>
+</body>
+</html>

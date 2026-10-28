@@ -1,0 +1,110 @@
+OK   desktop-light: статус «Подключено·@cashruflow·токен до 24.12.2026» (ник есть, ID нет)
+OK   desktop-light: ник в «Новом посте»
+OK   desktop-light: склонение 101 «2 418просмотров48лайков12ответов6репостов3цитаты»
+OK   desktop-light: склонение 102 «1 120просмотров21лайк4ответа2репоста0цитат»
+OK   desktop-light: склонение 104 «864просмотра17лайков2ответа1репост1цитата»
+OK   desktop-light: null → «—» 105 «96просмотров2лайка0ответов0репостов—цитат»
+OK   desktop-light: репост без статистики
+OK   desktop-light: 5 постов из 5
+OK   desktop-light: «Открыть» у поста
+OK   desktop-light: счётчик 30 / 500
+OK   desktop-light: кольцо --p=6
+OK   desktop-light: превью картинки (сжато в JPEG)
+OK   desktop-light: ответы раскрыты (3), кнопка «Скрыть ответы»
+OK   desktop-light: «Ответов пока нет»
+OK   desktop-light: «Убрать картинку»
+OK   desktop-light: «Опубликовать» → тост, поле очищено
+OK   desktop-light: вкладка «Ключи»
+OK   desktop-light: поиск — 3 результата
+OK   desktop-light: «Ничего не нашлось»
+OK   desktop-light: аналитика — 4 карточки, 28 столбиков
+OK   desktop-light: «Предыдущие» и стрелки
+OK   desktop-light: «Обновлено»
+OK   desktop-light: подписи дней Чт,Пт,Сб,Вс,Пн,Вт,Ср
+OK   desktop-light: #constructor → «Мои посты» (Object.hasOwn)
+OK   desktop-dark: статус «Подключено·@cashruflow·токен до 24.12.2026» (ник есть, ID нет)
+OK   desktop-dark: ник в «Новом посте»
+OK   desktop-dark: склонение 101 «2 418просмотров48лайков12ответов6репостов3цитаты»
+OK   desktop-dark: склонение 102 «1 120просмотров21лайк4ответа2репоста0цитат»
+OK   desktop-dark: склонение 104 «864просмотра17лайков2ответа1репост1цитата»
+OK   desktop-dark: null → «—» 105 «96просмотров2лайка0ответов0репостов—цитат»
+OK   desktop-dark: репост без статистики
+OK   desktop-dark: 5 постов из 5
+OK   desktop-dark: «Открыть» у поста
+OK   desktop-dark: счётчик 30 / 500
+OK   desktop-dark: кольцо --p=6
+OK   desktop-dark: превью картинки (сжато в JPEG)
+OK   desktop-dark: ответы раскрыты (3), кнопка «Скрыть ответы»
+OK   desktop-dark: «Ответов пока нет»
+OK   desktop-dark: «Убрать картинку»
+OK   desktop-dark: «Опубликовать» → тост, поле очищено
+OK   desktop-dark: вкладка «Ключи»
+OK   desktop-dark: поиск — 3 результата
+OK   desktop-dark: «Ничего не нашлось»
+OK   desktop-dark: аналитика — 4 карточки, 28 столбиков
+OK   desktop-dark: «Предыдущие» и стрелки
+OK   desktop-dark: «Обновлено»
+OK   desktop-dark: подписи дней Чт,Пт,Сб,Вс,Пн,Вт,Ср
+OK   desktop-dark: #constructor → «Мои посты» (Object.hasOwn)
+OK   mobile-light: статус «Подключено·@cashruflow·токен до 24.12.2026» (ник есть, ID нет)
+OK   mobile-light: ник в «Новом посте»
+OK   mobile-light: склонение 101 «2 418просмотров48лайков12ответов6репостов3цитаты»
+OK   mobile-light: склонение 102 «1 120просмотров21лайк4ответа2репоста0цитат»
+OK   mobile-light: склонение 104 «864просмотра17лайков2ответа1репост1цитата»
+OK   mobile-light: null → «—» 105 «96просмотров2лайка0ответов0репостов—цитат»
+OK   mobile-light: репост без статистики
+OK   mobile-light: 5 постов из 5
+OK   mobile-light: «Открыть» у поста
+OK   mobile-light: счётчик 30 / 500
+OK   mobile-light: кольцо --p=6
+OK   mobile-light: превью картинки (сжато в JPEG)
+OK   mobile-light: ответы раскрыты (3), кнопка «Скрыть ответы»
+OK   mobile-light: «Ответов пока нет»
+OK   mobile-light: «Убрать картинку»
+OK   mobile-light: «Опубликовать» → тост, поле очищено
+OK   mobile-light: вкладка «Ключи»
+OK   mobile-light: поиск — 3 результата
+OK   mobile-light: «Ничего не нашлось»
+OK   mobile-light: аналитика — 4 карточки, 28 столбиков
+OK   mobile-light: «Предыдущие» и стрелки
+OK   mobile-light: «Обновлено»
+OK   mobile-light: подписи дней Чт,Пт,Сб,Вс,Пн,Вт,Ср
+OK   mobile-light: #constructor → «Мои посты» (Object.hasOwn)
+OK   mobile-dark: статус «Подключено·@cashruflow·токен до 24.12.2026» (ник есть, ID нет)
+OK   mobile-dark: ник в «Новом посте»
+OK   mobile-dark: склонение 101 «2 418просмотров48лайков12ответов6репостов3цитаты»
+OK   mobile-dark: склонение 102 «1 120просмотров21лайк4ответа2репоста0цитат»
+OK   mobile-dark: склонение 104 «864просмотра17лайков2ответа1репост1цитата»
+OK   mobile-dark: null → «—» 105 «96просмотров2лайка0ответов0репостов—цитат»
+OK   mobile-dark: репост без статистики
+OK   mobile-dark: 5 постов из 5
+OK   mobile-dark: «Открыть» у поста
+OK   mobile-dark: счётчик 30 / 500
+OK   mobile-dark: кольцо --p=6
+OK   mobile-dark: превью картинки (сжато в JPEG)
+OK   mobile-dark: ответы раскрыты (3), кнопка «Скрыть ответы»
+OK   mobile-dark: «Ответов пока нет»
+OK   mobile-dark: «Убрать картинку»
+OK   mobile-dark: «Опубликовать» → тост, поле очищено
+OK   mobile-dark: вкладка «Ключи»
+OK   mobile-dark: поиск — 3 результата
+OK   mobile-dark: «Ничего не нашлось»
+OK   mobile-dark: аналитика — 4 карточки, 28 столбиков
+OK   mobile-dark: «Предыдущие» и стрелки
+OK   mobile-dark: «Обновлено»
+OK   mobile-dark: подписи дней Чт,Пт,Сб,Вс,Пн,Вт,Ср
+OK   mobile-dark: #constructor → «Мои посты» (Object.hasOwn)
+OK   desktop-light: не подключено, «Подключить», «Опубликовать» выключена
+OK   desktop-light: пусто «Подключи Threads…»
+OK   desktop-light: «Постов пока нет»
+OK   desktop-light: «Собрать сейчас» → карточки
+OK   desktop-light: плашка «Нет прав» + «Переподключить»
+OK   mobile-light: не подключено, «Подключить», «Опубликовать» выключена
+OK   mobile-light: пусто «Подключи Threads…»
+OK   mobile-light: «Постов пока нет»
+OK   mobile-light: «Собрать сейчас» → карточки
+OK   mobile-light: плашка «Нет прав» + «Переподключить»
+OK   desktop-dark: 520/500 → .over
+
+Консоль/ошибки страницы: нет
+Ожидаемые (403 insights в сценарии «нет прав»): 2
