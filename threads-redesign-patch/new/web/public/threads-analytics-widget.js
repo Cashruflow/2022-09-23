@@ -60,7 +60,7 @@
   }
   function fmt(n) { return n == null ? '—' : Number(n).toLocaleString('ru-RU'); }
   function ico(id, cls) {
-    return '<svg class="' + (cls || '') + '" aria-hidden="true"><use href="' + (window.ICONS_URL || '/assets/icons.svg?v=32') + '#' + id + '"></use></svg>';
+    return '<svg class="' + (cls || '') + '" aria-hidden="true"><use href="' + (window.ICONS_URL || '/assets/icons.svg?v=35') + '#' + id + '"></use></svg>';
   }
   // день недели по ключу YYYY-MM-DD: только T00:00:00Z + getUTCDay (локальная полночь МСК дала бы вчера)
   var WD = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
